@@ -1,0 +1,4 @@
+name: RedisBungee
+main: com.imaginarycode.minecraft.redisbungee.RedisBungee
+version: 0.1
+author: tuxed

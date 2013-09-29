@@ -1,0 +1,6 @@
+redis-server: 127.0.0.1
+server-id: iluvbungee
+linked-servers:
+- dastank
+- americancoffee
+- guavaissweet
