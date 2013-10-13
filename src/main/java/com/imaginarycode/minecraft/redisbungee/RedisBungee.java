@@ -40,6 +40,11 @@ public class RedisBungee extends Plugin implements Listener {
     private static List<String> servers = Lists.newArrayList();
     private static RedisBungee plugin;
 
+    /**
+     * Get a combined count of all players on this network.
+     *
+     * @return a count of all players found
+     */
     public static int getCount() {
         int count = 0;
         count += plugin.getProxy().getOnlineCount();
@@ -58,6 +63,13 @@ public class RedisBungee extends Plugin implements Listener {
         return count;
     }
 
+    /**
+     * Get a combined list of players on this network.
+     *
+     * Note that this function returns an immutable {@link java.util.Set}.
+     *
+     * @return a Set with all players found
+     */
     public static Set<String> getPlayers() {
         Set<String> players = Sets.newHashSet();
         for (ProxiedPlayer pp : plugin.getProxy().getPlayers()) {
@@ -81,10 +93,13 @@ public class RedisBungee extends Plugin implements Listener {
         return ImmutableSet.copyOf(players);
     }
 
-    public static ServerInfo getServerFor(ProxiedPlayer pp) {
-        return getServerFor(pp.getName());
-    }
-
+    /**
+     * Get the server where the specified player is playing. This function also deals with the case of local players
+     * as well, and will return local information on them.
+     *
+     * @param name a player name
+     * @return a {@link net.md_5.bungee.api.config.ServerInfo} for the server the player is on.
+     */
     public static ServerInfo getServerFor(String name) {
         ServerInfo server = null;
         if (plugin.getProxy().getPlayer(name) != null) return plugin.getProxy().getPlayer(name).getServer().getInfo();
@@ -100,14 +115,17 @@ public class RedisBungee extends Plugin implements Listener {
         return server;
     }
 
-    public static long getLastOnline(ProxiedPlayer pp) {
-        return getLastOnline(pp.getName());
-    }
-
     private static long getUnixTimestamp() {
         return TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
     }
 
+    /**
+     * Get the last time a player was on. If the player is currently online, this will return 0, otherwise it will return
+     * a value in seconds.
+     *
+     * @param name a player name
+     * @return the last time a player was on, if online returns a 0
+     */
     public static long getLastOnline(String name) {
         long time = 0L;
         if (plugin.getProxy().getPlayer(name) != null) return time;
