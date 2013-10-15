@@ -21,7 +21,13 @@ public class UpdateCountTask implements Runnable {
 
     @Override
     public void run() {
-        if (kill) return;
+        if (kill) {
+            if (rsc != null) {
+                plugin.getPool().returnResource(rsc);
+                rsc = null;
+            }
+            return;
+        }
         int c = plugin.getProxy().getOnlineCount();
         rsc.set("server:" + plugin.getServerId() + ":playerCount", String.valueOf(c));
         for (String i : plugin.getServers()) {
