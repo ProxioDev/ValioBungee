@@ -1,5 +1,6 @@
 redis-server: 127.0.0.1
 server-id: iluvbungee
+canonical-glist: true
 linked-servers:
 - dastank
 - americancoffee
