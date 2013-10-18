@@ -196,6 +196,17 @@ public class RedisBungee extends Plugin implements Listener {
     @Override
     public void onDisable() {
         uct.kill();
+        if (pool != null) {
+            Jedis tmpRsc = pool.getResource();
+            try {
+                tmpRsc.set("server:" + serverId + ":playerCount", "0"); // reset
+                for (String i : tmpRsc.smembers("server:" + serverId + ":usersOnline")) {
+                    tmpRsc.srem("server:" + serverId + ":usersOnline", i);
+                }
+            } finally {
+                pool.returnResource(tmpRsc);
+            }
+        }
         pool.destroy();
     }
 
