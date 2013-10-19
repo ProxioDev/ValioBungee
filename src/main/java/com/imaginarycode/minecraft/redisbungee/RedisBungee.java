@@ -72,7 +72,7 @@ public class RedisBungee extends Plugin implements Listener {
      * @return a Set with all players found
      */
     public static Set<String> getPlayers() {
-        Set<String> players = Sets.newHashSet();
+        List<String> players = Lists.newArrayList();
         for (ProxiedPlayer pp : plugin.getProxy().getPlayers()) {
             players.add(pp.getName());
         }
@@ -162,20 +162,20 @@ public class RedisBungee extends Plugin implements Listener {
             }
             uct = new UpdateCountTask(this);
             getProxy().getScheduler().schedule(this, uct, 1, 3, TimeUnit.SECONDS);
-            getProxy().getPluginManager().registerCommand(this, new Command("glist") {
+            getProxy().getPluginManager().registerCommand(this, new Command("glist", "bungeecord.command.glist", "redisbungee") {
                 @Override
                 public void execute(CommandSender sender, String[] args) {
                     sender.sendMessage(ChatColor.YELLOW + String.valueOf(getCount()) + " player(s) are currently online.");
                     if (args.length > 0 && args[0].equals("showall")) {
                         if (canonicalGlist) {
-                            Multimap<String, String> serverToPlayers = HashMultimap.create();
+                            Multimap<String, String> serverToPlayers = HashMultimap.create(getProxy().getServers().size(), count);
                             for (String p : getPlayers()) {
                                 ServerInfo si = getServerFor(p);
                                 if (si != null)
                                     serverToPlayers.put(si.getName(), p);
                             }
                             if (serverToPlayers.size() == 0) return;
-                            List<String> sortedServers = Lists.newArrayList(serverToPlayers.keySet());
+                            List<String> sortedServers = new ArrayList<>(serverToPlayers.keySet());
                             Collections.sort(sortedServers);
                             for (String server : sortedServers)
                                 sender.sendMessage(ChatColor.GREEN + "[" + server + "] " + ChatColor.YELLOW + "("
@@ -206,8 +206,8 @@ public class RedisBungee extends Plugin implements Listener {
             } finally {
                 pool.returnResource(tmpRsc);
             }
+            pool.destroy();
         }
-        pool.destroy();
     }
 
     private void loadConfig() throws IOException {
@@ -215,23 +215,26 @@ public class RedisBungee extends Plugin implements Listener {
             getDataFolder().mkdir();
         }
 
-        File exampleConfig = new File(getDataFolder(), "config.yml");
-        if (!exampleConfig.exists()) {
-            exampleConfig.createNewFile();
-            InputStream in = getResourceAsStream("example_config.yml");
-            OutputStream out = new FileOutputStream(exampleConfig);
-            byte[] buf = new byte[1024];
-            int len;
-            while ((len = in.read(buf)) > 0) {
-                out.write(buf, 0, len);
+        File file = new File(getDataFolder(), "config.yml");
+
+        if (!file.exists()) {
+            file.createNewFile();
+            try (InputStream in = getResourceAsStream("example_config.yml");
+                 OutputStream out = new FileOutputStream(file)) {
+                byte[] buf = new byte[1024];
+                int len;
+                while ((len = in.read(buf)) > 0) {
+                    out.write(buf, 0, len);
+                }
             }
-            out.close();
-            in.close();
         }
 
-        File file = new File(getDataFolder() + File.separator + "config.yml");
         Yaml yaml = new Yaml();
-        Map rawYaml = (Map) yaml.load(new FileInputStream(file));
+        Map rawYaml;
+
+        try (InputStream in = new FileInputStream(file)) {
+            rawYaml = (Map) yaml.load(new FileInputStream(file));
+        }
 
         String redisServer = "localhost";
         try {
