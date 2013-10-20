@@ -286,7 +286,7 @@ public class RedisBungee extends Plugin implements Listener {
                         pool.returnResource(rsc);
                     }
                 }
-            }, 1, TimeUnit.SECONDS);
+            }, 1750, TimeUnit.MILLISECONDS);
         }
     }
 
