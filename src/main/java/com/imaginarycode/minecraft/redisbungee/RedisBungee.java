@@ -322,11 +322,11 @@ public class RedisBungee extends Plugin implements Listener {
         List<ServerPing.PlayerInfo> players = new ArrayList<>();
         for (String player : getPlayers()) {
             // TODO: Find a better way of doing the UUIDs - right now I'm simply flunking it rather badly.
-            players.add(new ServerPing.PlayerInfo(player, new UUID(player.hashCode() + System.currentTimeMillis(), player.hashCode() + System.nanoTime()).toString()));
+            players.add(new ServerPing.PlayerInfo(player, "aaaa"));
         }
         ServerPing reply = new ServerPing();
-        reply.setPlayers(new ServerPing.Players(players.size(), old.getPlayers().getMax()));
-        reply.setSample((ServerPing.PlayerInfo[]) players.toArray());
+        reply.setPlayers(new ServerPing.Players(old.getPlayers().getMax(), players.size()));
+        reply.setSample(players.toArray(new ServerPing.PlayerInfo[players.size()]));
         reply.setDescription(old.getDescription());
         reply.setFavicon(old.getFavicon());
         reply.setVersion(old.getVersion());
