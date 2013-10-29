@@ -14,7 +14,7 @@
 
     <groupId>com.imaginarycode.minecraft</groupId>
     <artifactId>RedisBungee</artifactId>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.2.1-SNAPSHOT</version>
 
     <repositories>
         <repository>
@@ -106,7 +106,7 @@
         <dependency>
             <groupId>net.md-5</groupId>
             <artifactId>bungeecord-api</artifactId>
-            <version>1.6.2-SNAPSHOT</version>
+            <version>1.7-SNAPSHOT</version>
             <type>jar</type>
             <scope>provided</scope>
         </dependency>

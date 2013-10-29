@@ -319,8 +319,17 @@ public class RedisBungee extends Plugin implements Listener {
     @EventHandler
     public void onPing(ProxyPingEvent event) {
         ServerPing old = event.getResponse();
-        int players = getCount();
-        ServerPing newResponse = new ServerPing(old.getProtocolVersion(), old.getGameVersion(), old.getMotd(), players, old.getMaxPlayers());
-        event.setResponse(newResponse);
+        List<ServerPing.PlayerInfo> players = new ArrayList<>();
+        for (String player : getPlayers()) {
+            // TODO: Find a better way of doing the UUIDs - right now I'm simply flunking it rather badly.
+            players.add(new ServerPing.PlayerInfo(player, new UUID(player.hashCode() + System.currentTimeMillis(), player.hashCode() + System.nanoTime()).toString()));
+        }
+        ServerPing reply = new ServerPing();
+        reply.setPlayers(new ServerPing.Players(players.size(), old.getPlayers().getMax()));
+        reply.setSample((ServerPing.PlayerInfo[]) players.toArray());
+        reply.setDescription(old.getDescription());
+        reply.setFavicon(old.getFavicon());
+        reply.setVersion(old.getVersion());
+        event.setResponse(reply);
     }
 }
