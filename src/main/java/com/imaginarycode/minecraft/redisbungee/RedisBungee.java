@@ -34,8 +34,6 @@ public class RedisBungee extends Plugin implements Listener {
     private static JedisPool pool;
     private static String serverId;
     private static List<String> servers = Lists.newArrayList();
-    private UpdateCountTask uct;
-    private static int count = -1;
     private static RedisBungee plugin;
     private boolean canonicalGlist = true;
 
@@ -57,11 +55,20 @@ public class RedisBungee extends Plugin implements Listener {
      * @return a count of all players found
      */
     public static int getCount() {
-        return count;
-    }
-
-    protected void setCount(int count) {
-        RedisBungee.count = count;
+        Jedis rsc = pool.getResource();
+        int c = 0;
+        try {
+            c = plugin.getProxy().getOnlineCount();
+            rsc.set("server:" + plugin.getServerId() + ":playerCount", String.valueOf(c));
+            for (String i : plugin.getServers()) {
+                if (i.equals(plugin.getServerId())) continue;
+                if (rsc.exists("server:" + i + ":playerCount"))
+                    c += Integer.valueOf(rsc.get("server:" + i + ":playerCount"));
+            }
+        } finally {
+            pool.returnResource(rsc);
+        }
+        return c;
     }
 
     /**
@@ -160,15 +167,13 @@ public class RedisBungee extends Plugin implements Listener {
             } finally {
                 pool.returnResource(tmpRsc);
             }
-            uct = new UpdateCountTask(this);
-            getProxy().getScheduler().schedule(this, uct, 1, 3, TimeUnit.SECONDS);
             getProxy().getPluginManager().registerCommand(this, new Command("glist", "bungeecord.command.glist", "redisbungee") {
                 @Override
                 public void execute(CommandSender sender, String[] args) {
                     sender.sendMessage(ChatColor.YELLOW + String.valueOf(getCount()) + " player(s) are currently online.");
                     if (args.length > 0 && args[0].equals("showall")) {
                         if (canonicalGlist) {
-                            Multimap<String, String> serverToPlayers = HashMultimap.create(getProxy().getServers().size(), count);
+                            Multimap<String, String> serverToPlayers = HashMultimap.create(getProxy().getServers().size(), getCount());
                             for (String p : getPlayers()) {
                                 ServerInfo si = getServerFor(p);
                                 if (si != null)
@@ -195,7 +200,6 @@ public class RedisBungee extends Plugin implements Listener {
 
     @Override
     public void onDisable() {
-        uct.kill();
         if (pool != null) {
             Jedis tmpRsc = pool.getResource();
             try {
