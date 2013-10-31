@@ -59,7 +59,6 @@ public class RedisBungee extends Plugin implements Listener {
         int c = 0;
         try {
             c = plugin.getProxy().getOnlineCount();
-            rsc.set("server:" + plugin.getServerId() + ":playerCount", String.valueOf(c));
             for (String i : plugin.getServers()) {
                 if (i.equals(plugin.getServerId())) continue;
                 if (rsc.exists("server:" + i + ":playerCount"))
@@ -167,6 +166,17 @@ public class RedisBungee extends Plugin implements Listener {
             } finally {
                 pool.returnResource(tmpRsc);
             }
+            getProxy().getScheduler().schedule(this, new Runnable() {
+                @Override
+                public void run() {
+                    Jedis rsc = pool.getResource();
+                    try {
+                        rsc.set("server:" + plugin.getServerId() + ":playerCount", String.valueOf(getProxy().getOnlineCount()));
+                    } finally {
+                        pool.returnResource(rsc);
+                    }
+                }
+            }, 1, 3, TimeUnit.SECONDS);
             getProxy().getPluginManager().registerCommand(this, new Command("glist", "bungeecord.command.glist", "redisbungee") {
                 @Override
                 public void execute(CommandSender sender, String[] args) {
