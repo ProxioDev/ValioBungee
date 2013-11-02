@@ -37,10 +37,6 @@ public class RedisBungee extends Plugin implements Listener {
     private static RedisBungee plugin;
     private boolean canonicalGlist = true;
 
-    protected JedisPool getPool() {
-        return pool;
-    }
-
     protected String getServerId() {
         return serverId;
     }
@@ -247,7 +243,7 @@ public class RedisBungee extends Plugin implements Listener {
         Map rawYaml;
 
         try (InputStream in = new FileInputStream(file)) {
-            rawYaml = (Map) yaml.load(new FileInputStream(file));
+            rawYaml = (Map) yaml.load(in);
         }
 
         String redisServer = "localhost";
@@ -339,8 +335,7 @@ public class RedisBungee extends Plugin implements Listener {
             players.add(new ServerPing.PlayerInfo(player, "aaaa"));
         }
         ServerPing reply = new ServerPing();
-        reply.setPlayers(new ServerPing.Players(old.getPlayers().getMax(), players.size()));
-        reply.setSample(players.toArray(new ServerPing.PlayerInfo[players.size()]));
+        reply.setPlayers(new ServerPing.Players(old.getPlayers().getMax(), players.size(), players.toArray(new ServerPing.PlayerInfo[players.size()])));
         reply.setDescription(old.getDescription());
         reply.setFavicon(old.getFavicon());
         reply.setVersion(old.getVersion());
