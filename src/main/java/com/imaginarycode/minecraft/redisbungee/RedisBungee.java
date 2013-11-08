@@ -27,6 +27,7 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 import java.io.*;
+import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -176,10 +177,11 @@ public class RedisBungee extends Plugin implements Listener {
             getProxy().getPluginManager().registerCommand(this, new Command("glist", "bungeecord.command.glist", "redisbungee") {
                 @Override
                 public void execute(CommandSender sender, String[] args) {
-                    sender.sendMessage(ChatColor.YELLOW + String.valueOf(getCount()) + " player(s) are currently online.");
+                    int count = getCount();
                     if (args.length > 0 && args[0].equals("showall")) {
                         if (canonicalGlist) {
-                            Multimap<String, String> serverToPlayers = HashMultimap.create(getProxy().getServers().size(), getCount());
+                            int avgPlayers = count / getProxy().getServers().size();
+                            Multimap<String, String> serverToPlayers = HashMultimap.create(getProxy().getServers().size(), avgPlayers);
                             for (String p : getPlayers()) {
                                 ServerInfo si = getServerFor(p);
                                 if (si != null)
@@ -195,8 +197,25 @@ public class RedisBungee extends Plugin implements Listener {
                         } else {
                             sender.sendMessage(ChatColor.YELLOW + "Players: " + Joiner.on(", ").join(getPlayers()));
                         }
+                        sender.sendMessage(ChatColor.YELLOW + String.valueOf(count) + " player(s) are currently online.");
                     } else {
+                        sender.sendMessage(ChatColor.YELLOW + String.valueOf(count) + " player(s) are currently online.");
                         sender.sendMessage(ChatColor.YELLOW + "To see all players online, use /glist showall.");
+                    }
+                }
+            });
+            getProxy().getPluginManager().registerCommand(this, new Command("find", "bungeecord.command.find") {
+                @Override
+                public void execute(CommandSender sender, String[] args) {
+                    if (args.length > 0) {
+                        ServerInfo si = getServerFor(args[0]);
+                        if (si != null) {
+                            sender.sendMessage(ChatColor.BLUE + args[0] + " is on " + si.getName() + ".");
+                        } else {
+                            sender.sendMessage(ChatColor.RED + "That user is not online.");
+                        }
+                    } else {
+                        sender.sendMessage(ChatColor.RED + "You must specify a player name.");
                     }
                 }
             });
@@ -240,7 +259,7 @@ public class RedisBungee extends Plugin implements Listener {
         }
 
         Yaml yaml = new Yaml();
-        Map rawYaml;
+        Map<?, ?> rawYaml;
 
         try (InputStream in = new FileInputStream(file)) {
             rawYaml = (Map) yaml.load(in);
@@ -286,17 +305,31 @@ public class RedisBungee extends Plugin implements Listener {
             } finally {
                 pool.returnResource(rsc);
             }
-            getProxy().getScheduler().schedule(this, new Runnable() {
+            final WeakReference<ProxiedPlayer> player = new WeakReference<>(event.getPlayer());
+            getProxy().getScheduler().runAsync(this, new Runnable() {
                 @Override
                 public void run() {
-                    Jedis rsc = pool.getResource();
-                    try {
-                        rsc.hset("player:" + event.getPlayer().getName(), "server", event.getPlayer().getServer().getInfo().getName());
-                    } finally {
-                        pool.returnResource(rsc);
+                    while (true) {
+                        ProxiedPlayer pp = player.get();
+                        if (pp == null)
+                            break;
+
+                        if (pp.getServer() != null) {
+                            Jedis rsc = pool.getResource();
+                            try {
+                                rsc.hset("player:" + event.getPlayer().getName(), "server", event.getPlayer().getServer().getInfo().getName());
+                            } finally {
+                                pool.returnResource(rsc);
+                            }
+                            break;
+                        }
+                        try {
+                            Thread.sleep(150);
+                        } catch (InterruptedException ignored) {
+                        }
                     }
                 }
-            }, 1750, TimeUnit.MILLISECONDS);
+            });
         }
     }
 

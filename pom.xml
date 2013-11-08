@@ -47,6 +47,7 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <minimizeJar>true</minimizeJar>
                             <artifactSet>
                                 <includes>
                                     <include>redis.clients:jedis</include>
@@ -55,8 +56,12 @@
                             </artifactSet>
                             <relocations>
                                 <relocation>
-                                    <pattern>redis.clients</pattern>
+                                    <pattern>redis.clients.jedis</pattern>
                                     <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.jedis</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>redis.clients.util</pattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.jedisutil</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.apache.commons.pool</pattern>
