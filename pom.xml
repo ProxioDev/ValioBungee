@@ -52,6 +52,7 @@
                                 <includes>
                                     <include>redis.clients:jedis</include>
                                     <include>commons-pool:commons-pool</include>
+                                    <include>org.apache.commons:commons-lang3</include>
                                 </includes>
                             </artifactSet>
                             <relocations>
@@ -64,8 +65,8 @@
                                     <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.jedisutil</shadedPattern>
                                 </relocation>
                                 <relocation>
-                                    <pattern>org.apache.commons.pool</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.commonspool</shadedPattern>
+                                    <pattern>org.apache.commons</pattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.commons</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
@@ -99,6 +100,11 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.9.1</version>
+            </plugin>
         </plugins>
     </build>
 
@@ -114,6 +120,11 @@
             <version>1.7-SNAPSHOT</version>
             <type>jar</type>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.1</version>
         </dependency>
     </dependencies>
 </project>
