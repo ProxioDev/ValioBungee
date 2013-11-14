@@ -8,6 +8,7 @@ package com.imaginarycode.minecraft.redisbungee;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.*;
+import com.google.common.io.ByteStreams;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ServerPing;
@@ -21,30 +22,23 @@ import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.event.EventHandler;
+import org.apache.commons.lang3.time.FastDateFormat;
 import org.yaml.snakeyaml.Yaml;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 import java.io.*;
-import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class RedisBungee extends Plugin implements Listener {
+    private static final ServerPing.PlayerInfo[] EMPTY_PLAYERINFO = new ServerPing.PlayerInfo[]{};
     private static JedisPool pool;
     private static String serverId;
     private static List<String> servers = Lists.newArrayList();
     private static RedisBungee plugin;
     private boolean canonicalGlist = true;
-
-    protected String getServerId() {
-        return serverId;
-    }
-
-    protected List<String> getServers() {
-        return servers;
-    }
 
     /**
      * Get a combined count of all players on this network.
@@ -56,8 +50,8 @@ public class RedisBungee extends Plugin implements Listener {
         int c = 0;
         try {
             c = plugin.getProxy().getOnlineCount();
-            for (String i : plugin.getServers()) {
-                if (i.equals(plugin.getServerId())) continue;
+            for (String i : servers) {
+                if (i.equals(serverId)) continue;
                 if (rsc.exists("server:" + i + ":playerCount"))
                     c += Integer.valueOf(rsc.get("server:" + i + ":playerCount"));
             }
@@ -75,7 +69,7 @@ public class RedisBungee extends Plugin implements Listener {
      * @return a Set with all players found
      */
     public static Set<String> getPlayers() {
-        List<String> players = Lists.newArrayList();
+        Set<String> players = new HashSet<>();
         for (ProxiedPlayer pp : plugin.getProxy().getPlayers()) {
             players.add(pp.getName());
         }
@@ -168,7 +162,7 @@ public class RedisBungee extends Plugin implements Listener {
                 public void run() {
                     Jedis rsc = pool.getResource();
                     try {
-                        rsc.set("server:" + plugin.getServerId() + ":playerCount", String.valueOf(getProxy().getOnlineCount()));
+                        rsc.set("server:" + serverId + ":playerCount", String.valueOf(getProxy().getOnlineCount()));
                     } finally {
                         pool.returnResource(rsc);
                     }
@@ -180,16 +174,14 @@ public class RedisBungee extends Plugin implements Listener {
                     int count = getCount();
                     if (args.length > 0 && args[0].equals("showall")) {
                         if (canonicalGlist) {
-                            int avgPlayers = count / getProxy().getServers().size();
-                            Multimap<String, String> serverToPlayers = HashMultimap.create(getProxy().getServers().size(), avgPlayers);
+                            Multimap<String, String> serverToPlayers = HashMultimap.create();
                             for (String p : getPlayers()) {
                                 ServerInfo si = getServerFor(p);
                                 if (si != null)
                                     serverToPlayers.put(si.getName(), p);
                             }
                             if (serverToPlayers.size() == 0) return;
-                            List<String> sortedServers = new ArrayList<>(serverToPlayers.keySet());
-                            Collections.sort(sortedServers);
+                            Set<String> sortedServers = new TreeSet<>(serverToPlayers.keySet());
                             for (String server : sortedServers)
                                 sender.sendMessage(ChatColor.GREEN + "[" + server + "] " + ChatColor.YELLOW + "("
                                         + serverToPlayers.get(server).size() + "): " + ChatColor.WHITE
@@ -213,6 +205,23 @@ public class RedisBungee extends Plugin implements Listener {
                             sender.sendMessage(ChatColor.BLUE + args[0] + " is on " + si.getName() + ".");
                         } else {
                             sender.sendMessage(ChatColor.RED + "That user is not online.");
+                        }
+                    } else {
+                        sender.sendMessage(ChatColor.RED + "You must specify a player name.");
+                    }
+                }
+            });
+            getProxy().getPluginManager().registerCommand(this, new Command("lastseen", "redisbungee.command.lastseen") {
+                FastDateFormat format = FastDateFormat.getInstance();
+
+                @Override
+                public void execute(CommandSender sender, String[] args) {
+                    if (args.length > 0) {
+                        long secs = getLastOnline(args[0]);
+                        if (secs == 0) {
+                            sender.sendMessage(ChatColor.GREEN + args[0] + " is currently online.");
+                        } else {
+                            sender.sendMessage(ChatColor.BLUE + args[0] + " was last online on " + format.format(TimeUnit.SECONDS.toMillis(secs)) + ".");
                         }
                     } else {
                         sender.sendMessage(ChatColor.RED + "You must specify a player name.");
@@ -250,11 +259,7 @@ public class RedisBungee extends Plugin implements Listener {
             file.createNewFile();
             try (InputStream in = getResourceAsStream("example_config.yml");
                  OutputStream out = new FileOutputStream(file)) {
-                byte[] buf = new byte[1024];
-                int len;
-                while ((len = in.read(buf)) > 0) {
-                    out.write(buf, 0, len);
-                }
+                ByteStreams.copy(in, out);
             }
         }
 
@@ -305,31 +310,9 @@ public class RedisBungee extends Plugin implements Listener {
             } finally {
                 pool.returnResource(rsc);
             }
-            final WeakReference<ProxiedPlayer> player = new WeakReference<>(event.getPlayer());
-            getProxy().getScheduler().runAsync(this, new Runnable() {
-                @Override
-                public void run() {
-                    while (true) {
-                        ProxiedPlayer pp = player.get();
-                        if (pp == null)
-                            break;
-
-                        if (pp.getServer() != null) {
-                            Jedis rsc = pool.getResource();
-                            try {
-                                rsc.hset("player:" + event.getPlayer().getName(), "server", event.getPlayer().getServer().getInfo().getName());
-                            } finally {
-                                pool.returnResource(rsc);
-                            }
-                            break;
-                        }
-                        try {
-                            Thread.sleep(150);
-                        } catch (InterruptedException ignored) {
-                        }
-                    }
-                }
-            });
+            // I used to have a task that eagerly waited for the user to be connected.
+            // Well, upon further inspection of BungeeCord's source code, this turned
+            // out to not be needed at all, since ServerConnectedEvent is called anyway.
         }
     }
 
@@ -363,7 +346,7 @@ public class RedisBungee extends Plugin implements Listener {
     public void onPing(ProxyPingEvent event) {
         ServerPing old = event.getResponse();
         ServerPing reply = new ServerPing();
-        reply.setPlayers(new ServerPing.Players(old.getPlayers().getMax(), getCount(), new ServerPing.PlayerInfo[]{}));
+        reply.setPlayers(new ServerPing.Players(old.getPlayers().getMax(), getCount(), EMPTY_PLAYERINFO));
         reply.setDescription(old.getDescription());
         reply.setFavicon(old.getFavicon());
         reply.setVersion(old.getVersion());
