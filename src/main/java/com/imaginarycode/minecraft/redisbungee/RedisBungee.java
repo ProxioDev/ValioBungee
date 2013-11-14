@@ -118,15 +118,15 @@ public class RedisBungee extends Plugin implements Listener {
     }
 
     /**
-     * Get the last time a player was on. If the player is currently online, this will return 0, otherwise it will return
-     * a value in seconds.
+     * Get the last time a player was on. If the player is currently online, this will return 0. If the player has not been recorded,
+     * this will return -1. Otherwise it will return a value in seconds.
      *
      * @param name a player name
      * @return the last time a player was on, if online returns a 0
      */
     public static long getLastOnline(String name) {
-        long time = 0L;
-        if (plugin.getProxy().getPlayer(name) != null) return time;
+        long time = -1L;
+        if (plugin.getProxy().getPlayer(name) != null) return 0;
         if (pool != null) {
             Jedis tmpRsc = pool.getResource();
             try {
@@ -220,8 +220,10 @@ public class RedisBungee extends Plugin implements Listener {
                         long secs = getLastOnline(args[0]);
                         if (secs == 0) {
                             sender.sendMessage(ChatColor.GREEN + args[0] + " is currently online.");
-                        } else {
+                        } else if (secs != -1) {
                             sender.sendMessage(ChatColor.BLUE + args[0] + " was last online on " + format.format(TimeUnit.SECONDS.toMillis(secs)) + ".");
+                        } else {
+                            sender.sendMessage(ChatColor.RED + args[0] + " has never been online.");
                         }
                     } else {
                         sender.sendMessage(ChatColor.RED + "You must specify a player name.");
