@@ -20,6 +20,8 @@ import java.util.Collection;
  * @since 0.2.3
  */
 public class RedisBungeeCommandSender implements CommandSender {
+    protected RedisBungeeCommandSender() {}
+
     @Override
     public String getName() {
         return "RedisBungee";
