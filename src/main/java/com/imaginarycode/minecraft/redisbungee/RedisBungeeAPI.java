@@ -64,4 +64,14 @@ public class RedisBungeeAPI {
     public Set<String> getPlayersOnline() {
         return plugin.getPlayers();
     }
+
+    /**
+     * Convenience method: Checks if the specified player is online.
+     *
+     * @param player a player name
+     * @return if the server is online
+     */
+    public boolean isPlayerOnline(String player) {
+        return getLastOnline(player) == 0;
+    }
 }

@@ -6,6 +6,8 @@
  */
 package com.imaginarycode.minecraft.redisbungee;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 
@@ -19,9 +21,8 @@ import java.util.Collection;
  * @author tuxed
  * @since 0.2.3
  */
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RedisBungeeCommandSender implements CommandSender {
-    protected RedisBungeeCommandSender() {}
-
     @Override
     public String getName() {
         return "RedisBungee";

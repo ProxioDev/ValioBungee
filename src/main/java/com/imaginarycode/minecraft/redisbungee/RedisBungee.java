@@ -6,14 +6,8 @@
  */
 package com.imaginarycode.minecraft.redisbungee;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.*;
 import com.google.common.io.ByteStreams;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ServerPing;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -21,12 +15,9 @@ import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.event.ProxyPingEvent;
 import net.md_5.bungee.api.event.ServerConnectedEvent;
-import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
-import net.md_5.bungee.api.scheduler.ScheduledTask;
 import net.md_5.bungee.event.EventHandler;
-import org.apache.commons.lang3.time.FastDateFormat;
 import org.yaml.snakeyaml.Yaml;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -46,14 +37,11 @@ import java.util.concurrent.TimeUnit;
 public class RedisBungee extends Plugin implements Listener {
     private static final ServerPing.PlayerInfo[] EMPTY_PLAYERINFO = new ServerPing.PlayerInfo[]{};
     private RedisBungeeCommandSender commandSender = new RedisBungeeCommandSender();
+    private static RedisBungeeConfiguration configuration = new RedisBungeeConfiguration();
     private JedisPool pool;
-    private String serverId;
-    private List<String> servers = Lists.newArrayList();
     private RedisBungee plugin;
     private static RedisBungeeAPI api;
-    private PubSubListener psl;
-    private ScheduledTask pubSubTask;
-    private boolean canonicalGlist = true;
+    private PubSubListener psl = null;
 
     /**
      * Fetch the {@link RedisBungeeAPI} object created on plugin start.
@@ -64,13 +52,17 @@ public class RedisBungee extends Plugin implements Listener {
         return api;
     }
 
+    protected static RedisBungeeConfiguration getConfiguration() {
+        return configuration;
+    }
+
     public int getCount() {
         Jedis rsc = pool.getResource();
         int c = 0;
         try {
             c = plugin.getProxy().getOnlineCount();
-            for (String i : servers) {
-                if (i.equals(serverId)) continue;
+            for (String i : getConfiguration().getLinkedServers()) {
+                if (i.equals(configuration.getServerId())) continue;
                 if (rsc.exists("server:" + i + ":playerCount"))
                     c += Integer.valueOf(rsc.get("server:" + i + ":playerCount"));
             }
@@ -88,8 +80,8 @@ public class RedisBungee extends Plugin implements Listener {
         if (pool != null) {
             Jedis rsc = pool.getResource();
             try {
-                for (String i : servers) {
-                    if (i.equals(serverId)) continue;
+                for (String i : getConfiguration().getLinkedServers()) {
+                    if (i.equals(configuration.getServerId())) continue;
                     for (String p : rsc.smembers("server:" + i + ":usersOnline")) {
                         if (!players.contains(p)) {
                             players.add(p);
@@ -148,9 +140,9 @@ public class RedisBungee extends Plugin implements Listener {
         if (pool != null) {
             Jedis tmpRsc = pool.getResource();
             try {
-                tmpRsc.set("server:" + serverId + ":playerCount", "0"); // reset
-                for (String i : tmpRsc.smembers("server:" + serverId + ":usersOnline")) {
-                    tmpRsc.srem("server:" + serverId + ":usersOnline", i);
+                tmpRsc.set("server:" + configuration.getServerId() + ":playerCount", "0"); // reset
+                for (String i : tmpRsc.smembers("server:" + configuration.getServerId() + ":usersOnline")) {
+                    tmpRsc.srem("server:" + configuration.getServerId() + ":usersOnline", i);
                 }
             } finally {
                 pool.returnResource(tmpRsc);
@@ -160,78 +152,19 @@ public class RedisBungee extends Plugin implements Listener {
                 public void run() {
                     Jedis rsc = pool.getResource();
                     try {
-                        rsc.set("server:" + serverId + ":playerCount", String.valueOf(getProxy().getOnlineCount()));
+                        rsc.set("server:" + configuration.getServerId() + ":playerCount", String.valueOf(getProxy().getOnlineCount()));
                     } finally {
                         pool.returnResource(rsc);
                     }
                 }
             }, 1, 3, TimeUnit.SECONDS);
-            getProxy().getPluginManager().registerCommand(this, new Command("glist", "bungeecord.command.glist", "redisbungee") {
-                @Override
-                public void execute(CommandSender sender, String[] args) {
-                    int count = getCount();
-                    if (args.length > 0 && args[0].equals("showall")) {
-                        if (canonicalGlist) {
-                            Multimap<String, String> serverToPlayers = HashMultimap.create();
-                            for (String p : getPlayers()) {
-                                ServerInfo si = getServerFor(p);
-                                if (si != null)
-                                    serverToPlayers.put(si.getName(), p);
-                            }
-                            if (serverToPlayers.size() == 0) return;
-                            Set<String> sortedServers = new TreeSet<>(serverToPlayers.keySet());
-                            for (String server : sortedServers)
-                                sender.sendMessage(ChatColor.GREEN + "[" + server + "] " + ChatColor.YELLOW + "("
-                                        + serverToPlayers.get(server).size() + "): " + ChatColor.WHITE
-                                        + Joiner.on(", ").join(serverToPlayers.get(server)));
-                        } else {
-                            sender.sendMessage(ChatColor.YELLOW + "Players: " + Joiner.on(", ").join(getPlayers()));
-                        }
-                        sender.sendMessage(ChatColor.YELLOW + String.valueOf(count) + " player(s) are currently online.");
-                    } else {
-                        sender.sendMessage(ChatColor.YELLOW + String.valueOf(count) + " player(s) are currently online.");
-                        sender.sendMessage(ChatColor.YELLOW + "To see all players online, use /glist showall.");
-                    }
-                }
-            });
-            getProxy().getPluginManager().registerCommand(this, new Command("find", "bungeecord.command.find") {
-                @Override
-                public void execute(CommandSender sender, String[] args) {
-                    if (args.length > 0) {
-                        ServerInfo si = getServerFor(args[0]);
-                        if (si != null) {
-                            sender.sendMessage(ChatColor.BLUE + args[0] + " is on " + si.getName() + ".");
-                        } else {
-                            sender.sendMessage(ChatColor.RED + "That user is not online.");
-                        }
-                    } else {
-                        sender.sendMessage(ChatColor.RED + "You must specify a player name.");
-                    }
-                }
-            });
-            getProxy().getPluginManager().registerCommand(this, new Command("lastseen", "redisbungee.command.lastseen") {
-                FastDateFormat format = FastDateFormat.getInstance();
-
-                @Override
-                public void execute(CommandSender sender, String[] args) {
-                    if (args.length > 0) {
-                        long secs = getLastOnline(args[0]);
-                        if (secs == 0) {
-                            sender.sendMessage(ChatColor.GREEN + args[0] + " is currently online.");
-                        } else if (secs != -1) {
-                            sender.sendMessage(ChatColor.BLUE + args[0] + " was last online on " + format.format(TimeUnit.SECONDS.toMillis(secs)) + ".");
-                        } else {
-                            sender.sendMessage(ChatColor.RED + args[0] + " has never been online.");
-                        }
-                    } else {
-                        sender.sendMessage(ChatColor.RED + "You must specify a player name.");
-                    }
-                }
-            });
+            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.GlistCommand());
+            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.FindCommand());
+            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.LastSeenCommand());
             getProxy().getPluginManager().registerListener(this, this);
             api = new RedisBungeeAPI(this);
             psl = new PubSubListener();
-            pubSubTask = getProxy().getScheduler().runAsync(this, psl);
+            getProxy().getScheduler().runAsync(this, psl);
         }
     }
 
@@ -243,9 +176,9 @@ public class RedisBungee extends Plugin implements Listener {
             getProxy().getScheduler().cancel(this);
             Jedis tmpRsc = pool.getResource();
             try {
-                tmpRsc.set("server:" + serverId + ":playerCount", "0"); // reset
-                for (String i : tmpRsc.smembers("server:" + serverId + ":usersOnline")) {
-                    tmpRsc.srem("server:" + serverId + ":usersOnline", i);
+                tmpRsc.set("server:" + configuration.getServerId() + ":playerCount", "0"); // reset
+                for (String i : tmpRsc.smembers("server:" + configuration.getServerId() + ":usersOnline")) {
+                    tmpRsc.srem("server:" + configuration.getServerId() + ":usersOnline", i);
                 }
             } catch (JedisException | ClassCastException ignored) {
             } finally {
@@ -283,22 +216,24 @@ public class RedisBungee extends Plugin implements Listener {
         } catch (NullPointerException ignored) {
         }
         try {
-            serverId = ((String) rawYaml.get("server-id"));
+            configuration.setServerId((String) rawYaml.get("server-id"));
         } catch (NullPointerException ignored) {
-            serverId = "ImADumbIdi0t";
         }
         try {
-            canonicalGlist = ((Boolean) rawYaml.get("canonical-glist"));
+            configuration.setCanonicalGlist((Boolean) rawYaml.get("canonical-glist"));
         } catch (NullPointerException ignored) {
         }
         List<?> tmp = (List<?>) rawYaml.get("linked-servers");
 
+        List<String> servers = new ArrayList<>();
         if (tmp != null)
             for (Object i : tmp) {
                 if (i instanceof String) {
                     servers.add((String) i);
                 }
             }
+
+        configuration.setLinkedServers(ImmutableList.copyOf(servers));
 
         if (redisServer != null) {
             if (!redisServer.equals("")) {
@@ -312,7 +247,7 @@ public class RedisBungee extends Plugin implements Listener {
         if (pool != null) {
             Jedis rsc = pool.getResource();
             try {
-                rsc.sadd("server:" + serverId + ":usersOnline", event.getPlayer().getName());
+                rsc.sadd("server:" + configuration.getServerId() + ":usersOnline", event.getPlayer().getName());
                 rsc.hset("player:" + event.getPlayer().getName(), "online", "0");
             } finally {
                 pool.returnResource(rsc);
@@ -328,7 +263,7 @@ public class RedisBungee extends Plugin implements Listener {
         if (pool != null) {
             Jedis rsc = pool.getResource();
             try {
-                rsc.srem("server:" + serverId + ":usersOnline", event.getPlayer().getName());
+                rsc.srem("server:" + configuration.getServerId() + ":usersOnline", event.getPlayer().getName());
                 rsc.hset("player:" + event.getPlayer().getName(), "online", String.valueOf(getUnixTimestamp()));
                 rsc.hdel("player:" + event.getPlayer().getName(), "server");
             } finally {
@@ -370,7 +305,7 @@ public class RedisBungee extends Plugin implements Listener {
             try {
                 rsc = pool.getResource();
                 jpsh = new JedisPubSubHandler();
-                rsc.subscribe(jpsh, "redisbungee-" + serverId, "redisbungee-allservers");
+                rsc.subscribe(jpsh, "redisbungee-" + configuration.getServerId(), "redisbungee-allservers");
             } catch (JedisException | ClassCastException ignored) {
             }
         }
