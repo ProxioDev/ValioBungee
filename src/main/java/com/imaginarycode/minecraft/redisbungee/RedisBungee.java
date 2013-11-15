@@ -390,6 +390,7 @@ public class RedisBungee extends Plugin implements Listener {
             } else {
                 cmd = s2;
             }
+            getLogger().info("Invoking command from PubSub: /" + s2);
             getProxy().getPluginManager().dispatchCommand(commandSender, cmd);
         }
 
