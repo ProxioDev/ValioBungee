@@ -1,6 +1,14 @@
+# The Redis server you use.
+# Get Redis from http://redis.io/
 redis-server: 127.0.0.1
+
+# An identifier for this BungeeCord instance.
 server-id: iluvbungee
+
+# Whether or not /glist showall output should match vanilla BungeeCord.
 canonical-glist: true
+
+# All other RedisBungee server IDs in the network.
 linked-servers:
 - dastank
 - americancoffee
