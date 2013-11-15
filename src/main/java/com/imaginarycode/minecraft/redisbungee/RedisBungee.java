@@ -7,7 +7,10 @@
 package com.imaginarycode.minecraft.redisbungee;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.*;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import com.google.common.io.ByteStreams;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
@@ -21,31 +24,48 @@ import net.md_5.bungee.api.event.ServerConnectedEvent;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
+import net.md_5.bungee.api.scheduler.ScheduledTask;
 import net.md_5.bungee.event.EventHandler;
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.yaml.snakeyaml.Yaml;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.JedisPubSub;
+import redis.clients.jedis.exceptions.JedisConnectionException;
+import redis.clients.jedis.exceptions.JedisException;
 
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * The RedisBungee plugin.
+ * <p/>
+ * The only function of interest is {@link #getApi()}, which exposes some functions in this class.
+ */
 public class RedisBungee extends Plugin implements Listener {
     private static final ServerPing.PlayerInfo[] EMPTY_PLAYERINFO = new ServerPing.PlayerInfo[]{};
-    private static JedisPool pool;
-    private static String serverId;
-    private static List<String> servers = Lists.newArrayList();
-    private static RedisBungee plugin;
+    private RedisBungeeCommandSender commandSender = new RedisBungeeCommandSender();
+    private JedisPool pool;
+    private String serverId;
+    private List<String> servers = Lists.newArrayList();
+    private RedisBungee plugin;
+    private static RedisBungeeAPI api;
+    private PubSubListener psl;
+    private ScheduledTask pubSubTask;
     private boolean canonicalGlist = true;
 
     /**
-     * Get a combined count of all players on this network.
+     * Fetch the {@link RedisBungeeAPI} object created on plugin start.
      *
-     * @return a count of all players found
+     * @return the {@link RedisBungeeAPI} object
      */
-    public static int getCount() {
+    public static RedisBungeeAPI getApi() {
+        return api;
+    }
+
+    public int getCount() {
         Jedis rsc = pool.getResource();
         int c = 0;
         try {
@@ -61,14 +81,7 @@ public class RedisBungee extends Plugin implements Listener {
         return c;
     }
 
-    /**
-     * Get a combined list of players on this network.
-     * <p/>
-     * Note that this function returns an immutable {@link java.util.Set}.
-     *
-     * @return a Set with all players found
-     */
-    public static Set<String> getPlayers() {
+    public Set<String> getPlayers() {
         Set<String> players = new HashSet<>();
         for (ProxiedPlayer pp : plugin.getProxy().getPlayers()) {
             players.add(pp.getName());
@@ -91,14 +104,7 @@ public class RedisBungee extends Plugin implements Listener {
         return ImmutableSet.copyOf(players);
     }
 
-    /**
-     * Get the server where the specified player is playing. This function also deals with the case of local players
-     * as well, and will return local information on them.
-     *
-     * @param name a player name
-     * @return a {@link net.md_5.bungee.api.config.ServerInfo} for the server the player is on.
-     */
-    public static ServerInfo getServerFor(String name) {
+    public ServerInfo getServerFor(String name) {
         ServerInfo server = null;
         if (plugin.getProxy().getPlayer(name) != null) return plugin.getProxy().getPlayer(name).getServer().getInfo();
         if (pool != null) {
@@ -113,18 +119,11 @@ public class RedisBungee extends Plugin implements Listener {
         return server;
     }
 
-    private static long getUnixTimestamp() {
+    private long getUnixTimestamp() {
         return TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
     }
 
-    /**
-     * Get the last time a player was on. If the player is currently online, this will return 0. If the player has not been recorded,
-     * this will return -1. Otherwise it will return a value in seconds.
-     *
-     * @param name a player name
-     * @return the last time a player was on, if online returns a 0
-     */
-    public static long getLastOnline(String name) {
+    public long getLastOnline(String name) {
         long time = -1L;
         if (plugin.getProxy().getPlayer(name) != null) return 0;
         if (pool != null) {
@@ -231,18 +230,25 @@ public class RedisBungee extends Plugin implements Listener {
                 }
             });
             getProxy().getPluginManager().registerListener(this, this);
+            api = new RedisBungeeAPI(this);
+            psl = new PubSubListener();
+            pubSubTask = getProxy().getScheduler().runAsync(this, psl);
         }
     }
 
     @Override
     public void onDisable() {
         if (pool != null) {
+            // Poison the PubSub listener
+            psl.poison();
+            getProxy().getScheduler().cancel(this);
             Jedis tmpRsc = pool.getResource();
             try {
                 tmpRsc.set("server:" + serverId + ":playerCount", "0"); // reset
                 for (String i : tmpRsc.smembers("server:" + serverId + ":usersOnline")) {
                     tmpRsc.srem("server:" + serverId + ":usersOnline", i);
                 }
+            } catch (JedisException | ClassCastException ignored) {
             } finally {
                 pool.returnResource(tmpRsc);
             }
@@ -353,5 +359,59 @@ public class RedisBungee extends Plugin implements Listener {
         reply.setFavicon(old.getFavicon());
         reply.setVersion(old.getVersion());
         event.setResponse(reply);
+    }
+
+    private class PubSubListener implements Runnable {
+
+        private Jedis rsc;
+        private JedisPubSubHandler jpsh;
+
+        @Override
+        public void run() {
+            try {
+                rsc = pool.getResource();
+                jpsh = new JedisPubSubHandler();
+                rsc.subscribe(jpsh, "redisbungee-" + serverId, "redisbungee-allservers");
+            } catch (JedisException | ClassCastException ignored) {
+            }
+        }
+
+        public void poison() {
+            jpsh.unsubscribe();
+            pool.returnResource(rsc);
+        }
+    }
+
+    private class JedisPubSubHandler extends JedisPubSub {
+        @Override
+        public void onMessage(String s, String s2) {
+            String cmd;
+            if (s2.startsWith("/")) {
+                cmd = s2.substring(1);
+            } else {
+                cmd = s2;
+            }
+            getProxy().getPluginManager().dispatchCommand(commandSender, cmd);
+        }
+
+        @Override
+        public void onPMessage(String s, String s2, String s3) {
+        }
+
+        @Override
+        public void onSubscribe(String s, int i) {
+        }
+
+        @Override
+        public void onUnsubscribe(String s, int i) {
+        }
+
+        @Override
+        public void onPUnsubscribe(String s, int i) {
+        }
+
+        @Override
+        public void onPSubscribe(String s, int i) {
+        }
     }
 }
