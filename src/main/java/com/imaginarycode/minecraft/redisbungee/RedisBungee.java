@@ -138,7 +138,9 @@ public class RedisBungee extends Plugin implements Listener {
             Jedis tmpRsc = pool.getResource();
             try {
                 tmpRsc.set("server:" + configuration.getServerId() + ":playerCount", "0"); // reset
-                tmpRsc.srem("server:" + configuration.getServerId() + ":usersOnline", (String[]) tmpRsc.smembers("server:" + configuration.getServerId() + ":usersOnline").toArray());
+                Set<String> smembers = tmpRsc.smembers("server:" + configuration.getServerId() + ":usersOnline");
+                if (smembers.size() > 0)
+                    tmpRsc.srem("server:" + configuration.getServerId() + ":usersOnline", smembers.toArray(new String[smembers.size()]));
             } finally {
                 pool.returnResource(tmpRsc);
             }
@@ -172,7 +174,9 @@ public class RedisBungee extends Plugin implements Listener {
             Jedis tmpRsc = pool.getResource();
             try {
                 tmpRsc.set("server:" + configuration.getServerId() + ":playerCount", "0"); // reset
-                tmpRsc.srem("server:" + configuration.getServerId() + ":usersOnline", (String[]) tmpRsc.smembers("server:" + configuration.getServerId() + ":usersOnline").toArray());
+                Set<String> smembers = tmpRsc.smembers("server:" + configuration.getServerId() + ":usersOnline");
+                if (smembers.size() > 0)
+                    tmpRsc.srem("server:" + configuration.getServerId() + ":usersOnline", smembers.toArray(new String[smembers.size()]));
             } catch (JedisException | ClassCastException ignored) {
             } finally {
                 pool.returnResource(tmpRsc);
