@@ -245,59 +245,42 @@ public class RedisBungee extends Plugin implements Listener {
 
     @EventHandler
     public void onPlayerConnect(final PostLoginEvent event) {
-        getProxy().getScheduler().runAsync(this, new Runnable() {
-            @Override
-            public void run() {
-                if (pool != null) {
-                    Jedis rsc = pool.getResource();
-                    try {
-                        rsc.sadd("server:" + configuration.getServerId() + ":usersOnline", event.getPlayer().getName());
-                        rsc.hset("player:" + event.getPlayer().getName(), "online", "0");
-                    } finally {
-                        pool.returnResource(rsc);
-                    }
-                    // I used to have a task that eagerly waited for the user to be connected.
-                    // Well, upon further inspection of BungeeCord's source code, this turned
-                    // out to not be needed at all, since ServerConnectedEvent is called anyway.
-                }
-            }
-        });
+        Jedis rsc = pool.getResource();
+        try {
+            rsc.sadd("server:" + configuration.getServerId() + ":usersOnline", event.getPlayer().getName());
+            rsc.hset("player:" + event.getPlayer().getName(), "online", "0");
+        } finally {
+            pool.returnResource(rsc);
+        }
+        // I used to have a task that eagerly waited for the user to be connected.
+        // Well, upon further inspection of BungeeCord's source code, this turned
+        // out to not be needed at all, since ServerConnectedEvent is called anyway.
     }
 
     @EventHandler
     public void onPlayerDisconnect(final PlayerDisconnectEvent event) {
-        getProxy().getScheduler().runAsync(this, new Runnable() {
-            @Override
-            public void run() {
-                if (pool != null) {
-                    Jedis rsc = pool.getResource();
-                    try {
-                        rsc.srem("server:" + configuration.getServerId() + ":usersOnline", event.getPlayer().getName());
-                        rsc.hset("player:" + event.getPlayer().getName(), "online", String.valueOf(getUnixTimestamp()));
-                        rsc.hdel("player:" + event.getPlayer().getName(), "server");
-                    } finally {
-                        pool.returnResource(rsc);
-                    }
-                }
+        if (pool != null) {
+            Jedis rsc = pool.getResource();
+            try {
+                rsc.srem("server:" + configuration.getServerId() + ":usersOnline", event.getPlayer().getName());
+                rsc.hset("player:" + event.getPlayer().getName(), "online", String.valueOf(getUnixTimestamp()));
+                rsc.hdel("player:" + event.getPlayer().getName(), "server");
+            } finally {
+                pool.returnResource(rsc);
             }
-        });
+        }
     }
 
     @EventHandler
     public void onServerChange(final ServerConnectedEvent event) {
-        getProxy().getScheduler().runAsync(this, new Runnable() {
-            @Override
-            public void run() {
-                if (pool != null) {
-                    Jedis rsc = pool.getResource();
-                    try {
-                        rsc.hset("player:" + event.getPlayer().getName(), "server", event.getServer().getInfo().getName());
-                    } finally {
-                        pool.returnResource(rsc);
-                    }
-                }
+        if (pool != null) {
+            Jedis rsc = pool.getResource();
+            try {
+                rsc.hset("player:" + event.getPlayer().getName(), "server", event.getServer().getInfo().getName());
+            } finally {
+                pool.returnResource(rsc);
             }
-        });
+        }
     }
 
     @EventHandler
