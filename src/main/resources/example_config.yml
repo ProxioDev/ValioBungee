@@ -8,6 +8,9 @@ server-id: iluvbungee
 # Whether or not /glist showall output should match vanilla BungeeCord.
 canonical-glist: true
 
+# Output all players in the server list. Recommended only for smaller networks.
+player-list-in-ping: false
+
 # All other RedisBungee server IDs in the network.
 linked-servers:
 - dastank

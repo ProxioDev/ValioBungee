@@ -24,5 +24,6 @@ import java.util.List;
 public class RedisBungeeConfiguration {
     private String serverId = "iluvbungee";
     private boolean canonicalGlist = true;
+    private boolean playerListInPing = false;
     private List<String> linkedServers = Collections.emptyList();
 }

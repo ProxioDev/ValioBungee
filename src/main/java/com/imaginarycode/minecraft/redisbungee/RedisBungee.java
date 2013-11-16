@@ -6,7 +6,8 @@
  */
 package com.imaginarycode.minecraft.redisbungee;
 
-import com.google.common.collect.*;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.io.ByteStreams;
 import net.md_5.bungee.api.ServerPing;
 import net.md_5.bungee.api.config.ServerInfo;
@@ -82,11 +83,7 @@ public class RedisBungee extends Plugin implements Listener {
             try {
                 for (String i : getConfiguration().getLinkedServers()) {
                     if (i.equals(configuration.getServerId())) continue;
-                    for (String p : rsc.smembers("server:" + i + ":usersOnline")) {
-                        if (!players.contains(p)) {
-                            players.add(p);
-                        }
-                    }
+                    players.addAll(rsc.smembers("server:" + i + ":usersOnline"));
                 }
             } finally {
                 pool.returnResource(rsc);
@@ -141,9 +138,7 @@ public class RedisBungee extends Plugin implements Listener {
             Jedis tmpRsc = pool.getResource();
             try {
                 tmpRsc.set("server:" + configuration.getServerId() + ":playerCount", "0"); // reset
-                for (String i : tmpRsc.smembers("server:" + configuration.getServerId() + ":usersOnline")) {
-                    tmpRsc.srem("server:" + configuration.getServerId() + ":usersOnline", i);
-                }
+                tmpRsc.srem("server:" + configuration.getServerId() + ":usersOnline", (String[]) tmpRsc.smembers("server:" + configuration.getServerId() + ":usersOnline").toArray());
             } finally {
                 pool.returnResource(tmpRsc);
             }
@@ -177,9 +172,7 @@ public class RedisBungee extends Plugin implements Listener {
             Jedis tmpRsc = pool.getResource();
             try {
                 tmpRsc.set("server:" + configuration.getServerId() + ":playerCount", "0"); // reset
-                for (String i : tmpRsc.smembers("server:" + configuration.getServerId() + ":usersOnline")) {
-                    tmpRsc.srem("server:" + configuration.getServerId() + ":usersOnline", i);
-                }
+                tmpRsc.srem("server:" + configuration.getServerId() + ":usersOnline", (String[]) tmpRsc.smembers("server:" + configuration.getServerId() + ":usersOnline").toArray());
             } catch (JedisException | ClassCastException ignored) {
             } finally {
                 pool.returnResource(tmpRsc);
@@ -223,6 +216,10 @@ public class RedisBungee extends Plugin implements Listener {
             configuration.setCanonicalGlist((Boolean) rawYaml.get("canonical-glist"));
         } catch (NullPointerException ignored) {
         }
+        try {
+            configuration.setPlayerListInPing(((Boolean) rawYaml.get("player-list-in-ping")));
+        } catch (NullPointerException ignored) {
+        }
         List<?> tmp = (List<?>) rawYaml.get("linked-servers");
 
         List<String> servers = new ArrayList<>();
@@ -244,51 +241,77 @@ public class RedisBungee extends Plugin implements Listener {
 
     @EventHandler
     public void onPlayerConnect(final PostLoginEvent event) {
-        if (pool != null) {
-            Jedis rsc = pool.getResource();
-            try {
-                rsc.sadd("server:" + configuration.getServerId() + ":usersOnline", event.getPlayer().getName());
-                rsc.hset("player:" + event.getPlayer().getName(), "online", "0");
-            } finally {
-                pool.returnResource(rsc);
+        getProxy().getScheduler().runAsync(this, new Runnable() {
+            @Override
+            public void run() {
+                if (pool != null) {
+                    Jedis rsc = pool.getResource();
+                    try {
+                        rsc.sadd("server:" + configuration.getServerId() + ":usersOnline", event.getPlayer().getName());
+                        rsc.hset("player:" + event.getPlayer().getName(), "online", "0");
+                    } finally {
+                        pool.returnResource(rsc);
+                    }
+                    // I used to have a task that eagerly waited for the user to be connected.
+                    // Well, upon further inspection of BungeeCord's source code, this turned
+                    // out to not be needed at all, since ServerConnectedEvent is called anyway.
+                }
             }
-            // I used to have a task that eagerly waited for the user to be connected.
-            // Well, upon further inspection of BungeeCord's source code, this turned
-            // out to not be needed at all, since ServerConnectedEvent is called anyway.
-        }
+        });
     }
 
     @EventHandler
-    public void onPlayerDisconnect(PlayerDisconnectEvent event) {
-        if (pool != null) {
-            Jedis rsc = pool.getResource();
-            try {
-                rsc.srem("server:" + configuration.getServerId() + ":usersOnline", event.getPlayer().getName());
-                rsc.hset("player:" + event.getPlayer().getName(), "online", String.valueOf(getUnixTimestamp()));
-                rsc.hdel("player:" + event.getPlayer().getName(), "server");
-            } finally {
-                pool.returnResource(rsc);
+    public void onPlayerDisconnect(final PlayerDisconnectEvent event) {
+        getProxy().getScheduler().runAsync(this, new Runnable() {
+            @Override
+            public void run() {
+                if (pool != null) {
+                    Jedis rsc = pool.getResource();
+                    try {
+                        rsc.srem("server:" + configuration.getServerId() + ":usersOnline", event.getPlayer().getName());
+                        rsc.hset("player:" + event.getPlayer().getName(), "online", String.valueOf(getUnixTimestamp()));
+                        rsc.hdel("player:" + event.getPlayer().getName(), "server");
+                    } finally {
+                        pool.returnResource(rsc);
+                    }
+                }
             }
-        }
+        });
     }
 
     @EventHandler
-    public void onServerChange(ServerConnectedEvent event) {
-        if (pool != null) {
-            Jedis rsc = pool.getResource();
-            try {
-                rsc.hset("player:" + event.getPlayer().getName(), "server", event.getServer().getInfo().getName());
-            } finally {
-                pool.returnResource(rsc);
+    public void onServerChange(final ServerConnectedEvent event) {
+        getProxy().getScheduler().runAsync(this, new Runnable() {
+            @Override
+            public void run() {
+                if (pool != null) {
+                    Jedis rsc = pool.getResource();
+                    try {
+                        rsc.hset("player:" + event.getPlayer().getName(), "server", event.getServer().getInfo().getName());
+                    } finally {
+                        pool.returnResource(rsc);
+                    }
+                }
             }
-        }
+        });
     }
 
     @EventHandler
     public void onPing(ProxyPingEvent event) {
         ServerPing old = event.getResponse();
         ServerPing reply = new ServerPing();
-        reply.setPlayers(new ServerPing.Players(old.getPlayers().getMax(), getCount(), EMPTY_PLAYERINFO));
+        if (configuration.isPlayerListInPing()) {
+            Set<String> players = getPlayers();
+            ServerPing.PlayerInfo[] info = new ServerPing.PlayerInfo[players.size()];
+            int idx = 0;
+            for (String player : players) {
+                info[idx] = new ServerPing.PlayerInfo(player, "");
+                idx++;
+            }
+            reply.setPlayers(new ServerPing.Players(old.getPlayers().getMax(), players.size(), info));
+        } else {
+            reply.setPlayers(new ServerPing.Players(old.getPlayers().getMax(), getCount(), EMPTY_PLAYERINFO));
+        }
         reply.setDescription(old.getDescription());
         reply.setFavicon(old.getFavicon());
         reply.setVersion(old.getVersion());
