@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 public class RedisBungeeCommands {
     public static class GlistCommand extends Command {
         protected GlistCommand() {
-            super("glist", "bungeecord.command.glist", "redisbungee");
+            super("glist", "bungeecord.command.list", "redisbungee");
         }
 
         @Override
