@@ -161,7 +161,7 @@ public class RedisBungee extends Plugin implements Listener {
             getProxy().getPluginManager().registerListener(this, this);
             api = new RedisBungeeAPI(this);
             psl = new PubSubListener();
-            getProxy().getScheduler().runAsync(this, psl);
+            psl.start();
         }
     }
 
@@ -305,10 +305,14 @@ public class RedisBungee extends Plugin implements Listener {
         event.setResponse(reply);
     }
 
-    private class PubSubListener implements Runnable {
+    private class PubSubListener extends Thread {
 
         private Jedis rsc;
         private JedisPubSubHandler jpsh;
+
+        private PubSubListener() {
+            super("RedisBungee PubSub Listener");
+        }
 
         @Override
         public void run() {
