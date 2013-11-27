@@ -247,8 +247,12 @@ public class RedisBungee extends Plugin implements Listener {
     public void onPlayerConnect(final PostLoginEvent event) {
         Jedis rsc = pool.getResource();
         try {
-            rsc.sadd("server:" + configuration.getServerId() + ":usersOnline", event.getPlayer().getName());
-            rsc.hset("player:" + event.getPlayer().getName(), "online", "0");
+            if (rsc.hexists("player:" + event.getPlayer().getName(), "server")) {
+                event.getPlayer().disconnect("You are already logged on this server.");
+            } else {
+                rsc.sadd("server:" + configuration.getServerId() + ":usersOnline", event.getPlayer().getName());
+                rsc.hset("player:" + event.getPlayer().getName(), "online", "0");
+            }
         } finally {
             pool.returnResource(rsc);
         }
