@@ -2,6 +2,8 @@
 # Get Redis from http://redis.io/
 redis-server: 127.0.0.1
 redis-port: 6379
+# OPTIONAL: If your Redis server uses AUTH, set the password required.
+redis-password: ""
 
 # An identifier for this BungeeCord instance.
 server-id: iluvbungee

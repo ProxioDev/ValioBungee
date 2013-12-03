@@ -17,10 +17,7 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.event.EventHandler;
 import org.yaml.snakeyaml.Yaml;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
-import redis.clients.jedis.JedisPubSub;
+import redis.clients.jedis.*;
 import redis.clients.jedis.exceptions.JedisException;
 
 import java.io.*;
@@ -135,9 +132,10 @@ public class RedisBungee extends Plugin implements Listener {
             Jedis tmpRsc = pool.getResource();
             try {
                 tmpRsc.set("server:" + configuration.getServerId() + ":playerCount", "0"); // reset
-                Set<String> smembers = tmpRsc.smembers("server:" + configuration.getServerId() + ":usersOnline");
-                if (smembers.size() > 0)
+                if (tmpRsc.scard("server:" + configuration.getServerId() + ":usersOnline") > 0) {
+                    Set<String> smembers = tmpRsc.smembers("server:" + configuration.getServerId() + ":usersOnline");
                     tmpRsc.srem("server:" + configuration.getServerId() + ":usersOnline", smembers.toArray(new String[smembers.size()]));
+                }
             } finally {
                 pool.returnResource(tmpRsc);
             }
@@ -171,9 +169,10 @@ public class RedisBungee extends Plugin implements Listener {
             Jedis tmpRsc = pool.getResource();
             try {
                 tmpRsc.set("server:" + configuration.getServerId() + ":playerCount", "0"); // reset
-                Set<String> smembers = tmpRsc.smembers("server:" + configuration.getServerId() + ":usersOnline");
-                if (smembers.size() > 0)
+                if (tmpRsc.scard("server:" + configuration.getServerId() + ":usersOnline") > 0) {
+                    Set<String> smembers = tmpRsc.smembers("server:" + configuration.getServerId() + ":usersOnline");
                     tmpRsc.srem("server:" + configuration.getServerId() + ":usersOnline", smembers.toArray(new String[smembers.size()]));
+                }
             } catch (JedisException | ClassCastException ignored) {
             } finally {
                 pool.returnResource(tmpRsc);
@@ -206,12 +205,17 @@ public class RedisBungee extends Plugin implements Listener {
 
         String redisServer = "localhost";
         int redisPort = 6379;
+        String redisPassword = null;
         try {
             redisServer = ((String) rawYaml.get("redis-server"));
         } catch (NullPointerException ignored) {
         }
         try {
             redisPort = ((Integer) rawYaml.get("redis-port"));
+        } catch (NullPointerException ignored) {
+        }
+        try {
+            redisPassword = ((String) rawYaml.get("redis-password"));
         } catch (NullPointerException ignored) {
         }
         try {
@@ -238,9 +242,13 @@ public class RedisBungee extends Plugin implements Listener {
 
         configuration.setLinkedServers(ImmutableList.copyOf(servers));
 
+        if (redisPassword != null && (redisPassword.equals("") || redisPassword.equals("none"))) {
+            redisPassword = null;
+        }
+
         if (redisServer != null) {
             if (!redisServer.equals("")) {
-                pool = new JedisPool(new JedisPoolConfig(), redisServer, redisPort);
+                pool = new JedisPool(new JedisPoolConfig(), redisServer, redisPort, Protocol.DEFAULT_TIMEOUT, redisPassword);
             }
         }
     }
