@@ -270,8 +270,10 @@ public class RedisBungee extends Plugin implements Listener {
 
     @EventHandler
     public void onPlayerDisconnect(final PlayerDisconnectEvent event) {
-        if (forcefullyKicked.contains(event.getPlayer().getName()))
+        if (forcefullyKicked.contains(event.getPlayer().getName())) {
+            forcefullyKicked.remove(event.getPlayer().getName());
             return;
+        }
 
         if (pool != null) {
             Jedis rsc = pool.getResource();
