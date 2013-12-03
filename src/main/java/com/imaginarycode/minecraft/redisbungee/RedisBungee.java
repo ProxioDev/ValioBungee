@@ -12,10 +12,7 @@ import com.google.common.io.ByteStreams;
 import net.md_5.bungee.api.ServerPing;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.api.event.PlayerDisconnectEvent;
-import net.md_5.bungee.api.event.PostLoginEvent;
-import net.md_5.bungee.api.event.ProxyPingEvent;
-import net.md_5.bungee.api.event.ServerConnectedEvent;
+import net.md_5.bungee.api.event.*;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.event.EventHandler;
@@ -39,7 +36,6 @@ public class RedisBungee extends Plugin implements Listener {
     private static final ServerPing.PlayerInfo[] EMPTY_PLAYERINFO = new ServerPing.PlayerInfo[]{};
     private RedisBungeeCommandSender commandSender = new RedisBungeeCommandSender();
     private static RedisBungeeConfiguration configuration = new RedisBungeeConfiguration();
-    private List<String> forcefullyKicked = new ArrayList<>();
     private JedisPool pool;
     private RedisBungee plugin;
     private static RedisBungeeAPI api;
@@ -250,16 +246,24 @@ public class RedisBungee extends Plugin implements Listener {
     }
 
     @EventHandler
+    public void onPreLogin(PreLoginEvent event) {
+        Jedis rsc = pool.getResource();
+        try {
+            if (rsc.hexists("player:" + event.getConnection().getName(), "server")) {
+                event.setCancelled(true);
+                event.setCancelReason("You are already logged on to this server.");
+            }
+        }  finally {
+            pool.returnResource(rsc);
+        }
+    }
+
+    @EventHandler
     public void onPlayerConnect(final PostLoginEvent event) {
         Jedis rsc = pool.getResource();
         try {
-            if (rsc.hexists("player:" + event.getPlayer().getName(), "server")) {
-                forcefullyKicked.add(event.getPlayer().getName());
-                event.getPlayer().disconnect("You are already logged on this server.");
-            } else {
-                rsc.sadd("server:" + configuration.getServerId() + ":usersOnline", event.getPlayer().getName());
-                rsc.hset("player:" + event.getPlayer().getName(), "online", "0");
-            }
+            rsc.sadd("server:" + configuration.getServerId() + ":usersOnline", event.getPlayer().getName());
+            rsc.hset("player:" + event.getPlayer().getName(), "online", "0");
         } finally {
             pool.returnResource(rsc);
         }
@@ -270,11 +274,6 @@ public class RedisBungee extends Plugin implements Listener {
 
     @EventHandler
     public void onPlayerDisconnect(final PlayerDisconnectEvent event) {
-        if (forcefullyKicked.contains(event.getPlayer().getName())) {
-            forcefullyKicked.remove(event.getPlayer().getName());
-            return;
-        }
-
         if (pool != null) {
             Jedis rsc = pool.getResource();
             try {
