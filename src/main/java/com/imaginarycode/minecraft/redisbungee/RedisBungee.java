@@ -39,6 +39,7 @@ public class RedisBungee extends Plugin implements Listener {
     private static final ServerPing.PlayerInfo[] EMPTY_PLAYERINFO = new ServerPing.PlayerInfo[]{};
     private RedisBungeeCommandSender commandSender = new RedisBungeeCommandSender();
     private static RedisBungeeConfiguration configuration = new RedisBungeeConfiguration();
+    private List<String> forcefullyKicked = new ArrayList<>();
     private JedisPool pool;
     private RedisBungee plugin;
     private static RedisBungeeAPI api;
@@ -208,8 +209,13 @@ public class RedisBungee extends Plugin implements Listener {
         }
 
         String redisServer = "localhost";
+        int redisPort = 6379;
         try {
             redisServer = ((String) rawYaml.get("redis-server"));
+        } catch (NullPointerException ignored) {
+        }
+        try {
+            redisPort = ((Integer) rawYaml.get("redis-port"));
         } catch (NullPointerException ignored) {
         }
         try {
@@ -238,7 +244,7 @@ public class RedisBungee extends Plugin implements Listener {
 
         if (redisServer != null) {
             if (!redisServer.equals("")) {
-                pool = new JedisPool(new JedisPoolConfig(), redisServer);
+                pool = new JedisPool(new JedisPoolConfig(), redisServer, redisPort);
             }
         }
     }
@@ -248,6 +254,7 @@ public class RedisBungee extends Plugin implements Listener {
         Jedis rsc = pool.getResource();
         try {
             if (rsc.hexists("player:" + event.getPlayer().getName(), "server")) {
+                forcefullyKicked.add(event.getPlayer().getName());
                 event.getPlayer().disconnect("You are already logged on this server.");
             } else {
                 rsc.sadd("server:" + configuration.getServerId() + ":usersOnline", event.getPlayer().getName());
@@ -263,6 +270,9 @@ public class RedisBungee extends Plugin implements Listener {
 
     @EventHandler
     public void onPlayerDisconnect(final PlayerDisconnectEvent event) {
+        if (forcefullyKicked.contains(event.getPlayer().getName()))
+            return;
+
         if (pool != null) {
             Jedis rsc = pool.getResource();
             try {
