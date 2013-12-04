@@ -58,15 +58,18 @@
                             <relocations>
                                 <relocation>
                                     <pattern>redis.clients.jedis</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.jedis</shadedPattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.jedis
+                                    </shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>redis.clients.util</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.jedisutil</shadedPattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.jedisutil
+                                    </shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.apache.commons</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.commons</shadedPattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.commons
+                                    </shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>

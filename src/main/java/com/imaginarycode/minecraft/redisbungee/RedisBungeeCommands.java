@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * This class contains subclasses that are used for the commands RedisBungee overrides or includes: /glist, /find and /lastseen.
- *
+ * <p/>
  * All classes use the {@link RedisBungeeAPI}.
  *
  * @author tuxed

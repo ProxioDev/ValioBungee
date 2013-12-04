@@ -18,11 +18,13 @@ import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.event.EventHandler;
 import org.yaml.snakeyaml.Yaml;
 import redis.clients.jedis.*;
+import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.exceptions.JedisException;
 
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 /**
  * The RedisBungee plugin.
@@ -52,17 +54,18 @@ public class RedisBungee extends Plugin implements Listener {
     }
 
     public int getCount() {
-        Jedis rsc = pool.getResource();
-        int c = 0;
-        try {
-            c = plugin.getProxy().getOnlineCount();
-            for (String i : getConfiguration().getLinkedServers()) {
-                if (i.equals(configuration.getServerId())) continue;
-                if (rsc.exists("server:" + i + ":playerCount"))
-                    c += Integer.valueOf(rsc.get("server:" + i + ":playerCount"));
+        int c = plugin.getProxy().getOnlineCount();
+        if (pool != null) {
+            Jedis rsc = pool.getResource();
+            try {
+                for (String i : getConfiguration().getLinkedServers()) {
+                    if (i.equals(configuration.getServerId())) continue;
+                    if (rsc.exists("server:" + i + ":playerCount"))
+                        c += Integer.valueOf(rsc.get("server:" + i + ":playerCount"));
+                }
+            } finally {
+                pool.returnResource(rsc);
             }
-        } finally {
-            pool.returnResource(rsc);
         }
         return c;
     }
@@ -249,31 +252,51 @@ public class RedisBungee extends Plugin implements Listener {
         if (redisServer != null) {
             if (!redisServer.equals("")) {
                 pool = new JedisPool(new JedisPoolConfig(), redisServer, redisPort, Protocol.DEFAULT_TIMEOUT, redisPassword);
+                // Test the connection
+                Jedis rsc = pool.getResource();
+                try {
+                    rsc.exists(String.valueOf(System.currentTimeMillis()));
+                    getLogger().log(Level.INFO, "Successfully connected to Redis.");
+                } catch (JedisConnectionException e) {
+                    pool.returnBrokenResource(rsc);
+                    getLogger().log(Level.WARNING, "Failed to connect to your Redis server! RedisBungee will still work, albeit with reduced functionality.", e);
+                    pool.destroy();
+                    pool = null;
+                    rsc = null;
+                } finally {
+                    if (rsc != null && pool != null) {
+                        pool.returnResource(rsc);
+                    }
+                }
             }
         }
     }
 
     @EventHandler
     public void onPreLogin(PreLoginEvent event) {
-        Jedis rsc = pool.getResource();
-        try {
-            if (rsc.hexists("player:" + event.getConnection().getName(), "server")) {
-                event.setCancelled(true);
-                event.setCancelReason("You are already logged on to this server.");
+        if (pool != null) {
+            Jedis rsc = pool.getResource();
+            try {
+                if (rsc.hexists("player:" + event.getConnection().getName(), "server")) {
+                    event.setCancelled(true);
+                    event.setCancelReason("You are already logged on to this server.");
+                }
+            } finally {
+                pool.returnResource(rsc);
             }
-        }  finally {
-            pool.returnResource(rsc);
         }
     }
 
     @EventHandler
     public void onPlayerConnect(final PostLoginEvent event) {
-        Jedis rsc = pool.getResource();
-        try {
-            rsc.sadd("server:" + configuration.getServerId() + ":usersOnline", event.getPlayer().getName());
-            rsc.hset("player:" + event.getPlayer().getName(), "online", "0");
-        } finally {
-            pool.returnResource(rsc);
+        if (pool != null) {
+            Jedis rsc = pool.getResource();
+            try {
+                rsc.sadd("server:" + configuration.getServerId() + ":usersOnline", event.getPlayer().getName());
+                rsc.hset("player:" + event.getPlayer().getName(), "online", "0");
+            } finally {
+                pool.returnResource(rsc);
+            }
         }
         // I used to have a task that eagerly waited for the user to be connected.
         // Well, upon further inspection of BungeeCord's source code, this turned
@@ -329,7 +352,6 @@ public class RedisBungee extends Plugin implements Listener {
     }
 
     private class PubSubListener extends Thread {
-
         private Jedis rsc;
         private JedisPubSubHandler jpsh;
 
