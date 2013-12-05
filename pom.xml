@@ -23,6 +23,22 @@
         </repository>
     </repositories>
 
+    <ciManagement>
+        <system>jenkins</system>
+        <url>http://ci.md-5.net/job/RedisBungee/</url>
+    </ciManagement>
+
+    <distributionManagement>
+        <repository>
+            <id>md_5-releases</id>
+            <url>http://repo.md-5.net/content/repositories/releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>md_5-snapshots</id>
+            <url>http://repo.md-5.net/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <inceptionYear>2013</inceptionYear>
 
     <build>
