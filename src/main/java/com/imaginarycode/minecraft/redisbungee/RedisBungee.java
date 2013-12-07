@@ -253,12 +253,14 @@ public class RedisBungee extends Plugin implements Listener {
             if (!redisServer.equals("")) {
                 pool = new JedisPool(new JedisPoolConfig(), redisServer, redisPort, Protocol.DEFAULT_TIMEOUT, redisPassword);
                 // Test the connection
-                Jedis rsc = pool.getResource();
+                Jedis rsc = null;
                 try {
+                    rsc = pool.getResource();
                     rsc.exists(String.valueOf(System.currentTimeMillis()));
                     getLogger().log(Level.INFO, "Successfully connected to Redis.");
                 } catch (JedisConnectionException e) {
-                    pool.returnBrokenResource(rsc);
+                    if (rsc != null)
+                        pool.returnBrokenResource(rsc);
                     getLogger().log(Level.WARNING, "Failed to connect to your Redis server! RedisBungee will still work, albeit with reduced functionality.", e);
                     pool.destroy();
                     pool = null;
