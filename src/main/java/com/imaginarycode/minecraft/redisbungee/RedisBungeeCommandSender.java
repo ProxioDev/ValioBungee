@@ -9,9 +9,9 @@ package com.imaginarycode.minecraft.redisbungee;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.md_5.bungee.api.CommandSender;
-import net.md_5.bungee.api.ProxyServer;
 
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * This class is the CommandSender that RedisBungee uses to dispatch commands to BungeeCord.
@@ -40,7 +40,7 @@ public class RedisBungeeCommandSender implements CommandSender {
 
     @Override
     public Collection<String> getGroups() {
-        return ProxyServer.getInstance().getConsole().getGroups();
+        return Collections.emptySet();
     }
 
     @Override
@@ -55,7 +55,7 @@ public class RedisBungeeCommandSender implements CommandSender {
 
     @Override
     public boolean hasPermission(String s) {
-        return ProxyServer.getInstance().getConsole().hasPermission(s);
+        return true;
     }
 
     @Override

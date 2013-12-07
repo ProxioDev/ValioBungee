@@ -130,6 +130,8 @@ public class RedisBungee extends Plugin implements Listener {
             loadConfig();
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (JedisConnectionException e) {
+            throw new RuntimeException("Unable to connect to your Redis server!", e);
         }
         if (pool != null) {
             Jedis tmpRsc = pool.getResource();
@@ -184,7 +186,7 @@ public class RedisBungee extends Plugin implements Listener {
         }
     }
 
-    private void loadConfig() throws IOException {
+    private void loadConfig() throws IOException, JedisConnectionException {
         if (!getDataFolder().exists()) {
             getDataFolder().mkdir();
         }
@@ -261,10 +263,10 @@ public class RedisBungee extends Plugin implements Listener {
                 } catch (JedisConnectionException e) {
                     if (rsc != null)
                         pool.returnBrokenResource(rsc);
-                    getLogger().log(Level.WARNING, "Failed to connect to your Redis server! RedisBungee will still work, albeit with reduced functionality.", e);
                     pool.destroy();
                     pool = null;
                     rsc = null;
+                    throw e;
                 } finally {
                     if (rsc != null && pool != null) {
                         pool.returnResource(rsc);
