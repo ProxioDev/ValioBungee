@@ -7,8 +7,9 @@
 package com.imaginarycode.minecraft.redisbungee;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Ordering;
+import com.google.common.collect.TreeMultimap;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.config.ServerInfo;
@@ -38,15 +39,13 @@ public class RedisBungeeCommands {
             int count = RedisBungee.getApi().getPlayerCount();
             if (args.length > 0 && args[0].equals("showall")) {
                 if (RedisBungee.getConfiguration().isCanonicalGlist()) {
-                    Multimap<String, String> serverToPlayers = HashMultimap.create();
+                    Multimap<String, String> serverToPlayers = TreeMultimap.create(Ordering.natural(), Ordering.allEqual());
                     for (String p : RedisBungee.getApi().getPlayersOnline()) {
                         ServerInfo si = RedisBungee.getApi().getServerFor(p);
                         if (si != null)
                             serverToPlayers.put(si.getName(), p);
                     }
-                    if (serverToPlayers.size() == 0) return;
-                    Set<String> sortedServers = new TreeSet<>(serverToPlayers.keySet());
-                    for (String server : sortedServers)
+                    for (String server : serverToPlayers.keySet())
                         sender.sendMessage(ChatColor.GREEN + "[" + server + "] " + ChatColor.YELLOW + "("
                                 + serverToPlayers.get(server).size() + "): " + ChatColor.WHITE
                                 + Joiner.on(", ").join(serverToPlayers.get(server)));
