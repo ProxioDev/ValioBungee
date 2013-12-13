@@ -14,10 +14,9 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.plugin.Command;
-import org.apache.commons.lang3.time.FastDateFormat;
 
-import java.util.Set;
-import java.util.TreeSet;
+import java.net.InetAddress;
+import java.text.SimpleDateFormat;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -82,8 +81,6 @@ public class RedisBungeeCommands {
     }
 
     public static class LastSeenCommand extends Command {
-        FastDateFormat format = FastDateFormat.getInstance();
-
         protected LastSeenCommand() {
             super("lastseen", "redisbungee.command.lastseen");
         }
@@ -95,9 +92,29 @@ public class RedisBungeeCommands {
                 if (secs == 0) {
                     sender.sendMessage(ChatColor.GREEN + args[0] + " is currently online.");
                 } else if (secs != -1) {
-                    sender.sendMessage(ChatColor.BLUE + args[0] + " was last online on " + format.format(TimeUnit.SECONDS.toMillis(secs)) + ".");
+                    sender.sendMessage(ChatColor.BLUE + args[0] + " was last online on " + new SimpleDateFormat().format(TimeUnit.SECONDS.toMillis(secs)) + ".");
                 } else {
                     sender.sendMessage(ChatColor.RED + args[0] + " has never been online.");
+                }
+            } else {
+                sender.sendMessage(ChatColor.RED + "You must specify a player name.");
+            }
+        }
+    }
+
+    public static class IpCommand extends Command {
+        protected IpCommand() {
+            super("ip", "redisbungee.command.ip", "playerip");
+        }
+
+        @Override
+        public void execute(CommandSender sender, String[] args) {
+            if (args.length > 0) {
+                InetAddress ia = RedisBungee.getApi().getPlayerIp(args[0]);
+                if (ia != null) {
+                    sender.sendMessage(ChatColor.GREEN + args[0] + " is connected from " + ia.toString() + ".");
+                } else {
+                    sender.sendMessage(ChatColor.RED + "No such player found.");
                 }
             } else {
                 sender.sendMessage(ChatColor.RED + "You must specify a player name.");

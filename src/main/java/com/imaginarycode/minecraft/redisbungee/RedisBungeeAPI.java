@@ -8,7 +8,10 @@ package com.imaginarycode.minecraft.redisbungee;
 
 import net.md_5.bungee.api.config.ServerInfo;
 
+import java.net.InetAddress;
 import java.util.Set;
+
+import lombok.NonNull;
 
 /**
  * This class exposes some internal RedisBungee functions. You obtain an instance of this object by invoking {@link RedisBungee#getApi()}.
@@ -28,7 +31,7 @@ public class RedisBungeeAPI {
      *
      * @return a count of all players found
      */
-    public int getPlayerCount() {
+    public final int getPlayerCount() {
         return plugin.getCount();
     }
 
@@ -39,7 +42,7 @@ public class RedisBungeeAPI {
      * @param player a player name
      * @return the last time a player was on, if online returns a 0
      */
-    public long getLastOnline(String player) {
+    public final long getLastOnline(@NonNull String player) {
         return plugin.getLastOnline(player);
     }
 
@@ -50,18 +53,18 @@ public class RedisBungeeAPI {
      * @param player a player name
      * @return a {@link net.md_5.bungee.api.config.ServerInfo} for the server the player is on.
      */
-    public ServerInfo getServerFor(String player) {
+    public final ServerInfo getServerFor(@NonNull String player) {
         return plugin.getServerFor(player);
     }
 
     /**
      * Get a combined list of players on this network.
      * <p/>
-     * Note that this function returns an immutable {@link java.util.Set}.
+     * <strong>Note that this function returns an immutable {@link java.util.Set}.</strong>
      *
      * @return a Set with all players found
      */
-    public Set<String> getPlayersOnline() {
+    public final Set<String> getPlayersOnline() {
         return plugin.getPlayers();
     }
 
@@ -71,7 +74,16 @@ public class RedisBungeeAPI {
      * @param player a player name
      * @return if the server is online
      */
-    public boolean isPlayerOnline(String player) {
+    public final boolean isPlayerOnline(@NonNull String player) {
         return getLastOnline(player) == 0;
+    }
+
+    /**
+     * Get the {@link java.net.InetAddress} associated with this player.
+     *
+     * @return an {@link java.net.InetAddress} if the player is online, null otherwise
+     */
+    public final InetAddress getPlayerIp(@NonNull String player) {
+        return plugin.getIpAddress(player);
     }
 }

@@ -68,7 +68,6 @@
                                 <includes>
                                     <include>redis.clients:jedis</include>
                                     <include>commons-pool:commons-pool</include>
-                                    <include>org.apache.commons:commons-lang3</include>
                                 </includes>
                             </artifactSet>
                             <relocations>
@@ -80,11 +79,6 @@
                                 <relocation>
                                     <pattern>redis.clients.util</pattern>
                                     <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.jedisutil
-                                    </shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>org.apache.commons</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.commons
                                     </shadedPattern>
                                 </relocation>
                             </relocations>
@@ -139,11 +133,6 @@
             <version>1.7-SNAPSHOT</version>
             <type>jar</type>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.1</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
