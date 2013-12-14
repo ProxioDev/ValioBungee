@@ -30,6 +30,11 @@ import java.util.concurrent.TimeUnit;
  * @since 0.2.3
  */
 public class RedisBungeeCommands {
+    private static final BaseComponent[] NO_PLAYER_SPECIFIED =
+            new ComponentBuilder("").color(ChatColor.RED).append("You must specify a player name.").create();
+    private static final BaseComponent[] PLAYER_NOT_FOUND =
+            new ComponentBuilder("").color(ChatColor.RED).append("No such player found.").create();
+
     public static class GlistCommand extends Command {
         protected GlistCommand() {
             super("glist", "bungeecord.command.list", "redisbungee");
@@ -77,10 +82,10 @@ public class RedisBungeeCommands {
                     sender.sendMessage(new ComponentBuilder("").color(ChatColor.BLUE).append(args[0]).append(" is on ")
                             .append(si.getName()).append(".").create());
                 } else {
-                    sender.sendMessage(new ComponentBuilder("").color(ChatColor.RED).append("That user is not online.").create());
+                    sender.sendMessage(PLAYER_NOT_FOUND);
                 }
             } else {
-                sender.sendMessage(new ComponentBuilder("").color(ChatColor.RED).append("You must specify a player name.").create());
+                sender.sendMessage(NO_PLAYER_SPECIFIED);
             }
         }
     }
@@ -103,7 +108,7 @@ public class RedisBungeeCommands {
                     sender.sendMessage(new ComponentBuilder("").color(ChatColor.RED).append(args[0]).append(" has never been online.").create());
                 }
             } else {
-                sender.sendMessage(ChatColor.RED + "You must specify a player name.");
+                sender.sendMessage(NO_PLAYER_SPECIFIED);
             }
         }
     }
@@ -120,10 +125,10 @@ public class RedisBungeeCommands {
                 if (ia != null) {
                     sender.sendMessage(new ComponentBuilder("").color(ChatColor.GREEN).append(args[0]).append(" is connected from ").append(ia.toString()).append(".").create());
                 } else {
-                    sender.sendMessage(new ComponentBuilder("").color(ChatColor.RED).append("No such player found.").create());
+                    sender.sendMessage(PLAYER_NOT_FOUND);
                 }
             } else {
-                sender.sendMessage(new ComponentBuilder("").color(ChatColor.RED).append("You must specify a player name.").create());
+                sender.sendMessage(NO_PLAYER_SPECIFIED);
             }
         }
     }
