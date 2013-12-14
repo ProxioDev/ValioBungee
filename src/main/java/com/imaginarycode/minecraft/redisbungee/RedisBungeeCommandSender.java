@@ -9,6 +9,7 @@ package com.imaginarycode.minecraft.redisbungee;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.chat.BaseComponent;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -35,6 +36,16 @@ public class RedisBungeeCommandSender implements CommandSender {
 
     @Override
     public void sendMessages(String... strings) {
+        // no-op
+    }
+
+    @Override
+    public void sendMessage(BaseComponent... baseComponents) {
+        // no-op
+    }
+
+    @Override
+    public void sendMessage(BaseComponent baseComponent) {
         // no-op
     }
 

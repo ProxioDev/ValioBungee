@@ -11,6 +11,8 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.plugin.Command;
 
@@ -36,6 +38,8 @@ public class RedisBungeeCommands {
         @Override
         public void execute(CommandSender sender, String[] args) {
             int count = RedisBungee.getApi().getPlayerCount();
+            BaseComponent[] playersOnline = new ComponentBuilder("").color(ChatColor.YELLOW).append(String.valueOf(count))
+                    .append(" player(s) are currently online.").create();
             if (args.length > 0 && args[0].equals("showall")) {
                 if (RedisBungee.getConfiguration().isCanonicalGlist()) {
                     Multimap<String, String> serverToPlayers = HashMultimap.create();
@@ -45,17 +49,17 @@ public class RedisBungeeCommands {
                             serverToPlayers.put(si.getName(), p);
                     }
                     for (String server : new TreeSet<>(serverToPlayers.keySet()))
-                        sender.sendMessage(ChatColor.GREEN + "[" + server + "] " + ChatColor.YELLOW + "("
-                                + serverToPlayers.get(server).size() + "): " + ChatColor.WHITE
-                                + Joiner.on(", ").join(serverToPlayers.get(server)));
+                        sender.sendMessage(new ComponentBuilder("").color(ChatColor.GREEN).append("[").append(server)
+                                .append("]").color(ChatColor.YELLOW).append("(").append(String.valueOf(serverToPlayers.get(server).size()))
+                                .append("): ").color(ChatColor.WHITE).append(Joiner.on(", ").join(serverToPlayers.get(server))).create());
                 } else {
-                    sender.sendMessage(ChatColor.YELLOW + "Players: " + Joiner.on(", ").join(RedisBungee.getApi()
-                            .getPlayersOnline()));
+                    sender.sendMessage(new ComponentBuilder("").color(ChatColor.YELLOW).append("Players: ")
+                            .append(Joiner.on(", ").join(RedisBungee.getApi().getPlayersOnline())).create());
                 }
-                sender.sendMessage(ChatColor.YELLOW + String.valueOf(count) + " player(s) are currently online.");
+                sender.sendMessage(playersOnline);
             } else {
-                sender.sendMessage(ChatColor.YELLOW + String.valueOf(count) + " player(s) are currently online.");
-                sender.sendMessage(ChatColor.YELLOW + "To see all players online, use /glist showall.");
+                sender.sendMessage(playersOnline);
+                sender.sendMessage(new ComponentBuilder("").color(ChatColor.YELLOW).append("To see all players online, use /glist showall.").create());
             }
         }
     }
@@ -70,12 +74,13 @@ public class RedisBungeeCommands {
             if (args.length > 0) {
                 ServerInfo si = RedisBungee.getApi().getServerFor(args[0]);
                 if (si != null) {
-                    sender.sendMessage(ChatColor.BLUE + args[0] + " is on " + si.getName() + ".");
+                    sender.sendMessage(new ComponentBuilder("").color(ChatColor.BLUE).append(args[0]).append(" is on ")
+                            .append(si.getName()).append(".").create());
                 } else {
-                    sender.sendMessage(ChatColor.RED + "That user is not online.");
+                    sender.sendMessage(new ComponentBuilder("").color(ChatColor.RED).append("That user is not online.").create());
                 }
             } else {
-                sender.sendMessage(ChatColor.RED + "You must specify a player name.");
+                sender.sendMessage(new ComponentBuilder("").color(ChatColor.RED).append("You must specify a player name.").create());
             }
         }
     }
@@ -90,11 +95,12 @@ public class RedisBungeeCommands {
             if (args.length > 0) {
                 long secs = RedisBungee.getApi().getLastOnline(args[0]);
                 if (secs == 0) {
-                    sender.sendMessage(ChatColor.GREEN + args[0] + " is currently online.");
+                    sender.sendMessage(new ComponentBuilder("").color(ChatColor.GREEN).append(args[0]).append(" is currently online.").create());
                 } else if (secs != -1) {
-                    sender.sendMessage(ChatColor.BLUE + args[0] + " was last online on " + new SimpleDateFormat().format(TimeUnit.SECONDS.toMillis(secs)) + ".");
+                    sender.sendMessage(new ComponentBuilder("").color(ChatColor.BLUE).append(args[0]).append(" was last online on ").
+                            append(new SimpleDateFormat().format(TimeUnit.SECONDS.toMillis(secs))).append(".").create());
                 } else {
-                    sender.sendMessage(ChatColor.RED + args[0] + " has never been online.");
+                    sender.sendMessage(new ComponentBuilder("").color(ChatColor.RED).append(args[0]).append(" has never been online.").create());
                 }
             } else {
                 sender.sendMessage(ChatColor.RED + "You must specify a player name.");
@@ -112,12 +118,12 @@ public class RedisBungeeCommands {
             if (args.length > 0) {
                 InetAddress ia = RedisBungee.getApi().getPlayerIp(args[0]);
                 if (ia != null) {
-                    sender.sendMessage(ChatColor.GREEN + args[0] + " is connected from " + ia.toString() + ".");
+                    sender.sendMessage(new ComponentBuilder("").color(ChatColor.GREEN).append(args[0]).append(" is connected from ").append(ia.toString()).append(".").create());
                 } else {
-                    sender.sendMessage(ChatColor.RED + "No such player found.");
+                    sender.sendMessage(new ComponentBuilder("").color(ChatColor.RED).append("No such player found.").create());
                 }
             } else {
-                sender.sendMessage(ChatColor.RED + "You must specify a player name.");
+                sender.sendMessage(new ComponentBuilder("").color(ChatColor.RED).append("You must specify a player name.").create());
             }
         }
     }
