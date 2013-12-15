@@ -302,9 +302,11 @@ public final class RedisBungee extends Plugin implements Listener {
         if (pool != null) {
             Jedis rsc = pool.getResource();
             try {
-                if (rsc.hexists("player:" + event.getConnection().getName(), "server")) {
-                    event.setCancelled(true);
-                    event.setCancelReason("You are already logged on to this server.");
+                for (String server : configuration.getLinkedServers()) {
+                    if (rsc.sismember("server:" + server + ":usersOnline", event.getConnection().getName())) {
+                        event.setCancelled(true);
+                        event.setCancelReason("You are already logged on to this server.");
+                    }
                 }
             } finally {
                 pool.returnResource(rsc);
