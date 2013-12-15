@@ -19,6 +19,7 @@ import net.md_5.bungee.event.EventHandler;
 import org.yaml.snakeyaml.Yaml;
 import redis.clients.jedis.*;
 import redis.clients.jedis.exceptions.JedisConnectionException;
+import redis.clients.jedis.exceptions.JedisDataException;
 import redis.clients.jedis.exceptions.JedisException;
 
 import java.io.*;
@@ -159,7 +160,11 @@ public final class RedisBungee extends Plugin implements Listener {
                 tmpRsc.set("server:" + configuration.getServerId() + ":playerCount", "0"); // reset
                 if (tmpRsc.scard("server:" + configuration.getServerId() + ":usersOnline") > 0) {
                     Set<String> smembers = tmpRsc.smembers("server:" + configuration.getServerId() + ":usersOnline");
-                    tmpRsc.srem("server:" + configuration.getServerId() + ":usersOnline", smembers.toArray(new String[smembers.size()]));
+                    // Make sure more one time...
+                    if (smembers.size() > 0)
+                        try {
+                            tmpRsc.srem("server:" + configuration.getServerId() + ":usersOnline", smembers.toArray(new String[smembers.size()]));
+                        } catch (JedisDataException ignored) {}
                 }
             } finally {
                 pool.returnResource(tmpRsc);
