@@ -13,6 +13,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.plugin.Command;
 
@@ -53,10 +54,18 @@ public class RedisBungeeCommands {
                         if (si != null)
                             serverToPlayers.put(si.getName(), p);
                     }
-                    for (String server : new TreeSet<>(serverToPlayers.keySet()))
-                        sender.sendMessage(new ComponentBuilder("").color(ChatColor.GREEN).append("[").append(server)
-                                .append("]").color(ChatColor.YELLOW).append("(").append(String.valueOf(serverToPlayers.get(server).size()))
-                                .append("): ").color(ChatColor.WHITE).append(Joiner.on(", ").join(serverToPlayers.get(server))).create());
+                    for (String server : new TreeSet<>(serverToPlayers.keySet())) {
+                        TextComponent serverName = new TextComponent();
+                        serverName.setColor(ChatColor.GREEN);
+                        serverName.setText("[" + server + "] ");
+                        TextComponent serverCount = new TextComponent();
+                        serverCount.setColor(ChatColor.YELLOW);
+                        serverCount.setText("(" + serverToPlayers.get(server).size() + "): ");
+                        TextComponent serverPlayers = new TextComponent();
+                        serverPlayers.setColor(ChatColor.WHITE);
+                        serverPlayers.setText(Joiner.on(", ").join(serverToPlayers.get(server)));
+                        sender.sendMessage(serverName, serverCount, serverPlayers);
+                    }
                 } else {
                     sender.sendMessage(new ComponentBuilder("").color(ChatColor.YELLOW).append("Players: ")
                             .append(Joiner.on(", ").join(RedisBungee.getApi().getPlayersOnline())).create());
@@ -79,8 +88,10 @@ public class RedisBungeeCommands {
             if (args.length > 0) {
                 ServerInfo si = RedisBungee.getApi().getServerFor(args[0]);
                 if (si != null) {
-                    sender.sendMessage(new ComponentBuilder("").color(ChatColor.BLUE).append(args[0]).append(" is on ")
-                            .append(si.getName()).append(".").create());
+                    TextComponent message = new TextComponent();
+                    message.setColor(ChatColor.BLUE);
+                    message.setText(args[0] + " is on " + si.getName() + ".");
+                    sender.sendMessage(message);
                 } else {
                     sender.sendMessage(PLAYER_NOT_FOUND);
                 }
@@ -99,13 +110,19 @@ public class RedisBungeeCommands {
         public void execute(CommandSender sender, String[] args) {
             if (args.length > 0) {
                 long secs = RedisBungee.getApi().getLastOnline(args[0]);
+                TextComponent message = new TextComponent();
                 if (secs == 0) {
-                    sender.sendMessage(new ComponentBuilder("").color(ChatColor.GREEN).append(args[0]).append(" is currently online.").create());
+                    message.setColor(ChatColor.GREEN);
+                    message.setText(args[0] + " is currently online.");
+                    sender.sendMessage(message);
                 } else if (secs != -1) {
-                    sender.sendMessage(new ComponentBuilder("").color(ChatColor.BLUE).append(args[0]).append(" was last online on ").
-                            append(new SimpleDateFormat().format(TimeUnit.SECONDS.toMillis(secs))).append(".").create());
+                    message.setColor(ChatColor.BLUE);
+                    message.setText(args[0] + " was last online on " + new SimpleDateFormat().format(TimeUnit.SECONDS.toMillis(secs)) + ".");
+                    sender.sendMessage(message);
                 } else {
-                    sender.sendMessage(new ComponentBuilder("").color(ChatColor.RED).append(args[0]).append(" has never been online.").create());
+                    message.setColor(ChatColor.RED);
+                    message.setText(args[0] + " has never been online.");
+                    sender.sendMessage(message);
                 }
             } else {
                 sender.sendMessage(NO_PLAYER_SPECIFIED);
@@ -123,7 +140,9 @@ public class RedisBungeeCommands {
             if (args.length > 0) {
                 InetAddress ia = RedisBungee.getApi().getPlayerIp(args[0]);
                 if (ia != null) {
-                    sender.sendMessage(new ComponentBuilder("").color(ChatColor.GREEN).append(args[0]).append(" is connected from ").append(ia.toString()).append(".").create());
+                    TextComponent message = new TextComponent();
+                    message.setColor(ChatColor.GREEN);
+                    message.setText(args[0] + " is connected from " + ia.toString() + ".");
                 } else {
                     sender.sendMessage(PLAYER_NOT_FOUND);
                 }
