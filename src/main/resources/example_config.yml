@@ -1,3 +1,6 @@
+# RedisBungee configuration file.
+# PLEASE READ THE WIKI: http://minecraft.imaginarycode.com/
+
 # The Redis server you use.
 # Get Redis from http://redis.io/
 redis-server: 127.0.0.1
