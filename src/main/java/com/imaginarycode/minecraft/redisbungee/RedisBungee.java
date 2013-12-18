@@ -159,12 +159,8 @@ public final class RedisBungee extends Plugin implements Listener {
             try {
                 tmpRsc.set("server:" + configuration.getServerId() + ":playerCount", "0"); // reset
                 if (tmpRsc.scard("server:" + configuration.getServerId() + ":usersOnline") > 0) {
-                    Set<String> smembers = tmpRsc.smembers("server:" + configuration.getServerId() + ":usersOnline");
-                    // Make sure more one time...
-                    if (smembers.size() > 0)
-                        try {
-                            tmpRsc.srem("server:" + configuration.getServerId() + ":usersOnline", smembers.toArray(new String[smembers.size()]));
-                        } catch (JedisDataException ignored) {}
+                    for (String member : tmpRsc.smembers("server:" + configuration.getServerId() + ":usersOnline"))
+                        cleanUpPlayer(member, tmpRsc);
                 }
             } finally {
                 pool.returnResource(tmpRsc);
@@ -201,8 +197,8 @@ public final class RedisBungee extends Plugin implements Listener {
             try {
                 tmpRsc.set("server:" + configuration.getServerId() + ":playerCount", "0"); // reset
                 if (tmpRsc.scard("server:" + configuration.getServerId() + ":usersOnline") > 0) {
-                    Set<String> smembers = tmpRsc.smembers("server:" + configuration.getServerId() + ":usersOnline");
-                    tmpRsc.srem("server:" + configuration.getServerId() + ":usersOnline", smembers.toArray(new String[smembers.size()]));
+                    for (String member : tmpRsc.smembers("server:" + configuration.getServerId() + ":usersOnline"))
+                        cleanUpPlayer(member, tmpRsc);
                 }
             } catch (JedisException | ClassCastException ignored) {
             } finally {
@@ -341,10 +337,8 @@ public final class RedisBungee extends Plugin implements Listener {
         if (pool != null) {
             Jedis rsc = pool.getResource();
             try {
-                rsc.srem("server:" + configuration.getServerId() + ":usersOnline", event.getPlayer().getName());
                 rsc.hset("player:" + event.getPlayer().getName(), "online", String.valueOf(getUnixTimestamp()));
-                rsc.hdel("player:" + event.getPlayer().getName(), "server");
-                rsc.hdel("player:" + event.getPlayer().getName(), "ip");
+                cleanUpPlayer(event.getPlayer().getName(), rsc);
             } finally {
                 pool.returnResource(rsc);
             }
@@ -383,6 +377,12 @@ public final class RedisBungee extends Plugin implements Listener {
         reply.setFavicon(old.getFavicon());
         reply.setVersion(old.getVersion());
         event.setResponse(reply);
+    }
+
+    private void cleanUpPlayer(String player, Jedis rsc) {
+        rsc.srem("server:" + configuration.getServerId() + ":usersOnline", player);
+        rsc.hdel("player:" + player, "server");
+        rsc.hdel("player:" + player, "ip");
     }
 
     private class PubSubListener extends Thread {
