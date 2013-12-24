@@ -51,11 +51,11 @@ public final class RedisBungee extends Plugin implements Listener {
         return api;
     }
 
-    protected static Configuration getConfiguration() {
+    static Configuration getConfiguration() {
         return configuration;
     }
 
-    protected final int getCount() {
+    final int getCount() {
         int c = plugin.getProxy().getOnlineCount();
         if (pool != null) {
             Jedis rsc = pool.getResource();
@@ -72,7 +72,7 @@ public final class RedisBungee extends Plugin implements Listener {
         return c;
     }
 
-    protected final Set<String> getPlayers() {
+    final Set<String> getPlayers() {
         Set<String> players = new HashSet<>();
         for (ProxiedPlayer pp : plugin.getProxy().getPlayers()) {
             players.add(pp.getName());
@@ -91,7 +91,7 @@ public final class RedisBungee extends Plugin implements Listener {
         return ImmutableSet.copyOf(players);
     }
 
-    protected final ServerInfo getServerFor(String name) {
+    final ServerInfo getServerFor(String name) {
         ServerInfo server = null;
         if (plugin.getProxy().getPlayer(name) != null) return plugin.getProxy().getPlayer(name).getServer().getInfo();
         if (pool != null) {
@@ -110,7 +110,7 @@ public final class RedisBungee extends Plugin implements Listener {
         return TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
     }
 
-    protected final long getLastOnline(String name) {
+    final long getLastOnline(String name) {
         long time = -1L;
         if (plugin.getProxy().getPlayer(name) != null) return 0;
         if (pool != null) {
@@ -125,7 +125,7 @@ public final class RedisBungee extends Plugin implements Listener {
         return time;
     }
 
-    protected final InetAddress getIpAddress(String name) {
+    final InetAddress getIpAddress(String name) {
         if (plugin.getProxy().getPlayer(name) != null)
             return plugin.getProxy().getPlayer(name).getAddress().getAddress();
         InetAddress ia = null;

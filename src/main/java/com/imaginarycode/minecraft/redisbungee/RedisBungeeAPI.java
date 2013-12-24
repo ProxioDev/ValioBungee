@@ -20,9 +20,9 @@ import lombok.NonNull;
  * @since 0.2.3
  */
 public class RedisBungeeAPI {
-    private RedisBungee plugin;
+    private final RedisBungee plugin;
 
-    protected RedisBungeeAPI(RedisBungee plugin) {
+    RedisBungeeAPI(RedisBungee plugin) {
         this.plugin = plugin;
     }
 

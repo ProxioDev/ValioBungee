@@ -30,14 +30,14 @@ import java.util.concurrent.TimeUnit;
  * @author tuxed
  * @since 0.2.3
  */
-public class RedisBungeeCommands {
+class RedisBungeeCommands {
     private static final BaseComponent[] NO_PLAYER_SPECIFIED =
             new ComponentBuilder("").color(ChatColor.RED).append("You must specify a player name.").create();
     private static final BaseComponent[] PLAYER_NOT_FOUND =
             new ComponentBuilder("").color(ChatColor.RED).append("No such player found.").create();
 
     public static class GlistCommand extends Command {
-        protected GlistCommand() {
+        GlistCommand() {
             super("glist", "bungeecord.command.list", "redisbungee");
         }
 
@@ -79,7 +79,7 @@ public class RedisBungeeCommands {
     }
 
     public static class FindCommand extends Command {
-        protected FindCommand() {
+        FindCommand() {
             super("find", "bungeecord.command.find");
         }
 
@@ -102,7 +102,7 @@ public class RedisBungeeCommands {
     }
 
     public static class LastSeenCommand extends Command {
-        protected LastSeenCommand() {
+        LastSeenCommand() {
             super("lastseen", "redisbungee.command.lastseen");
         }
 
@@ -131,7 +131,7 @@ public class RedisBungeeCommands {
     }
 
     public static class IpCommand extends Command {
-        protected IpCommand() {
+        IpCommand() {
             super("ip", "redisbungee.command.ip", "playerip");
         }
 
