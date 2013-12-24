@@ -63,23 +63,18 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <minimizeJar>true</minimizeJar>
-                            <artifactSet>
-                                <includes>
-                                    <include>redis.clients:jedis</include>
-                                    <include>commons-pool:commons-pool</include>
-                                </includes>
-                            </artifactSet>
                             <relocations>
                                 <relocation>
                                     <pattern>redis.clients.jedis</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.jedis
-                                    </shadedPattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.jedis</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>redis.clients.util</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.jedisutil
-                                    </shadedPattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.jedisutil</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.apache.commons.pool</pattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.commonspool</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
@@ -123,9 +118,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>redis.clients</groupId>
+            <groupId>net.heartsavior</groupId>
             <artifactId>jedis</artifactId>
-            <version>2.2.1</version>
+            <version>2.2.1.1</version>
         </dependency>
         <dependency>
             <groupId>net.md-5</groupId>
@@ -145,6 +140,7 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.12.2</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>
