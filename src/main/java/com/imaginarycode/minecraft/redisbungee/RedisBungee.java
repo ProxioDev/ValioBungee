@@ -6,7 +6,6 @@
  */
 package com.imaginarycode.minecraft.redisbungee;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.ByteStreams;
 import net.md_5.bungee.api.ServerPing;
@@ -15,11 +14,12 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.*;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
+import net.md_5.bungee.config.Configuration;
+import net.md_5.bungee.config.ConfigurationProvider;
+import net.md_5.bungee.config.YamlConfiguration;
 import net.md_5.bungee.event.EventHandler;
-import org.yaml.snakeyaml.Yaml;
 import redis.clients.jedis.*;
 import redis.clients.jedis.exceptions.JedisConnectionException;
-import redis.clients.jedis.exceptions.JedisDataException;
 import redis.clients.jedis.exceptions.JedisException;
 
 import java.io.*;
@@ -37,7 +37,7 @@ import java.util.logging.Level;
 public final class RedisBungee extends Plugin implements Listener {
     private static final ServerPing.PlayerInfo[] EMPTY_PLAYERINFO = new ServerPing.PlayerInfo[]{};
     private RedisBungeeCommandSender commandSender = new RedisBungeeCommandSender();
-    private static RedisBungeeConfiguration configuration = new RedisBungeeConfiguration();
+    private static Configuration configuration;
     private JedisPool pool;
     private RedisBungee plugin;
     private static RedisBungeeAPI api;
@@ -52,7 +52,7 @@ public final class RedisBungee extends Plugin implements Listener {
         return api;
     }
 
-    protected static RedisBungeeConfiguration getConfiguration() {
+    protected static Configuration getConfiguration() {
         return configuration;
     }
 
@@ -61,8 +61,8 @@ public final class RedisBungee extends Plugin implements Listener {
         if (pool != null) {
             Jedis rsc = pool.getResource();
             try {
-                for (String i : getConfiguration().getLinkedServers()) {
-                    if (i.equals(configuration.getServerId())) continue;
+                for (String i : configuration.getStringList("linked-servers")) {
+                    if (i.equals(configuration.getString("server-id"))) continue;
                     if (rsc.exists("server:" + i + ":playerCount"))
                         c += Integer.valueOf(rsc.get("server:" + i + ":playerCount"));
                 }
@@ -81,8 +81,8 @@ public final class RedisBungee extends Plugin implements Listener {
         if (pool != null) {
             Jedis rsc = pool.getResource();
             try {
-                for (String i : getConfiguration().getLinkedServers()) {
-                    if (i.equals(configuration.getServerId())) continue;
+                for (String i : configuration.getStringList("linked-servers")) {
+                    if (i.equals(configuration.getString("server-id"))) continue;
                     players.addAll(rsc.smembers("server:" + i + ":usersOnline"));
                 }
             } finally {
@@ -157,9 +157,9 @@ public final class RedisBungee extends Plugin implements Listener {
         if (pool != null) {
             Jedis tmpRsc = pool.getResource();
             try {
-                tmpRsc.set("server:" + configuration.getServerId() + ":playerCount", "0"); // reset
-                if (tmpRsc.scard("server:" + configuration.getServerId() + ":usersOnline") > 0) {
-                    for (String member : tmpRsc.smembers("server:" + configuration.getServerId() + ":usersOnline"))
+                tmpRsc.set("server:" + configuration.getString("server-id") + ":playerCount", "0"); // reset
+                if (tmpRsc.scard("server:" + configuration.getString("server-id") + ":usersOnline") > 0) {
+                    for (String member : tmpRsc.smembers("server:" + configuration.getString("server-id") + ":usersOnline"))
                         cleanUpPlayer(member, tmpRsc);
                 }
             } finally {
@@ -170,7 +170,7 @@ public final class RedisBungee extends Plugin implements Listener {
                 public void run() {
                     Jedis rsc = pool.getResource();
                     try {
-                        rsc.set("server:" + configuration.getServerId() + ":playerCount", String.valueOf(getProxy().getOnlineCount()));
+                        rsc.set("server:" + configuration.getString("server-id")+ ":playerCount", String.valueOf(getProxy().getOnlineCount()));
                     } finally {
                         pool.returnResource(rsc);
                     }
@@ -195,9 +195,9 @@ public final class RedisBungee extends Plugin implements Listener {
             getProxy().getScheduler().cancel(this);
             Jedis tmpRsc = pool.getResource();
             try {
-                tmpRsc.set("server:" + configuration.getServerId() + ":playerCount", "0"); // reset
-                if (tmpRsc.scard("server:" + configuration.getServerId() + ":usersOnline") > 0) {
-                    for (String member : tmpRsc.smembers("server:" + configuration.getServerId() + ":usersOnline"))
+                tmpRsc.set("server:" + configuration.getString("server-id") + ":playerCount", "0"); // reset
+                if (tmpRsc.scard("server:" + configuration.getString("server-id") + ":usersOnline") > 0) {
+                    for (String member : tmpRsc.smembers("server:" + configuration.getString("server-id") + ":usersOnline"))
                         cleanUpPlayer(member, tmpRsc);
                 }
             } catch (JedisException | ClassCastException ignored) {
@@ -223,54 +223,23 @@ public final class RedisBungee extends Plugin implements Listener {
             }
         }
 
-        Yaml yaml = new Yaml();
-        Map<?, ?> rawYaml;
+        configuration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(file);
 
-        try (InputStream in = new FileInputStream(file)) {
-            rawYaml = (Map) yaml.load(in);
-        }
-
-        String redisServer = "localhost";
-        int redisPort = 6379;
-        String redisPassword = null;
-        try {
-            redisServer = ((String) rawYaml.get("redis-server"));
-        } catch (NullPointerException ignored) {
-        }
-        try {
-            redisPort = ((Integer) rawYaml.get("redis-port"));
-        } catch (NullPointerException ignored) {
-        }
-        try {
-            redisPassword = ((String) rawYaml.get("redis-password"));
-        } catch (NullPointerException ignored) {
-        }
-        try {
-            configuration.setServerId((String) rawYaml.get("server-id"));
-        } catch (NullPointerException ignored) {
-        }
-        try {
-            configuration.setCanonicalGlist((Boolean) rawYaml.get("canonical-glist"));
-        } catch (NullPointerException ignored) {
-        }
-        try {
-            configuration.setPlayerListInPing(((Boolean) rawYaml.get("player-list-in-ping")));
-        } catch (NullPointerException ignored) {
-        }
-        List<?> tmp = (List<?>) rawYaml.get("linked-servers");
-
-        List<String> servers = new ArrayList<>();
-        if (tmp != null)
-            for (Object i : tmp) {
-                if (i instanceof String) {
-                    servers.add((String) i);
-                }
-            }
-
-        configuration.setLinkedServers(ImmutableList.copyOf(servers));
+        String redisServer = configuration.getString("redis-server", "localhost");
+        int redisPort = configuration.getInt("redis-port", 6379);
+        String redisPassword = configuration.getString("redis-password");
 
         if (redisPassword != null && (redisPassword.equals("") || redisPassword.equals("none"))) {
             redisPassword = null;
+        }
+
+        // Configuration sanity checks.
+        if (configuration.getString("server-id").equals("")) {
+            throw new RuntimeException("server-id is not specified in the configuration or is empty");
+        }
+
+        if (configuration.getStringList("linked-servers").equals(Collections.EMPTY_LIST)) {
+            throw new RuntimeException("linked-servers is not specified in the configuration or is empty");
         }
 
         if (redisServer != null) {
@@ -295,6 +264,8 @@ public final class RedisBungee extends Plugin implements Listener {
                     }
                 }
             }
+        } else {
+            throw new RuntimeException("No redis server specified!");
         }
     }
 
@@ -303,7 +274,7 @@ public final class RedisBungee extends Plugin implements Listener {
         if (pool != null) {
             Jedis rsc = pool.getResource();
             try {
-                for (String server : configuration.getLinkedServers()) {
+                for (String server : configuration.getStringList("linked-servers")) {
                     if (rsc.sismember("server:" + server + ":usersOnline", event.getConnection().getName())) {
                         event.setCancelled(true);
                         event.setCancelReason("You are already logged on to this server.");
@@ -320,7 +291,7 @@ public final class RedisBungee extends Plugin implements Listener {
         if (pool != null) {
             Jedis rsc = pool.getResource();
             try {
-                rsc.sadd("server:" + configuration.getServerId() + ":usersOnline", event.getPlayer().getName());
+                rsc.sadd("server:" + configuration.getString("server-id", "") + ":usersOnline", event.getPlayer().getName());
                 rsc.hset("player:" + event.getPlayer().getName(), "online", "0");
                 rsc.hset("player:" + event.getPlayer().getName(), "ip", event.getPlayer().getAddress().getAddress().getHostAddress());
             } finally {
@@ -361,7 +332,7 @@ public final class RedisBungee extends Plugin implements Listener {
     public void onPing(ProxyPingEvent event) {
         ServerPing old = event.getResponse();
         ServerPing reply = new ServerPing();
-        if (configuration.isPlayerListInPing()) {
+        if (configuration.getBoolean("player-list-in-ping", false)) {
             Set<String> players = getPlayers();
             ServerPing.PlayerInfo[] info = new ServerPing.PlayerInfo[players.size()];
             int idx = 0;
@@ -380,7 +351,7 @@ public final class RedisBungee extends Plugin implements Listener {
     }
 
     private void cleanUpPlayer(String player, Jedis rsc) {
-        rsc.srem("server:" + configuration.getServerId() + ":usersOnline", player);
+        rsc.srem("server:" + configuration.getString("server-id") + ":usersOnline", player);
         rsc.hdel("player:" + player, "server");
         rsc.hdel("player:" + player, "ip");
     }
@@ -398,7 +369,7 @@ public final class RedisBungee extends Plugin implements Listener {
             try {
                 rsc = pool.getResource();
                 jpsh = new JedisPubSubHandler();
-                rsc.subscribe(jpsh, "redisbungee-" + configuration.getServerId(), "redisbungee-allservers");
+                rsc.subscribe(jpsh, "redisbungee-" + configuration.getString("server-id"), "redisbungee-allservers");
             } catch (JedisException | ClassCastException ignored) {
             }
         }
