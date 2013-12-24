@@ -22,8 +22,10 @@ import java.util.Collections;
  * @author tuxed
  * @since 0.2.3
  */
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class RedisBungeeCommandSender implements CommandSender {
+    protected static RedisBungeeCommandSender instance = new RedisBungeeCommandSender();
+
     @Override
     public String getName() {
         return "RedisBungee";

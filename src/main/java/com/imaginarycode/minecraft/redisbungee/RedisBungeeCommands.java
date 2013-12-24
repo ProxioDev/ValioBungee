@@ -47,7 +47,7 @@ public class RedisBungeeCommands {
             BaseComponent[] playersOnline = new ComponentBuilder("").color(ChatColor.YELLOW).append(String.valueOf(count))
                     .append(" player(s) are currently online.").create();
             if (args.length > 0 && args[0].equals("showall")) {
-                if (RedisBungee.getConfiguration().getBoolean("canonical-glist", false)) {
+                if (RedisBungee.getConfiguration().getBoolean("canonical-glist", true)) {
                     Multimap<String, String> serverToPlayers = HashMultimap.create();
                     for (String p : RedisBungee.getApi().getPlayersOnline()) {
                         ServerInfo si = RedisBungee.getApi().getServerFor(p);

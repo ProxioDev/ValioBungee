@@ -36,7 +36,6 @@ import java.util.logging.Level;
  */
 public final class RedisBungee extends Plugin implements Listener {
     private static final ServerPing.PlayerInfo[] EMPTY_PLAYERINFO = new ServerPing.PlayerInfo[]{};
-    private RedisBungeeCommandSender commandSender = new RedisBungeeCommandSender();
     private static Configuration configuration;
     private JedisPool pool;
     private RedisBungee plugin;
@@ -390,7 +389,7 @@ public final class RedisBungee extends Plugin implements Listener {
                 cmd = s2;
             }
             getLogger().info("Invoking command from PubSub: /" + s2);
-            getProxy().getPluginManager().dispatchCommand(commandSender, cmd);
+            getProxy().getPluginManager().dispatchCommand(RedisBungeeCommandSender.instance, cmd);
         }
 
         @Override
