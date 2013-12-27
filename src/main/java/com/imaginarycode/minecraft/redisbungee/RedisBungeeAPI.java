@@ -6,12 +6,11 @@
  */
 package com.imaginarycode.minecraft.redisbungee;
 
+import lombok.NonNull;
 import net.md_5.bungee.api.config.ServerInfo;
 
 import java.net.InetAddress;
 import java.util.Set;
-
-import lombok.NonNull;
 
 /**
  * This class exposes some internal RedisBungee functions. You obtain an instance of this object by invoking {@link RedisBungee#getApi()}.
@@ -66,6 +65,15 @@ public class RedisBungeeAPI {
      */
     public final Set<String> getPlayersOnline() {
         return plugin.getPlayers();
+    }
+
+    /**
+     * Get a list of players on the server with the given name.
+     * @param server a server name
+     * @return a Set with all players found on this server
+     */
+    public final Set<String> getPlayersOnServer(@NonNull String server) {
+        return plugin.getPlayersOnServer(server);
     }
 
     /**

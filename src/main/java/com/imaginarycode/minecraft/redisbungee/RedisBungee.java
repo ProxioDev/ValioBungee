@@ -6,7 +6,9 @@
  */
 package com.imaginarycode.minecraft.redisbungee;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
 import com.google.common.io.ByteStreams;
 import net.md_5.bungee.api.ServerPing;
 import net.md_5.bungee.api.config.ServerInfo;
@@ -55,6 +57,16 @@ public final class RedisBungee extends Plugin implements Listener {
         return configuration;
     }
 
+    static Multimap<String, String> serversToPlayers() {
+        Multimap<String, String> serverToPlayers = HashMultimap.create();
+        for (String p : RedisBungee.getApi().getPlayersOnline()) {
+            ServerInfo si = RedisBungee.getApi().getServerFor(p);
+            if (si != null)
+                serverToPlayers.put(si.getName(), p);
+        }
+        return serverToPlayers;
+    }
+
     final int getCount() {
         int c = plugin.getProxy().getOnlineCount();
         if (pool != null) {
@@ -89,6 +101,10 @@ public final class RedisBungee extends Plugin implements Listener {
             }
         }
         return ImmutableSet.copyOf(players);
+    }
+
+    final Set<String> getPlayersOnServer(String server) {
+        return new HashSet<>(serversToPlayers().get(server));
     }
 
     final ServerInfo getServerFor(String name) {
@@ -169,7 +185,7 @@ public final class RedisBungee extends Plugin implements Listener {
                 public void run() {
                     Jedis rsc = pool.getResource();
                     try {
-                        rsc.set("server:" + configuration.getString("server-id")+ ":playerCount", String.valueOf(getProxy().getOnlineCount()));
+                        rsc.set("server:" + configuration.getString("server-id") + ":playerCount", String.valueOf(getProxy().getOnlineCount()));
                     } finally {
                         pool.returnResource(rsc);
                     }
