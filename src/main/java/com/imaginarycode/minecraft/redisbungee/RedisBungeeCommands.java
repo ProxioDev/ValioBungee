@@ -7,7 +7,6 @@
 package com.imaginarycode.minecraft.redisbungee;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
@@ -48,12 +47,7 @@ class RedisBungeeCommands {
                     .append(" player(s) are currently online.").create();
             if (args.length > 0 && args[0].equals("showall")) {
                 if (RedisBungee.getConfiguration().getBoolean("canonical-glist", true)) {
-                    Multimap<String, String> serverToPlayers = HashMultimap.create();
-                    for (String p : RedisBungee.getApi().getPlayersOnline()) {
-                        ServerInfo si = RedisBungee.getApi().getServerFor(p);
-                        if (si != null)
-                            serverToPlayers.put(si.getName(), p);
-                    }
+                    Multimap<String, String> serverToPlayers = RedisBungee.serversToPlayers();
                     for (String server : new TreeSet<>(serverToPlayers.keySet())) {
                         TextComponent serverName = new TextComponent();
                         serverName.setColor(ChatColor.GREEN);
