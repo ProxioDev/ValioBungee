@@ -19,7 +19,6 @@ import net.md_5.bungee.api.plugin.Command;
 import java.net.InetAddress;
 import java.text.SimpleDateFormat;
 import java.util.TreeSet;
-import java.util.concurrent.TimeUnit;
 
 /**
  * This class contains subclasses that are used for the commands RedisBungee overrides or includes: /glist, /find and /lastseen.
@@ -47,7 +46,7 @@ class RedisBungeeCommands {
                     .append(" player(s) are currently online.").create();
             if (args.length > 0 && args[0].equals("showall")) {
                 if (RedisBungee.getConfiguration().getBoolean("canonical-glist", true)) {
-                    Multimap<String, String> serverToPlayers = RedisBungee.serversToPlayers();
+                    Multimap<String, String> serverToPlayers = RedisBungee.getApi().getServerToPlayers();
                     for (String server : new TreeSet<>(serverToPlayers.keySet())) {
                         TextComponent serverName = new TextComponent();
                         serverName.setColor(ChatColor.GREEN);
@@ -111,7 +110,7 @@ class RedisBungeeCommands {
                     sender.sendMessage(message);
                 } else if (secs != -1) {
                     message.setColor(ChatColor.BLUE);
-                    message.setText(args[0] + " was last online on " + new SimpleDateFormat().format(TimeUnit.SECONDS.toMillis(secs)) + ".");
+                    message.setText(args[0] + " was last online on " + new SimpleDateFormat().format(secs) + ".");
                     sender.sendMessage(message);
                 } else {
                     message.setColor(ChatColor.RED);

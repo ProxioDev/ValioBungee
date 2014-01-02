@@ -6,6 +6,7 @@
  */
 package com.imaginarycode.minecraft.redisbungee;
 
+import com.google.common.collect.Multimap;
 import lombok.NonNull;
 import net.md_5.bungee.api.config.ServerInfo;
 
@@ -36,7 +37,7 @@ public class RedisBungeeAPI {
 
     /**
      * Get the last time a player was on. If the player is currently online, this will return 0. If the player has not been recorded,
-     * this will return -1. Otherwise it will return a value in seconds.
+     * this will return -1. Otherwise it will return a value in milliseconds.
      *
      * @param player a player name
      * @return the last time a player was on, if online returns a 0
@@ -65,6 +66,14 @@ public class RedisBungeeAPI {
      */
     public final Set<String> getPlayersOnline() {
         return plugin.getPlayers();
+    }
+
+    /**
+     * Get a full list of players on all servers.
+     * @return a immutable Multimap with all players found on this server
+     */
+    public final Multimap<String, String> getServerToPlayers() {
+        return plugin.serversToPlayers();
     }
 
     /**
@@ -99,7 +108,7 @@ public class RedisBungeeAPI {
      * Sends a proxy command to all proxies.
      * @param command the command to send and execute
      */
-    public final void sendProxyCommand(String command) {
+    public final void sendProxyCommand(@NonNull String command) {
         plugin.sendProxyCommand("allservers", command);
     }
 
@@ -108,7 +117,7 @@ public class RedisBungeeAPI {
      * @param proxyId a proxy ID
      * @param command the command to send and execute
      */
-    public final void sendProxyCommand(String proxyId, String command) {
+    public final void sendProxyCommand(@NonNull String proxyId, @NonNull String command) {
         plugin.sendProxyCommand(proxyId, command);
     }
 }
