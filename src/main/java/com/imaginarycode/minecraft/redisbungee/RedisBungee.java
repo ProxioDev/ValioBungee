@@ -159,6 +159,15 @@ public final class RedisBungee extends Plugin implements Listener {
         return ia;
     }
 
+    final void sendProxyCommand(String proxyId, String command) {
+        Jedis jedis = pool.getResource();
+        try {
+            jedis.publish("redisbungee-" + proxyId, command);
+        } finally {
+            pool.returnResource(jedis);
+        }
+    }
+
     @Override
     public void onEnable() {
         plugin = this;

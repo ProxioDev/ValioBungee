@@ -94,4 +94,21 @@ public class RedisBungeeAPI {
     public final InetAddress getPlayerIp(@NonNull String player) {
         return plugin.getIpAddress(player);
     }
+
+    /**
+     * Sends a proxy command to all proxies.
+     * @param command the command to send and execute
+     */
+    public final void sendProxyCommand(String command) {
+        plugin.sendProxyCommand("allservers", command);
+    }
+
+    /**
+     * Sends a proxy command to the proxy with the given ID.
+     * @param proxyId a proxy ID
+     * @param command the command to send and execute
+     */
+    public final void sendProxyCommand(String proxyId, String command) {
+        plugin.sendProxyCommand(proxyId, command);
+    }
 }
