@@ -6,15 +6,18 @@
  */
 package com.imaginarycode.minecraft.redisbungee;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
+import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import lombok.NonNull;
 import net.md_5.bungee.api.ServerPing;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.connection.Server;
 import net.md_5.bungee.api.event.*;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -44,7 +47,6 @@ public final class RedisBungee extends Plugin implements Listener {
     private static final ServerPing.PlayerInfo[] EMPTY_PLAYERINFO = new ServerPing.PlayerInfo[]{};
     private static Configuration configuration;
     private JedisPool pool;
-    private RedisBungee plugin;
     private static RedisBungeeAPI api;
     private PubSubListener psl = null;
 
@@ -72,7 +74,7 @@ public final class RedisBungee extends Plugin implements Listener {
     }
 
     final int getCount() {
-        int c = plugin.getProxy().getOnlineCount();
+        int c = getProxy().getOnlineCount();
         if (pool != null) {
             Jedis rsc = pool.getResource();
             try {
@@ -90,7 +92,7 @@ public final class RedisBungee extends Plugin implements Listener {
 
     final Set<String> getPlayers() {
         Set<String> players = new HashSet<>();
-        for (ProxiedPlayer pp : plugin.getProxy().getPlayers()) {
+        for (ProxiedPlayer pp : getProxy().getPlayers()) {
             players.add(pp.getName());
         }
         if (pool != null) {
@@ -108,17 +110,18 @@ public final class RedisBungee extends Plugin implements Listener {
     }
 
     final Set<String> getPlayersOnServer(@NonNull String server) {
+        checkArgument(getProxy().getServerInfo(server) != null, "server doesn't exist");
         return ImmutableSet.copyOf(serversToPlayers().get(server));
     }
 
     final ServerInfo getServerFor(@NonNull String name) {
         ServerInfo server = null;
-        if (plugin.getProxy().getPlayer(name) != null) return plugin.getProxy().getPlayer(name).getServer().getInfo();
+        if (getProxy().getPlayer(name) != null) return getProxy().getPlayer(name).getServer().getInfo();
         if (pool != null) {
             Jedis tmpRsc = pool.getResource();
             try {
                 if (tmpRsc.hexists("player:" + name, "server"))
-                    server = plugin.getProxy().getServerInfo(tmpRsc.hget("player:" + name, "server"));
+                    server = getProxy().getServerInfo(tmpRsc.hget("player:" + name, "server"));
             } finally {
                 pool.returnResource(tmpRsc);
             }
@@ -128,7 +131,7 @@ public final class RedisBungee extends Plugin implements Listener {
 
     final long getLastOnline(@NonNull String name) {
         long time = -1L;
-        if (plugin.getProxy().getPlayer(name) != null) return 0;
+        if (getProxy().getPlayer(name) != null) return 0;
         if (pool != null) {
             Jedis tmpRsc = pool.getResource();
             try {
@@ -142,8 +145,8 @@ public final class RedisBungee extends Plugin implements Listener {
     }
 
     final InetAddress getIpAddress(@NonNull String name) {
-        if (plugin.getProxy().getPlayer(name) != null)
-            return plugin.getProxy().getPlayer(name).getAddress().getAddress();
+        if (getProxy().getPlayer(name) != null)
+            return getProxy().getPlayer(name).getAddress().getAddress();
         InetAddress ia = null;
         if (pool != null) {
             Jedis tmpRsc = pool.getResource();
@@ -171,7 +174,6 @@ public final class RedisBungee extends Plugin implements Listener {
 
     @Override
     public void onEnable() {
-        plugin = this;
         try {
             loadConfig();
         } catch (IOException e) {
@@ -372,6 +374,65 @@ public final class RedisBungee extends Plugin implements Listener {
         reply.setFavicon(old.getFavicon());
         reply.setVersion(old.getVersion());
         event.setResponse(reply);
+    }
+
+    @EventHandler
+    public void onPluginMessage(PluginMessageEvent event) {
+        if (event.getTag().equals("RedisBungee") && event.getSender() instanceof Server) {
+            DataInput in = ByteStreams.newDataInput(event.getData());
+
+            try {
+                String subchannel = in.readUTF();
+                ByteArrayDataOutput out = ByteStreams.newDataOutput();
+                String type;
+
+                switch (subchannel) {
+                    case "PlayerList":
+                        out.writeUTF("Players");
+                        Set<String> source = Collections.emptySet();
+                        type = in.readUTF();
+                        if (type.equals("ALL")) {
+                            out.writeUTF("ALL");
+                            source = getPlayers();
+                        } else {
+                            try {
+                                source = getPlayersOnServer(type);
+                            } catch (IllegalArgumentException ignored) {
+                            }
+                        }
+                        out.writeUTF(Joiner.on(',').join(source));
+                        break;
+                    case "PlayerCount":
+                        out.writeUTF("PlayerCount");
+                        type = in.readUTF();
+                        if (type.equals("ALL")) {
+                            out.writeUTF("ALL");
+                            out.writeInt(getCount());
+                        } else {
+                            out.writeUTF(type);
+                            try {
+                                out.writeInt(getPlayersOnServer(type).size());
+                            } catch (IllegalArgumentException e) {
+                                out.writeInt(0);
+                            }
+                        }
+                        out.writeInt(getCount());
+                        break;
+                    case "LastOnline":
+                        String user = in.readUTF();
+                        out.writeUTF("LastOnline");
+                        out.writeUTF(user);
+                        out.writeLong(getLastOnline(user));
+                        break;
+                    default:
+                        break;
+                }
+
+                ((Server) event.getSender()).sendData("RedisBungee", out.toByteArray());
+            } catch (IOException e) {
+                throw new RuntimeException("Unable to process plugin message from " + event.getSender().getAddress(), e);
+            }
+        }
     }
 
     private void cleanUpPlayer(String player, Jedis rsc) {
