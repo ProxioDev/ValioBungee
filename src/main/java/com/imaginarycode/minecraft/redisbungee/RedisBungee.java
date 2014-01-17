@@ -205,6 +205,7 @@ public final class RedisBungee extends Plugin implements Listener {
             getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.FindCommand());
             getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.LastSeenCommand());
             getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.IpCommand());
+            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.SendToAll());
             getProxy().getPluginManager().registerListener(this, this);
             api = new RedisBungeeAPI(this);
             psl = new PubSubListener();

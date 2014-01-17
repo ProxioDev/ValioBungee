@@ -33,6 +33,8 @@ class RedisBungeeCommands {
             new ComponentBuilder("").color(ChatColor.RED).append("You must specify a player name.").create();
     private static final BaseComponent[] PLAYER_NOT_FOUND =
             new ComponentBuilder("").color(ChatColor.RED).append("No such player found.").create();
+    private static final BaseComponent[] NO_COMMAND_SPECIFIED =
+            new ComponentBuilder("").color(ChatColor.RED).append("You must specify a command to be run.").create();
 
     public static class GlistCommand extends Command {
         GlistCommand() {
@@ -141,6 +143,25 @@ class RedisBungeeCommands {
                 }
             } else {
                 sender.sendMessage(NO_PLAYER_SPECIFIED);
+            }
+        }
+    }
+
+    public static class SendToAll extends Command {
+        SendToAll() {
+            super("sendtoall", "redisbungee.command.sendtoall");
+        }
+
+        @Override
+        public void execute(CommandSender sender, String[] args) {
+            if (args.length > 0) {
+                String command = Joiner.on(" ").skipNulls().join(args);
+                RedisBungee.getApi().sendProxyCommand(command);
+                TextComponent message = new TextComponent();
+                message.setColor(ChatColor.GREEN);
+                message.setText("Sent the command /" + command + " to all proxies.");
+            } else {
+                sender.sendMessage(NO_COMMAND_SPECIFIED);
             }
         }
     }
