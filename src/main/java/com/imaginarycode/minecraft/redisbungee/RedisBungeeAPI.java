@@ -120,4 +120,12 @@ public class RedisBungeeAPI {
     public final void sendProxyCommand(@NonNull String proxyId, @NonNull String command) {
         plugin.sendProxyCommand(proxyId, command);
     }
+
+    /**
+     * Get the current BungeeCord server ID for this server.
+     * @return the current server ID
+     */
+    public final String getServerId() {
+        return RedisBungee.getConfiguration().getString("server-id");
+    }
 }

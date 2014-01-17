@@ -165,4 +165,18 @@ class RedisBungeeCommands {
             }
         }
     }
+
+    public static class ServerId extends Command {
+        ServerId() {
+            super("serverid", "redisbungee.command.serverid");
+        }
+
+        @Override
+        public void execute(CommandSender sender, String[] args) {
+            TextComponent textComponent = new TextComponent();
+            textComponent.setText("You are on " + RedisBungee.getApi().getServerId() + ".");
+            textComponent.setColor(ChatColor.YELLOW);
+            sender.sendMessage(textComponent);
+        }
+    }
 }
