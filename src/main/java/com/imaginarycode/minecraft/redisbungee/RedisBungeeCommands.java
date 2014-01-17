@@ -30,11 +30,11 @@ import java.util.TreeSet;
  */
 class RedisBungeeCommands {
     private static final BaseComponent[] NO_PLAYER_SPECIFIED =
-            new ComponentBuilder("").color(ChatColor.RED).append("You must specify a player name.").create();
+            new ComponentBuilder("You must specify a player name.").color(ChatColor.RED).create();
     private static final BaseComponent[] PLAYER_NOT_FOUND =
-            new ComponentBuilder("").color(ChatColor.RED).append("No such player found.").create();
+            new ComponentBuilder("No such player found.").color(ChatColor.RED).create();
     private static final BaseComponent[] NO_COMMAND_SPECIFIED =
-            new ComponentBuilder("").color(ChatColor.RED).append("You must specify a command to be run.").create();
+            new ComponentBuilder("You must specify a command to be run.").color(ChatColor.RED).create();
 
     public static class GlistCommand extends Command {
         GlistCommand() {
@@ -62,13 +62,13 @@ class RedisBungeeCommands {
                         sender.sendMessage(serverName, serverCount, serverPlayers);
                     }
                 } else {
-                    sender.sendMessage(new ComponentBuilder("").color(ChatColor.YELLOW).append("Players: ")
-                            .append(Joiner.on(", ").join(RedisBungee.getApi().getPlayersOnline())).create());
+                    sender.sendMessage(new ComponentBuilder("Players: " + Joiner.on(", ").join(RedisBungee.getApi().getPlayersOnline()))
+                            .color(ChatColor.YELLOW).create());
                 }
                 sender.sendMessage(playersOnline);
             } else {
                 sender.sendMessage(playersOnline);
-                sender.sendMessage(new ComponentBuilder("").color(ChatColor.YELLOW).append("To see all players online, use /glist showall.").create());
+                sender.sendMessage(new ComponentBuilder("To see all players online, use /glist showall.").color(ChatColor.YELLOW).create());
             }
         }
     }
