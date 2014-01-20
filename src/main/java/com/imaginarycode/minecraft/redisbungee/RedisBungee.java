@@ -212,7 +212,7 @@ public final class RedisBungee extends Plugin implements Listener {
             getProxy().getPluginManager().registerListener(this, this);
             api = new RedisBungeeAPI(this);
             psl = new PubSubListener();
-            psl.start();
+            new Thread(psl, "RedisBungee PubSub Listener").start();
         }
     }
 
@@ -443,13 +443,11 @@ public final class RedisBungee extends Plugin implements Listener {
         rsc.hdel("player:" + player, "ip");
     }
 
-    private class PubSubListener extends Thread {
+    private class PubSubListener implements Runnable {
         private Jedis rsc;
         private JedisPubSubHandler jpsh;
 
-        private PubSubListener() {
-            super("RedisBungee PubSub Listener");
-        }
+        private PubSubListener() {}
 
         @Override
         public void run() {
