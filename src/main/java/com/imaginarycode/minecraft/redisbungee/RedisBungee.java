@@ -190,8 +190,21 @@ public final class RedisBungee extends Plugin implements Listener {
             try {
                 tmpRsc.set("server:" + configuration.getString("server-id") + ":playerCount", "0"); // reset
                 if (tmpRsc.scard("server:" + configuration.getString("server-id") + ":usersOnline") > 0) {
-                    for (String member : tmpRsc.smembers("server:" + configuration.getString("server-id") + ":usersOnline"))
-                        cleanUpPlayer(member, tmpRsc);
+                    for (String member : tmpRsc.smembers("server:" + configuration.getString("server-id") + ":usersOnline")) {
+                        // Are they simply on a different proxy?
+                        boolean found = false;
+                        for (String proxyId : configuration.getStringList("linked-servers")) {
+                            if (proxyId.equals(configuration.getString("server-id"))) continue;
+                            if (tmpRsc.sismember("server:" + proxyId + ":usersOnline", member)) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found)
+                            cleanUpPlayer(member, tmpRsc);
+                        else
+                            tmpRsc.srem("server:" + configuration.getString("server-id") + ":usersOnline", member);
+                    }
                 }
             } finally {
                 pool.returnResource(tmpRsc);
@@ -218,15 +231,33 @@ public final class RedisBungee extends Plugin implements Listener {
             psl = new PubSubListener();
             new Thread(psl, "RedisBungee PubSub Listener").start();
             getProxy().getScheduler().schedule(this, new Runnable() {
-                final Random random = new Random();
-                final Thread psc = new Thread(new PlayerSetCheck(), "RedisBungee PlayerSetCheck Task");
-
                 @Override
                 public void run() {
+                    Jedis tmpRsc = pool.getResource();
                     try {
-                        Thread.sleep(60000 * (1 + random.nextInt(3)));
-                        psc.start();
-                    } catch (InterruptedException ignored) {
+                        Set<String> players = getLocalPlayers();
+                        for (String member : tmpRsc.smembers("server:" + configuration.getString("server-id") + ":usersOnline"))
+                            if (!players.contains(member)) {
+                                // Are they simply on a different proxy?
+                                boolean found = false;
+                                for (String proxyId : configuration.getStringList("linked-servers")) {
+                                    if (proxyId.equals(configuration.getString("server-id"))) continue;
+                                    if (tmpRsc.sismember("server:" + proxyId + ":usersOnline", member)) {
+                                        // Just clean up the set.
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                                if (!found) {
+                                    cleanUpPlayer(member, tmpRsc);
+                                    getLogger().warning("Player found in set that was not found locally and globally: " + member);
+                                } else {
+                                    tmpRsc.srem("server:" + configuration.getString("server-id") + ":usersOnline", member);
+                                    getLogger().warning("Player found in set that was not found locally, but is on another proxy: " + member);
+                                }
+                            }
+                    } finally {
+                        pool.returnResource(tmpRsc);
                     }
                 }
             }, 1, 5, TimeUnit.MINUTES);
@@ -514,26 +545,6 @@ public final class RedisBungee extends Plugin implements Listener {
 
         @Override
         public void onPSubscribe(String s, int i) {
-        }
-    }
-
-    private class PlayerSetCheck implements Runnable {
-        private PlayerSetCheck() {
-        }
-
-        @Override
-        public void run() {
-            Jedis tmpRsc = pool.getResource();
-            try {
-                Set<String> players = getLocalPlayers();
-                for (String member : tmpRsc.smembers("server:" + configuration.getString("server-id") + ":usersOnline"))
-                    if (!players.contains(member)) {
-                        cleanUpPlayer(member, tmpRsc);
-                        getLogger().warning("Player found in set that was not found locally: " + member);
-                    }
-            } finally {
-                pool.returnResource(tmpRsc);
-            }
         }
     }
 }
