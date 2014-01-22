@@ -262,7 +262,7 @@ public final class RedisBungee extends Plugin implements Listener {
                 }
             }, 1, 5, TimeUnit.MINUTES);
         }
-        ProxyServer.getInstance().registerChannel("RedisBungee");
+        getProxy().registerChannel("RedisBungee");
     }
 
     @Override
