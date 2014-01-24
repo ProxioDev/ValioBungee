@@ -38,7 +38,7 @@ class RedisBungeeCommands {
 
     public static class GlistCommand extends Command {
         GlistCommand() {
-            super("glist", "bungeecord.command.list", "redisbungee");
+            super("glist", "bungeecord.command.list", "redisbungee", "rglist");
         }
 
         @Override
@@ -75,7 +75,7 @@ class RedisBungeeCommands {
 
     public static class FindCommand extends Command {
         FindCommand() {
-            super("find", "bungeecord.command.find");
+            super("find", "bungeecord.command.find", "rfind");
         }
 
         @Override
@@ -98,7 +98,7 @@ class RedisBungeeCommands {
 
     public static class LastSeenCommand extends Command {
         LastSeenCommand() {
-            super("lastseen", "redisbungee.command.lastseen");
+            super("lastseen", "redisbungee.command.lastseen", "rlastseen");
         }
 
         @Override
@@ -127,7 +127,7 @@ class RedisBungeeCommands {
 
     public static class IpCommand extends Command {
         IpCommand() {
-            super("ip", "redisbungee.command.ip", "playerip");
+            super("ip", "redisbungee.command.ip", "playerip", "rip", "rplayerip");
         }
 
         @Override
@@ -149,7 +149,7 @@ class RedisBungeeCommands {
 
     public static class SendToAll extends Command {
         SendToAll() {
-            super("sendtoall", "redisbungee.command.sendtoall");
+            super("sendtoall", "redisbungee.command.sendtoall", "rsendtoall");
         }
 
         @Override
@@ -168,7 +168,7 @@ class RedisBungeeCommands {
 
     public static class ServerId extends Command {
         ServerId() {
-            super("serverid", "redisbungee.command.serverid");
+            super("serverid", "redisbungee.command.serverid", "rserverid");
         }
 
         @Override
