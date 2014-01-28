@@ -11,6 +11,7 @@ import lombok.NonNull;
 import net.md_5.bungee.api.config.ServerInfo;
 
 import java.net.InetAddress;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -71,6 +72,7 @@ public class RedisBungeeAPI {
     /**
      * Get a full list of players on all servers.
      * @return a immutable Multimap with all players found on this server
+     * @since 0.2.5
      */
     public final Multimap<String, String> getServerToPlayers() {
         return plugin.serversToPlayers();
@@ -89,7 +91,7 @@ public class RedisBungeeAPI {
      * Convenience method: Checks if the specified player is online.
      *
      * @param player a player name
-     * @return if the server is online
+     * @return if the player is online
      */
     public final boolean isPlayerOnline(@NonNull String player) {
         return getLastOnline(player) == 0;
@@ -99,6 +101,7 @@ public class RedisBungeeAPI {
      * Get the {@link java.net.InetAddress} associated with this player.
      *
      * @return an {@link java.net.InetAddress} if the player is online, null otherwise
+     * @since 0.2.4
      */
     public final InetAddress getPlayerIp(@NonNull String player) {
         return plugin.getIpAddress(player);
@@ -107,15 +110,19 @@ public class RedisBungeeAPI {
     /**
      * Sends a proxy command to all proxies.
      * @param command the command to send and execute
+     * @see {@link #sendProxyCommand(String, String)}
+     * @since 0.2.5
      */
     public final void sendProxyCommand(@NonNull String command) {
         plugin.sendProxyCommand("allservers", command);
     }
 
     /**
-     * Sends a proxy command to the proxy with the given ID.
+     * Sends a proxy command to the proxy with the given ID. "allservers" means all proxies.
      * @param proxyId a proxy ID
      * @param command the command to send and execute
+     * @see {@link #getServerId()}, {@link #getAllServers()}
+     * @since 0.2.5
      */
     public final void sendProxyCommand(@NonNull String proxyId, @NonNull String command) {
         plugin.sendProxyCommand(proxyId, command);
@@ -124,8 +131,20 @@ public class RedisBungeeAPI {
     /**
      * Get the current BungeeCord server ID for this server.
      * @return the current server ID
+     * @since 0.2.5
+     * @see {@link #getAllServers()}
      */
     public final String getServerId() {
         return RedisBungee.getConfiguration().getString("server-id");
+    }
+
+    /**
+     * Get all the linked proxies in this network.
+     * @return the list of all proxies
+     * @since 0.2.5
+     * @see {@link #getServerId()}
+     */
+    public final List<String> getAllServers() {
+        return RedisBungee.getServerIds();
     }
 }
