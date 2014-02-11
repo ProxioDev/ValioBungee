@@ -75,4 +75,9 @@ public class RedisBungeeCommandSender implements CommandSender {
     public void setPermission(String s, boolean b) {
         // no-op
     }
+
+    @Override
+    public Collection<String> getPermissions() {
+        return Collections.emptySet();
+    }
 }
