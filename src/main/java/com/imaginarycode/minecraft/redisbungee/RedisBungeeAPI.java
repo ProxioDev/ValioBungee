@@ -110,7 +110,7 @@ public class RedisBungeeAPI {
     /**
      * Sends a proxy command to all proxies.
      * @param command the command to send and execute
-     * @see {@link #sendProxyCommand(String, String)}
+     * @see #sendProxyCommand(String, String)
      * @since 0.2.5
      */
     public final void sendProxyCommand(@NonNull String command) {
@@ -121,7 +121,8 @@ public class RedisBungeeAPI {
      * Sends a proxy command to the proxy with the given ID. "allservers" means all proxies.
      * @param proxyId a proxy ID
      * @param command the command to send and execute
-     * @see {@link #getServerId()}, {@link #getAllServers()}
+     * @see #getServerId()
+     * @see #getAllServers()
      * @since 0.2.5
      */
     public final void sendProxyCommand(@NonNull String proxyId, @NonNull String command) {
@@ -132,7 +133,7 @@ public class RedisBungeeAPI {
      * Get the current BungeeCord server ID for this server.
      * @return the current server ID
      * @since 0.2.5
-     * @see {@link #getAllServers()}
+     * @see #getAllServers()
      */
     public final String getServerId() {
         return RedisBungee.getConfiguration().getString("server-id");
@@ -142,7 +143,7 @@ public class RedisBungeeAPI {
      * Get all the linked proxies in this network.
      * @return the list of all proxies
      * @since 0.2.5
-     * @see {@link #getServerId()}
+     * @see #getServerId()
      */
     public final List<String> getAllServers() {
         return RedisBungee.getServerIds();
