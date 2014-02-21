@@ -7,7 +7,10 @@
 package com.imaginarycode.minecraft.redisbungee;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.*;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
@@ -30,11 +33,13 @@ import redis.clients.jedis.exceptions.JedisException;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * The RedisBungee plugin.
@@ -149,7 +154,7 @@ public final class RedisBungee extends Plugin implements Listener {
                 // Redis server has disappeared!
                 getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
                 pool.returnBrokenResource(tmpRsc);
-                throw new RuntimeException("Unable to get server for "+ name, e);
+                throw new RuntimeException("Unable to get server for " + name, e);
             } finally {
                 pool.returnResource(tmpRsc);
             }
@@ -211,7 +216,7 @@ public final class RedisBungee extends Plugin implements Listener {
                 // Redis server has disappeared!
                 getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
                 pool.returnBrokenResource(tmpRsc);
-                throw new RuntimeException("Unable to fetch IP address for "+ name, e);
+                throw new RuntimeException("Unable to fetch IP address for " + name, e);
             } catch (UnknownHostException ignored) {
                 // Best to just return null
             } finally {
@@ -387,7 +392,7 @@ public final class RedisBungee extends Plugin implements Listener {
 
         if (redisServer != null) {
             if (!redisServer.equals("")) {
-                pool = new JedisPool(new JedisPoolConfig(), redisServer, redisPort, Protocol.DEFAULT_TIMEOUT, redisPassword);
+                pool = new JedisPool(new JedisPoolConfig(), redisServer, redisPort, 0, redisPassword);
                 // Test the connection
                 Jedis rsc = null;
                 try {
