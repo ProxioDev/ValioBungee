@@ -90,6 +90,11 @@ public final class RedisBungee extends Plugin implements Listener {
                             rsc.set("server:" + i + ":playerCount", "0");
                         }
                 }
+            } catch (JedisConnectionException e) {
+                // Redis server has disappeared!
+                getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
+                pool.returnBrokenResource(rsc);
+                throw new RuntimeException("Unable to get total player count", e);
             } finally {
                 pool.returnResource(rsc);
             }
@@ -115,6 +120,11 @@ public final class RedisBungee extends Plugin implements Listener {
                     if (users != null && !users.isEmpty())
                         setBuilder = setBuilder.addAll(users);
                 }
+            } catch (JedisConnectionException e) {
+                // Redis server has disappeared!
+                getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
+                pool.returnBrokenResource(rsc);
+                throw new RuntimeException("Unable to get all players online", e);
             } finally {
                 pool.returnResource(rsc);
             }
@@ -135,6 +145,11 @@ public final class RedisBungee extends Plugin implements Listener {
             try {
                 if (tmpRsc.hexists("player:" + name, "server"))
                     server = getProxy().getServerInfo(tmpRsc.hget("player:" + name, "server"));
+            } catch (JedisConnectionException e) {
+                // Redis server has disappeared!
+                getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
+                pool.returnBrokenResource(tmpRsc);
+                throw new RuntimeException("Unable to get server for "+ name, e);
             } finally {
                 pool.returnResource(tmpRsc);
             }
@@ -171,6 +186,11 @@ public final class RedisBungee extends Plugin implements Listener {
                         }
                         tmpRsc.hset("player:" + name, "online", value);
                     }
+            } catch (JedisConnectionException e) {
+                // Redis server has disappeared!
+                getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
+                pool.returnBrokenResource(tmpRsc);
+                throw new RuntimeException("Unable to get last time online for " + name, e);
             } finally {
                 pool.returnResource(tmpRsc);
             }
@@ -187,6 +207,11 @@ public final class RedisBungee extends Plugin implements Listener {
             try {
                 if (tmpRsc.hexists("player:" + name, "ip"))
                     ia = InetAddress.getByName(tmpRsc.hget("player:" + name, "ip"));
+            } catch (JedisConnectionException e) {
+                // Redis server has disappeared!
+                getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
+                pool.returnBrokenResource(tmpRsc);
+                throw new RuntimeException("Unable to fetch IP address for "+ name, e);
             } catch (UnknownHostException ignored) {
                 // Best to just return null
             } finally {
@@ -201,6 +226,11 @@ public final class RedisBungee extends Plugin implements Listener {
         Jedis jedis = pool.getResource();
         try {
             jedis.publish("redisbungee-" + proxyId, command);
+        } catch (JedisConnectionException e) {
+            // Redis server has disappeared!
+            getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
+            pool.returnBrokenResource(jedis);
+            throw new RuntimeException("Unable to publish command", e);
         } finally {
             pool.returnResource(jedis);
         }
@@ -245,6 +275,10 @@ public final class RedisBungee extends Plugin implements Listener {
                     Jedis rsc = pool.getResource();
                     try {
                         rsc.set("server:" + configuration.getString("server-id") + ":playerCount", String.valueOf(getProxy().getOnlineCount()));
+                    } catch (JedisConnectionException e) {
+                        // Redis server has disappeared!
+                        getLogger().log(Level.SEVERE, "Unable to update proxy counts - did your Redis server go away?", e);
+                        pool.returnBrokenResource(rsc);
                     } finally {
                         pool.returnResource(rsc);
                     }
