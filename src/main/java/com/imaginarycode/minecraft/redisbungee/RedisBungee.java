@@ -398,6 +398,19 @@ public final class RedisBungee extends Plugin implements Listener {
                 try {
                     rsc = pool.getResource();
                     rsc.exists(String.valueOf(System.currentTimeMillis()));
+                    // If that worked, now we can check for an existing, alive Bungee:
+                    File crashFile = new File(getDataFolder(), "restarted_from_crash.txt");
+                    if (crashFile.exists())
+                        crashFile.delete();
+                    else if (rsc.exists("server:" + configuration.get("server-id") + ":playerCount")) {
+                        if (Integer.valueOf(rsc.get("server:" + configuration.get("server-id") + ":playerCount")) > 0 &&
+                                rsc.scard("server:" + configuration.getString("server-id") + ":usersOnline") > 0) {
+                            getLogger().severe("You have launched a possible imposter BungeeCord instance. Another instance is already running.");
+                            getLogger().severe("For data consistency reasons, RedisBungee will now disable itself.");
+                            getLogger().severe("If this instance is coming up from a crash, create a file in your RedisBungee plugins directory with the name 'restarted_from_crash.txt' and RedisBungee will not perform this check.");
+                            throw new RuntimeException("Possible imposter instance!");
+                        }
+                    }
                     getLogger().log(Level.INFO, "Successfully connected to Redis.");
                 } catch (JedisConnectionException e) {
                     if (rsc != null)
