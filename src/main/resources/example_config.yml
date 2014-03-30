@@ -7,6 +7,10 @@ redis-server: 127.0.0.1
 redis-port: 6379
 # OPTIONAL: If your Redis server uses AUTH, set the password required.
 redis-password: ""
+# Maximum connections that will be maintained to the Redis server.
+# The default is an unlimited number of connections.
+# You may need to lower this value in some setups.
+max-redis-connections: -1
 
 # An identifier for this BungeeCord instance.
 server-id: iluvbungee

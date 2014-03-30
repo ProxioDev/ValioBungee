@@ -43,7 +43,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * The RedisBungee plugin.
- * <p/>
+ * <p>
  * The only function of interest is {@link #getApi()}, which exposes some functions in this class.
  */
 public final class RedisBungee extends Plugin implements Listener {
@@ -52,6 +52,7 @@ public final class RedisBungee extends Plugin implements Listener {
     private static RedisBungeeAPI api;
     private PubSubListener psl = null;
     private static List<String> serverIds;
+    private int globalCount;
 
     /**
      * Fetch the {@link RedisBungeeAPI} object created on plugin start.
@@ -81,6 +82,10 @@ public final class RedisBungee extends Plugin implements Listener {
     }
 
     final int getCount() {
+        return globalCount;
+    }
+
+    final int getCurrentCount() {
         int c = getProxy().getOnlineCount();
         if (pool != null) {
             Jedis rsc = pool.getResource();
@@ -274,6 +279,7 @@ public final class RedisBungee extends Plugin implements Listener {
             } finally {
                 pool.returnResource(tmpRsc);
             }
+            globalCount = getCurrentCount();
             getProxy().getScheduler().schedule(this, new Runnable() {
                 @Override
                 public void run() {
@@ -287,8 +293,9 @@ public final class RedisBungee extends Plugin implements Listener {
                     } finally {
                         pool.returnResource(rsc);
                     }
+                    globalCount = getCurrentCount();
                 }
-            }, 1, 3, TimeUnit.SECONDS);
+            }, 0, 3, TimeUnit.SECONDS);
             getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.GlistCommand());
             getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.FindCommand());
             getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.LastSeenCommand());
@@ -392,7 +399,9 @@ public final class RedisBungee extends Plugin implements Listener {
 
         if (redisServer != null) {
             if (!redisServer.equals("")) {
-                pool = new JedisPool(new JedisPoolConfig(), redisServer, redisPort, 0, redisPassword);
+                JedisPoolConfig config = new JedisPoolConfig();
+                config.setMaxTotal(configuration.getInt("max-redis-connections", -1));
+                pool = new JedisPool(config, redisServer, redisPort, 0, redisPassword);
                 // Test the connection
                 Jedis rsc = null;
                 try {
@@ -450,14 +459,19 @@ public final class RedisBungee extends Plugin implements Listener {
     @EventHandler
     public void onPlayerConnect(final PostLoginEvent event) {
         if (pool != null) {
-            Jedis rsc = pool.getResource();
-            try {
-                rsc.sadd("server:" + configuration.getString("server-id", "") + ":usersOnline", event.getPlayer().getName());
-                rsc.hset("player:" + event.getPlayer().getName(), "online", "0");
-                rsc.hset("player:" + event.getPlayer().getName(), "ip", event.getPlayer().getAddress().getAddress().getHostAddress());
-            } finally {
-                pool.returnResource(rsc);
-            }
+            getProxy().getScheduler().runAsync(RedisBungee.this, new Runnable() {
+                @Override
+                public void run() {
+                    Jedis rsc = pool.getResource();
+                    try {
+                        rsc.sadd("server:" + configuration.getString("server-id", "") + ":usersOnline", event.getPlayer().getName());
+                        rsc.hset("player:" + event.getPlayer().getName(), "online", "0");
+                        rsc.hset("player:" + event.getPlayer().getName(), "ip", event.getPlayer().getAddress().getAddress().getHostAddress());
+                    } finally {
+                        pool.returnResource(rsc);
+                    }
+                }
+            });
         }
         // I used to have a task that eagerly waited for the user to be connected.
         // Well, upon further inspection of BungeeCord's source code, this turned
@@ -467,25 +481,35 @@ public final class RedisBungee extends Plugin implements Listener {
     @EventHandler
     public void onPlayerDisconnect(final PlayerDisconnectEvent event) {
         if (pool != null) {
-            Jedis rsc = pool.getResource();
-            try {
-                rsc.hset("player:" + event.getPlayer().getName(), "online", String.valueOf(System.currentTimeMillis()));
-                cleanUpPlayer(event.getPlayer().getName(), rsc);
-            } finally {
-                pool.returnResource(rsc);
-            }
+            getProxy().getScheduler().runAsync(RedisBungee.this, new Runnable() {
+                @Override
+                public void run() {
+                    Jedis rsc = pool.getResource();
+                    try {
+                        rsc.hset("player:" + event.getPlayer().getName(), "online", String.valueOf(System.currentTimeMillis()));
+                        cleanUpPlayer(event.getPlayer().getName(), rsc);
+                    } finally {
+                        pool.returnResource(rsc);
+                    }
+                }
+            });
         }
     }
 
     @EventHandler
     public void onServerChange(final ServerConnectedEvent event) {
         if (pool != null) {
-            Jedis rsc = pool.getResource();
-            try {
-                rsc.hset("player:" + event.getPlayer().getName(), "server", event.getServer().getInfo().getName());
-            } finally {
-                pool.returnResource(rsc);
-            }
+            getProxy().getScheduler().runAsync(RedisBungee.this, new Runnable() {
+                @Override
+                public void run() {
+                    Jedis rsc = pool.getResource();
+                    try {
+                        rsc.hset("player:" + event.getPlayer().getName(), "server", event.getServer().getInfo().getName());
+                    } finally {
+                        pool.returnResource(rsc);
+                    }
+                }
+            });
         }
     }
 
@@ -541,7 +565,7 @@ public final class RedisBungee extends Plugin implements Listener {
                     type = in.readUTF();
                     if (type.equals("ALL")) {
                         out.writeUTF("ALL");
-                        out.writeInt(getCount());
+                        out.writeInt(getCurrentCount());
                     } else {
                         out.writeUTF(type);
                         try {
@@ -550,7 +574,7 @@ public final class RedisBungee extends Plugin implements Listener {
                             out.writeInt(0);
                         }
                     }
-                    out.writeInt(getCount());
+                    out.writeInt(getCurrentCount());
                     break;
                 case "LastOnline":
                     String user = in.readUTF();

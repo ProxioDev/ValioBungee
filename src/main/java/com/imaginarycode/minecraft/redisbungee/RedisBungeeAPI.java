@@ -60,7 +60,7 @@ public class RedisBungeeAPI {
 
     /**
      * Get a combined list of players on this network.
-     * <p/>
+     * <p>
      * <strong>Note that this function returns an immutable {@link java.util.Set}.</strong>
      *
      * @return a Set with all players found
@@ -100,6 +100,7 @@ public class RedisBungeeAPI {
     /**
      * Get the {@link java.net.InetAddress} associated with this player.
      *
+     * @param player the player to fetch the IP for
      * @return an {@link java.net.InetAddress} if the player is online, null otherwise
      * @since 0.2.4
      */
