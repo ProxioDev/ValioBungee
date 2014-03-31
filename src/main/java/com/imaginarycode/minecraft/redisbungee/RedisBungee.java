@@ -453,7 +453,7 @@ public final class RedisBungee extends Plugin implements Listener {
             Jedis rsc = pool.getResource();
             try {
                 for (String server : serverIds) {
-                    if (rsc.sismember("server:" + server + ":usersOnline", event.getConnection().getUUID())) {
+                    if (rsc.sismember("server:" + server + ":usersOnline", event.getConnection().getName())) {
                         event.setCancelled(true);
                         event.setCancelReason("You are already logged on to this server.");
                     }
@@ -473,9 +473,9 @@ public final class RedisBungee extends Plugin implements Listener {
                     Jedis rsc = pool.getResource();
                     try {
                         rsc.sadd("server:" + configuration.getString("server-id", "") + ":usersOnline", event.getPlayer().getName());
-                        rsc.hset("player:" + event.getPlayer().getUUID(), "online", "0");
-                        rsc.hset("player:" + event.getPlayer().getUUID(), "ip", event.getPlayer().getAddress().getAddress().getHostAddress());
-                        rsc.hset("player:" + event.getPlayer().getUUID(), "name", event.getPlayer().getName());
+                        rsc.hset("player:" + event.getPlayer().getName(), "online", "0");
+                        rsc.hset("player:" + event.getPlayer().getName(), "ip", event.getPlayer().getAddress().getAddress().getHostAddress());
+                        rsc.hset("player:" + event.getPlayer().getName(), "name", event.getPlayer().getName());
                     } finally {
                         pool.returnResource(rsc);
                     }
@@ -495,8 +495,8 @@ public final class RedisBungee extends Plugin implements Listener {
                 public void run() {
                     Jedis rsc = pool.getResource();
                     try {
-                        rsc.hset("player:" + event.getPlayer().getUUID(), "online", String.valueOf(System.currentTimeMillis()));
-                        cleanUpPlayer(event.getPlayer().getUUID(), rsc);
+                        rsc.hset("player:" + event.getPlayer().getName(), "online", String.valueOf(System.currentTimeMillis()));
+                        cleanUpPlayer(event.getPlayer().getName(), rsc);
                     } finally {
                         pool.returnResource(rsc);
                     }
@@ -513,7 +513,7 @@ public final class RedisBungee extends Plugin implements Listener {
                 public void run() {
                     Jedis rsc = pool.getResource();
                     try {
-                        rsc.hset("player:" + event.getPlayer().getUUID(), "server", event.getServer().getInfo().getName());
+                        rsc.hset("player:" + event.getPlayer().getName(), "server", event.getServer().getInfo().getName());
                     } finally {
                         pool.returnResource(rsc);
                     }
