@@ -15,6 +15,7 @@ import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import lombok.NonNull;
 import net.md_5.bungee.api.ServerPing;
 import net.md_5.bungee.api.config.ServerInfo;
@@ -51,9 +52,9 @@ import static com.google.common.base.Preconditions.checkArgument;
  */
 public final class RedisBungee extends Plugin implements Listener {
     private static Configuration configuration;
-    private JedisPool pool;
+    private static JedisPool pool;
     private static RedisBungeeAPI api;
-    private PubSubListener psl = null;
+    private static PubSubListener psl = null;
     private static List<String> serverIds;
     private int globalCount;
 
@@ -72,6 +73,10 @@ public final class RedisBungee extends Plugin implements Listener {
 
     static List<String> getServerIds() {
         return serverIds;
+    }
+
+    static PubSubListener getPubSubListener() {
+        return psl;
     }
 
     final Multimap<String, String> serversToPlayers() {
@@ -594,13 +599,24 @@ public final class RedisBungee extends Plugin implements Listener {
         }
     }
 
+    @EventHandler
+    public void onPubSubMessage(PubSubMessageEvent event) {
+        if (event.getChannel().equals("redisbungee-allservers") || event.getChannel().equals("redisbungee-" + configuration.getString("server-id"))) {
+            String message = event.getMessage();
+            if (message.startsWith("/"))
+                message = message.substring(1);
+            getLogger().info("Invoking command via PubSub: /" + message);
+            getProxy().getPluginManager().dispatchCommand(RedisBungeeCommandSender.instance, message);
+        }
+    }
+
     private void cleanUpPlayer(String player, Jedis rsc) {
         rsc.srem("server:" + configuration.getString("server-id") + ":usersOnline", player);
         rsc.hdel("player:" + player, "server");
         rsc.hdel("player:" + player, "ip");
     }
 
-    private class PubSubListener implements Runnable {
+    class PubSubListener implements Runnable {
         private Jedis rsc;
         private JedisPubSubHandler jpsh;
 
@@ -621,25 +637,26 @@ public final class RedisBungee extends Plugin implements Listener {
             jpsh.unsubscribe();
             pool.returnResource(rsc);
         }
+
+        public void addChannel(String... channel) {
+            jpsh.subscribe(channel);
+        }
+
+        public void removeChannel(String... channel) {
+            jpsh.unsubscribe(channel);
+        }
     }
 
-    private class JedisPubSubHandler extends JedisPubSub {
-        private ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setDaemon(true).setNameFormat("RedisBungee PubSub Command Executor").build());
+    class JedisPubSubHandler extends JedisPubSub {
+        private ExecutorService executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setDaemon(true).setNameFormat("RedisBungee PubSub Handler - #%d").build());
 
         @Override
-        public void onMessage(String s, String s2) {
-            final String cmd;
-            if (s2.startsWith("/")) {
-                cmd = s2.substring(1);
-            } else {
-                cmd = s2;
-            }
+        public void onMessage(final String s, final String s2) {
             if (s2.trim().length() == 0) return;
-            getLogger().info("Invoking command from PubSub: /" + s2);
             executor.submit(new Runnable() {
                 @Override
                 public void run() {
-                    getProxy().getPluginManager().dispatchCommand(RedisBungeeCommandSender.instance, cmd);
+                    getProxy().getPluginManager().callEvent(new PubSubMessageEvent(s, s2));
                 }
             });
         }

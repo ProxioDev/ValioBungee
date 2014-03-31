@@ -149,4 +149,24 @@ public class RedisBungeeAPI {
     public final List<String> getAllServers() {
         return RedisBungee.getServerIds();
     }
+
+    /**
+     * Register (a) PubSub channel(s), so that you may capture {@link com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent} for it.
+     *
+     * @param channels the channels to register
+     * @since 0.2.6
+     */
+    public final void registerPubSubChannels(String... channels) {
+        RedisBungee.getPubSubListener().addChannel(channels);
+    }
+
+    /**
+     * Unregister (a) PubSub channel(s).
+     *
+     * @param channels the channels to unregister
+     * @since 0.2.6
+     */
+    public final void unregisterPubSubChannels(String... channels) {
+        RedisBungee.getPubSubListener().removeChannel(channels);
+    }
 }
