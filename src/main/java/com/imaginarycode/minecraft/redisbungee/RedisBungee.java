@@ -14,6 +14,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.NonNull;
 import net.md_5.bungee.api.ServerPing;
 import net.md_5.bungee.api.config.ServerInfo;
@@ -36,6 +37,8 @@ import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
@@ -445,7 +448,7 @@ public final class RedisBungee extends Plugin implements Listener {
             Jedis rsc = pool.getResource();
             try {
                 for (String server : serverIds) {
-                    if (rsc.sismember("server:" + server + ":usersOnline", event.getConnection().getName())) {
+                    if (rsc.sismember("server:" + server + ":usersOnline", event.getConnection().getUUID())) {
                         event.setCancelled(true);
                         event.setCancelReason("You are already logged on to this server.");
                     }
@@ -465,8 +468,9 @@ public final class RedisBungee extends Plugin implements Listener {
                     Jedis rsc = pool.getResource();
                     try {
                         rsc.sadd("server:" + configuration.getString("server-id", "") + ":usersOnline", event.getPlayer().getName());
-                        rsc.hset("player:" + event.getPlayer().getName(), "online", "0");
-                        rsc.hset("player:" + event.getPlayer().getName(), "ip", event.getPlayer().getAddress().getAddress().getHostAddress());
+                        rsc.hset("player:" + event.getPlayer().getUUID(), "online", "0");
+                        rsc.hset("player:" + event.getPlayer().getUUID(), "ip", event.getPlayer().getAddress().getAddress().getHostAddress());
+                        rsc.hset("player:" + event.getPlayer().getUUID(), "name", event.getPlayer().getName());
                     } finally {
                         pool.returnResource(rsc);
                     }
@@ -486,8 +490,8 @@ public final class RedisBungee extends Plugin implements Listener {
                 public void run() {
                     Jedis rsc = pool.getResource();
                     try {
-                        rsc.hset("player:" + event.getPlayer().getName(), "online", String.valueOf(System.currentTimeMillis()));
-                        cleanUpPlayer(event.getPlayer().getName(), rsc);
+                        rsc.hset("player:" + event.getPlayer().getUUID(), "online", String.valueOf(System.currentTimeMillis()));
+                        cleanUpPlayer(event.getPlayer().getUUID(), rsc);
                     } finally {
                         pool.returnResource(rsc);
                     }
@@ -504,7 +508,7 @@ public final class RedisBungee extends Plugin implements Listener {
                 public void run() {
                     Jedis rsc = pool.getResource();
                     try {
-                        rsc.hset("player:" + event.getPlayer().getName(), "server", event.getServer().getInfo().getName());
+                        rsc.hset("player:" + event.getPlayer().getUUID(), "server", event.getServer().getInfo().getName());
                     } finally {
                         pool.returnResource(rsc);
                     }
@@ -620,9 +624,11 @@ public final class RedisBungee extends Plugin implements Listener {
     }
 
     private class JedisPubSubHandler extends JedisPubSub {
+        private ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setDaemon(true).setNameFormat("RedisBungee PubSub Command Executor").build());
+
         @Override
         public void onMessage(String s, String s2) {
-            String cmd;
+            final String cmd;
             if (s2.startsWith("/")) {
                 cmd = s2.substring(1);
             } else {
@@ -630,7 +636,12 @@ public final class RedisBungee extends Plugin implements Listener {
             }
             if (s2.trim().length() == 0) return;
             getLogger().info("Invoking command from PubSub: /" + s2);
-            getProxy().getPluginManager().dispatchCommand(RedisBungeeCommandSender.instance, cmd);
+            executor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    getProxy().getPluginManager().dispatchCommand(RedisBungeeCommandSender.instance, cmd);
+                }
+            });
         }
 
         @Override
