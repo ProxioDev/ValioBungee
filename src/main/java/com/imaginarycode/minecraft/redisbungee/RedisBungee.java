@@ -313,7 +313,7 @@ public final class RedisBungee extends Plugin implements Listener {
             getProxy().getPluginManager().registerListener(this, this);
             api = new RedisBungeeAPI(this);
             psl = new PubSubListener();
-            new Thread(psl, "RedisBungee PubSub Listener").start();
+            getProxy().getScheduler().runAsync(this, psl);
             getProxy().getScheduler().schedule(this, new Runnable() {
                 @Override
                 public void run() {
@@ -353,7 +353,6 @@ public final class RedisBungee extends Plugin implements Listener {
     public void onDisable() {
         if (pool != null) {
             // Poison the PubSub listener
-            psl.poison();
             getProxy().getScheduler().cancel(this);
             Jedis tmpRsc = pool.getResource();
             try {
@@ -631,11 +630,6 @@ public final class RedisBungee extends Plugin implements Listener {
                 rsc.subscribe(jpsh, "redisbungee-" + configuration.getString("server-id"), "redisbungee-allservers");
             } catch (JedisException | ClassCastException ignored) {
             }
-        }
-
-        public void poison() {
-            jpsh.unsubscribe();
-            pool.returnResource(rsc);
         }
 
         public void addChannel(String... channel) {
