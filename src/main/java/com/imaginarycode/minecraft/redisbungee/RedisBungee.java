@@ -425,6 +425,7 @@ public final class RedisBungee extends Plugin implements Listener {
                         getLogger().severe("If this instance is coming up from a crash, create a file in your RedisBungee plugins directory with the name 'restarted_from_crash.txt' and RedisBungee will not perform this check.");
                         throw new RuntimeException("Possible imposter instance!");
                     }
+                    rsc.sadd("servers", configuration.getString("server-id"));
                     getLogger().log(Level.INFO, "Successfully connected to Redis.");
                 } catch (JedisConnectionException e) {
                     if (rsc != null)
