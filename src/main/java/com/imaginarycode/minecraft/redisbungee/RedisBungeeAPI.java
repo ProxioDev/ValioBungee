@@ -147,7 +147,7 @@ public class RedisBungeeAPI {
      * @see #getServerId()
      */
     public final List<String> getAllServers() {
-        return RedisBungee.getServerIds();
+        return plugin.getServerIds();
     }
 
     /**
