@@ -20,9 +20,3 @@ canonical-glist: true
 
 # Output all players in the server list. Recommended only for smaller networks.
 player-list-in-ping: false
-
-# All other RedisBungee server IDs in the network.
-linked-servers:
-- dastank
-- americancoffee
-- guavaissweet

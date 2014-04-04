@@ -55,7 +55,6 @@ public final class RedisBungee extends Plugin implements Listener {
     private static JedisPool pool;
     private static RedisBungeeAPI api;
     private static PubSubListener psl = null;
-    private static List<String> serverIds;
     private int globalCount;
 
     /**
@@ -71,8 +70,16 @@ public final class RedisBungee extends Plugin implements Listener {
         return configuration;
     }
 
-    static List<String> getServerIds() {
-        return serverIds;
+    final List<String> getServerIds() {
+        Jedis jedis = pool.getResource();
+        try {
+            return ImmutableList.copyOf(jedis.smembers("servers"));
+        } catch (JedisConnectionException e) {
+            getLogger().log(Level.SEVERE, "Unable to fetch all server IDs", e);
+            return Collections.singletonList(configuration.getString("server-id"));
+        } finally {
+            pool.returnResource(jedis);
+        }
     }
 
     static PubSubListener getPubSubListener() {
@@ -98,7 +105,7 @@ public final class RedisBungee extends Plugin implements Listener {
         if (pool != null) {
             Jedis rsc = pool.getResource();
             try {
-                for (String i : serverIds) {
+                for (String i : rsc.smembers("servers")) {
                     if (i.equals(configuration.getString("server-id"))) continue;
                     if (rsc.exists("server:" + i + ":playerCount"))
                         try {
@@ -132,7 +139,7 @@ public final class RedisBungee extends Plugin implements Listener {
         if (pool != null) {
             Jedis rsc = pool.getResource();
             try {
-                for (String i : serverIds) {
+                for (String i : rsc.smembers("servers")) {
                     if (i.equals(configuration.getString("server-id"))) continue;
                     Set<String> users = rsc.smembers("server:" + i + ":usersOnline");
                     if (users != null && !users.isEmpty())
@@ -187,7 +194,7 @@ public final class RedisBungee extends Plugin implements Listener {
                     } catch (NumberFormatException e) {
                         getLogger().info("I found a funny number for when " + name + " was last online!");
                         boolean found = false;
-                        for (String proxyId : serverIds) {
+                        for (String proxyId : getServerIds()) {
                             if (proxyId.equals(configuration.getString("server-id"))) continue;
                             if (tmpRsc.sismember("server:" + proxyId + ":usersOnline", name)) {
                                 found = true;
@@ -240,7 +247,7 @@ public final class RedisBungee extends Plugin implements Listener {
     }
 
     final void sendProxyCommand(@NonNull String proxyId, @NonNull String command) {
-        checkArgument(serverIds.contains(proxyId) || proxyId.equals("allservers"), "proxyId is invalid");
+        checkArgument(getServerIds().contains(proxyId) || proxyId.equals("allservers"), "proxyId is invalid");
         Jedis jedis = pool.getResource();
         try {
             jedis.publish("redisbungee-" + proxyId, command);
@@ -271,7 +278,7 @@ public final class RedisBungee extends Plugin implements Listener {
                     for (String member : tmpRsc.smembers("server:" + configuration.getString("server-id") + ":usersOnline")) {
                         // Are they simply on a different proxy?
                         boolean found = false;
-                        for (String proxyId : serverIds) {
+                        for (String proxyId : tmpRsc.smembers("servers")) {
                             if (proxyId.equals(configuration.getString("server-id"))) continue;
                             if (tmpRsc.sismember("server:" + proxyId + ":usersOnline", member)) {
                                 found = true;
@@ -324,7 +331,7 @@ public final class RedisBungee extends Plugin implements Listener {
                             if (!players.contains(member)) {
                                 // Are they simply on a different proxy?
                                 boolean found = false;
-                                for (String proxyId : serverIds) {
+                                for (String proxyId : getServerIds()) {
                                     if (proxyId.equals(configuration.getString("server-id"))) continue;
                                     if (tmpRsc.sismember("server:" + proxyId + ":usersOnline", member)) {
                                         // Just clean up the set.
@@ -398,12 +405,6 @@ public final class RedisBungee extends Plugin implements Listener {
             throw new RuntimeException("server-id is not specified in the configuration or is empty");
         }
 
-        if (configuration.getStringList("linked-servers").isEmpty()) {
-            throw new RuntimeException("linked-servers is not specified in the configuration or is empty");
-        }
-
-        serverIds = ImmutableList.copyOf(configuration.getStringList("linked-servers"));
-
         if (redisServer != null) {
             if (!redisServer.equals("")) {
                 JedisPoolConfig config = new JedisPoolConfig();
@@ -418,14 +419,11 @@ public final class RedisBungee extends Plugin implements Listener {
                     File crashFile = new File(getDataFolder(), "restarted_from_crash.txt");
                     if (crashFile.exists())
                         crashFile.delete();
-                    else if (rsc.exists("server:" + configuration.get("server-id") + ":playerCount")) {
-                        if (Integer.valueOf(rsc.get("server:" + configuration.get("server-id") + ":playerCount")) > 0 &&
-                                rsc.scard("server:" + configuration.getString("server-id") + ":usersOnline") > 0) {
-                            getLogger().severe("You have launched a possible imposter BungeeCord instance. Another instance is already running.");
-                            getLogger().severe("For data consistency reasons, RedisBungee will now disable itself.");
-                            getLogger().severe("If this instance is coming up from a crash, create a file in your RedisBungee plugins directory with the name 'restarted_from_crash.txt' and RedisBungee will not perform this check.");
-                            throw new RuntimeException("Possible imposter instance!");
-                        }
+                    else if (rsc.sismember("servers", configuration.getString("server-id"))) {
+                        getLogger().severe("You have launched a possible imposter BungeeCord instance. Another instance is already running.");
+                        getLogger().severe("For data consistency reasons, RedisBungee will now disable itself.");
+                        getLogger().severe("If this instance is coming up from a crash, create a file in your RedisBungee plugins directory with the name 'restarted_from_crash.txt' and RedisBungee will not perform this check.");
+                        throw new RuntimeException("Possible imposter instance!");
                     }
                     getLogger().log(Level.INFO, "Successfully connected to Redis.");
                 } catch (JedisConnectionException e) {
@@ -451,10 +449,11 @@ public final class RedisBungee extends Plugin implements Listener {
         if (pool != null) {
             Jedis rsc = pool.getResource();
             try {
-                for (String server : serverIds) {
+                for (String server : rsc.smembers("servers")) {
                     if (rsc.sismember("server:" + server + ":usersOnline", event.getConnection().getName())) {
                         event.setCancelled(true);
                         event.setCancelReason("You are already logged on to this server.");
+                        break;
                     }
                 }
             } finally {
