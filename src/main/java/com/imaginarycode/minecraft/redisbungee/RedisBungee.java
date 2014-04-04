@@ -368,6 +368,7 @@ public final class RedisBungee extends Plugin implements Listener {
                     for (String member : tmpRsc.smembers("server:" + configuration.getString("server-id") + ":usersOnline"))
                         cleanUpPlayer(member, tmpRsc);
                 }
+                tmpRsc.srem("servers", configuration.getString("server-id"));
             } finally {
                 pool.returnResource(tmpRsc);
             }
