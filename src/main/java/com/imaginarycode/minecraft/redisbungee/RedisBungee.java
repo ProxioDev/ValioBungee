@@ -37,6 +37,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -73,7 +74,17 @@ public final class RedisBungee extends Plugin implements Listener {
     final List<String> getServerIds() {
         Jedis jedis = pool.getResource();
         try {
-            return ImmutableList.copyOf(jedis.smembers("servers"));
+            ImmutableList.Builder<String> servers = ImmutableList.builder();
+            Map<String, String> heartbeats = jedis.hgetAll("heartbeats");
+            for (Map.Entry<String, String> entry : heartbeats.entrySet()) {
+                try {
+                    long stamp = Long.valueOf(entry.getValue());
+                    if (stamp + 30000 < System.currentTimeMillis())
+                        servers.add(entry.getKey());
+                } catch (NumberFormatException ignored) {
+                }
+            }
+            return servers.build();
         } catch (JedisConnectionException e) {
             getLogger().log(Level.SEVERE, "Unable to fetch all server IDs", e);
             return Collections.singletonList(configuration.getString("server-id"));
@@ -274,6 +285,7 @@ public final class RedisBungee extends Plugin implements Listener {
             Jedis tmpRsc = pool.getResource();
             try {
                 tmpRsc.set("server:" + configuration.getString("server-id") + ":playerCount", "0"); // reset
+                tmpRsc.hset("heartbeats", configuration.getString("server-id"), String.valueOf(System.currentTimeMillis()));
                 if (tmpRsc.scard("server:" + configuration.getString("server-id") + ":usersOnline") > 0) {
                     for (String member : tmpRsc.smembers("server:" + configuration.getString("server-id") + ":usersOnline")) {
                         // Are they simply on a different proxy?
@@ -301,6 +313,7 @@ public final class RedisBungee extends Plugin implements Listener {
                     Jedis rsc = pool.getResource();
                     try {
                         rsc.set("server:" + configuration.getString("server-id") + ":playerCount", String.valueOf(getProxy().getOnlineCount()));
+                        rsc.hset("heartbeats", configuration.getString("server-id"), String.valueOf(System.currentTimeMillis()));
                     } catch (JedisConnectionException e) {
                         // Redis server has disappeared!
                         getLogger().log(Level.SEVERE, "Unable to update proxy counts - did your Redis server go away?", e);
@@ -451,7 +464,7 @@ public final class RedisBungee extends Plugin implements Listener {
         if (pool != null) {
             Jedis rsc = pool.getResource();
             try {
-                for (String server : rsc.smembers("servers")) {
+                for (String server : getServerIds()) {
                     if (rsc.sismember("server:" + server + ":usersOnline", event.getConnection().getName())) {
                         event.setCancelled(true);
                         event.setCancelReason("You are already logged on to this server.");
@@ -539,7 +552,7 @@ public final class RedisBungee extends Plugin implements Listener {
             reply.setPlayers(new ServerPing.Players(old.getPlayers().getMax(), getCount(), null));
         }
         reply.setDescription(old.getDescription());
-        reply.setFavicon(old.getFavicon());
+        reply.setFavicon(old.getFaviconObject());
         reply.setVersion(old.getVersion());
         event.setResponse(reply);
     }
