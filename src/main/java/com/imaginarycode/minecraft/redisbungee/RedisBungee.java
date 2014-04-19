@@ -56,6 +56,7 @@ public final class RedisBungee extends Plugin implements Listener {
     private static JedisPool pool;
     private static RedisBungeeAPI api;
     private static PubSubListener psl = null;
+    private List<String> serverIds;
     private int globalCount;
 
     /**
@@ -72,6 +73,10 @@ public final class RedisBungee extends Plugin implements Listener {
     }
 
     final List<String> getServerIds() {
+        return serverIds;
+    }
+
+    final List<String> getCurrentServerIds() {
         Jedis jedis = pool.getResource();
         try {
             ImmutableList.Builder<String> servers = ImmutableList.builder();
@@ -116,7 +121,7 @@ public final class RedisBungee extends Plugin implements Listener {
         if (pool != null) {
             Jedis rsc = pool.getResource();
             try {
-                for (String i : rsc.smembers("servers")) {
+                for (String i : getServerIds()) {
                     if (i.equals(configuration.getString("server-id"))) continue;
                     if (rsc.exists("server:" + i + ":playerCount"))
                         try {
@@ -150,7 +155,7 @@ public final class RedisBungee extends Plugin implements Listener {
         if (pool != null) {
             Jedis rsc = pool.getResource();
             try {
-                for (String i : rsc.smembers("servers")) {
+                for (String i : getServerIds()) {
                     if (i.equals(configuration.getString("server-id"))) continue;
                     Set<String> users = rsc.smembers("server:" + i + ":usersOnline");
                     if (users != null && !users.isEmpty())
@@ -307,6 +312,7 @@ public final class RedisBungee extends Plugin implements Listener {
                 pool.returnResource(tmpRsc);
             }
             globalCount = getCurrentCount();
+            serverIds = getCurrentServerIds();
             getProxy().getScheduler().schedule(this, new Runnable() {
                 @Override
                 public void run() {
@@ -322,6 +328,7 @@ public final class RedisBungee extends Plugin implements Listener {
                         pool.returnResource(rsc);
                     }
                     globalCount = getCurrentCount();
+                    serverIds = getCurrentServerIds();
                 }
             }, 0, 3, TimeUnit.SECONDS);
             getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.GlistCommand());
