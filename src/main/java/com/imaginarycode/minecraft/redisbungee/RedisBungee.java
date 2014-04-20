@@ -390,7 +390,7 @@ public final class RedisBungee extends Plugin {
             consumer.stop();
             Jedis tmpRsc = pool.getResource();
             try {
-                tmpRsc.set("server:" + configuration.getString("server-id") + ":playerCount", "0"); // reset
+                tmpRsc.hdel("playerCounts", configuration.getString("server-id"), "0");
                 if (tmpRsc.scard("server:" + configuration.getString("server-id") + ":usersOnline") > 0) {
                     for (String member : tmpRsc.smembers("server:" + configuration.getString("server-id") + ":usersOnline"))
                         RedisUtil.cleanUpPlayer(member, tmpRsc);
