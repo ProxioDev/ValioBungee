@@ -1,9 +1,18 @@
+/**
+ * Copyright © 2013 tuxed <write@imaginarycode.com>
+ * This work is free. You can redistribute it and/or modify it under the
+ * terms of the Do What The Fuck You Want To Public License, Version 2,
+ * as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
+ */
 package com.imaginarycode.minecraft.redisbungee;
 
 import com.google.common.base.Joiner;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+import com.imaginarycode.minecraft.redisbungee.consumerevents.PlayerChangedServerConsumerEvent;
+import com.imaginarycode.minecraft.redisbungee.consumerevents.PlayerLoggedInConsumerEvent;
+import com.imaginarycode.minecraft.redisbungee.consumerevents.PlayerLoggedOffConsumerEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import lombok.AllArgsConstructor;
 import net.md_5.bungee.api.ServerPing;
@@ -14,7 +23,9 @@ import net.md_5.bungee.event.EventHandler;
 import redis.clients.jedis.Jedis;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @AllArgsConstructor
 public class RedisBungeeListener implements Listener {
@@ -40,60 +51,17 @@ public class RedisBungeeListener implements Listener {
 
     @EventHandler
     public void onPlayerConnect(final PostLoginEvent event) {
-        if (plugin.getPool() != null) {
-            plugin.getProxy().getScheduler().runAsync(plugin, new Runnable() {
-                @Override
-                public void run() {
-                    Jedis rsc = plugin.getPool().getResource();
-                    try {
-                        rsc.sadd("server:" + RedisBungee.getConfiguration().getString("server-id", "") + ":usersOnline", event.getPlayer().getName());
-                        rsc.hset("player:" + event.getPlayer().getName(), "online", "0");
-                        rsc.hset("player:" + event.getPlayer().getName(), "ip", event.getPlayer().getAddress().getAddress().getHostAddress());
-                        rsc.hset("player:" + event.getPlayer().getName(), "name", event.getPlayer().getName());
-                    } finally {
-                        plugin.getPool().returnResource(rsc);
-                    }
-                }
-            });
-        }
-        // I used to have a task that eagerly waited for the user to be connected.
-        // Well, upon further inspection of BungeeCord's source code, this turned
-        // out to not be needed at all, since ServerConnectedEvent is called anyway.
+        plugin.getConsumer().queue(new PlayerLoggedInConsumerEvent(event.getPlayer()));
     }
 
     @EventHandler
     public void onPlayerDisconnect(final PlayerDisconnectEvent event) {
-        if (plugin.getPool() != null) {
-            plugin.getProxy().getScheduler().runAsync(plugin, new Runnable() {
-                @Override
-                public void run() {
-                    Jedis rsc = plugin.getPool().getResource();
-                    try {
-                        rsc.hset("player:" + event.getPlayer().getName(), "online", String.valueOf(System.currentTimeMillis()));
-                        RedisUtil.cleanUpPlayer(event.getPlayer().getName(), rsc);
-                    } finally {
-                        plugin.getPool().returnResource(rsc);
-                    }
-                }
-            });
-        }
+        plugin.getConsumer().queue(new PlayerLoggedOffConsumerEvent(event.getPlayer()));
     }
 
     @EventHandler
     public void onServerChange(final ServerConnectedEvent event) {
-        if (plugin.getPool() != null) {
-            plugin.getProxy().getScheduler().runAsync(plugin, new Runnable() {
-                @Override
-                public void run() {
-                    Jedis rsc = plugin.getPool().getResource();
-                    try {
-                        rsc.hset("player:" + event.getPlayer().getName(), "server", event.getServer().getInfo().getName());
-                    } finally {
-                        plugin.getPool().returnResource(rsc);
-                    }
-                }
-            });
-        }
+        plugin.getConsumer().queue(new PlayerChangedServerConsumerEvent(event.getPlayer(), event.getServer().getInfo()));
     }
 
     @EventHandler
@@ -101,11 +69,11 @@ public class RedisBungeeListener implements Listener {
         ServerPing old = event.getResponse();
         ServerPing reply = new ServerPing();
         if (RedisBungee.getConfiguration().getBoolean("player-list-in-ping", false)) {
-            Set<String> players = plugin.getPlayers();
+            Set<UUID> players = plugin.getPlayers();
             ServerPing.PlayerInfo[] info = new ServerPing.PlayerInfo[players.size()];
             int idx = 0;
-            for (String player : players) {
-                info[idx] = new ServerPing.PlayerInfo(player, "");
+            for (UUID player : players) {
+                info[idx] = new ServerPing.PlayerInfo(plugin.getUuidTranslator().getNameFromUuid(player), "");
                 idx++;
             }
             reply.setPlayers(new ServerPing.Players(old.getPlayers().getMax(), players.size(), info));
@@ -130,18 +98,21 @@ public class RedisBungeeListener implements Listener {
             switch (subchannel) {
                 case "PlayerList":
                     out.writeUTF("Players");
-                    Set<String> source = Collections.emptySet();
+                    Set<UUID> original = Collections.emptySet();
                     type = in.readUTF();
                     if (type.equals("ALL")) {
                         out.writeUTF("ALL");
-                        source = plugin.getPlayers();
+                        original = plugin.getPlayers();
                     } else {
                         try {
-                            source = plugin.getPlayersOnServer(type);
+                            original = plugin.getPlayersOnServer(type);
                         } catch (IllegalArgumentException ignored) {
                         }
                     }
-                    out.writeUTF(Joiner.on(',').join(source));
+                    Set<String> players = new HashSet<>();
+                    for (UUID uuid : original)
+                        players.add(plugin.getUuidTranslator().getNameFromUuid(uuid));
+                    out.writeUTF(Joiner.on(',').join(players));
                     break;
                 case "PlayerCount":
                     out.writeUTF("PlayerCount");
@@ -163,7 +134,7 @@ public class RedisBungeeListener implements Listener {
                     String user = in.readUTF();
                     out.writeUTF("LastOnline");
                     out.writeUTF(user);
-                    out.writeLong(plugin.getLastOnline(user));
+                    out.writeLong(plugin.getLastOnline(plugin.getUuidTranslator().getTranslatedUuid(user)));
                     break;
                 default:
                     break;

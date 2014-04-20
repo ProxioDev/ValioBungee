@@ -13,6 +13,7 @@ import net.md_5.bungee.api.config.ServerInfo;
 import java.net.InetAddress;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * This class exposes some internal RedisBungee functions. You obtain an instance of this object by invoking {@link RedisBungee#getApi()}.
@@ -43,7 +44,7 @@ public class RedisBungeeAPI {
      * @param player a player name
      * @return the last time a player was on, if online returns a 0
      */
-    public final long getLastOnline(@NonNull String player) {
+    public final long getLastOnline(@NonNull UUID player) {
         return plugin.getLastOnline(player);
     }
 
@@ -54,36 +55,38 @@ public class RedisBungeeAPI {
      * @param player a player name
      * @return a {@link net.md_5.bungee.api.config.ServerInfo} for the server the player is on.
      */
-    public final ServerInfo getServerFor(@NonNull String player) {
+    public final ServerInfo getServerFor(@NonNull UUID player) {
         return plugin.getServerFor(player);
     }
 
     /**
      * Get a combined list of players on this network.
-     * <p>
+     * <p/>
      * <strong>Note that this function returns an immutable {@link java.util.Set}.</strong>
      *
      * @return a Set with all players found
      */
-    public final Set<String> getPlayersOnline() {
+    public final Set<UUID> getPlayersOnline() {
         return plugin.getPlayers();
     }
 
     /**
      * Get a full list of players on all servers.
+     *
      * @return a immutable Multimap with all players found on this server
      * @since 0.2.5
      */
-    public final Multimap<String, String> getServerToPlayers() {
+    public final Multimap<String, UUID> getServerToPlayers() {
         return plugin.serversToPlayers();
     }
 
     /**
      * Get a list of players on the server with the given name.
+     *
      * @param server a server name
      * @return a Set with all players found on this server
      */
-    public final Set<String> getPlayersOnServer(@NonNull String server) {
+    public final Set<UUID> getPlayersOnServer(@NonNull String server) {
         return plugin.getPlayersOnServer(server);
     }
 
@@ -93,7 +96,7 @@ public class RedisBungeeAPI {
      * @param player a player name
      * @return if the player is online
      */
-    public final boolean isPlayerOnline(@NonNull String player) {
+    public final boolean isPlayerOnline(@NonNull UUID player) {
         return getLastOnline(player) == 0;
     }
 
@@ -104,12 +107,13 @@ public class RedisBungeeAPI {
      * @return an {@link java.net.InetAddress} if the player is online, null otherwise
      * @since 0.2.4
      */
-    public final InetAddress getPlayerIp(@NonNull String player) {
+    public final InetAddress getPlayerIp(@NonNull UUID player) {
         return plugin.getIpAddress(player);
     }
 
     /**
      * Sends a proxy command to all proxies.
+     *
      * @param command the command to send and execute
      * @see #sendProxyCommand(String, String)
      * @since 0.2.5
@@ -120,6 +124,7 @@ public class RedisBungeeAPI {
 
     /**
      * Sends a proxy command to the proxy with the given ID. "allservers" means all proxies.
+     *
      * @param proxyId a proxy ID
      * @param command the command to send and execute
      * @see #getServerId()
@@ -132,9 +137,10 @@ public class RedisBungeeAPI {
 
     /**
      * Get the current BungeeCord server ID for this server.
+     *
      * @return the current server ID
-     * @since 0.2.5
      * @see #getAllServers()
+     * @since 0.2.5
      */
     public final String getServerId() {
         return RedisBungee.getConfiguration().getString("server-id");
@@ -142,9 +148,10 @@ public class RedisBungeeAPI {
 
     /**
      * Get all the linked proxies in this network.
+     *
      * @return the list of all proxies
-     * @since 0.2.5
      * @see #getServerId()
+     * @since 0.2.5
      */
     public final List<String> getAllServers() {
         return plugin.getServerIds();
@@ -168,5 +175,27 @@ public class RedisBungeeAPI {
      */
     public final void unregisterPubSubChannels(String... channels) {
         RedisBungee.getPubSubListener().removeChannel(channels);
+    }
+
+    /**
+     * Fetch a name from the specified UUID.
+     *
+     * @param uuid the UUID to fetch the name for
+     * @return the name for the UUID
+     * @since 0.3
+     */
+    public final String getNameFromUuid(UUID uuid) {
+        return plugin.getUuidTranslator().getNameFromUuid(uuid);
+    }
+
+    /**
+     * Fetch a UUID from the specified name.
+     *
+     * @param name the UUID to fetch the name for
+     * @return the UUID for the name
+     * @since 0.3
+     */
+    public final UUID getUuidFromName(String name) {
+        return plugin.getUuidTranslator().getTranslatedUuid(name);
     }
 }

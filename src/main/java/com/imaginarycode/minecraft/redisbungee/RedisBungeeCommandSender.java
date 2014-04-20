@@ -16,7 +16,7 @@ import java.util.Collections;
 
 /**
  * This class is the CommandSender that RedisBungee uses to dispatch commands to BungeeCord.
- * <p>
+ * <p/>
  * It inherits all permissions of the console command sender. Sending messages and modifying permissions are no-ops.
  *
  * @author tuxed
