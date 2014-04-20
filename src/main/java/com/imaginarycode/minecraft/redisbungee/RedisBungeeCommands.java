@@ -102,7 +102,12 @@ class RedisBungeeCommands {
                 @Override
                 public void run() {
                     if (args.length > 0) {
-                        ServerInfo si = RedisBungee.getApi().getServerFor(plugin.getUuidTranslator().getTranslatedUuid(args[0]));
+                        UUID uuid = plugin.getUuidTranslator().getTranslatedUuid(args[0]);
+                        if (uuid == null) {
+                            sender.sendMessage(PLAYER_NOT_FOUND);
+                            return;
+                        }
+                        ServerInfo si = RedisBungee.getApi().getServerFor(uuid);
                         if (si != null) {
                             TextComponent message = new TextComponent();
                             message.setColor(ChatColor.BLUE);
@@ -133,7 +138,12 @@ class RedisBungeeCommands {
                 @Override
                 public void run() {
                     if (args.length > 0) {
-                        long secs = RedisBungee.getApi().getLastOnline(plugin.getUuidTranslator().getTranslatedUuid(args[0]));
+                        UUID uuid = plugin.getUuidTranslator().getTranslatedUuid(args[0]);
+                        if (uuid == null) {
+                            sender.sendMessage(PLAYER_NOT_FOUND);
+                            return;
+                        }
+                        long secs = RedisBungee.getApi().getLastOnline(uuid);
                         TextComponent message = new TextComponent();
                         if (secs == 0) {
                             message.setColor(ChatColor.GREEN);
@@ -170,7 +180,12 @@ class RedisBungeeCommands {
                 @Override
                 public void run() {
                     if (args.length > 0) {
-                        InetAddress ia = RedisBungee.getApi().getPlayerIp(plugin.getUuidTranslator().getTranslatedUuid(args[0]));
+                        UUID uuid = plugin.getUuidTranslator().getTranslatedUuid(args[0]);
+                        if (uuid == null) {
+                            sender.sendMessage(PLAYER_NOT_FOUND);
+                            return;
+                        }
+                        InetAddress ia = RedisBungee.getApi().getPlayerIp(uuid);
                         if (ia != null) {
                             TextComponent message = new TextComponent();
                             message.setColor(ChatColor.GREEN);

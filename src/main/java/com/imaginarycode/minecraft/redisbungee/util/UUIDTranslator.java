@@ -47,7 +47,7 @@ public class UUIDTranslator {
             if (stored != null && UUID_PATTERN.matcher(stored).find()) {
                 // This is it!
                 uuid = UUID.fromString(stored);
-                uuidMap.put(stored, UUID.fromString(stored));
+                uuidMap.put(player, UUID.fromString(stored));
                 return uuid;
             }
 
@@ -55,7 +55,7 @@ public class UUIDTranslator {
             uuid = UUIDFetcher.getUUIDOf(player);
 
             if (uuid != null) {
-                uuidMap.put(stored, uuid);
+                uuidMap.put(player, uuid);
                 jedis.hset("uuids", player, uuid.toString());
             }
 

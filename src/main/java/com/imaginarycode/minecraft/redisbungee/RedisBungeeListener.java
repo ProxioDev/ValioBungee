@@ -22,10 +22,7 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import redis.clients.jedis.Jedis;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @AllArgsConstructor
 public class RedisBungeeListener implements Listener {
@@ -87,60 +84,66 @@ public class RedisBungeeListener implements Listener {
     }
 
     @EventHandler
-    public void onPluginMessage(PluginMessageEvent event) {
+    public void onPluginMessage(final PluginMessageEvent event) {
         if (event.getTag().equals("RedisBungee") && event.getSender() instanceof Server) {
-            ByteArrayDataInput in = ByteStreams.newDataInput(event.getData());
+            final byte[] data = Arrays.copyOf(event.getData(), event.getData().length);
+            plugin.getProxy().getScheduler().runAsync(plugin, new Runnable() {
+                @Override
+                public void run() {
+                    ByteArrayDataInput in = ByteStreams.newDataInput(data);
 
-            String subchannel = in.readUTF();
-            ByteArrayDataOutput out = ByteStreams.newDataOutput();
-            String type;
+                    String subchannel = in.readUTF();
+                    ByteArrayDataOutput out = ByteStreams.newDataOutput();
+                    String type;
 
-            switch (subchannel) {
-                case "PlayerList":
-                    out.writeUTF("Players");
-                    Set<UUID> original = Collections.emptySet();
-                    type = in.readUTF();
-                    if (type.equals("ALL")) {
-                        out.writeUTF("ALL");
-                        original = plugin.getPlayers();
-                    } else {
-                        try {
-                            original = plugin.getPlayersOnServer(type);
-                        } catch (IllegalArgumentException ignored) {
-                        }
+                    switch (subchannel) {
+                        case "PlayerList":
+                            out.writeUTF("Players");
+                            Set<UUID> original = Collections.emptySet();
+                            type = in.readUTF();
+                            if (type.equals("ALL")) {
+                                out.writeUTF("ALL");
+                                original = plugin.getPlayers();
+                            } else {
+                                try {
+                                    original = plugin.getPlayersOnServer(type);
+                                } catch (IllegalArgumentException ignored) {
+                                }
+                            }
+                            Set<String> players = new HashSet<>();
+                            for (UUID uuid : original)
+                                players.add(plugin.getUuidTranslator().getNameFromUuid(uuid));
+                            out.writeUTF(Joiner.on(',').join(players));
+                            break;
+                        case "PlayerCount":
+                            out.writeUTF("PlayerCount");
+                            type = in.readUTF();
+                            if (type.equals("ALL")) {
+                                out.writeUTF("ALL");
+                                out.writeInt(plugin.getCount());
+                            } else {
+                                out.writeUTF(type);
+                                try {
+                                    out.writeInt(plugin.getPlayersOnServer(type).size());
+                                } catch (IllegalArgumentException e) {
+                                    out.writeInt(0);
+                                }
+                            }
+                            out.writeInt(plugin.getCurrentCount());
+                            break;
+                        case "LastOnline":
+                            String user = in.readUTF();
+                            out.writeUTF("LastOnline");
+                            out.writeUTF(user);
+                            out.writeLong(plugin.getLastOnline(plugin.getUuidTranslator().getTranslatedUuid(user)));
+                            break;
+                        default:
+                            break;
                     }
-                    Set<String> players = new HashSet<>();
-                    for (UUID uuid : original)
-                        players.add(plugin.getUuidTranslator().getNameFromUuid(uuid));
-                    out.writeUTF(Joiner.on(',').join(players));
-                    break;
-                case "PlayerCount":
-                    out.writeUTF("PlayerCount");
-                    type = in.readUTF();
-                    if (type.equals("ALL")) {
-                        out.writeUTF("ALL");
-                        out.writeInt(plugin.getCount());
-                    } else {
-                        out.writeUTF(type);
-                        try {
-                            out.writeInt(plugin.getPlayersOnServer(type).size());
-                        } catch (IllegalArgumentException e) {
-                            out.writeInt(0);
-                        }
-                    }
-                    out.writeInt(plugin.getCurrentCount());
-                    break;
-                case "LastOnline":
-                    String user = in.readUTF();
-                    out.writeUTF("LastOnline");
-                    out.writeUTF(user);
-                    out.writeLong(plugin.getLastOnline(plugin.getUuidTranslator().getTranslatedUuid(user)));
-                    break;
-                default:
-                    break;
-            }
 
-            ((Server) event.getSender()).sendData("RedisBungee", out.toByteArray());
+                    ((Server) event.getSender()).sendData("RedisBungee", out.toByteArray());
+                }
+            });
         }
     }
 
