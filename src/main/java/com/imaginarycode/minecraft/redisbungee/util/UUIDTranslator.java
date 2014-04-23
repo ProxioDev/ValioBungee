@@ -47,7 +47,8 @@ public class UUIDTranslator {
             if (stored != null && UUID_PATTERN.matcher(stored).find()) {
                 // This is it!
                 uuid = UUID.fromString(stored);
-                uuidMap.put(player, UUID.fromString(stored));
+                storeInfo(player, uuid, jedis);
+                uuidMap.put(player, uuid);
                 return uuid;
             }
 
@@ -56,7 +57,7 @@ public class UUIDTranslator {
 
             if (uuid != null) {
                 uuidMap.put(player, uuid);
-                jedis.hset("uuids", player, uuid.toString());
+                storeInfo(player, uuid, jedis);
             }
 
             return uuid;
@@ -91,8 +92,7 @@ public class UUIDTranslator {
             name = new NameFetcher(Collections.singletonList(player)).call().get(player);
 
             if (name != null) {
-                jedis.hset("player:" + player, "name", name);
-                uuidMap.put(name, player);
+                storeInfo(name, player, jedis);
                 return name;
             }
 
@@ -103,5 +103,10 @@ public class UUIDTranslator {
         } finally {
             plugin.getPool().returnResource(jedis);
         }
+    }
+
+    private static void storeInfo(String name, UUID uuid, Jedis jedis) {
+        jedis.hset("uuids", name, uuid.toString());
+        jedis.hset("player:" + uuid, "name", name);
     }
 }
