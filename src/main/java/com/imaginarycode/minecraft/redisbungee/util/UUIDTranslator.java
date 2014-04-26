@@ -16,6 +16,7 @@ import net.md_5.bungee.api.ProxyServer;
 import redis.clients.jedis.Jedis;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
@@ -53,14 +54,15 @@ public class UUIDTranslator {
             }
 
             // That didn't work. Let's ask Mojang.
-            uuid = UUIDFetcher.getUUIDOf(player);
-
-            if (uuid != null) {
-                uuidMap.put(player, uuid);
-                storeInfo(player, uuid, jedis);
+            for (Map.Entry<String, UUID> entry : new UUIDFetcher(Collections.singletonList(player)).call().entrySet()) {
+                if (entry.getKey().equalsIgnoreCase(player)) {
+                    uuidMap.put(player, entry.getValue());
+                    storeInfo(player, entry.getValue(), jedis);
+                    return entry.getValue();
+                }
             }
 
-            return uuid;
+            return null;
         } catch (Exception e) {
             plugin.getLogger().log(Level.SEVERE, "Unable to fetch UUID for " + player, e);
             return null;
