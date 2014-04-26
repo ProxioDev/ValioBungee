@@ -168,14 +168,18 @@ public final class RedisBungee extends Plugin {
         if (pool != null) {
             Jedis rsc = pool.getResource();
             try {
+                List<String> keys = new ArrayList<>();
                 for (String i : getServerIds()) {
-                    if (i.equals(configuration.getString("server-id"))) continue;
-                    Set<String> users = rsc.smembers("server:" + i + ":usersOnline");
-                    if (users != null && !users.isEmpty()) {
-                        for (String user : users) {
-                            if (UUIDTranslator.UUID_PATTERN.matcher(user).find()) {
-                                setBuilder = setBuilder.add(UUID.fromString(user));
-                            }
+                    if (i.equals(configuration.getString("server-id")))
+                        continue;
+
+                    keys.add("server:" + i + ":usersOnline");
+                }
+                Set<String> users = rsc.sunion(keys.toArray(new String[keys.size()]));
+                if (users != null && !users.isEmpty()) {
+                    for (String user : users) {
+                        if (UUIDTranslator.UUID_PATTERN.matcher(user).find()) {
+                            setBuilder = setBuilder.add(UUID.fromString(user));
                         }
                     }
                 }
