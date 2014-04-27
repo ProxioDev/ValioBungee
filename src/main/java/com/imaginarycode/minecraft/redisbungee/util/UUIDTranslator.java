@@ -44,7 +44,7 @@ public class UUIDTranslator {
         // Okay, it wasn't locally cached. Let's try Redis.
         Jedis jedis = plugin.getPool().getResource();
         try {
-            String stored = jedis.hget("uuids", player);
+            String stored = jedis.hget("uuids", player.toLowerCase());
             if (stored != null && UUID_PATTERN.matcher(stored).find()) {
                 // This is it!
                 uuid = UUID.fromString(stored);
@@ -108,7 +108,7 @@ public class UUIDTranslator {
     }
 
     private static void storeInfo(String name, UUID uuid, Jedis jedis) {
-        jedis.hset("uuids", name, uuid.toString());
+        jedis.hset("uuids", name.toLowerCase(), uuid.toString());
         jedis.hset("player:" + uuid, "name", name);
     }
 }

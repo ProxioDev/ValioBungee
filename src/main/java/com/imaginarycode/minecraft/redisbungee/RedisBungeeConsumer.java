@@ -50,7 +50,7 @@ public class RedisBungeeConsumer implements Runnable {
             jedis.hset("player:" + event1.getPlayer().getUniqueId().toString(), "online", "0");
             jedis.hset("player:" + event1.getPlayer().getUniqueId().toString(), "ip", event1.getPlayer().getAddress().getAddress().getHostAddress());
             jedis.hset("player:" + event1.getPlayer().getUniqueId().toString(), "name", event1.getPlayer().getName());
-            jedis.hset("uuids", event1.getPlayer().getName(), event1.getPlayer().getUniqueId().toString());
+            jedis.hset("uuids", event1.getPlayer().getName().toLowerCase(), event1.getPlayer().getUniqueId().toString());
         } else if (event instanceof PlayerLoggedOffConsumerEvent) {
             PlayerLoggedOffConsumerEvent event1 = (PlayerLoggedOffConsumerEvent) event;
             jedis.hset("player:" + event1.getPlayer().getUniqueId().toString(), "online", String.valueOf(System.currentTimeMillis()));
