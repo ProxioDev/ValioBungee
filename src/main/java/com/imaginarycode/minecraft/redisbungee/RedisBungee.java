@@ -175,11 +175,13 @@ public final class RedisBungee extends Plugin {
 
                     keys.add("server:" + i + ":usersOnline");
                 }
-                Set<String> users = rsc.sunion(keys.toArray(new String[keys.size()]));
-                if (users != null && !users.isEmpty()) {
-                    for (String user : users) {
-                        if (UUIDTranslator.UUID_PATTERN.matcher(user).find()) {
-                            setBuilder = setBuilder.add(UUID.fromString(user));
+                if (!keys.isEmpty()) {
+                    Set<String> users = rsc.sunion(keys.toArray(new String[keys.size()]));
+                    if (users != null && !users.isEmpty()) {
+                        for (String user : users) {
+                            if (UUIDTranslator.UUID_PATTERN.matcher(user).find()) {
+                                setBuilder = setBuilder.add(UUID.fromString(user));
+                            }
                         }
                     }
                 }
