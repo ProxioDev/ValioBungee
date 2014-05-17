@@ -6,11 +6,14 @@
  */
 package com.imaginarycode.minecraft.redisbungee;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.Multimap;
 import lombok.NonNull;
 import net.md_5.bungee.api.config.ServerInfo;
 
 import java.net.InetAddress;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -68,6 +71,25 @@ public class RedisBungeeAPI {
      */
     public final Set<UUID> getPlayersOnline() {
         return plugin.getPlayers();
+    }
+
+    /**
+     * Get a combined list of players on this network, as a collection of usernames.
+     * <p>
+     * <strong>Note that this function returns an immutable {@link java.util.Collection}, and usernames
+     * are lazily calculated (but cached, see the contract of {@link #getNameFromUuid(java.util.UUID)}).</strong>
+     *
+     * @return a Set with all players found
+     * @since 0.3
+     * @see #getNameFromUuid(java.util.UUID)
+     */
+    public final Collection<String> getHumanPlayersOnline() {
+        return Collections2.transform(getPlayersOnline(), new Function<UUID, String>() {
+            @Override
+            public String apply(UUID uuid) {
+                return getNameFromUuid(uuid);
+            }
+        });
     }
 
     /**
@@ -158,10 +180,10 @@ public class RedisBungeeAPI {
     }
 
     /**
-     * Register (a) PubSub channel(s), so that you may capture {@link com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent} for it.
+     * Register (a) PubSub channel(s), so that you may handle {@link com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent} for it.
      *
      * @param channels the channels to register
-     * @since 0.2.6
+     * @since 0.3
      */
     public final void registerPubSubChannels(String... channels) {
         RedisBungee.getPubSubListener().addChannel(channels);
@@ -171,14 +193,18 @@ public class RedisBungeeAPI {
      * Unregister (a) PubSub channel(s).
      *
      * @param channels the channels to unregister
-     * @since 0.2.6
+     * @since 0.3
      */
     public final void unregisterPubSubChannels(String... channels) {
         RedisBungee.getPubSubListener().removeChannel(channels);
     }
 
     /**
-     * Fetch a name from the specified UUID.
+     * Fetch a name from the specified UUID. UUIDs are cached locally and in Redis. This function falls back to Mojang
+     * as a last resort, so calls <strong>may</strong> be blocking.
+     * <p>
+     * For the common use case of translating a list of UUIDs into names, use {@link #getHumanPlayersOnline()}
+     * as the efficiency of that function is slightly greater as the names are calculated lazily.
      *
      * @param uuid the UUID to fetch the name for
      * @return the name for the UUID
@@ -189,7 +215,8 @@ public class RedisBungeeAPI {
     }
 
     /**
-     * Fetch a UUID from the specified name.
+     * Fetch a UUID from the specified name. Names are cached locally and in Redis. This function falls back to Mojang
+     * as a last resort, so calls <strong>may</strong> be blocking.
      *
      * @param name the UUID to fetch the name for
      * @return the UUID for the name
