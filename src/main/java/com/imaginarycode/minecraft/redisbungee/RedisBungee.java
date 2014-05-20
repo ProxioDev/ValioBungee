@@ -57,7 +57,7 @@ public final class RedisBungee extends Plugin {
     @Getter
     private static Gson gson = new Gson();
     @Getter
-    private static String serverId;
+    private String serverId;
     
     private static RedisBungeeAPI api;
     private static PubSubListener psl = null;
@@ -351,8 +351,8 @@ public final class RedisBungee extends Plugin {
             getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.SendToAll(this));
             getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.ServerId(this));
             getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.ServerIds());
-            getProxy().getPluginManager().registerListener(this, new RedisBungeeListener(this));
             api = new RedisBungeeAPI(this);
+            getProxy().getPluginManager().registerListener(this, new RedisBungeeListener(this));
             psl = new PubSubListener();
             getProxy().getScheduler().runAsync(this, psl);
             getProxy().getScheduler().schedule(this, new Runnable() {
