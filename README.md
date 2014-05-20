@@ -4,11 +4,11 @@ RedisBungee bridges [Redis](http://redis.io) and BungeeCord together. This is th
 
 ## Compiling
 
-RedisBungee is distributed as a [maven](http://maven.apache.org) project. To compile it:
+RedisBungee is distributed as a [maven](http://maven.apache.org) project. To compile it and install it in your local Maven repository:
 
     git clone https://github.com/minecrafter/RedisBungee.git
     cd RedisBungee
-    mvn clean package
+    mvn clean install
 
 ## Configuration
 

@@ -165,7 +165,7 @@ public class RedisBungeeAPI {
      * @since 0.2.5
      */
     public final String getServerId() {
-        return RedisBungee.getConfiguration().getString("server-id");
+        return plugin.getServerId();
     }
 
     /**
