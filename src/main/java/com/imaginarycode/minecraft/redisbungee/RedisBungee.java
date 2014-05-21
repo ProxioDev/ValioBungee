@@ -57,7 +57,7 @@ public final class RedisBungee extends Plugin {
     @Getter
     private static Gson gson = new Gson();
     @Getter
-    private static String serverId;
+    private String serverId;
     
     private static RedisBungeeAPI api;
     private static PubSubListener psl = null;

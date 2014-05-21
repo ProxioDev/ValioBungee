@@ -10,7 +10,7 @@ import redis.clients.jedis.Jedis;
 
 public class RedisUtil {
     public static void cleanUpPlayer(String player, Jedis rsc) {
-        rsc.srem("server:" + RedisBungee.getServerId() + ":usersOnline", player);
+        rsc.srem("server:" + RedisBungee.getApi().getServerId() + ":usersOnline", player);
         rsc.hdel("player:" + player, "server");
         rsc.hdel("player:" + player, "ip");
     }
