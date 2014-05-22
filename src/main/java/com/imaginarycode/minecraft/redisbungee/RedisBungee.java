@@ -97,6 +97,7 @@ public final class RedisBungee extends Plugin {
             return servers.build();
         } catch (JedisConnectionException e) {
             getLogger().log(Level.SEVERE, "Unable to fetch all server IDs", e);
+            pool.returnBrokenResource(jedis);
             return Collections.singletonList(serverId);
         } finally {
             pool.returnResource(jedis);
