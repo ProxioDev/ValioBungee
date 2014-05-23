@@ -64,7 +64,7 @@ public class RedisBungeeAPI {
 
     /**
      * Get a combined list of players on this network.
-     * <p/>
+     * <p>
      * <strong>Note that this function returns an immutable {@link java.util.Set}.</strong>
      *
      * @return a Set with all players found

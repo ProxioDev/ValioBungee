@@ -6,10 +6,8 @@
  */
 package com.imaginarycode.minecraft.redisbungee;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multimap;
+import com.google.common.base.Functions;
+import com.google.common.collect.*;
 import com.google.common.io.ByteStreams;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.gson.Gson;
@@ -160,11 +158,8 @@ public final class RedisBungee extends Plugin {
         return setBuilder.build();
     }
 
-    final Set<String> getLocalPlayersAsUuidStrings() {
-        ImmutableSet.Builder<String> setBuilder = ImmutableSet.builder();
-        for (ProxiedPlayer pp : getProxy().getPlayers())
-            setBuilder = setBuilder.add(pp.getUniqueId().toString());
-        return setBuilder.build();
+    final Collection<String> getLocalPlayersAsUuidStrings() {
+        return Collections2.transform(getLocalPlayers(), Functions.toStringFunction());
     }
 
     final Set<UUID> getPlayers() {
@@ -183,8 +178,9 @@ public final class RedisBungee extends Plugin {
                     Set<String> users = rsc.sunion(keys.toArray(new String[keys.size()]));
                     if (users != null && !users.isEmpty()) {
                         for (String user : users) {
-                            if (UUIDTranslator.UUID_PATTERN.matcher(user).find()) {
+                            try {
                                 setBuilder = setBuilder.add(UUID.fromString(user));
+                            } catch (IllegalArgumentException ignored) {
                             }
                         }
                     }
@@ -361,7 +357,7 @@ public final class RedisBungee extends Plugin {
                 public void run() {
                     Jedis tmpRsc = pool.getResource();
                     try {
-                        Set<String> players = getLocalPlayersAsUuidStrings();
+                        Collection<String> players = getLocalPlayersAsUuidStrings();
                         for (String member : tmpRsc.smembers("server:" + serverId + ":usersOnline"))
                             if (!players.contains(member)) {
                                 // Are they simply on a different proxy?
@@ -400,7 +396,7 @@ public final class RedisBungee extends Plugin {
             consumer.stop();
             Jedis tmpRsc = pool.getResource();
             try {
-                tmpRsc.hdel("playerCounts", serverId, "0");
+                tmpRsc.hdel("playerCounts", serverId);
                 if (tmpRsc.scard("server:" + serverId + ":usersOnline") > 0) {
                     for (String member : tmpRsc.smembers("server:" + serverId + ":usersOnline"))
                         RedisUtil.cleanUpPlayer(member, tmpRsc);
@@ -459,10 +455,16 @@ public final class RedisBungee extends Plugin {
                     if (crashFile.exists())
                         crashFile.delete();
                     else if (rsc.hexists("heartbeats", serverId)) {
-                        getLogger().severe("You have launched a possible imposter BungeeCord instance. Another instance is already running.");
-                        getLogger().severe("For data consistency reasons, RedisBungee will now disable itself.");
-                        getLogger().severe("If this instance is coming up from a crash, create a file in your RedisBungee plugins directory with the name 'restarted_from_crash.txt' and RedisBungee will not perform this check.");
-                        throw new RuntimeException("Possible imposter instance!");
+                        try {
+                            Long value = Long.valueOf(rsc.hget("heartbeats", serverId));
+                            if (value != null && System.currentTimeMillis() < value + 20000) {
+                                getLogger().severe("You have launched a possible imposter BungeeCord instance. Another instance is already running.");
+                                getLogger().severe("For data consistency reasons, RedisBungee will now disable itself.");
+                                getLogger().severe("If this instance is coming up from a crash, create a file in your RedisBungee plugins directory with the name 'restarted_from_crash.txt' and RedisBungee will not perform this check.");
+                                throw new RuntimeException("Possible imposter instance!");
+                            }
+                        } catch (NumberFormatException ignored) {
+                        }
                     }
                     getLogger().log(Level.INFO, "Successfully connected to Redis.");
                 } catch (JedisConnectionException e) {
