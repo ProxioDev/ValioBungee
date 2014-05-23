@@ -35,6 +35,10 @@ public class UUIDTranslator {
         if (uuid != null)
             return uuid;
 
+        if (UUID_PATTERN.matcher(player).find()) {
+            return UUID.fromString(player);
+        }
+
         if (!plugin.getProxy().getConfig().isOnlineMode()) {
             uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + player).getBytes(Charsets.UTF_8));
             uuidMap.put(player, uuid);
