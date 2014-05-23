@@ -148,16 +148,14 @@ class RedisBungeeCommands {
                         if (secs == 0) {
                             message.setColor(ChatColor.GREEN);
                             message.setText(args[0] + " is currently online.");
-                            sender.sendMessage(message);
                         } else if (secs != -1) {
                             message.setColor(ChatColor.BLUE);
                             message.setText(args[0] + " was last online on " + new SimpleDateFormat().format(secs) + ".");
-                            sender.sendMessage(message);
                         } else {
                             message.setColor(ChatColor.RED);
                             message.setText(args[0] + " has never been online.");
-                            sender.sendMessage(message);
                         }
+                        sender.sendMessage(message);
                     } else {
                         sender.sendMessage(NO_PLAYER_SPECIFIED);
                     }
@@ -190,6 +188,7 @@ class RedisBungeeCommands {
                             TextComponent message = new TextComponent();
                             message.setColor(ChatColor.GREEN);
                             message.setText(args[0] + " is connected from " + ia.toString() + ".");
+                            sender.sendMessage(message);
                         } else {
                             sender.sendMessage(PLAYER_NOT_FOUND);
                         }
@@ -217,6 +216,7 @@ class RedisBungeeCommands {
                 TextComponent message = new TextComponent();
                 message.setColor(ChatColor.GREEN);
                 message.setText("Sent the command /" + command + " to all proxies.");
+                sender.sendMessage(message);
             } else {
                 sender.sendMessage(NO_COMMAND_SPECIFIED);
             }
