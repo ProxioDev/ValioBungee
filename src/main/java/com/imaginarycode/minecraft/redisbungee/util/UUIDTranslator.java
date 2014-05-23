@@ -26,6 +26,7 @@ public class UUIDTranslator {
     private final RedisBungee plugin;
     private BiMap<String, UUID> uuidMap = Maps.synchronizedBiMap(HashBiMap.<String, UUID>create());
     public static final Pattern UUID_PATTERN = Pattern.compile("[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}");
+    public static final Pattern MOJANGIAN_UUID_PATTERN = Pattern.compile("[a-fA-F0-9]{32}");
 
     public UUID getTranslatedUuid(String player) {
         if (ProxyServer.getInstance().getPlayer(player) != null)
@@ -37,6 +38,11 @@ public class UUIDTranslator {
 
         if (UUID_PATTERN.matcher(player).find()) {
             return UUID.fromString(player);
+        }
+
+        if (MOJANGIAN_UUID_PATTERN.matcher(player).find()) {
+            // Reconstruct the UUID
+            return UUIDFetcher.getUUID(player);
         }
 
         if (!plugin.getProxy().getConfig().isOnlineMode()) {
