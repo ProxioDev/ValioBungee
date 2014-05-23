@@ -458,7 +458,7 @@ public final class RedisBungee extends Plugin {
                     File crashFile = new File(getDataFolder(), "restarted_from_crash.txt");
                     if (crashFile.exists())
                         crashFile.delete();
-                    else if (rsc.hexists("heartbeat", serverId)) {
+                    else if (rsc.hexists("heartbeats", serverId)) {
                         getLogger().severe("You have launched a possible imposter BungeeCord instance. Another instance is already running.");
                         getLogger().severe("For data consistency reasons, RedisBungee will now disable itself.");
                         getLogger().severe("If this instance is coming up from a crash, create a file in your RedisBungee plugins directory with the name 'restarted_from_crash.txt' and RedisBungee will not perform this check.");
