@@ -15,7 +15,9 @@ import com.imaginarycode.minecraft.redisbungee.consumerevents.PlayerLoggedInCons
 import com.imaginarycode.minecraft.redisbungee.consumerevents.PlayerLoggedOffConsumerEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import lombok.AllArgsConstructor;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ServerPing;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.connection.Server;
 import net.md_5.bungee.api.event.*;
 import net.md_5.bungee.api.plugin.Listener;
@@ -29,25 +31,21 @@ public class RedisBungeeListener implements Listener {
     private final RedisBungee plugin;
 
     @EventHandler
-    public void onPreLogin(PreLoginEvent event) {
+    public void onPlayerConnect(final PostLoginEvent event) {
         if (plugin.getPool() != null) {
             Jedis rsc = plugin.getPool().getResource();
             try {
                 for (String server : plugin.getServerIds()) {
-                    if (rsc.sismember("server:" + server + ":usersOnline", event.getConnection().getName())) {
-                        event.setCancelled(true);
-                        event.setCancelReason("You are already logged on to this server.");
-                        break;
+                    if (rsc.sismember("server:" + server + ":usersOnline", event.getPlayer().getUniqueId().toString())) {
+                        event.getPlayer().disconnect(new ComponentBuilder("You are already logged on to this server.").color(
+                                ChatColor.RED).create());
+                        return;
                     }
                 }
             } finally {
                 plugin.getPool().returnResource(rsc);
             }
         }
-    }
-
-    @EventHandler
-    public void onPlayerConnect(final PostLoginEvent event) {
         plugin.getConsumer().queue(new PlayerLoggedInConsumerEvent(event.getPlayer()));
     }
 
