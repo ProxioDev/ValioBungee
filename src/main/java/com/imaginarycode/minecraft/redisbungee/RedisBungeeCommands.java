@@ -75,7 +75,7 @@ class RedisBungeeCommands {
                                 sender.sendMessage(serverName, serverCount, serverPlayers);
                             }
                         } else {
-                            sender.sendMessage(new ComponentBuilder("Players: " + Joiner.on(", ").join(RedisBungee.getApi().getPlayersOnline()))
+                            sender.sendMessage(new ComponentBuilder("Players: " + Joiner.on(", ").join(RedisBungee.getApi().getHumanPlayersOnline()))
                                     .color(ChatColor.YELLOW).create());
                         }
                         sender.sendMessage(playersOnline);
