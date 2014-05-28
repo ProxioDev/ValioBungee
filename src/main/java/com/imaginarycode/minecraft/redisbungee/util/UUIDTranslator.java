@@ -11,6 +11,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
 import com.imaginarycode.minecraft.redisbungee.RedisBungee;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.ProxyServer;
 import redis.clients.jedis.Jedis;
@@ -28,7 +29,7 @@ public class UUIDTranslator {
     public static final Pattern UUID_PATTERN = Pattern.compile("[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}");
     public static final Pattern MOJANGIAN_UUID_PATTERN = Pattern.compile("[a-fA-F0-9]{32}");
 
-    public UUID getTranslatedUuid(String player) {
+    public UUID getTranslatedUuid(@NonNull String player) {
         if (ProxyServer.getInstance().getPlayer(player) != null)
             return ProxyServer.getInstance().getPlayer(player).getUniqueId();
 
@@ -81,7 +82,7 @@ public class UUIDTranslator {
         }
     }
 
-    public String getNameFromUuid(UUID player) {
+    public String getNameFromUuid(@NonNull UUID player) {
         if (ProxyServer.getInstance().getPlayer(player) != null)
             return ProxyServer.getInstance().getPlayer(player).getName();
 

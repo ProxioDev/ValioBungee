@@ -210,7 +210,7 @@ public class RedisBungeeAPI {
      * @return the name for the UUID
      * @since 0.3
      */
-    public final String getNameFromUuid(UUID uuid) {
+    public final String getNameFromUuid(@NonNull UUID uuid) {
         return plugin.getUuidTranslator().getNameFromUuid(uuid);
     }
 
@@ -222,7 +222,7 @@ public class RedisBungeeAPI {
      * @return the UUID for the name
      * @since 0.3
      */
-    public final UUID getUuidFromName(String name) {
+    public final UUID getUuidFromName(@NonNull String name) {
         return plugin.getUuidTranslator().getTranslatedUuid(name);
     }
 }
