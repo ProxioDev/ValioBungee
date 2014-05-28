@@ -15,6 +15,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.ProxyServer;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.exceptions.JedisException;
 
 import java.util.Collections;
 import java.util.Map;
@@ -55,31 +56,41 @@ public class UUIDTranslator {
         // Okay, it wasn't locally cached. Let's try Redis.
         Jedis jedis = plugin.getPool().getResource();
         try {
-            String stored = jedis.hget("uuids", player.toLowerCase());
-            if (stored != null && UUID_PATTERN.matcher(stored).find()) {
-                // This is it!
-                uuid = UUID.fromString(stored);
-                storeInfo(player, uuid, jedis);
-                uuidMap.put(player, uuid);
+            try {
+                String stored = jedis.hget("uuids", player.toLowerCase());
+                if (stored != null && UUID_PATTERN.matcher(stored).find()) {
+                    // This is it!
+                    uuid = UUID.fromString(stored);
+                    storeInfo(player, uuid, jedis);
+                    uuidMap.put(player, uuid);
+                    return uuid;
+                }
+
+                // That didn't work. Let's ask Mojang.
+                Map<String, UUID> uuidMap1;
+                try {
+                    uuidMap1 = new UUIDFetcher(Collections.singletonList(player)).call();
+                } catch (Exception e) {
+                    plugin.getLogger().log(Level.SEVERE, "Unable to fetch UUID from Mojang for " + player, e);
+                    return null;
+                }
+                for (Map.Entry<String, UUID> entry : uuidMap1.entrySet()) {
+                    if (entry.getKey().equalsIgnoreCase(player)) {
+                        uuidMap.put(player, entry.getValue());
+                        storeInfo(player, entry.getValue(), jedis);
+                        return entry.getValue();
+                    }
+                }
+            } catch (JedisException e) {
+                plugin.getLogger().log(Level.SEVERE, "Unable to fetch UUID for " + player, e);
+                // Go ahead and give them what we have.
                 return uuid;
             }
-
-            // That didn't work. Let's ask Mojang.
-            for (Map.Entry<String, UUID> entry : new UUIDFetcher(Collections.singletonList(player)).call().entrySet()) {
-                if (entry.getKey().equalsIgnoreCase(player)) {
-                    uuidMap.put(player, entry.getValue());
-                    storeInfo(player, entry.getValue(), jedis);
-                    return entry.getValue();
-                }
-            }
-
-            return null;
-        } catch (Exception e) {
-            plugin.getLogger().log(Level.SEVERE, "Unable to fetch UUID for " + player, e);
-            return null;
         } finally {
             plugin.getPool().returnResource(jedis);
         }
+
+        return null; // Nope, game over!
     }
 
     public String getNameFromUuid(@NonNull UUID player) {
@@ -102,7 +113,12 @@ public class UUIDTranslator {
             }
 
             // That didn't work. Let's ask Mojang.
-            name = new NameFetcher(Collections.singletonList(player)).call().get(player);
+            try {
+                name = new NameFetcher(Collections.singletonList(player)).call().get(player);
+            } catch (Exception e) {
+                plugin.getLogger().log(Level.SEVERE, "Unable to fetch name from Mojang for " + player, e);
+                return null;
+            }
 
             if (name != null) {
                 storeInfo(name, player, jedis);
@@ -110,9 +126,9 @@ public class UUIDTranslator {
             }
 
             return null;
-        } catch (Exception e) {
+        } catch (JedisException e) {
             plugin.getLogger().log(Level.SEVERE, "Unable to fetch name for " + player, e);
-            return null;
+            return name;
         } finally {
             plugin.getPool().returnResource(jedis);
         }
