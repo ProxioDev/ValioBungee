@@ -110,6 +110,7 @@ public class UUIDTranslator {
                 }
                 for (Map.Entry<String, UUID> entry : uuidMap1.entrySet()) {
                     if (entry.getKey().equalsIgnoreCase(player)) {
+                        lock.writeLock().lock();
                         try {
                             uuidMap.put(entry.getKey(), entry.getValue());
                         } finally {
