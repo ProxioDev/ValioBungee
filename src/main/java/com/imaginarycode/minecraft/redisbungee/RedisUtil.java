@@ -8,7 +8,7 @@ package com.imaginarycode.minecraft.redisbungee;
 
 import redis.clients.jedis.Jedis;
 
-public class RedisUtil {
+class RedisUtil {
     public static void cleanUpPlayer(String player, Jedis rsc) {
         rsc.srem("server:" + RedisBungee.getApi().getServerId() + ":usersOnline", player);
         rsc.hdel("player:" + player, "server");

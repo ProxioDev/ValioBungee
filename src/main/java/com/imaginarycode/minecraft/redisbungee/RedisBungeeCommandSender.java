@@ -23,7 +23,7 @@ import java.util.Collections;
  * @since 0.2.3
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class RedisBungeeCommandSender implements CommandSender {
+class RedisBungeeCommandSender implements CommandSender {
     static final RedisBungeeCommandSender instance = new RedisBungeeCommandSender();
 
     @Override

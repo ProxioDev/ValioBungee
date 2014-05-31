@@ -20,7 +20,7 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 
 /* Credits to evilmidget38 for this class. I modified it to use Gson. */
-public class NameFetcher implements Callable<Map<UUID, String>> {
+class NameFetcher implements Callable<Map<UUID, String>> {
     private static final String PROFILE_URL = "https://sessionserver.mojang.com/session/minecraft/profile/";
     private final List<UUID> uuids;
 

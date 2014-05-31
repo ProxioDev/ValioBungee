@@ -512,7 +512,7 @@ public final class RedisBungee extends Plugin {
     }
 
     class JedisPubSubHandler extends JedisPubSub {
-        private ExecutorService executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setDaemon(true).setNameFormat("RedisBungee PubSub Handler - #%d").build());
+        private final ExecutorService executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setDaemon(true).setNameFormat("RedisBungee PubSub Handler - #%d").build());
 
         @Override
         public void onMessage(final String s, final String s2) {

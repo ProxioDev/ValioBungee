@@ -60,7 +60,7 @@ class RedisBungeeCommands {
                             Multimap<String, UUID> serverToPlayers = RedisBungee.getApi().getServerToPlayers();
                             Multimap<String, String> human = HashMultimap.create();
                             for (Map.Entry<String, UUID> entry : serverToPlayers.entries()) {
-                                human.put(entry.getKey(), plugin.getUuidTranslator().getNameFromUuid(entry.getValue()));
+                                human.put(entry.getKey(), plugin.getUuidTranslator().getNameFromUuid(entry.getValue(), false));
                             }
                             for (String server : new TreeSet<>(serverToPlayers.keySet())) {
                                 TextComponent serverName = new TextComponent();
@@ -102,7 +102,7 @@ class RedisBungeeCommands {
                 @Override
                 public void run() {
                     if (args.length > 0) {
-                        UUID uuid = plugin.getUuidTranslator().getTranslatedUuid(args[0]);
+                        UUID uuid = plugin.getUuidTranslator().getTranslatedUuid(args[0], true);
                         if (uuid == null) {
                             sender.sendMessage(PLAYER_NOT_FOUND);
                             return;
@@ -138,7 +138,7 @@ class RedisBungeeCommands {
                 @Override
                 public void run() {
                     if (args.length > 0) {
-                        UUID uuid = plugin.getUuidTranslator().getTranslatedUuid(args[0]);
+                        UUID uuid = plugin.getUuidTranslator().getTranslatedUuid(args[0], true);
                         if (uuid == null) {
                             sender.sendMessage(PLAYER_NOT_FOUND);
                             return;
@@ -178,7 +178,7 @@ class RedisBungeeCommands {
                 @Override
                 public void run() {
                     if (args.length > 0) {
-                        UUID uuid = plugin.getUuidTranslator().getTranslatedUuid(args[0]);
+                        UUID uuid = plugin.getUuidTranslator().getTranslatedUuid(args[0], true);
                         if (uuid == null) {
                             sender.sendMessage(PLAYER_NOT_FOUND);
                             return;

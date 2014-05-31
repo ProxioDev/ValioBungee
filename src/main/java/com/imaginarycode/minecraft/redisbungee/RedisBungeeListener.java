@@ -68,7 +68,7 @@ public class RedisBungeeListener implements Listener {
             ServerPing.PlayerInfo[] info = new ServerPing.PlayerInfo[players.size()];
             int idx = 0;
             for (UUID player : players) {
-                info[idx] = new ServerPing.PlayerInfo(plugin.getUuidTranslator().getNameFromUuid(player), "");
+                info[idx] = new ServerPing.PlayerInfo(plugin.getUuidTranslator().getNameFromUuid(player, false), "");
                 idx++;
             }
             reply.setPlayers(new ServerPing.Players(old.getPlayers().getMax(), players.size(), info));
@@ -110,7 +110,7 @@ public class RedisBungeeListener implements Listener {
                             }
                             Set<String> players = new HashSet<>();
                             for (UUID uuid : original)
-                                players.add(plugin.getUuidTranslator().getNameFromUuid(uuid));
+                                players.add(plugin.getUuidTranslator().getNameFromUuid(uuid, false));
                             out.writeUTF(Joiner.on(',').join(players));
                             break;
                         case "PlayerCount":
@@ -133,7 +133,7 @@ public class RedisBungeeListener implements Listener {
                             String user = in.readUTF();
                             out.writeUTF("LastOnline");
                             out.writeUTF(user);
-                            out.writeLong(plugin.getLastOnline(plugin.getUuidTranslator().getTranslatedUuid(user)));
+                            out.writeLong(plugin.getLastOnline(plugin.getUuidTranslator().getTranslatedUuid(user, true)));
                             break;
                         default:
                             break;

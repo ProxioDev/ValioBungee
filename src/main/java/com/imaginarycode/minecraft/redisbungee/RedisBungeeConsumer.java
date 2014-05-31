@@ -19,7 +19,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 @RequiredArgsConstructor
 public class RedisBungeeConsumer implements Runnable {
     private final RedisBungee plugin;
-    private BlockingQueue<ConsumerEvent> consumerQueue = new LinkedBlockingQueue<>();
+    private final BlockingQueue<ConsumerEvent> consumerQueue = new LinkedBlockingQueue<>();
     private boolean stopped = false;
 
     @Override
