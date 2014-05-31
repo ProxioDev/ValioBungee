@@ -87,7 +87,7 @@ public class RedisBungeeAPI {
         return Collections2.transform(getPlayersOnline(), new Function<UUID, String>() {
             @Override
             public String apply(UUID uuid) {
-                return getNameFromUuid(uuid);
+                return getNameFromUuid(uuid, false);
             }
         });
     }
@@ -205,24 +205,66 @@ public class RedisBungeeAPI {
      * <p>
      * For the common use case of translating a list of UUIDs into names, use {@link #getHumanPlayersOnline()}
      * as the efficiency of that function is slightly greater as the names are calculated lazily.
+     * <p>
+     * If performance is a concern, use {@link #getNameFromUuid(java.util.UUID, boolean)} as this allows you to disable Mojang lookups.
      *
      * @param uuid the UUID to fetch the name for
      * @return the name for the UUID
      * @since 0.3
      */
     public final String getNameFromUuid(@NonNull UUID uuid) {
-        return plugin.getUuidTranslator().getNameFromUuid(uuid);
+        return getNameFromUuid(uuid, true);
+    }
+
+    /**
+     * Fetch a name from the specified UUID. UUIDs are cached locally and in Redis. This function can fall back to Mojang
+     * as a last resort if {@code expensiveLookups} is true, so calls <strong>may</strong> be blocking.
+     * <p>
+     * For the common use case of translating the list of online players into names, use {@link #getHumanPlayersOnline()}
+     * as the efficiency of that function is slightly greater as the names are calculated lazily.
+     * <p>
+     * If performance is a concern, set {@code expensiveLookups} to false as this will disable lookups via Mojang.
+     *
+     * @param uuid the UUID to fetch the name for
+     * @param expensiveLookups whether or not to perform potentially expensive lookups
+     * @return the name for the UUID
+     * @since 0.3.2
+     */
+    public final String getNameFromUuid(@NonNull UUID uuid, boolean expensiveLookups) {
+        return plugin.getUuidTranslator().getNameFromUuid(uuid, expensiveLookups);
     }
 
     /**
      * Fetch a UUID from the specified name. Names are cached locally and in Redis. This function falls back to Mojang
      * as a last resort, so calls <strong>may</strong> be blocking.
+     * <p>
+     * If performance is a concern, see {@link #getUuidFromName(String, boolean)}, which disables the following functions:
+     * <ul>
+     *     <li>Searching local entries case-insensitively</li>
+     *     <li>Searching Mojang</li>
+     * </ul>
      *
      * @param name the UUID to fetch the name for
      * @return the UUID for the name
      * @since 0.3
      */
     public final UUID getUuidFromName(@NonNull String name) {
-        return plugin.getUuidTranslator().getTranslatedUuid(name);
+        return getUuidFromName(name, true);
+    }
+
+    /**
+     * Fetch a UUID from the specified name. Names are cached locally and in Redis. This function falls back to Mojang
+     * as a last resort if {@code expensiveLookups} is true, so calls <strong>may</strong> be blocking.
+     * <p>
+     * If performance is a concern, set {@code expensiveLookups} to false to disable searching Mojang and searching for usernames
+     * case-insensitively.
+     *
+     * @param name the UUID to fetch the name for
+     * @param expensiveLookups whether or not to perform potentially expensive lookups
+     * @return the UUID for the name
+     * @since 0.3.2
+     */
+    public final UUID getUuidFromName(@NonNull String name, boolean expensiveLookups) {
+        return plugin.getUuidTranslator().getTranslatedUuid(name, expensiveLookups);
     }
 }

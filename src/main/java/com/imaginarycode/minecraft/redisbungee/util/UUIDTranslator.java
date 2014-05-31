@@ -20,24 +20,36 @@ import redis.clients.jedis.exceptions.JedisException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 @RequiredArgsConstructor
 public class UUIDTranslator {
     private final RedisBungee plugin;
-    private BiMap<String, UUID> uuidMap = Maps.synchronizedBiMap(HashBiMap.<String, UUID>create());
+    private final BiMap<String, UUID> uuidMap = HashBiMap.create();
+    private final ReadWriteLock lock = new ReentrantReadWriteLock();
     public static final Pattern UUID_PATTERN = Pattern.compile("[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}");
     public static final Pattern MOJANGIAN_UUID_PATTERN = Pattern.compile("[a-fA-F0-9]{32}");
 
-    public UUID getTranslatedUuid(@NonNull String player) {
+    public UUID getTranslatedUuid(@NonNull String player, boolean expensiveLookups) {
         if (ProxyServer.getInstance().getPlayer(player) != null)
             return ProxyServer.getInstance().getPlayer(player).getUniqueId();
 
-        UUID uuid = uuidMap.get(player);
-        if (uuid != null)
-            return uuid;
+        UUID uuid;
 
+        // Check if it exists in the map
+        lock.readLock().lock();
+        try {
+            uuid = uuidMap.get(player);
+            if (uuid != null)
+                return uuid;
+        } finally {
+            lock.readLock().unlock();
+        }
+
+        // Check if we can exit early
         if (UUID_PATTERN.matcher(player).find()) {
             return UUID.fromString(player);
         }
@@ -53,7 +65,21 @@ public class UUIDTranslator {
             return uuid;
         }
 
-        // Okay, it wasn't locally cached. Let's try Redis.
+        // We could not exit early. Look for the name, ignoring case.
+        if (expensiveLookups) {
+            lock.readLock().lock();
+            try {
+                for (Map.Entry<String, UUID> entry : uuidMap.entrySet()) {
+                    if (entry.getKey().equalsIgnoreCase(player)) {
+                        return entry.getValue();
+                    }
+                }
+            } finally {
+                lock.readLock().unlock();
+            }
+        }
+
+        // Okay, it wasn't locally cached and the expensive search didn't help us. Let's try Redis.
         Jedis jedis = plugin.getPool().getResource();
         try {
             try {
@@ -62,11 +88,19 @@ public class UUIDTranslator {
                     // This is it!
                     uuid = UUID.fromString(stored);
                     storeInfo(player, uuid, jedis);
-                    uuidMap.put(player, uuid);
+                    lock.writeLock().lock();
+                    try {
+                        uuidMap.put(player, uuid);
+                    } finally {
+                        lock.writeLock().unlock();
+                    }
                     return uuid;
                 }
 
                 // That didn't work. Let's ask Mojang.
+                if (!expensiveLookups)
+                    return null;
+
                 Map<String, UUID> uuidMap1;
                 try {
                     uuidMap1 = new UUIDFetcher(Collections.singletonList(player)).call();
@@ -76,8 +110,12 @@ public class UUIDTranslator {
                 }
                 for (Map.Entry<String, UUID> entry : uuidMap1.entrySet()) {
                     if (entry.getKey().equalsIgnoreCase(player)) {
-                        uuidMap.put(player, entry.getValue());
-                        storeInfo(player, entry.getValue(), jedis);
+                        try {
+                            uuidMap.put(entry.getKey(), entry.getValue());
+                        } finally {
+                            lock.writeLock().unlock();
+                        }
+                        storeInfo(entry.getKey(), entry.getValue(), jedis);
                         return entry.getValue();
                     }
                 }
@@ -93,11 +131,18 @@ public class UUIDTranslator {
         return null; // Nope, game over!
     }
 
-    public String getNameFromUuid(@NonNull UUID player) {
+    public String getNameFromUuid(@NonNull UUID player, boolean expensiveLookups) {
         if (ProxyServer.getInstance().getPlayer(player) != null)
             return ProxyServer.getInstance().getPlayer(player).getName();
 
-        String name = uuidMap.inverse().get(player);
+        String name;
+
+        lock.readLock().lock();
+        try {
+            name = uuidMap.inverse().get(player);
+        } finally {
+            lock.readLock().unlock();
+        }
 
         if (name != null)
             return name;
@@ -108,9 +153,17 @@ public class UUIDTranslator {
             String stored = jedis.hget("player:" + player, "name");
             if (stored != null) {
                 name = stored;
-                uuidMap.put(name, player);
+                lock.writeLock().lock();
+                try {
+                    uuidMap.put(name, player);
+                } finally {
+                    lock.writeLock().unlock();
+                }
                 return name;
             }
+
+            if (!expensiveLookups)
+                return null;
 
             // That didn't work. Let's ask Mojang.
             try {
@@ -122,6 +175,12 @@ public class UUIDTranslator {
 
             if (name != null) {
                 storeInfo(name, player, jedis);
+                lock.writeLock().lock();
+                try {
+                    uuidMap.put(name, player);
+                } finally {
+                    lock.writeLock().unlock();
+                }
                 return name;
             }
 
