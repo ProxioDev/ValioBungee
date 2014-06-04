@@ -341,10 +341,12 @@ public final class RedisBungee extends Plugin {
             }, 0, 3, TimeUnit.SECONDS);
             consumer = new RedisBungeeConsumer(this);
             new Thread(consumer, "RedisBungee Consumer Thread").start();
-            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.GlistCommand(this));
-            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.FindCommand(this));
-            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.LastSeenCommand(this));
-            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.IpCommand(this));
+            if (configuration.getBoolean("register-bungee-commands", true)) {
+                getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.GlistCommand(this));
+                getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.FindCommand(this));
+                getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.LastSeenCommand(this));
+                getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.IpCommand(this));
+            }
             getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.SendToAll(this));
             getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.ServerId(this));
             getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.ServerIds());

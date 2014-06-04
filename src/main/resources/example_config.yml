@@ -15,6 +15,17 @@ max-redis-connections: -1
 # An identifier for this BungeeCord instance.
 server-id: iluvbungee
 
+# Whether or not RedisBungee should install its version of regular BungeeCord commands.
+# Often, the RedisBungee commands are desired, but in some cases someone may wish to
+# override the commands using another plugin.
+#
+# If you are just denying access to the commands, RedisBungee uses the default BungeeCord
+# permissions - just deny them and access will be denied.
+#
+# Please note that with build 787+, most commands overridden by RedisBungee were moved to
+# modules, and these must be disabled or overridden yourself.
+register-bungee-commands: true
+
 # Whether or not /glist showall output should match vanilla BungeeCord.
 canonical-glist: true
 
