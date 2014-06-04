@@ -96,7 +96,7 @@ public class RedisBungeeListener implements Listener {
 
                     switch (subchannel) {
                         case "PlayerList":
-                            out.writeUTF("Players");
+                            out.writeUTF("PlayerList");
                             Set<UUID> original = Collections.emptySet();
                             type = in.readUTF();
                             if (type.equals("ALL")) {
