@@ -35,6 +35,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -60,6 +61,7 @@ public final class RedisBungee extends Plugin {
     private static RedisBungeeAPI api;
     private static PubSubListener psl = null;
     private List<String> serverIds;
+    private AtomicInteger nagAboutServers = new AtomicInteger();
     private int globalCount;
 
     /**
@@ -82,6 +84,10 @@ public final class RedisBungee extends Plugin {
     final List<String> getCurrentServerIds() {
         Jedis jedis = pool.getResource();
         try {
+            int nag = nagAboutServers.decrementAndGet();
+            if (nag <= 0) {
+                nagAboutServers.set(10);
+            }
             ImmutableList.Builder<String> servers = ImmutableList.builder();
             Map<String, String> heartbeats = jedis.hgetAll("heartbeats");
             for (Map.Entry<String, String> entry : heartbeats.entrySet()) {
@@ -89,6 +95,9 @@ public final class RedisBungee extends Plugin {
                     long stamp = Long.valueOf(entry.getValue());
                     if (System.currentTimeMillis() < stamp + 30000)
                         servers.add(entry.getKey());
+                    else if (nag == 0) {
+                        getLogger().severe(entry.getKey() + " is " + (System.currentTimeMillis() - stamp) + "ms behind! (Time not synchronized or server down?)");
+                    }
                 } catch (NumberFormatException ignored) {
                 }
             }
