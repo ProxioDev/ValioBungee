@@ -95,7 +95,7 @@ public final class RedisBungee extends Plugin {
                     long stamp = Long.valueOf(entry.getValue());
                     if (System.currentTimeMillis() < stamp + 30000)
                         servers.add(entry.getKey());
-                    else if (nag == 0) {
+                    else if (nag <= 0) {
                         getLogger().severe(entry.getKey() + " is " + (System.currentTimeMillis() - stamp) + "ms behind! (Time not synchronized or server down?)");
                     }
                 } catch (NumberFormatException ignored) {
