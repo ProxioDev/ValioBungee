@@ -30,12 +30,14 @@
 
     <distributionManagement>
         <repository>
-            <id>md_5-releases</id>
-            <url>http://repo.md-5.net/content/repositories/releases/</url>
+            <id>supaham-nexus</id>
+            <name>SupaHam - releases</name>
+            <url>http://repo.supaham.com/content/repositories/releases/</url>
         </repository>
         <snapshotRepository>
-            <id>md_5-snapshots</id>
-            <url>http://repo.md-5.net/content/repositories/snapshots/</url>
+            <id>supaham-nexus</id>
+            <name>SupaHam - snapshots</name>
+            <url>http://repo.supaham.com/content/repositories/snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 
