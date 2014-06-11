@@ -12,6 +12,7 @@ import com.imaginarycode.minecraft.redisbungee.consumerevents.PlayerLoggedInCons
 import com.imaginarycode.minecraft.redisbungee.consumerevents.PlayerLoggedOffConsumerEvent;
 import lombok.RequiredArgsConstructor;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Pipeline;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -46,17 +47,22 @@ public class RedisBungeeConsumer implements Runnable {
     private void handle(ConsumerEvent event, Jedis jedis) {
         if (event instanceof PlayerLoggedInConsumerEvent) {
             PlayerLoggedInConsumerEvent event1 = (PlayerLoggedInConsumerEvent) event;
-            jedis.sadd("server:" + RedisBungee.getApi().getServerId() + ":usersOnline", event1.getPlayer().getUniqueId().toString());
-            jedis.hset("player:" + event1.getPlayer().getUniqueId().toString(), "online", "0");
-            jedis.hset("player:" + event1.getPlayer().getUniqueId().toString(), "ip", event1.getPlayer().getAddress().getAddress().getHostAddress());
-            jedis.hset("player:" + event1.getPlayer().getUniqueId().toString(), "name", event1.getPlayer().getName());
-            jedis.hset("uuids", event1.getPlayer().getName().toLowerCase(), event1.getPlayer().getUniqueId().toString());
+            Pipeline pipeline = jedis.pipelined();
+            pipeline.sadd("server:" + RedisBungee.getApi().getServerId() + ":usersOnline", event1.getPlayer().getUniqueId().toString());
+            pipeline.hset("player:" + event1.getPlayer().getUniqueId().toString(), "online", "0");
+            pipeline.hset("player:" + event1.getPlayer().getUniqueId().toString(), "ip", event1.getPlayer().getAddress().getAddress().getHostAddress());
+            pipeline.hset("player:" + event1.getPlayer().getUniqueId().toString(), "name", event1.getPlayer().getName());
+            pipeline.hset("uuids", event1.getPlayer().getName().toLowerCase(), event1.getPlayer().getUniqueId().toString());
+            pipeline.sync();
         } else if (event instanceof PlayerLoggedOffConsumerEvent) {
             PlayerLoggedOffConsumerEvent event1 = (PlayerLoggedOffConsumerEvent) event;
+            Pipeline pipeline = jedis.pipelined();
             jedis.hset("player:" + event1.getPlayer().getUniqueId().toString(), "online", String.valueOf(System.currentTimeMillis()));
-            RedisUtil.cleanUpPlayer(event1.getPlayer().getUniqueId().toString(), jedis);
+            RedisUtil.cleanUpPlayer(event1.getPlayer().getUniqueId().toString(), pipeline);
+            pipeline.sync();
         } else if (event instanceof PlayerChangedServerConsumerEvent) {
             PlayerChangedServerConsumerEvent event1 = (PlayerChangedServerConsumerEvent) event;
+            // No use in pipelining this
             jedis.hset("player:" + event1.getPlayer().getUniqueId().toString(), "server", event1.getNewServer().getName());
         }
     }

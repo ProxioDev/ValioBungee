@@ -21,10 +21,7 @@ import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
-import redis.clients.jedis.JedisPubSub;
+import redis.clients.jedis.*;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.exceptions.JedisException;
 
@@ -409,8 +406,12 @@ public final class RedisBungee extends Plugin {
             try {
                 tmpRsc.hdel("playerCounts", serverId);
                 if (tmpRsc.scard("server:" + serverId + ":usersOnline") > 0) {
-                    for (String member : tmpRsc.smembers("server:" + serverId + ":usersOnline"))
-                        RedisUtil.cleanUpPlayer(member, tmpRsc);
+                    Set<String> players = tmpRsc.smembers("server:" + serverId + ":usersOnline");
+                    Pipeline pipeline = tmpRsc.pipelined();
+                    for (String member : players)
+                        RedisUtil.cleanUpPlayer(member, pipeline);
+
+                    pipeline.sync();
                 }
                 tmpRsc.hdel("heartbeats", serverId);
             } finally {
