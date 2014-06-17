@@ -332,8 +332,10 @@ public final class RedisBungee extends Plugin {
                 public void run() {
                     Jedis rsc = pool.getResource();
                     try {
-                        rsc.hset("playerCounts", serverId, String.valueOf(getProxy().getOnlineCount()));
-                        rsc.hset("heartbeats", serverId, String.valueOf(System.currentTimeMillis()));
+                        Pipeline pipeline = rsc.pipelined();
+                        pipeline.hset("playerCounts", serverId, String.valueOf(getProxy().getOnlineCount()));
+                        pipeline.hset("heartbeats", serverId, String.valueOf(System.currentTimeMillis()));
+                        pipeline.sync();
                     } catch (JedisConnectionException e) {
                         // Redis server has disappeared!
                         getLogger().log(Level.SEVERE, "Unable to update proxy counts - did your Redis server go away?", e);
@@ -405,6 +407,7 @@ public final class RedisBungee extends Plugin {
             Jedis tmpRsc = pool.getResource();
             try {
                 tmpRsc.hdel("playerCounts", serverId);
+                tmpRsc.hdel("heartbeats", serverId);
                 if (tmpRsc.scard("server:" + serverId + ":usersOnline") > 0) {
                     Set<String> players = tmpRsc.smembers("server:" + serverId + ":usersOnline");
                     Pipeline pipeline = tmpRsc.pipelined();
@@ -413,7 +416,6 @@ public final class RedisBungee extends Plugin {
 
                     pipeline.sync();
                 }
-                tmpRsc.hdel("heartbeats", serverId);
             } finally {
                 pool.returnResource(tmpRsc);
             }
@@ -443,53 +445,51 @@ public final class RedisBungee extends Plugin {
         String redisPassword = configuration.getString("redis-password");
         serverId = configuration.getString("server-id");
 
-        if (redisPassword != null && (redisPassword.equals("") || redisPassword.equals("none"))) {
+        if (redisPassword != null && (redisPassword.isEmpty() || redisPassword.equals("none"))) {
             redisPassword = null;
         }
 
         // Configuration sanity checks.
-        if (serverId == null || serverId.equals("")) {
+        if (serverId == null || serverId.isEmpty()) {
             throw new RuntimeException("server-id is not specified in the configuration or is empty");
         }
 
-        if (redisServer != null) {
-            if (!redisServer.equals("")) {
-                JedisPoolConfig config = new JedisPoolConfig();
-                config.setMaxTotal(configuration.getInt("max-redis-connections", -1));
-                pool = new JedisPool(config, redisServer, redisPort, 0, redisPassword);
-                // Test the connection
-                Jedis rsc = null;
-                try {
-                    rsc = pool.getResource();
-                    rsc.exists(String.valueOf(System.currentTimeMillis()));
-                    // If that worked, now we can check for an existing, alive Bungee:
-                    File crashFile = new File(getDataFolder(), "restarted_from_crash.txt");
-                    if (crashFile.exists())
-                        crashFile.delete();
-                    else if (rsc.hexists("heartbeats", serverId)) {
-                        try {
-                            Long value = Long.valueOf(rsc.hget("heartbeats", serverId));
-                            if (value != null && System.currentTimeMillis() < value + 20000) {
-                                getLogger().severe("You have launched a possible imposter BungeeCord instance. Another instance is already running.");
-                                getLogger().severe("For data consistency reasons, RedisBungee will now disable itself.");
-                                getLogger().severe("If this instance is coming up from a crash, create a file in your RedisBungee plugins directory with the name 'restarted_from_crash.txt' and RedisBungee will not perform this check.");
-                                throw new RuntimeException("Possible imposter instance!");
-                            }
-                        } catch (NumberFormatException ignored) {
+        if (redisServer != null && !redisServer.isEmpty()) {
+            JedisPoolConfig config = new JedisPoolConfig();
+            config.setMaxTotal(configuration.getInt("max-redis-connections", -1));
+            pool = new JedisPool(config, redisServer, redisPort, 0, redisPassword);
+            // Test the connection
+            Jedis rsc = null;
+            try {
+                rsc = pool.getResource();
+                rsc.exists(String.valueOf(System.currentTimeMillis()));
+                // If that worked, now we can check for an existing, alive Bungee:
+                File crashFile = new File(getDataFolder(), "restarted_from_crash.txt");
+                if (crashFile.exists())
+                    crashFile.delete();
+                else if (rsc.hexists("heartbeats", serverId)) {
+                    try {
+                        Long value = Long.valueOf(rsc.hget("heartbeats", serverId));
+                        if (value != null && System.currentTimeMillis() < value + 20000) {
+                            getLogger().severe("You have launched a possible imposter BungeeCord instance. Another instance is already running.");
+                            getLogger().severe("For data consistency reasons, RedisBungee will now disable itself.");
+                            getLogger().severe("If this instance is coming up from a crash, create a file in your RedisBungee plugins directory with the name 'restarted_from_crash.txt' and RedisBungee will not perform this check.");
+                            throw new RuntimeException("Possible imposter instance!");
                         }
+                    } catch (NumberFormatException ignored) {
                     }
-                    getLogger().log(Level.INFO, "Successfully connected to Redis.");
-                } catch (JedisConnectionException e) {
-                    if (rsc != null)
-                        pool.returnBrokenResource(rsc);
-                    pool.destroy();
-                    pool = null;
-                    rsc = null;
-                    throw e;
-                } finally {
-                    if (rsc != null && pool != null) {
-                        pool.returnResource(rsc);
-                    }
+                }
+                getLogger().log(Level.INFO, "Successfully connected to Redis.");
+            } catch (JedisConnectionException e) {
+                if (rsc != null)
+                    pool.returnBrokenResource(rsc);
+                pool.destroy();
+                pool = null;
+                rsc = null;
+                throw e;
+            } finally {
+                if (rsc != null && pool != null) {
+                    pool.returnResource(rsc);
                 }
             }
         } else {
