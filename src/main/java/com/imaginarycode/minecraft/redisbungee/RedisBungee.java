@@ -214,8 +214,9 @@ public final class RedisBungee extends Plugin {
         if (pool != null) {
             Jedis tmpRsc = pool.getResource();
             try {
-                if (tmpRsc.hexists("player:" + uuid, "server"))
-                    server = getProxy().getServerInfo(tmpRsc.hget("player:" + uuid, "server"));
+                String result = tmpRsc.hget("player:" + uuid, "server");
+                if (result != null)
+                    server = getProxy().getServerInfo(result);
             } catch (JedisConnectionException e) {
                 // Redis server has disappeared!
                 getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
@@ -234,9 +235,10 @@ public final class RedisBungee extends Plugin {
         if (pool != null) {
             Jedis tmpRsc = pool.getResource();
             try {
-                if (tmpRsc.hexists("player:" + uuid, "online"))
+                String result = tmpRsc.hget("player:" + uuid, "online");
+                if (result != null)
                     try {
-                        time = Long.valueOf(tmpRsc.hget("player:" + uuid, "online"));
+                        time = Long.valueOf(result);
                     } catch (NumberFormatException e) {
                         getLogger().info("I found a funny number for when " + uuid + " was last online!");
                         boolean found = false;
@@ -276,8 +278,9 @@ public final class RedisBungee extends Plugin {
         if (pool != null) {
             Jedis tmpRsc = pool.getResource();
             try {
-                if (tmpRsc.hexists("player:" + uuid, "ip"))
-                    ia = InetAddress.getByName(tmpRsc.hget("player:" + uuid, "ip"));
+                String result = tmpRsc.hget("player:" + uuid, "ip");
+                if (result != null)
+                    ia = InetAddress.getByName(result);
             } catch (JedisConnectionException e) {
                 // Redis server has disappeared!
                 getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
