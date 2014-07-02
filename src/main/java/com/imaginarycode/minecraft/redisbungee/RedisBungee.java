@@ -9,7 +9,6 @@ package com.imaginarycode.minecraft.redisbungee;
 import com.google.common.base.Functions;
 import com.google.common.collect.*;
 import com.google.common.io.ByteStreams;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.gson.Gson;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import com.imaginarycode.minecraft.redisbungee.util.UUIDTranslator;
@@ -29,8 +28,6 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -351,7 +348,7 @@ public final class RedisBungee extends Plugin {
                 }
             }, 0, 3, TimeUnit.SECONDS);
             consumer = new RedisBungeeConsumer(this);
-            new Thread(consumer, "RedisBungee Consumer Thread").start();
+            getProxy().getScheduler().runAsync(this, consumer);
             if (configuration.getBoolean("register-bungee-commands", true)) {
                 getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.GlistCommand(this));
                 getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.FindCommand(this));
@@ -527,12 +524,11 @@ public final class RedisBungee extends Plugin {
     }
 
     class JedisPubSubHandler extends JedisPubSub {
-        private final ExecutorService executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setDaemon(true).setNameFormat("RedisBungee PubSub Handler - #%d").build());
 
         @Override
         public void onMessage(final String s, final String s2) {
             if (s2.trim().length() == 0) return;
-            executor.submit(new Runnable() {
+            getProxy().getScheduler().runAsync(RedisBungee.this, new Runnable() {
                 @Override
                 public void run() {
                     getProxy().getPluginManager().callEvent(new PubSubMessageEvent(s, s2));
