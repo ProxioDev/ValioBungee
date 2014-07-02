@@ -46,7 +46,7 @@ class UUIDFetcher implements Callable<Map<String, UUID>> {
                 uuidMap.put(profile.name, uuid);
             }
             if (rateLimiting && i != requests - 1) {
-                Thread.sleep(100L);
+                Thread.sleep(100L); // FIXME: This is not how we into concurrency
             }
         }
         return uuidMap;
