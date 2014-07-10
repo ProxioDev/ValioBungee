@@ -28,6 +28,9 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
@@ -440,8 +443,8 @@ public final class RedisBungee extends Plugin {
 
         configuration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(file);
 
-        String redisServer = configuration.getString("redis-server", "localhost");
-        int redisPort = configuration.getInt("redis-port", 6379);
+        final String redisServer = configuration.getString("redis-server", "localhost");
+        final int redisPort = configuration.getInt("redis-port", 6379);
         String redisPassword = configuration.getString("redis-password");
         serverId = configuration.getString("server-id");
 
@@ -455,9 +458,25 @@ public final class RedisBungee extends Plugin {
         }
 
         if (redisServer != null && !redisServer.isEmpty()) {
-            JedisPoolConfig config = new JedisPoolConfig();
-            config.setMaxTotal(configuration.getInt("max-redis-connections", -1));
-            pool = new JedisPool(config, redisServer, redisPort, 0, redisPassword);
+            final String finalRedisPassword = redisPassword;
+            FutureTask<JedisPool> task = new FutureTask<>(new Callable<JedisPool>() {
+                @Override
+                public JedisPool call() throws Exception {
+                    JedisPoolConfig config = new JedisPoolConfig();
+                    config.setMaxTotal(configuration.getInt("max-redis-connections", -1));
+                    config.setJmxEnabled(false);
+                    return new JedisPool(config, redisServer, redisPort, 0, finalRedisPassword);
+                }
+            });
+
+            getProxy().getScheduler().runAsync(this, task);
+
+            try {
+                pool = task.get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException("Unable to create Redis pool", e);
+            }
+
             // Test the connection
             Jedis rsc = null;
             try {
