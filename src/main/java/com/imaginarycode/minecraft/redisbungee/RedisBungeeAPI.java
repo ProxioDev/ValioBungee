@@ -158,6 +158,17 @@ public class RedisBungeeAPI {
     }
 
     /**
+     * Sends a message to a PubSub channel. The channel has to be subscribed to on this, or another redisbungee instance for {@link com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent} to fire.
+     *
+     * @param channel The PubSub channel
+     * @param message the message body to send
+     * @since 0.3.3
+     */
+    public final void sendChannelMessage(@NonNull String channel, @NonNull String message) {
+	plugin.sendChannelMessage(channel, message);
+    }
+    
+    /**
      * Get the current BungeeCord server ID for this server.
      *
      * @return the current server ID

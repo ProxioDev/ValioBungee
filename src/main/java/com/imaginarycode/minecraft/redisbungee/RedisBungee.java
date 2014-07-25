@@ -12,6 +12,7 @@ import com.google.common.io.ByteStreams;
 import com.google.gson.Gson;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import com.imaginarycode.minecraft.redisbungee.util.UUIDTranslator;
+
 import lombok.Getter;
 import lombok.NonNull;
 import net.md_5.bungee.api.config.ServerInfo;
@@ -305,6 +306,20 @@ public final class RedisBungee extends Plugin {
             getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
             pool.returnBrokenResource(jedis);
             throw new RuntimeException("Unable to publish command", e);
+        } finally {
+            pool.returnResource(jedis);
+        }
+    }
+    
+    final void sendChannelMessage(String channel, String message) {
+        Jedis jedis = pool.getResource();
+        try {
+            jedis.publish(channel, message);
+        } catch (JedisConnectionException e) {
+            // Redis server has disappeared!
+            getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
+            pool.returnBrokenResource(jedis);
+            throw new RuntimeException("Unable to publish channel message", e);
         } finally {
             pool.returnResource(jedis);
         }
