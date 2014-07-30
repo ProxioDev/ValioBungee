@@ -51,8 +51,7 @@ public class RedisBungeeConsumer implements Runnable {
             pipeline.sadd("server:" + RedisBungee.getApi().getServerId() + ":usersOnline", event1.getPlayer().getUniqueId().toString());
             pipeline.hset("player:" + event1.getPlayer().getUniqueId().toString(), "online", "0");
             pipeline.hset("player:" + event1.getPlayer().getUniqueId().toString(), "ip", event1.getPlayer().getAddress().getAddress().getHostAddress());
-            pipeline.hset("player:" + event1.getPlayer().getUniqueId().toString(), "name", event1.getPlayer().getName());
-            pipeline.hset("uuids", event1.getPlayer().getName().toLowerCase(), event1.getPlayer().getUniqueId().toString());
+            plugin.getUuidTranslator().persistInfo(event1.getPlayer().getName(), event1.getPlayer().getUniqueId(), pipeline);
             pipeline.sync();
         } else if (event instanceof PlayerLoggedOffConsumerEvent) {
             PlayerLoggedOffConsumerEvent event1 = (PlayerLoggedOffConsumerEvent) event;
