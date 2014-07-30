@@ -35,10 +35,9 @@ public final class UUIDTranslator {
         // Cache the entry for three days.
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_MONTH, 3);
-        Date date = calendar.getTime();
 
         // Create the entry and populate the local maps
-        CachedUUIDEntry entry = new CachedUUIDEntry(name, uuid, date);
+        CachedUUIDEntry entry = new CachedUUIDEntry(name, uuid, calendar);
         nameToUuidMap.put(name.toLowerCase(), entry);
         uuidToNameMap.put(uuid, entry);
     }
@@ -199,10 +198,10 @@ public final class UUIDTranslator {
     private class CachedUUIDEntry {
         private final String name;
         private final UUID uuid;
-        private final Date expiry;
+        private final Calendar expiry;
 
         public boolean expired() {
-            return new Date().after(expiry);
+            return Calendar.getInstance().after(expiry);
         }
     }
 }
