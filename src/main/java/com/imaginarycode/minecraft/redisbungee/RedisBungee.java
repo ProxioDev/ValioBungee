@@ -179,7 +179,7 @@ public final class RedisBungee extends Plugin {
                     if (i.equals(serverId))
                         continue;
 
-                    keys.add("server:" + i + ":usersOnline");
+                    keys.add("proxy:" + i + ":usersOnline");
                 }
                 if (!keys.isEmpty()) {
                     Set<String> users = rsc.sunion(keys.toArray(new String[keys.size()]));
@@ -245,7 +245,7 @@ public final class RedisBungee extends Plugin {
                         boolean found = false;
                         for (String proxyId : getServerIds()) {
                             if (proxyId.equals(serverId)) continue;
-                            if (tmpRsc.sismember("server:" + proxyId + ":usersOnline", uuid.toString())) {
+                            if (tmpRsc.sismember("proxy:" + proxyId + ":usersOnline", uuid.toString())) {
                                 found = true;
                                 break;
                             }
@@ -386,13 +386,13 @@ public final class RedisBungee extends Plugin {
                     Jedis tmpRsc = pool.getResource();
                     try {
                         Collection<String> players = getLocalPlayersAsUuidStrings();
-                        for (String member : tmpRsc.smembers("server:" + serverId + ":usersOnline"))
+                        for (String member : tmpRsc.smembers("proxy:" + serverId + ":usersOnline"))
                             if (!players.contains(member)) {
                                 // Are they simply on a different proxy?
                                 boolean found = false;
                                 for (String proxyId : getServerIds()) {
                                     if (proxyId.equals(serverId)) continue;
-                                    if (tmpRsc.sismember("server:" + proxyId + ":usersOnline", member)) {
+                                    if (tmpRsc.sismember("proxy:" + proxyId + ":usersOnline", member)) {
                                         // Just clean up the set.
                                         found = true;
                                         break;
@@ -402,7 +402,7 @@ public final class RedisBungee extends Plugin {
                                     RedisUtil.cleanUpPlayer(member, tmpRsc);
                                     getLogger().warning("Player found in set that was not found locally and globally: " + member);
                                 } else {
-                                    tmpRsc.srem("server:" + serverId + ":usersOnline", member);
+                                    tmpRsc.srem("proxy:" + serverId + ":usersOnline", member);
                                     getLogger().warning("Player found in set that was not found locally, but is on another proxy: " + member);
                                 }
                             }
@@ -426,8 +426,8 @@ public final class RedisBungee extends Plugin {
             try {
                 tmpRsc.hdel("playerCounts", serverId);
                 tmpRsc.hdel("heartbeats", serverId);
-                if (tmpRsc.scard("server:" + serverId + ":usersOnline") > 0) {
-                    Set<String> players = tmpRsc.smembers("server:" + serverId + ":usersOnline");
+                if (tmpRsc.scard("proxy:" + serverId + ":usersOnline") > 0) {
+                    Set<String> players = tmpRsc.smembers("proxy:" + serverId + ":usersOnline");
                     Pipeline pipeline = tmpRsc.pipelined();
                     for (String member : players)
                         RedisUtil.cleanUpPlayer(member, pipeline);

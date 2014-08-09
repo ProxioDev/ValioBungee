@@ -32,19 +32,17 @@ public class RedisBungeeListener implements Listener {
 
     @EventHandler
     public void onPlayerConnect(final PostLoginEvent event) {
-        if (plugin.getPool() != null) {
-            Jedis rsc = plugin.getPool().getResource();
-            try {
-                for (String server : plugin.getServerIds()) {
-                    if (rsc.sismember("server:" + server + ":usersOnline", event.getPlayer().getUniqueId().toString())) {
-                        event.getPlayer().disconnect(new ComponentBuilder("You are already logged on to this server.").color(
-                                ChatColor.RED).create());
-                        return;
-                    }
+        Jedis rsc = plugin.getPool().getResource();
+        try {
+            for (String server : plugin.getServerIds()) {
+                if (rsc.sismember("proxy:" + server + ":usersOnline", event.getPlayer().getUniqueId().toString())) {
+                    event.getPlayer().disconnect(new ComponentBuilder("You are already logged on to this server.").color(
+                            ChatColor.RED).create());
+                    return;
                 }
-            } finally {
-                plugin.getPool().returnResource(rsc);
             }
+        } finally {
+            plugin.getPool().returnResource(rsc);
         }
         plugin.getConsumer().queue(new PlayerLoggedInConsumerEvent(event.getPlayer()));
     }
