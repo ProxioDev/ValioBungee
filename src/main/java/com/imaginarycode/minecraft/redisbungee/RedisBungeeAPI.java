@@ -165,7 +165,7 @@ public class RedisBungeeAPI {
      * @since 0.3.3
      */
     public final void sendChannelMessage(@NonNull String channel, @NonNull String message) {
-	plugin.sendChannelMessage(channel, message);
+	    plugin.sendChannelMessage(channel, message);
     }
     
     /**
