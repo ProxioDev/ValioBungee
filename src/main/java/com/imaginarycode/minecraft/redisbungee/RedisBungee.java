@@ -117,10 +117,8 @@ public final class RedisBungee extends Plugin {
 
     final Multimap<String, UUID> serversToPlayers() {
         ImmutableMultimap.Builder<String, UUID> multimapBuilder = ImmutableMultimap.builder();
-        for (UUID p : getPlayers()) {
-            String name = dataManager.getServer(p);
-            if (name != null)
-                multimapBuilder.put(name, p);
+        for (ServerInfo info : getProxy().getServers().values()) {
+            multimapBuilder.putAll(info.getName(), getPlayersOnServer(info.getName()));
         }
         return multimapBuilder.build();
     }
@@ -130,23 +128,12 @@ public final class RedisBungee extends Plugin {
     }
 
     final int getCurrentCount() {
-        int c = getProxy().getOnlineCount();
+        int c = 0;
         if (pool != null) {
             Jedis rsc = pool.getResource();
             try {
-                List<String> serverIds = getServerIds();
-                Map<String, String> counts = rsc.hgetAll("playerCounts");
-                for (Map.Entry<String, String> entry : counts.entrySet()) {
-                    if (!serverIds.contains(entry.getKey()))
-                        continue;
-
-                    if (entry.getKey().equals(serverId)) continue;
-
-                    try {
-                        c += Integer.valueOf(entry.getValue());
-                    } catch (NumberFormatException e) {
-                        rsc.hset("playerCounts", entry.getKey(), "0");
-                    }
+                for (String i : getServerIds()) {
+                    c += rsc.scard("proxy:" + i + ":usersOnline");
                 }
             } catch (JedisConnectionException e) {
                 // Redis server has disappeared!
@@ -207,8 +194,29 @@ public final class RedisBungee extends Plugin {
     }
 
     final Set<UUID> getPlayersOnServer(@NonNull String server) {
-        checkArgument(getProxy().getServerInfo(server) != null, "server doesn't exist");
-        return ImmutableSet.copyOf(serversToPlayers().get(server));
+        ServerInfo info = getProxy().getServerInfo(server);
+        checkArgument(info != null, "server doesn't exist");
+
+        ImmutableSet.Builder<UUID> setBuilder = ImmutableSet.builder();
+
+        Jedis jedis = pool.getResource();
+        try {
+            for (String s : jedis.smembers("server:" + server + ":players")) {
+                try {
+                    setBuilder.add(UUID.fromString(s));
+                } catch (IllegalArgumentException ignored) {
+                }
+            }
+        } catch (JedisConnectionException e) {
+            // Redis server has disappeared!
+            getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
+            pool.returnBrokenResource(jedis);
+            throw new RuntimeException("Unable to publish command", e);
+        } finally {
+            pool.returnResource(jedis);
+        }
+
+        return setBuilder.build();
     }
 
     final void sendProxyCommand(@NonNull String proxyId, @NonNull String command) {
@@ -252,7 +260,6 @@ public final class RedisBungee extends Plugin {
         if (pool != null) {
             Jedis tmpRsc = pool.getResource();
             try {
-                tmpRsc.hset("playerCounts", serverId, "0"); // reset
                 tmpRsc.hset("heartbeats", serverId, String.valueOf(System.currentTimeMillis()));
             } finally {
                 pool.returnResource(tmpRsc);
@@ -265,13 +272,10 @@ public final class RedisBungee extends Plugin {
                 public void run() {
                     Jedis rsc = pool.getResource();
                     try {
-                        Pipeline pipeline = rsc.pipelined();
-                        pipeline.hset("playerCounts", serverId, String.valueOf(getProxy().getOnlineCount()));
-                        pipeline.hset("heartbeats", serverId, String.valueOf(System.currentTimeMillis()));
-                        pipeline.sync();
+                        rsc.hset("heartbeats", serverId, String.valueOf(System.currentTimeMillis()));
                     } catch (JedisConnectionException e) {
                         // Redis server has disappeared!
-                        getLogger().log(Level.SEVERE, "Unable to update proxy counts - did your Redis server go away?", e);
+                        getLogger().log(Level.SEVERE, "Unable to update heartbeat - did your Redis server go away?", e);
                         pool.returnBrokenResource(rsc);
                     } finally {
                         pool.returnResource(rsc);
@@ -341,7 +345,6 @@ public final class RedisBungee extends Plugin {
             consumer.stop();
             Jedis tmpRsc = pool.getResource();
             try {
-                tmpRsc.hdel("playerCounts", serverId);
                 tmpRsc.hdel("heartbeats", serverId);
                 if (tmpRsc.scard("proxy:" + serverId + ":usersOnline") > 0) {
                     Set<String> players = tmpRsc.smembers("proxy:" + serverId + ":usersOnline");

@@ -11,10 +11,15 @@ import redis.clients.jedis.Pipeline;
 
 class RedisUtil {
     public static void cleanUpPlayer(String player, Jedis rsc) {
-        rsc.srem("proxy:" + RedisBungee.getApi().getServerId() + ":usersOnline", player);
-        rsc.hdel("player:" + player, "server");
-        rsc.hdel("player:" + player, "ip");
-        rsc.hdel("player:" + player, "proxy");
+        String server = rsc.hget("player:" + player, "server");
+
+        Pipeline pipeline = rsc.pipelined();
+
+        if (server != null)
+            pipeline.srem("server:" + server + ":players", player);
+
+        cleanUpPlayer(player, pipeline);
+        pipeline.sync();
     }
 
     public static void cleanUpPlayer(String player, Pipeline rsc) {

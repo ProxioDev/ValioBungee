@@ -6,14 +6,19 @@
  */
 package com.imaginarycode.minecraft.redisbungee.consumerevents;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
-@AllArgsConstructor
 @Getter
 public class PlayerChangedServerConsumerEvent implements ConsumerEvent {
     private final ProxiedPlayer player;
+    private final ServerInfo oldServer;
     private final ServerInfo newServer;
+
+    public PlayerChangedServerConsumerEvent(ProxiedPlayer player, ServerInfo newServer) {
+        this.player = player;
+        this.newServer = newServer;
+        this.oldServer = player.getServer() != null ? player.getServer().getInfo() : null;
+    }
 }

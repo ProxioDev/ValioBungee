@@ -59,6 +59,10 @@ public class RedisBungeeConsumer implements Runnable {
             PlayerLoggedOffConsumerEvent event1 = (PlayerLoggedOffConsumerEvent) event;
             Pipeline pipeline = jedis.pipelined();
             jedis.hset("player:" + event1.getPlayer().getUniqueId().toString(), "online", String.valueOf(System.currentTimeMillis()));
+
+            if (event1.getPlayer().getServer() != null)
+                pipeline.srem("server:" + event1.getPlayer().getServer().getInfo().getName() + ":players", event1.getPlayer().getUniqueId().toString());
+
             RedisUtil.cleanUpPlayer(event1.getPlayer().getUniqueId().toString(), pipeline);
             pipeline.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage(event1.getPlayer().getUniqueId(), DataManager.DataManagerMessage.Action.LEAVE)));
             pipeline.sync();
@@ -66,6 +70,11 @@ public class RedisBungeeConsumer implements Runnable {
             PlayerChangedServerConsumerEvent event1 = (PlayerChangedServerConsumerEvent) event;
             Pipeline pipeline = jedis.pipelined();
             pipeline.hset("player:" + event1.getPlayer().getUniqueId().toString(), "server", event1.getNewServer().getName());
+
+            if (event1.getOldServer() != null)
+                pipeline.srem("server:" + event1.getOldServer().getName() + ":players", event1.getPlayer().getUniqueId().toString());
+
+            pipeline.sadd("server:" + event1.getNewServer().getName() + ":players", event1.getPlayer().getUniqueId().toString());
             pipeline.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage(event1.getPlayer().getUniqueId(), DataManager.DataManagerMessage.Action.SERVER_CHANGE)));
             pipeline.sync();
         }
