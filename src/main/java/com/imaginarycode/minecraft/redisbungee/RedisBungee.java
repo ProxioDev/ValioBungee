@@ -55,6 +55,8 @@ public final class RedisBungee extends Plugin {
     private static Gson gson = new Gson();
     @Getter
     private String serverId;
+    @Getter
+    private DataManager dataManager;
     
     private static RedisBungeeAPI api;
     private static PubSubListener psl = null;
@@ -116,9 +118,7 @@ public final class RedisBungee extends Plugin {
     final Multimap<String, UUID> serversToPlayers() {
         ImmutableMultimap.Builder<String, UUID> multimapBuilder = ImmutableMultimap.builder();
         for (UUID p : getPlayers()) {
-            ServerInfo si = getServerFor(p);
-            if (si != null)
-                multimapBuilder = multimapBuilder.put(si.getName(), p);
+            multimapBuilder.put(dataManager.getServer(p), p);
         }
         return multimapBuilder.build();
     }
@@ -209,93 +209,6 @@ public final class RedisBungee extends Plugin {
         return ImmutableSet.copyOf(serversToPlayers().get(server));
     }
 
-    final ServerInfo getServerFor(@NonNull UUID uuid) {
-        ServerInfo server = null;
-        if (getProxy().getPlayer(uuid) != null) return getProxy().getPlayer(uuid).getServer().getInfo();
-        if (pool != null) {
-            Jedis tmpRsc = pool.getResource();
-            try {
-                String result = tmpRsc.hget("player:" + uuid, "server");
-                if (result != null)
-                    server = getProxy().getServerInfo(result);
-            } catch (JedisConnectionException e) {
-                // Redis server has disappeared!
-                getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
-                pool.returnBrokenResource(tmpRsc);
-                throw new RuntimeException("Unable to get server for " + uuid, e);
-            } finally {
-                pool.returnResource(tmpRsc);
-            }
-        }
-        return server;
-    }
-
-    final long getLastOnline(@NonNull UUID uuid) {
-        long time = -1L;
-        if (getProxy().getPlayer(uuid) != null) return 0;
-        if (pool != null) {
-            Jedis tmpRsc = pool.getResource();
-            try {
-                String result = tmpRsc.hget("player:" + uuid, "online");
-                if (result != null)
-                    try {
-                        time = Long.valueOf(result);
-                    } catch (NumberFormatException e) {
-                        getLogger().info("I found a funny number for when " + uuid + " was last online!");
-                        boolean found = false;
-                        for (String proxyId : getServerIds()) {
-                            if (proxyId.equals(serverId)) continue;
-                            if (tmpRsc.sismember("proxy:" + proxyId + ":usersOnline", uuid.toString())) {
-                                found = true;
-                                break;
-                            }
-                        }
-                        String value = "0";
-                        if (!found) {
-                            value = String.valueOf(System.currentTimeMillis());
-                            getLogger().info(uuid + " isn't online. Setting to current time.");
-                        } else {
-                            getLogger().info(uuid + " is online. Setting to 0. Please check your BungeeCord instances.");
-                            getLogger().info("If they are working properly, and this error does not resolve in a few minutes, please let Tux know!");
-                        }
-                        tmpRsc.hset("player:" + uuid, "online", value);
-                    }
-            } catch (JedisConnectionException e) {
-                // Redis server has disappeared!
-                getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
-                pool.returnBrokenResource(tmpRsc);
-                throw new RuntimeException("Unable to get last time online for " + uuid, e);
-            } finally {
-                pool.returnResource(tmpRsc);
-            }
-        }
-        return time;
-    }
-
-    final InetAddress getIpAddress(@NonNull UUID uuid) {
-        if (getProxy().getPlayer(uuid) != null)
-            return getProxy().getPlayer(uuid).getAddress().getAddress();
-        InetAddress ia = null;
-        if (pool != null) {
-            Jedis tmpRsc = pool.getResource();
-            try {
-                String result = tmpRsc.hget("player:" + uuid, "ip");
-                if (result != null)
-                    ia = InetAddress.getByName(result);
-            } catch (JedisConnectionException e) {
-                // Redis server has disappeared!
-                getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
-                pool.returnBrokenResource(tmpRsc);
-                throw new RuntimeException("Unable to fetch IP address for " + uuid, e);
-            } catch (UnknownHostException ignored) {
-                // Best to just return null
-            } finally {
-                pool.returnResource(tmpRsc);
-            }
-        }
-        return ia;
-    }
-
     final void sendProxyCommand(@NonNull String proxyId, @NonNull String command) {
         checkArgument(getServerIds().contains(proxyId) || proxyId.equals("allservers"), "proxyId is invalid");
         Jedis jedis = pool.getResource();
@@ -366,6 +279,7 @@ public final class RedisBungee extends Plugin {
                 }
             }, 0, 3, TimeUnit.SECONDS);
             consumer = new RedisBungeeConsumer(this);
+            dataManager = new DataManager(this);
             getProxy().getScheduler().runAsync(this, consumer);
             if (configuration.getBoolean("register-bungee-commands", true)) {
                 getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.GlistCommand(this));
@@ -378,6 +292,7 @@ public final class RedisBungee extends Plugin {
             getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.ServerIds());
             api = new RedisBungeeAPI(this);
             getProxy().getPluginManager().registerListener(this, new RedisBungeeListener(this));
+            getProxy().getPluginManager().registerListener(this, dataManager);
             psl = new PubSubListener();
             getProxy().getScheduler().runAsync(this, psl);
             getProxy().getScheduler().schedule(this, new Runnable() {
@@ -543,7 +458,7 @@ public final class RedisBungee extends Plugin {
             try {
                 rsc = pool.getResource();
                 jpsh = new JedisPubSubHandler();
-                rsc.subscribe(jpsh, "redisbungee-" + serverId, "redisbungee-allservers");
+                rsc.subscribe(jpsh, "redisbungee-" + serverId, "redisbungee-allservers", "redisbungee-data");
             } catch (JedisException | ClassCastException ignored) {
             }
         }

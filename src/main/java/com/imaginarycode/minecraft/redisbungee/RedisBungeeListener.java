@@ -120,7 +120,7 @@ public class RedisBungeeListener implements Listener {
                             String user = in.readUTF();
                             out.writeUTF("LastOnline");
                             out.writeUTF(user);
-                            out.writeLong(plugin.getLastOnline(plugin.getUuidTranslator().getTranslatedUuid(user, true)));
+                            out.writeLong(RedisBungee.getApi().getLastOnline(plugin.getUuidTranslator().getTranslatedUuid(user, true)));
                             break;
                         default:
                             break;

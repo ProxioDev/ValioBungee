@@ -53,12 +53,14 @@ public class RedisBungeeConsumer implements Runnable {
             pipeline.hset("player:" + event1.getPlayer().getUniqueId().toString(), "ip", event1.getPlayer().getAddress().getAddress().getHostAddress());
             plugin.getUuidTranslator().persistInfo(event1.getPlayer().getName(), event1.getPlayer().getUniqueId(), pipeline);
             pipeline.hset("player:" + event1.getPlayer().getUniqueId().toString(), "proxy", plugin.getServerId());
+            pipeline.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage(event1.getPlayer().getUniqueId(), DataManager.DataManagerMessage.Action.JOIN)));
             pipeline.sync();
         } else if (event instanceof PlayerLoggedOffConsumerEvent) {
             PlayerLoggedOffConsumerEvent event1 = (PlayerLoggedOffConsumerEvent) event;
             Pipeline pipeline = jedis.pipelined();
             jedis.hset("player:" + event1.getPlayer().getUniqueId().toString(), "online", String.valueOf(System.currentTimeMillis()));
             RedisUtil.cleanUpPlayer(event1.getPlayer().getUniqueId().toString(), pipeline);
+            pipeline.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage(event1.getPlayer().getUniqueId(), DataManager.DataManagerMessage.Action.LEAVE)));
             pipeline.sync();
         } else if (event instanceof PlayerChangedServerConsumerEvent) {
             PlayerChangedServerConsumerEvent event1 = (PlayerChangedServerConsumerEvent) event;

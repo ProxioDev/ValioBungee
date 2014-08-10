@@ -48,7 +48,7 @@ public class RedisBungeeAPI {
      * @return the last time a player was on, if online returns a 0
      */
     public final long getLastOnline(@NonNull UUID player) {
-        return plugin.getLastOnline(player);
+        return plugin.getDataManager().getLastOnline(player);
     }
 
     /**
@@ -59,7 +59,8 @@ public class RedisBungeeAPI {
      * @return a {@link net.md_5.bungee.api.config.ServerInfo} for the server the player is on.
      */
     public final ServerInfo getServerFor(@NonNull UUID player) {
-        return plugin.getServerFor(player);
+        String server = plugin.getDataManager().getServer(player);
+        return plugin.getProxy().getServerInfo(server);
     }
 
     /**
@@ -130,7 +131,7 @@ public class RedisBungeeAPI {
      * @since 0.2.4
      */
     public final InetAddress getPlayerIp(@NonNull UUID player) {
-        return plugin.getIpAddress(player);
+        return plugin.getDataManager().getIp(player);
     }
 
     /**
