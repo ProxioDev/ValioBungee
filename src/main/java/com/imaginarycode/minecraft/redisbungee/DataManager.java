@@ -22,7 +22,6 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 /**
@@ -40,7 +39,6 @@ public class DataManager implements Listener {
      * Most of these are purged only based on size limits but are also invalidated on certain actions.
      */
     private final Cache<UUID, String> serverCache = CacheBuilder.newBuilder()
-            .expireAfterWrite(5, TimeUnit.SECONDS)
             .maximumSize(2000)
             .concurrencyLevel(2)
             .build();
@@ -244,8 +242,12 @@ public class DataManager implements Listener {
         if (message.getSource().equals(source))
             return;
 
-        // For now we will just invalidate the caches. In a future version the action scope will be expanded ;)
-        invalidate(message.getTarget());
+        // For now we will just invalidate the caches, depending on what action occurred.
+        if (message.getAction() == DataManagerMessage.Action.SERVER_CHANGE) {
+            serverCache.invalidate(message.getTarget());
+        } else {
+            invalidate(message.getTarget());
+        }
     }
 
     @Getter
@@ -253,7 +255,8 @@ public class DataManager implements Listener {
     static class DataManagerMessage {
         enum Action {
             JOIN,
-            LEAVE
+            LEAVE,
+            SERVER_CHANGE
         }
 
         private final UUID target;

@@ -64,8 +64,10 @@ public class RedisBungeeConsumer implements Runnable {
             pipeline.sync();
         } else if (event instanceof PlayerChangedServerConsumerEvent) {
             PlayerChangedServerConsumerEvent event1 = (PlayerChangedServerConsumerEvent) event;
-            // No use in pipelining this
-            jedis.hset("player:" + event1.getPlayer().getUniqueId().toString(), "server", event1.getNewServer().getName());
+            Pipeline pipeline = jedis.pipelined();
+            pipeline.hset("player:" + event1.getPlayer().getUniqueId().toString(), "server", event1.getNewServer().getName());
+            pipeline.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage(event1.getPlayer().getUniqueId(), DataManager.DataManagerMessage.Action.SERVER_CHANGE)));
+            pipeline.sync();
         }
     }
 
