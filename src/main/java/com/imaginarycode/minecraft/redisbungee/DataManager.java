@@ -6,8 +6,6 @@
  */
 package com.imaginarycode.minecraft.redisbungee;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +20,8 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 
 /**
@@ -32,31 +32,10 @@ import java.util.logging.Level;
 @RequiredArgsConstructor
 public class DataManager implements Listener {
     private final RedisBungee plugin;
-
-    /*
-     * Caches of player data in Redis.
-     *
-     * Most of these are purged only based on size limits but are also invalidated on certain actions.
-     */
-    private final Cache<UUID, String> serverCache = CacheBuilder.newBuilder()
-            .maximumSize(2000)
-            .concurrencyLevel(2)
-            .build();
-
-    private final Cache<UUID, String> proxyCache = CacheBuilder.newBuilder()
-            .maximumSize(2000)
-            .concurrencyLevel(2)
-            .build();
-
-    private final Cache<UUID, InetAddress> ipCache = CacheBuilder.newBuilder()
-            .maximumSize(2000)
-            .concurrencyLevel(2)
-            .build();
-
-    private final Cache<UUID, Long> lastOnlineCache = CacheBuilder.newBuilder()
-            .maximumSize(2000)
-            .concurrencyLevel(2)
-            .build();
+    private final ConcurrentMap<UUID, String> serverCache = new ConcurrentHashMap<>(192, 0.65f, 4);
+    private final ConcurrentMap<UUID, String> proxyCache = new ConcurrentHashMap<>(192, 0.65f, 4);
+    private final ConcurrentMap<UUID, InetAddress> ipCache = new ConcurrentHashMap<>(192, 0.65f, 4);
+    private final ConcurrentMap<UUID, Long> lastOnlineCache = new ConcurrentHashMap<>(192, 0.65f, 4);
 
     static final UUID source = UUID.randomUUID();
 
@@ -66,7 +45,7 @@ public class DataManager implements Listener {
         if (player != null)
             return player.getServer() != null ? player.getServer().getInfo().getName() : null;
 
-        String server = serverCache.getIfPresent(uuid);
+        String server = serverCache.get(uuid);
 
         if (server != null)
             return server;
@@ -96,7 +75,7 @@ public class DataManager implements Listener {
         if (player != null)
             return plugin.getServerId();
 
-        String server = proxyCache.getIfPresent(uuid);
+        String server = proxyCache.get(uuid);
 
         if (server != null)
             return server;
@@ -126,7 +105,7 @@ public class DataManager implements Listener {
         if (player != null)
             return player.getAddress().getAddress();
 
-        InetAddress address = ipCache.getIfPresent(uuid);
+        InetAddress address = ipCache.get(uuid);
 
         if (address != null)
             return address;
@@ -162,7 +141,7 @@ public class DataManager implements Listener {
         if (player != null)
             return 0;
 
-        Long time = lastOnlineCache.getIfPresent(uuid);
+        Long time = lastOnlineCache.get(uuid);
 
         if (time != null)
             return time;
@@ -214,10 +193,10 @@ public class DataManager implements Listener {
     }
 
     private void invalidate(UUID uuid) {
-        ipCache.invalidate(uuid);
-        lastOnlineCache.invalidate(uuid);
-        serverCache.invalidate(uuid);
-        proxyCache.invalidate(uuid);
+        ipCache.remove(uuid);
+        lastOnlineCache.remove(uuid);
+        serverCache.remove(uuid);
+        proxyCache.remove(uuid);
     }
 
     @EventHandler
@@ -244,7 +223,7 @@ public class DataManager implements Listener {
 
         // For now we will just invalidate the caches, depending on what action occurred.
         if (message.getAction() == DataManagerMessage.Action.SERVER_CHANGE) {
-            serverCache.invalidate(message.getTarget());
+            serverCache.remove(message.getTarget());
         } else {
             invalidate(message.getTarget());
         }
