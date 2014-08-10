@@ -11,13 +11,7 @@ import redis.clients.jedis.Pipeline;
 
 class RedisUtil {
     public static void cleanUpPlayer(String player, Jedis rsc) {
-        String server = rsc.hget("player:" + player, "server");
-
         Pipeline pipeline = rsc.pipelined();
-
-        if (server != null)
-            pipeline.srem("server:" + server + ":players", player);
-
         cleanUpPlayer(player, pipeline);
         pipeline.sync();
     }

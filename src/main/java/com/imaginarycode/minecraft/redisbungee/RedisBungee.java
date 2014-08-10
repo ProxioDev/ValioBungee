@@ -117,8 +117,10 @@ public final class RedisBungee extends Plugin {
 
     final Multimap<String, UUID> serversToPlayers() {
         ImmutableMultimap.Builder<String, UUID> multimapBuilder = ImmutableMultimap.builder();
-        for (ServerInfo info : getProxy().getServers().values()) {
-            multimapBuilder.putAll(info.getName(), getPlayersOnServer(info.getName()));
+        for (UUID p : getPlayers()) {
+            String name = dataManager.getServer(p);
+            if (name != null)
+                multimapBuilder.put(name, p);
         }
         return multimapBuilder.build();
     }
@@ -194,29 +196,8 @@ public final class RedisBungee extends Plugin {
     }
 
     final Set<UUID> getPlayersOnServer(@NonNull String server) {
-        ServerInfo info = getProxy().getServerInfo(server);
-        checkArgument(info != null, "server doesn't exist");
-
-        ImmutableSet.Builder<UUID> setBuilder = ImmutableSet.builder();
-
-        Jedis jedis = pool.getResource();
-        try {
-            for (String s : jedis.smembers("server:" + server + ":players")) {
-                try {
-                    setBuilder.add(UUID.fromString(s));
-                } catch (IllegalArgumentException ignored) {
-                }
-            }
-        } catch (JedisConnectionException e) {
-            // Redis server has disappeared!
-            getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
-            pool.returnBrokenResource(jedis);
-            throw new RuntimeException("Unable to publish command", e);
-        } finally {
-            pool.returnResource(jedis);
-        }
-
-        return setBuilder.build();
+        checkArgument(getProxy().getServers().containsKey(server), "server does not exist");
+        return ImmutableSet.copyOf(serversToPlayers().get(server));
     }
 
     final void sendProxyCommand(@NonNull String proxyId, @NonNull String command) {
