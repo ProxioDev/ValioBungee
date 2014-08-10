@@ -114,7 +114,6 @@ public class RedisBungeeListener implements Listener {
                                     out.writeInt(0);
                                 }
                             }
-                            out.writeInt(plugin.getCurrentCount());
                             break;
                         case "LastOnline":
                             String user = in.readUTF();
