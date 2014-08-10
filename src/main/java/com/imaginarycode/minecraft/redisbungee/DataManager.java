@@ -245,7 +245,6 @@ public class DataManager implements Listener {
             return;
 
         // For now we will just invalidate the caches. In a future version the action scope will be expanded ;)
-        plugin.getLogger().info("Invaliding player " + message.getTarget() + " from PubSub");
         invalidate(message.getTarget());
     }
 
