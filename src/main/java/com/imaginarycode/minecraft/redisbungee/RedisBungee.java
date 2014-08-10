@@ -118,7 +118,9 @@ public final class RedisBungee extends Plugin {
     final Multimap<String, UUID> serversToPlayers() {
         ImmutableMultimap.Builder<String, UUID> multimapBuilder = ImmutableMultimap.builder();
         for (UUID p : getPlayers()) {
-            multimapBuilder.put(dataManager.getServer(p), p);
+            String name = dataManager.getServer(p);
+            if (name != null)
+                multimapBuilder.put(name, p);
         }
         return multimapBuilder.build();
     }
