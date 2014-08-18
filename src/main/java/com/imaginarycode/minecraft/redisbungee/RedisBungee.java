@@ -62,7 +62,6 @@ public final class RedisBungee extends Plugin {
     private static PubSubListener psl = null;
     private List<String> serverIds;
     private AtomicInteger nagAboutServers = new AtomicInteger();
-    private int globalCount;
 
     /**
      * Fetch the {@link RedisBungeeAPI} object created on plugin start.
@@ -126,10 +125,6 @@ public final class RedisBungee extends Plugin {
     }
 
     final int getCount() {
-        return globalCount;
-    }
-
-    final int getCurrentCount() {
         int c = 0;
         if (pool != null) {
             Jedis rsc = pool.getResource();
@@ -246,7 +241,6 @@ public final class RedisBungee extends Plugin {
                 pool.returnResource(tmpRsc);
             }
             serverIds = getCurrentServerIds();
-            globalCount = getCurrentCount();
             uuidTranslator = new UUIDTranslator(this);
             getProxy().getScheduler().schedule(this, new Runnable() {
                 @Override
@@ -262,7 +256,6 @@ public final class RedisBungee extends Plugin {
                         pool.returnResource(rsc);
                     }
                     serverIds = getCurrentServerIds();
-                    globalCount = getCurrentCount();
                 }
             }, 0, 3, TimeUnit.SECONDS);
             consumer = new RedisBungeeConsumer(this);
