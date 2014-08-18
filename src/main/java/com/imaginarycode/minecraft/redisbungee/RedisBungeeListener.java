@@ -22,6 +22,7 @@ import net.md_5.bungee.api.connection.Server;
 import net.md_5.bungee.api.event.*;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
+import net.md_5.bungee.event.EventPriority;
 import redis.clients.jedis.Jedis;
 
 import java.util.*;
@@ -57,7 +58,7 @@ public class RedisBungeeListener implements Listener {
         plugin.getConsumer().queue(new PlayerChangedServerConsumerEvent(event.getPlayer(), event.getServer().getInfo()));
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPing(ProxyPingEvent event) {
         ServerPing old = event.getResponse();
         ServerPing reply = new ServerPing();
