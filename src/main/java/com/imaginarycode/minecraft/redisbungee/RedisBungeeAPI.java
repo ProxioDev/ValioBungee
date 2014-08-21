@@ -135,6 +135,17 @@ public class RedisBungeeAPI {
     }
 
     /**
+     * Get the RedisBungee proxy ID this player is connected to.
+     *
+     * @param player the player to fetch the IP for
+     * @return the proxy the player is connected to, or null if they are offline
+     * @since 0.3.3
+     */
+    public final String getProxy(@NonNull UUID player) {
+        return plugin.getDataManager().getProxy(player);
+    }
+
+    /**
      * Sends a proxy command to all proxies.
      *
      * @param command the command to send and execute

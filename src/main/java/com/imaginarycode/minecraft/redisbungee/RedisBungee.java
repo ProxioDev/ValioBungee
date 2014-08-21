@@ -270,6 +270,7 @@ public final class RedisBungee extends Plugin {
             getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.SendToAll(this));
             getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.ServerId(this));
             getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.ServerIds());
+            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.PlayerProxyCommand(this));
             api = new RedisBungeeAPI(this);
             getProxy().getPluginManager().registerListener(this, new RedisBungeeListener(this));
             getProxy().getPluginManager().registerListener(this, dataManager);
