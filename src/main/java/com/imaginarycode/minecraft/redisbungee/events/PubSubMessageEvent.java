@@ -7,6 +7,7 @@
 package com.imaginarycode.minecraft.redisbungee.events;
 
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import net.md_5.bungee.api.plugin.Event;
 
 /**
@@ -17,6 +18,7 @@ import net.md_5.bungee.api.plugin.Event;
  * @since 0.2.6
  */
 @RequiredArgsConstructor
+@ToString
 public class PubSubMessageEvent extends Event {
     private final String channel;
     private final String message;

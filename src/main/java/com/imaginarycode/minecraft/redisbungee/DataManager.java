@@ -6,6 +6,12 @@
  */
 package com.imaginarycode.minecraft.redisbungee;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
+import com.imaginarycode.minecraft.redisbungee.events.PlayerChangedServerNetworkEvent;
+import com.imaginarycode.minecraft.redisbungee.events.PlayerJoinedNetworkEvent;
+import com.imaginarycode.minecraft.redisbungee.events.PlayerLeftNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +43,7 @@ public class DataManager implements Listener {
     private final ConcurrentMap<UUID, InetAddress> ipCache = new ConcurrentHashMap<>(192, 0.65f, 4);
     private final ConcurrentMap<UUID, Long> lastOnlineCache = new ConcurrentHashMap<>(192, 0.65f, 4);
 
-    static final UUID source = UUID.randomUUID();
+    private final JsonParser parser = new JsonParser();
 
     public String getServer(UUID uuid) {
         ProxiedPlayer player = plugin.getProxy().getPlayer(uuid);
@@ -216,22 +222,56 @@ public class DataManager implements Listener {
         if (!event.getChannel().equals("redisbungee-data"))
             return;
 
-        DataManagerMessage message = RedisBungee.getGson().fromJson(event.getMessage(), DataManagerMessage.class);
+        // Partially deserialize the message so we can look at the action
+        JsonObject jsonObject = parser.parse(event.getMessage()).getAsJsonObject();
 
-        if (message.getSource().equals(source))
+        String source = jsonObject.get("source").getAsString();
+
+        if (source.equals(plugin.getServerId()))
             return;
 
-        // For now we will just invalidate the caches, depending on what action occurred.
-        if (message.getAction() == DataManagerMessage.Action.SERVER_CHANGE) {
-            serverCache.remove(message.getTarget());
-        } else {
-            invalidate(message.getTarget());
+        DataManagerMessage.Action action = DataManagerMessage.Action.valueOf(jsonObject.get("action").getAsString());
+
+        switch (action) {
+            case JOIN:
+                final DataManagerMessage<LoginPayload> message1 = RedisBungee.getGson().fromJson(jsonObject, new TypeToken<DataManagerMessage<LoginPayload>>() {}.getType());
+                proxyCache.put(message1.getTarget(), message1.getSource());
+                lastOnlineCache.put(message1.getTarget(), (long)0);
+                ipCache.put(message1.getTarget(), message1.getPayload().getAddress());
+                plugin.getProxy().getScheduler().runAsync(plugin, new Runnable() {
+                    @Override
+                    public void run() {
+                        plugin.getProxy().getPluginManager().callEvent(new PlayerJoinedNetworkEvent(message1.getTarget()));
+                    }
+                });
+                break;
+            case LEAVE:
+                final DataManagerMessage<LogoutPayload> message2 = RedisBungee.getGson().fromJson(jsonObject, new TypeToken<DataManagerMessage<LogoutPayload>>() {}.getType());
+                invalidate(message2.getTarget());
+                lastOnlineCache.put(message2.getTarget(), message2.getPayload().getTimestamp());
+                plugin.getProxy().getScheduler().runAsync(plugin, new Runnable() {
+                    @Override
+                    public void run() {
+                        plugin.getProxy().getPluginManager().callEvent(new PlayerLeftNetworkEvent(message2.getTarget()));
+                    }
+                });
+                break;
+            case SERVER_CHANGE:
+                final DataManagerMessage<ServerChangePayload> message3 = RedisBungee.getGson().fromJson(jsonObject, new TypeToken<DataManagerMessage<ServerChangePayload>>() {}.getType());
+                serverCache.put(message3.getTarget(), message3.getPayload().getServer());
+                plugin.getProxy().getScheduler().runAsync(plugin, new Runnable() {
+                    @Override
+                    public void run() {
+                        plugin.getProxy().getPluginManager().callEvent(new PlayerChangedServerNetworkEvent(message3.getTarget(), message3.getPayload().getServer()));
+                    }
+                });
+                break;
         }
     }
 
     @Getter
     @RequiredArgsConstructor
-    static class DataManagerMessage {
+    static class DataManagerMessage<T> {
         enum Action {
             JOIN,
             LEAVE,
@@ -239,7 +279,26 @@ public class DataManager implements Listener {
         }
 
         private final UUID target;
-        private final UUID source = DataManager.source;
+        private final String source = RedisBungee.getApi().getServerId();
         private final Action action; // for future use!
+        private final T payload;
+    }
+
+    @Getter
+    @RequiredArgsConstructor
+    static class LoginPayload {
+        private final InetAddress address;
+    }
+
+    @Getter
+    @RequiredArgsConstructor
+    static class ServerChangePayload {
+        private final String server;
+    }
+
+    @Getter
+    @RequiredArgsConstructor
+    static class LogoutPayload {
+        private final long timestamp;
     }
 }
