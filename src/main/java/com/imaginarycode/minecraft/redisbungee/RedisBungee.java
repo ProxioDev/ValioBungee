@@ -10,12 +10,12 @@ import com.google.common.base.Functions;
 import com.google.common.collect.*;
 import com.google.common.io.ByteStreams;
 import com.google.gson.Gson;
+import com.imaginarycode.minecraft.redisbungee.consumerevents.PlayerLoggedInConsumerEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import com.imaginarycode.minecraft.redisbungee.util.UUIDTranslator;
 
 import lombok.Getter;
 import lombok.NonNull;
-import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
@@ -281,8 +281,10 @@ public final class RedisBungee extends Plugin {
                 public void run() {
                     Jedis tmpRsc = pool.getResource();
                     try {
-                        Collection<String> players = getLocalPlayersAsUuidStrings();
-                        for (String member : tmpRsc.smembers("proxy:" + serverId + ":usersOnline"))
+                        Set<String> players = new HashSet<>(getLocalPlayersAsUuidStrings());
+                        Set<String> redisCollection = tmpRsc.smembers("proxy:" + serverId + ":usersOnline");
+
+                        for (String member : redisCollection) {
                             if (!players.contains(member)) {
                                 // Are they simply on a different proxy?
                                 boolean found = false;
@@ -302,11 +304,21 @@ public final class RedisBungee extends Plugin {
                                     getLogger().warning("Player found in set that was not found locally, but is on another proxy: " + member);
                                 }
                             }
+                        }
+
+                        for (String player : players) {
+                            if (redisCollection.contains(player))
+                                continue;
+
+                            // Player not online according to Redis but not BungeeCord. Fire another consumer event.
+                            getLogger().warning("Player " + player + " is on the proxy but not in Redis.");
+                            consumer.queue(new PlayerLoggedInConsumerEvent(getProxy().getPlayer(UUID.fromString(player))));
+                        }
                     } finally {
                         pool.returnResource(tmpRsc);
                     }
                 }
-            }, 0, 3, TimeUnit.MINUTES);
+            }, 0, 1, TimeUnit.MINUTES);
         }
         getProxy().registerChannel("RedisBungee");
     }
