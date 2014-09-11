@@ -17,6 +17,7 @@ import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import lombok.AllArgsConstructor;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ServerPing;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.connection.Server;
 import net.md_5.bungee.api.event.*;
@@ -30,6 +31,11 @@ import java.util.*;
 @AllArgsConstructor
 public class RedisBungeeListener implements Listener {
     private final RedisBungee plugin;
+    private static final BaseComponent[] ALREADY_LOGGED_IN =
+            new ComponentBuilder("You are already logged on to this server.").color(ChatColor.RED)
+                    .append("\n\nIf you were disconnected forcefully, please wait up to one minute.\nIf this does not resolve your issue, please contact staff.")
+                    .color(ChatColor.GRAY)
+                    .create();
 
     @EventHandler
     public void onPlayerConnect(final PostLoginEvent event) {
@@ -37,15 +43,15 @@ public class RedisBungeeListener implements Listener {
         try {
             for (String server : plugin.getServerIds()) {
                 if (rsc.sismember("proxy:" + server + ":usersOnline", event.getPlayer().getUniqueId().toString())) {
-                    event.getPlayer().disconnect(new ComponentBuilder("You are already logged on to this server.").color(
-                            ChatColor.RED).create());
+                    event.getPlayer().disconnect(ALREADY_LOGGED_IN);
                     return;
                 }
             }
+
+            plugin.getConsumer().queue(new PlayerLoggedInConsumerEvent(event.getPlayer()));
         } finally {
             plugin.getPool().returnResource(rsc);
         }
-        plugin.getConsumer().queue(new PlayerLoggedInConsumerEvent(event.getPlayer()));
     }
 
     @EventHandler

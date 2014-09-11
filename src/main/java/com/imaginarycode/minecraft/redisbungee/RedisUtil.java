@@ -7,16 +7,9 @@
 package com.imaginarycode.minecraft.redisbungee;
 
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.Pipeline;
 
 class RedisUtil {
     public static void cleanUpPlayer(String player, Jedis rsc) {
-        Pipeline pipeline = rsc.pipelined();
-        cleanUpPlayer(player, pipeline);
-        pipeline.sync();
-    }
-
-    public static void cleanUpPlayer(String player, Pipeline rsc) {
         rsc.srem("proxy:" + RedisBungee.getApi().getServerId() + ":usersOnline", player);
         rsc.hdel("player:" + player, "server");
         rsc.hdel("player:" + player, "ip");

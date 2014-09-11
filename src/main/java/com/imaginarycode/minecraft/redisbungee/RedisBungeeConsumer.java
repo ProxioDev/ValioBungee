@@ -47,34 +47,31 @@ public class RedisBungeeConsumer implements Runnable {
     private void handle(ConsumerEvent event, Jedis jedis) {
         if (event instanceof PlayerLoggedInConsumerEvent) {
             PlayerLoggedInConsumerEvent event1 = (PlayerLoggedInConsumerEvent) event;
-            Pipeline pipeline = jedis.pipelined();
-            pipeline.sadd("proxy:" + RedisBungee.getApi().getServerId() + ":usersOnline", event1.getPlayer().getUniqueId().toString());
-            pipeline.hset("player:" + event1.getPlayer().getUniqueId().toString(), "online", "0");
-            pipeline.hset("player:" + event1.getPlayer().getUniqueId().toString(), "ip", event1.getPlayer().getAddress().getAddress().getHostAddress());
-            plugin.getUuidTranslator().persistInfo(event1.getPlayer().getName(), event1.getPlayer().getUniqueId(), pipeline);
-            pipeline.hset("player:" + event1.getPlayer().getUniqueId().toString(), "proxy", plugin.getServerId());
-            pipeline.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage<>(
+            jedis.sadd("proxy:" + RedisBungee.getApi().getServerId() + ":usersOnline", event1.getPlayer().getUniqueId().toString());
+            jedis.hset("player:" + event1.getPlayer().getUniqueId().toString(), "online", "0");
+            jedis.hset("player:" + event1.getPlayer().getUniqueId().toString(), "ip", event1.getPlayer().getAddress().getAddress().getHostAddress());
+            plugin.getUuidTranslator().persistInfo(event1.getPlayer().getName(), event1.getPlayer().getUniqueId(), jedis);
+            jedis.hset("player:" + event1.getPlayer().getUniqueId().toString(), "proxy", plugin.getServerId());
+            jedis.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage<>(
                     event1.getPlayer().getUniqueId(), DataManager.DataManagerMessage.Action.JOIN,
                     new DataManager.LoginPayload(event1.getPlayer().getAddress().getAddress()))));
-            pipeline.sync();
+            jedis.sync();
         } else if (event instanceof PlayerLoggedOffConsumerEvent) {
             PlayerLoggedOffConsumerEvent event1 = (PlayerLoggedOffConsumerEvent) event;
-            Pipeline pipeline = jedis.pipelined();
             long timestamp = System.currentTimeMillis();
-            pipeline.hset("player:" + event1.getPlayer().getUniqueId().toString(), "online", String.valueOf(timestamp));
-            RedisUtil.cleanUpPlayer(event1.getPlayer().getUniqueId().toString(), pipeline);
-            pipeline.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage<>(
+            jedis.hset("player:" + event1.getPlayer().getUniqueId().toString(), "online", String.valueOf(timestamp));
+            RedisUtil.cleanUpPlayer(event1.getPlayer().getUniqueId().toString(), jedis);
+            jedis.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage<>(
                     event1.getPlayer().getUniqueId(), DataManager.DataManagerMessage.Action.LEAVE,
                     new DataManager.LogoutPayload(timestamp))));
-            pipeline.sync();
+            jedis.sync();
         } else if (event instanceof PlayerChangedServerConsumerEvent) {
             PlayerChangedServerConsumerEvent event1 = (PlayerChangedServerConsumerEvent) event;
-            Pipeline pipeline = jedis.pipelined();
-            pipeline.hset("player:" + event1.getPlayer().getUniqueId().toString(), "server", event1.getNewServer().getName());
-            pipeline.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage<>(
+            jedis.hset("player:" + event1.getPlayer().getUniqueId().toString(), "server", event1.getNewServer().getName());
+            jedis.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage<>(
                     event1.getPlayer().getUniqueId(), DataManager.DataManagerMessage.Action.SERVER_CHANGE,
                     new DataManager.ServerChangePayload(event1.getNewServer().getName()))));
-            pipeline.sync();
+            jedis.sync();
         }
     }
 

@@ -181,13 +181,7 @@ public final class UUIDTranslator {
         }
     }
 
-    protected final void persistInfo(String name, UUID uuid, Jedis jedis) {
-        addToMaps(name, uuid);
-        jedis.hset("uuid-cache", name.toLowerCase(), RedisBungee.getGson().toJson(uuidToNameMap.get(uuid)));
-        jedis.hset("uuid-cache", uuid.toString(), RedisBungee.getGson().toJson(uuidToNameMap.get(uuid)));
-    }
-
-    public final void persistInfo(String name, UUID uuid, Pipeline jedis) {
+    public final void persistInfo(String name, UUID uuid, Jedis jedis) {
         addToMaps(name, uuid);
         jedis.hset("uuid-cache", name.toLowerCase(), RedisBungee.getGson().toJson(uuidToNameMap.get(uuid)));
         jedis.hset("uuid-cache", uuid.toString(), RedisBungee.getGson().toJson(uuidToNameMap.get(uuid)));

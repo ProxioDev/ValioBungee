@@ -335,11 +335,8 @@ public final class RedisBungee extends Plugin {
                 tmpRsc.hdel("heartbeats", serverId);
                 if (tmpRsc.scard("proxy:" + serverId + ":usersOnline") > 0) {
                     Set<String> players = tmpRsc.smembers("proxy:" + serverId + ":usersOnline");
-                    Pipeline pipeline = tmpRsc.pipelined();
                     for (String member : players)
-                        RedisUtil.cleanUpPlayer(member, pipeline);
-
-                    pipeline.sync();
+                        RedisUtil.cleanUpPlayer(member, tmpRsc);
                 }
             } finally {
                 pool.returnResource(tmpRsc);
