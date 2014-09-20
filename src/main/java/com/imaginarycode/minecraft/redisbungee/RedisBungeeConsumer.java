@@ -55,7 +55,6 @@ public class RedisBungeeConsumer implements Runnable {
             jedis.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage<>(
                     event1.getPlayer().getUniqueId(), DataManager.DataManagerMessage.Action.JOIN,
                     new DataManager.LoginPayload(event1.getPlayer().getAddress().getAddress()))));
-            jedis.sync();
         } else if (event instanceof PlayerLoggedOffConsumerEvent) {
             PlayerLoggedOffConsumerEvent event1 = (PlayerLoggedOffConsumerEvent) event;
             long timestamp = System.currentTimeMillis();
@@ -64,14 +63,12 @@ public class RedisBungeeConsumer implements Runnable {
             jedis.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage<>(
                     event1.getPlayer().getUniqueId(), DataManager.DataManagerMessage.Action.LEAVE,
                     new DataManager.LogoutPayload(timestamp))));
-            jedis.sync();
         } else if (event instanceof PlayerChangedServerConsumerEvent) {
             PlayerChangedServerConsumerEvent event1 = (PlayerChangedServerConsumerEvent) event;
             jedis.hset("player:" + event1.getPlayer().getUniqueId().toString(), "server", event1.getNewServer().getName());
             jedis.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage<>(
                     event1.getPlayer().getUniqueId(), DataManager.DataManagerMessage.Action.SERVER_CHANGE,
                     new DataManager.ServerChangePayload(event1.getNewServer().getName()))));
-            jedis.sync();
         }
     }
 
