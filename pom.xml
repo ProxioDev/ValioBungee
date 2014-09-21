@@ -7,8 +7,8 @@
     as published by Sam Hocevar. See http://www.wtfpl.net/ for more details.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -66,15 +66,18 @@
                             <relocations>
                                 <relocation>
                                     <pattern>redis.clients.jedis</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.jedis</shadedPattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.jedis
+                                    </shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>redis.clients.util</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.jedisutil</shadedPattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.jedisutil
+                                    </shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.apache.commons.pool</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.commonspool</shadedPattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.commonspool
+                                    </shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>

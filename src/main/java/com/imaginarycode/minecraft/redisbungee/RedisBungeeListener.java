@@ -29,12 +29,12 @@ import java.util.concurrent.Callable;
 
 @AllArgsConstructor
 public class RedisBungeeListener implements Listener {
-    private final RedisBungee plugin;
     private static final BaseComponent[] ALREADY_LOGGED_IN =
             new ComponentBuilder("You are already logged on to this server.").color(ChatColor.RED)
                     .append("\n\nIf you were disconnected forcefully, please wait up to one minute.\nIf this does not resolve your issue, please contact staff.")
                     .color(ChatColor.GRAY)
                     .create();
+    private final RedisBungee plugin;
 
     @EventHandler
     public void onPlayerConnect(final PostLoginEvent event) {

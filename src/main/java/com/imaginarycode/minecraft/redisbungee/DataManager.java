@@ -25,7 +25,7 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.*;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
@@ -234,9 +234,10 @@ public class DataManager implements Listener {
 
         switch (action) {
             case JOIN:
-                final DataManagerMessage<LoginPayload> message1 = RedisBungee.getGson().fromJson(jsonObject, new TypeToken<DataManagerMessage<LoginPayload>>() {}.getType());
+                final DataManagerMessage<LoginPayload> message1 = RedisBungee.getGson().fromJson(jsonObject, new TypeToken<DataManagerMessage<LoginPayload>>() {
+                }.getType());
                 proxyCache.put(message1.getTarget(), message1.getSource());
-                lastOnlineCache.put(message1.getTarget(), (long)0);
+                lastOnlineCache.put(message1.getTarget(), (long) 0);
                 ipCache.put(message1.getTarget(), message1.getPayload().getAddress());
                 plugin.getProxy().getScheduler().runAsync(plugin, new Runnable() {
                     @Override
@@ -246,7 +247,8 @@ public class DataManager implements Listener {
                 });
                 break;
             case LEAVE:
-                final DataManagerMessage<LogoutPayload> message2 = RedisBungee.getGson().fromJson(jsonObject, new TypeToken<DataManagerMessage<LogoutPayload>>() {}.getType());
+                final DataManagerMessage<LogoutPayload> message2 = RedisBungee.getGson().fromJson(jsonObject, new TypeToken<DataManagerMessage<LogoutPayload>>() {
+                }.getType());
                 invalidate(message2.getTarget());
                 lastOnlineCache.put(message2.getTarget(), message2.getPayload().getTimestamp());
                 plugin.getProxy().getScheduler().runAsync(plugin, new Runnable() {
@@ -257,7 +259,8 @@ public class DataManager implements Listener {
                 });
                 break;
             case SERVER_CHANGE:
-                final DataManagerMessage<ServerChangePayload> message3 = RedisBungee.getGson().fromJson(jsonObject, new TypeToken<DataManagerMessage<ServerChangePayload>>() {}.getType());
+                final DataManagerMessage<ServerChangePayload> message3 = RedisBungee.getGson().fromJson(jsonObject, new TypeToken<DataManagerMessage<ServerChangePayload>>() {
+                }.getType());
                 serverCache.put(message3.getTarget(), message3.getPayload().getServer());
                 plugin.getProxy().getScheduler().runAsync(plugin, new Runnable() {
                     @Override
@@ -272,16 +275,15 @@ public class DataManager implements Listener {
     @Getter
     @RequiredArgsConstructor
     static class DataManagerMessage<T> {
+        private final UUID target;
+        private final String source = RedisBungee.getApi().getServerId();
+        private final Action action; // for future use!
+        private final T payload;
         enum Action {
             JOIN,
             LEAVE,
             SERVER_CHANGE
         }
-
-        private final UUID target;
-        private final String source = RedisBungee.getApi().getServerId();
-        private final Action action; // for future use!
-        private final T payload;
     }
 
     @Getter

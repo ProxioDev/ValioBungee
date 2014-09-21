@@ -81,8 +81,8 @@ public class RedisBungeeAPI {
      * are lazily calculated (but cached, see the contract of {@link #getNameFromUuid(java.util.UUID)}).</strong>
      *
      * @return a Set with all players found
-     * @since 0.3
      * @see #getNameFromUuid(java.util.UUID)
+     * @since 0.3
      */
     public final Collection<String> getHumanPlayersOnline() {
         return Collections2.transform(getPlayersOnline(), new Function<UUID, String>() {
@@ -177,9 +177,9 @@ public class RedisBungeeAPI {
      * @since 0.3.3
      */
     public final void sendChannelMessage(@NonNull String channel, @NonNull String message) {
-	    plugin.sendChannelMessage(channel, message);
+        plugin.sendChannelMessage(channel, message);
     }
-    
+
     /**
      * Get the current BungeeCord server ID for this server.
      *
@@ -248,7 +248,7 @@ public class RedisBungeeAPI {
      * <p>
      * If performance is a concern, set {@code expensiveLookups} to false as this will disable lookups via Mojang.
      *
-     * @param uuid the UUID to fetch the name for
+     * @param uuid             the UUID to fetch the name for
      * @param expensiveLookups whether or not to perform potentially expensive lookups
      * @return the name for the UUID
      * @since 0.3.2
@@ -263,8 +263,8 @@ public class RedisBungeeAPI {
      * <p>
      * If performance is a concern, see {@link #getUuidFromName(String, boolean)}, which disables the following functions:
      * <ul>
-     *     <li>Searching local entries case-insensitively</li>
-     *     <li>Searching Mojang</li>
+     * <li>Searching local entries case-insensitively</li>
+     * <li>Searching Mojang</li>
      * </ul>
      *
      * @param name the UUID to fetch the name for
@@ -282,7 +282,7 @@ public class RedisBungeeAPI {
      * If performance is a concern, set {@code expensiveLookups} to false to disable searching Mojang and searching for usernames
      * case-insensitively.
      *
-     * @param name the UUID to fetch the name for
+     * @param name             the UUID to fetch the name for
      * @param expensiveLookups whether or not to perform potentially expensive lookups
      * @return the UUID for the name
      * @since 0.3.2

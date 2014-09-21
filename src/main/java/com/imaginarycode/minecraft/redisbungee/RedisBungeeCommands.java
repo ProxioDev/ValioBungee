@@ -25,7 +25,7 @@ import java.util.UUID;
 
 /**
  * This class contains subclasses that are used for the commands RedisBungee overrides or includes: /glist, /find and /lastseen.
- * <p/>
+ * <p>
  * All classes use the {@link RedisBungeeAPI}.
  *
  * @author tuxed

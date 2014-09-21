@@ -12,7 +12,6 @@ import com.google.common.io.ByteStreams;
 import com.google.gson.Gson;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import com.imaginarycode.minecraft.redisbungee.util.UUIDTranslator;
-
 import lombok.Getter;
 import lombok.NonNull;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -20,7 +19,10 @@ import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
-import redis.clients.jedis.*;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.JedisPubSub;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.exceptions.JedisException;
 
@@ -40,20 +42,19 @@ import static com.google.common.base.Preconditions.checkArgument;
 public final class RedisBungee extends Plugin {
     private static Configuration configuration;
     @Getter
+    private static Gson gson = new Gson();
+    private static RedisBungeeAPI api;
+    private static PubSubListener psl = null;
+    @Getter
     private JedisPool pool;
     @Getter
     private UUIDTranslator uuidTranslator;
-    @Getter
-    private static Gson gson = new Gson();
     @Getter
     private String serverId;
     @Getter
     private DataManager dataManager;
     @Getter
     private ExecutorService service;
-    
-    private static RedisBungeeAPI api;
-    private static PubSubListener psl = null;
     private List<String> serverIds;
     private AtomicInteger nagAboutServers = new AtomicInteger();
 
@@ -68,6 +69,10 @@ public final class RedisBungee extends Plugin {
 
     static Configuration getConfiguration() {
         return configuration;
+    }
+
+    static PubSubListener getPubSubListener() {
+        return psl;
     }
 
     final List<String> getServerIds() {
@@ -102,10 +107,6 @@ public final class RedisBungee extends Plugin {
         } finally {
             pool.returnResource(jedis);
         }
-    }
-
-    static PubSubListener getPubSubListener() {
-        return psl;
     }
 
     final Multimap<String, UUID> serversToPlayers() {
@@ -203,7 +204,7 @@ public final class RedisBungee extends Plugin {
             pool.returnResource(jedis);
         }
     }
-    
+
     final void sendChannelMessage(String channel, String message) {
         Jedis jedis = pool.getResource();
         try {
