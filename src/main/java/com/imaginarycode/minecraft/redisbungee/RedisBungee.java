@@ -10,7 +10,6 @@ import com.google.common.base.Functions;
 import com.google.common.collect.*;
 import com.google.common.io.ByteStreams;
 import com.google.gson.Gson;
-import com.imaginarycode.minecraft.redisbungee.consumerevents.PlayerLoggedInConsumerEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import com.imaginarycode.minecraft.redisbungee.util.UUIDTranslator;
 
@@ -26,13 +25,8 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.exceptions.JedisException;
 
 import java.io.*;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
@@ -48,8 +42,6 @@ public final class RedisBungee extends Plugin {
     @Getter
     private JedisPool pool;
     @Getter
-    private RedisBungeeConsumer consumer;
-    @Getter
     private UUIDTranslator uuidTranslator;
     @Getter
     private static Gson gson = new Gson();
@@ -57,6 +49,8 @@ public final class RedisBungee extends Plugin {
     private String serverId;
     @Getter
     private DataManager dataManager;
+    @Getter
+    private ExecutorService service;
     
     private static RedisBungeeAPI api;
     private static PubSubListener psl = null;
@@ -258,9 +252,7 @@ public final class RedisBungee extends Plugin {
                     serverIds = getCurrentServerIds();
                 }
             }, 0, 3, TimeUnit.SECONDS);
-            consumer = new RedisBungeeConsumer(this);
             dataManager = new DataManager(this);
-            getProxy().getScheduler().runAsync(this, consumer);
             if (configuration.getBoolean("register-bungee-commands", true)) {
                 getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.GlistCommand(this));
                 getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.FindCommand(this));
@@ -312,7 +304,7 @@ public final class RedisBungee extends Plugin {
 
                             // Player not online according to Redis but not BungeeCord. Fire another consumer event.
                             getLogger().warning("Player " + player + " is on the proxy but not in Redis.");
-                            consumer.queue(new PlayerLoggedInConsumerEvent(getProxy().getPlayer(UUID.fromString(player))));
+                            tmpRsc.sadd("proxy:" + serverId + ":usersOnline", player);
                         }
                     } finally {
                         pool.returnResource(tmpRsc);
@@ -328,8 +320,16 @@ public final class RedisBungee extends Plugin {
         if (pool != null) {
             // Poison the PubSub listener
             getProxy().getScheduler().cancel(this);
-            getLogger().info("Waiting for consumer to finish writing data...");
-            consumer.stop();
+            getLogger().info("Waiting for all tasks to finish.");
+
+            service.shutdown();
+            try {
+                if (!service.awaitTermination(60, TimeUnit.SECONDS)) {
+                    service.shutdownNow();
+                }
+            } catch (InterruptedException ignored) {
+            }
+
             Jedis tmpRsc = pool.getResource();
             try {
                 tmpRsc.hdel("heartbeats", serverId);
@@ -400,7 +400,7 @@ public final class RedisBungee extends Plugin {
             Jedis rsc = null;
             try {
                 rsc = pool.getResource();
-                rsc.exists(String.valueOf(System.currentTimeMillis()));
+                rsc.ping();
                 // If that worked, now we can check for an existing, alive Bungee:
                 File crashFile = new File(getDataFolder(), "restarted_from_crash.txt");
                 if (crashFile.exists())
@@ -417,6 +417,23 @@ public final class RedisBungee extends Plugin {
                     } catch (NumberFormatException ignored) {
                     }
                 }
+
+                FutureTask<Void> task2 = new FutureTask<>(new Callable<Void>() {
+                    @Override
+                    public Void call() throws Exception {
+                        service = Executors.newFixedThreadPool(16);
+                        return null;
+                    }
+                });
+
+                getProxy().getScheduler().runAsync(this, task2);
+
+                try {
+                    task2.get();
+                } catch (InterruptedException | ExecutionException e) {
+                    throw new RuntimeException("Unable to create executor", e);
+                }
+
                 getLogger().log(Level.INFO, "Successfully connected to Redis.");
             } catch (JedisConnectionException e) {
                 if (rsc != null)

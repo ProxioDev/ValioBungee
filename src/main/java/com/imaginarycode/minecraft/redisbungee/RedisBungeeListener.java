@@ -10,10 +10,8 @@ import com.google.common.base.Joiner;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import com.imaginarycode.minecraft.redisbungee.consumerevents.PlayerChangedServerConsumerEvent;
-import com.imaginarycode.minecraft.redisbungee.consumerevents.PlayerLoggedInConsumerEvent;
-import com.imaginarycode.minecraft.redisbungee.consumerevents.PlayerLoggedOffConsumerEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
+import com.imaginarycode.minecraft.redisbungee.util.RedisCallable;
 import lombok.AllArgsConstructor;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ServerPing;
@@ -27,6 +25,7 @@ import net.md_5.bungee.event.EventPriority;
 import redis.clients.jedis.Jedis;
 
 import java.util.*;
+import java.util.concurrent.Callable;
 
 @AllArgsConstructor
 public class RedisBungeeListener implements Listener {
@@ -48,7 +47,20 @@ public class RedisBungeeListener implements Listener {
                 }
             }
 
-            plugin.getConsumer().queue(new PlayerLoggedInConsumerEvent(event.getPlayer()));
+            plugin.getService().submit((Callable<Void>) new RedisCallable<Void>(plugin) {
+                @Override
+                protected Void call(Jedis jedis) {
+                    jedis.sadd("proxy:" + RedisBungee.getApi().getServerId() + ":usersOnline", event.getPlayer().getUniqueId().toString());
+                    jedis.hset("player:" + event.getPlayer().getUniqueId().toString(), "online", "0");
+                    jedis.hset("player:" + event.getPlayer().getUniqueId().toString(), "ip", event.getPlayer().getAddress().getAddress().getHostAddress());
+                    plugin.getUuidTranslator().persistInfo(event.getPlayer().getName(), event.getPlayer().getUniqueId(), jedis);
+                    jedis.hset("player:" + event.getPlayer().getUniqueId().toString(), "proxy", plugin.getServerId());
+                    jedis.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage<>(
+                            event.getPlayer().getUniqueId(), DataManager.DataManagerMessage.Action.JOIN,
+                            new DataManager.LoginPayload(event.getPlayer().getAddress().getAddress()))));
+                    return null;
+                }
+            });
         } finally {
             plugin.getPool().returnResource(rsc);
         }
@@ -56,23 +68,50 @@ public class RedisBungeeListener implements Listener {
 
     @EventHandler
     public void onPlayerDisconnect(final PlayerDisconnectEvent event) {
-        plugin.getConsumer().queue(new PlayerLoggedOffConsumerEvent(event.getPlayer()));
+        plugin.getService().submit((Callable<Void>) new RedisCallable<Void>(plugin) {
+            @Override
+            protected Void call(Jedis jedis) {
+                long timestamp = System.currentTimeMillis();
+                jedis.hset("player:" + event.getPlayer().getUniqueId().toString(), "online", String.valueOf(timestamp));
+                RedisUtil.cleanUpPlayer(event.getPlayer().getUniqueId().toString(), jedis);
+                jedis.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage<>(
+                        event.getPlayer().getUniqueId(), DataManager.DataManagerMessage.Action.LEAVE,
+                        new DataManager.LogoutPayload(timestamp))));
+                return null;
+            }
+        });
     }
 
     @EventHandler
     public void onServerChange(final ServerConnectedEvent event) {
-        plugin.getConsumer().queue(new PlayerChangedServerConsumerEvent(event.getPlayer(), event.getServer().getInfo()));
+        plugin.getService().submit((Callable<Void>) new RedisCallable<Void>(plugin) {
+            @Override
+            protected Void call(Jedis jedis) {
+                jedis.hset("player:" + event.getPlayer().getUniqueId().toString(), "server", event.getServer().getInfo().getName());
+                jedis.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage<>(
+                        event.getPlayer().getUniqueId(), DataManager.DataManagerMessage.Action.SERVER_CHANGE,
+                        new DataManager.ServerChangePayload(event.getServer().getInfo().getName()))));
+                return null;
+            }
+        });
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onPing(ProxyPingEvent event) {
-        ServerPing old = event.getResponse();
-        ServerPing reply = new ServerPing();
-        reply.setPlayers(new ServerPing.Players(old.getPlayers().getMax(), plugin.getCount(), old.getPlayers().getSample()));
-        reply.setDescription(old.getDescription());
-        reply.setFavicon(old.getFaviconObject());
-        reply.setVersion(old.getVersion());
-        event.setResponse(reply);
+    public void onPing(final ProxyPingEvent event) {
+        event.registerIntent(plugin);
+        plugin.getProxy().getScheduler().runAsync(plugin, new Runnable() {
+            @Override
+            public void run() {
+                ServerPing old = event.getResponse();
+                ServerPing reply = new ServerPing();
+                reply.setPlayers(new ServerPing.Players(old.getPlayers().getMax(), plugin.getCount(), old.getPlayers().getSample()));
+                reply.setDescription(old.getDescription());
+                reply.setFavicon(old.getFaviconObject());
+                reply.setVersion(old.getVersion());
+                event.setResponse(reply);
+                event.completeIntent(plugin);
+            }
+        });
     }
 
     @EventHandler
