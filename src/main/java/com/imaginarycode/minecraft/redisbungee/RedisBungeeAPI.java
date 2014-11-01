@@ -8,6 +8,7 @@ package com.imaginarycode.minecraft.redisbungee;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import lombok.NonNull;
 import net.md_5.bungee.api.config.ServerInfo;
@@ -66,7 +67,7 @@ public class RedisBungeeAPI {
     /**
      * Get a combined list of players on this network.
      * <p>
-     * <strong>Note that this function returns an immutable {@link java.util.Set}.</strong>
+     * <strong>Note that this function returns an instance of {@link com.google.common.collect.ImmutableSet}.</strong>
      *
      * @return a Set with all players found
      */
@@ -85,7 +86,7 @@ public class RedisBungeeAPI {
      * @since 0.3
      */
     public final Collection<String> getHumanPlayersOnline() {
-        return Collections2.transform(getPlayersOnline(), new Function<UUID, String>() {
+        return Collections2.transform(((ImmutableSet<UUID>) getPlayersOnline()).asList(), new Function<UUID, String>() {
             @Override
             public String apply(UUID uuid) {
                 return getNameFromUuid(uuid, false);
