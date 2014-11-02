@@ -320,7 +320,9 @@ public final class RedisBungee extends Plugin {
     public void onDisable() {
         if (pool != null) {
             // Poison the PubSub listener
+            psl.poison();
             getProxy().getScheduler().cancel(this);
+
             getLogger().info("Waiting for all tasks to finish.");
 
             service.shutdown();
@@ -342,6 +344,7 @@ public final class RedisBungee extends Plugin {
             } finally {
                 pool.returnResource(tmpRsc);
             }
+
             pool.destroy();
         }
     }
@@ -477,10 +480,13 @@ public final class RedisBungee extends Plugin {
         public void removeChannel(String... channel) {
             jpsh.unsubscribe(channel);
         }
+
+        public void poison() {
+            jpsh.unsubscribe();
+        }
     }
 
     class JedisPubSubHandler extends JedisPubSub {
-
         @Override
         public void onMessage(final String s, final String s2) {
             if (s2.trim().length() == 0) return;

@@ -7,7 +7,9 @@
 package com.imaginarycode.minecraft.redisbungee;
 
 import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import lombok.NonNull;
@@ -27,9 +29,15 @@ import java.util.UUID;
  */
 public class RedisBungeeAPI {
     private final RedisBungee plugin;
+    private final List<String> reservedChannels;
 
     RedisBungeeAPI(RedisBungee plugin) {
         this.plugin = plugin;
+        this.reservedChannels = ImmutableList.of(
+                "redisbungee-allservers",
+                "redisbungee-" + plugin.getServerId(),
+                "redisbungee-data"
+        );
     }
 
     /**
@@ -220,6 +228,10 @@ public class RedisBungeeAPI {
      * @since 0.3
      */
     public final void unregisterPubSubChannels(String... channels) {
+        for (String channel : channels) {
+            Preconditions.checkArgument(!reservedChannels.contains(channel), "attempting to unregister internal channel");
+        }
+
         RedisBungee.getPubSubListener().removeChannel(channels);
     }
 
