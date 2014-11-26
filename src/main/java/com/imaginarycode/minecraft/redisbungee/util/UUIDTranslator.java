@@ -13,6 +13,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.ProxyServer;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.exceptions.JedisException;
 
 import java.util.Calendar;
@@ -79,46 +80,44 @@ public final class UUIDTranslator {
         // Let's try Redis.
         Jedis jedis = plugin.getPool().getResource();
         try {
+            String stored = jedis.hget("uuid-cache", player.toLowerCase());
+            if (stored != null) {
+                // Found an entry value. Deserialize it.
+                CachedUUIDEntry entry = RedisBungee.getGson().fromJson(stored, CachedUUIDEntry.class);
+
+                // Check for expiry:
+                if (entry.expired()) {
+                    jedis.hdel("uuid-cache", player.toLowerCase());
+                } else {
+                    nameToUuidMap.put(player.toLowerCase(), entry);
+                    uuidToNameMap.put(entry.getUuid(), entry);
+                    return entry.getUuid();
+                }
+            }
+
+            // That didn't work. Let's ask Mojang.
+            if (!expensiveLookups)
+                return null;
+
+            Map<String, UUID> uuidMap1;
             try {
-                String stored = jedis.hget("uuid-cache", player.toLowerCase());
-                if (stored != null) {
-                    // Found an entry value. Deserialize it.
-                    CachedUUIDEntry entry = RedisBungee.getGson().fromJson(stored, CachedUUIDEntry.class);
-
-                    // Check for expiry:
-                    if (entry.expired()) {
-                        jedis.hdel("uuid-cache", player.toLowerCase());
-                    } else {
-                        nameToUuidMap.put(player.toLowerCase(), entry);
-                        uuidToNameMap.put(entry.getUuid(), entry);
-                        return entry.getUuid();
-                    }
-                }
-
-                // That didn't work. Let's ask Mojang.
-                if (!expensiveLookups)
-                    return null;
-
-                Map<String, UUID> uuidMap1;
-                try {
-                    uuidMap1 = new UUIDFetcher(Collections.singletonList(player)).call();
-                } catch (Exception e) {
-                    plugin.getLogger().log(Level.SEVERE, "Unable to fetch UUID from Mojang for " + player, e);
-                    return null;
-                }
-                for (Map.Entry<String, UUID> entry : uuidMap1.entrySet()) {
-                    if (entry.getKey().equalsIgnoreCase(player)) {
-                        persistInfo(entry.getKey(), entry.getValue(), jedis);
-                        return entry.getValue();
-                    }
-                }
-            } catch (JedisException e) {
-                plugin.getLogger().log(Level.SEVERE, "Unable to fetch UUID for " + player, e);
-                // Go ahead and give them what we have.
+                uuidMap1 = new UUIDFetcher(Collections.singletonList(player)).call();
+            } catch (Exception e) {
+                plugin.getLogger().log(Level.SEVERE, "Unable to fetch UUID from Mojang for " + player, e);
                 return null;
             }
-        } finally {
-            plugin.getPool().returnResource(jedis);
+            for (Map.Entry<String, UUID> entry : uuidMap1.entrySet()) {
+                if (entry.getKey().equalsIgnoreCase(player)) {
+                    persistInfo(entry.getKey(), entry.getValue(), jedis);
+                    return entry.getValue();
+                }
+            }
+        } catch (JedisException e) {
+            plugin.getLogger().log(Level.SEVERE, "Unable to fetch UUID for " + player, e);
+            if (jedis != null)
+                plugin.getPool().returnBrokenResource(jedis);
+            // Go ahead and give them what we have.
+            return null;
         }
 
         return null; // Nope, game over!

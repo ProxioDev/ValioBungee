@@ -68,7 +68,8 @@ public class DataManager implements Listener {
         } catch (JedisConnectionException e) {
             // Redis server has disappeared!
             plugin.getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
-            plugin.getPool().returnBrokenResource(tmpRsc);
+            if (tmpRsc != null)
+                plugin.getPool().returnBrokenResource(tmpRsc);
             throw new RuntimeException("Unable to get server for " + uuid, e);
         } finally {
             plugin.getPool().returnResource(tmpRsc);
@@ -98,7 +99,8 @@ public class DataManager implements Listener {
         } catch (JedisConnectionException e) {
             // Redis server has disappeared!
             plugin.getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
-            plugin.getPool().returnBrokenResource(tmpRsc);
+            if (tmpRsc != null)
+                plugin.getPool().returnBrokenResource(tmpRsc);
             throw new RuntimeException("Unable to get server for " + uuid, e);
         } finally {
             plugin.getPool().returnResource(tmpRsc);
@@ -132,7 +134,8 @@ public class DataManager implements Listener {
         } catch (JedisConnectionException e) {
             // Redis server has disappeared!
             plugin.getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
-            plugin.getPool().returnBrokenResource(tmpRsc);
+            if (tmpRsc != null)
+                plugin.getPool().returnBrokenResource(tmpRsc);
             throw new RuntimeException("Unable to get server for " + uuid, e);
         } catch (UnknownHostException e) {
             return null;
@@ -191,7 +194,8 @@ public class DataManager implements Listener {
         } catch (JedisConnectionException e) {
             // Redis server has disappeared!
             plugin.getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
-            plugin.getPool().returnBrokenResource(tmpRsc);
+            if (tmpRsc != null)
+                plugin.getPool().returnBrokenResource(tmpRsc);
             throw new RuntimeException("Unable to get server for " + uuid, e);
         } finally {
             plugin.getPool().returnResource(tmpRsc);

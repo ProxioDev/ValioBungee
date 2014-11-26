@@ -106,7 +106,8 @@ public final class RedisBungee extends Plugin {
             return servers.build();
         } catch (JedisConnectionException e) {
             getLogger().log(Level.SEVERE, "Unable to fetch all server IDs", e);
-            pool.returnBrokenResource(jedis);
+            if (jedis != null)
+                pool.returnBrokenResource(jedis);
             return Collections.singletonList(serverId);
         } finally {
             pool.returnResource(jedis);
@@ -135,7 +136,8 @@ public final class RedisBungee extends Plugin {
             } catch (JedisConnectionException e) {
                 // Redis server has disappeared!
                 getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
-                pool.returnBrokenResource(rsc);
+                if (rsc != null)
+                    pool.returnBrokenResource(rsc);
                 throw new RuntimeException("Unable to get total player count", e);
             } finally {
                 pool.returnResource(rsc);
@@ -181,7 +183,8 @@ public final class RedisBungee extends Plugin {
             } catch (JedisConnectionException e) {
                 // Redis server has disappeared!
                 getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
-                pool.returnBrokenResource(rsc);
+                if (rsc != null)
+                    pool.returnBrokenResource(rsc);
                 throw new RuntimeException("Unable to get all players online", e);
             } finally {
                 pool.returnResource(rsc);
@@ -197,17 +200,7 @@ public final class RedisBungee extends Plugin {
 
     final void sendProxyCommand(@NonNull String proxyId, @NonNull String command) {
         checkArgument(getServerIds().contains(proxyId) || proxyId.equals("allservers"), "proxyId is invalid");
-        Jedis jedis = pool.getResource();
-        try {
-            jedis.publish("redisbungee-" + proxyId, command);
-        } catch (JedisConnectionException e) {
-            // Redis server has disappeared!
-            getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
-            pool.returnBrokenResource(jedis);
-            throw new RuntimeException("Unable to publish command", e);
-        } finally {
-            pool.returnResource(jedis);
-        }
+        sendChannelMessage("redisbungee-" + proxyId, command);
     }
 
     final void sendChannelMessage(String channel, String message) {
@@ -217,7 +210,8 @@ public final class RedisBungee extends Plugin {
         } catch (JedisConnectionException e) {
             // Redis server has disappeared!
             getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
-            pool.returnBrokenResource(jedis);
+            if (jedis != null)
+                pool.returnBrokenResource(jedis);
             throw new RuntimeException("Unable to publish channel message", e);
         } finally {
             pool.returnResource(jedis);
