@@ -16,6 +16,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
+import net.md_5.bungee.api.scheduler.ScheduledTask;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
@@ -57,6 +58,9 @@ public final class RedisBungee extends Plugin {
     private ExecutorService service;
     private List<String> serverIds;
     private AtomicInteger nagAboutServers = new AtomicInteger();
+    private ScheduledTask integrityCheck;
+    private ScheduledTask heartbeatTask;
+
 
     /**
      * Fetch the {@link RedisBungeeAPI} object created on plugin start.
@@ -125,7 +129,7 @@ public final class RedisBungee extends Plugin {
             Jedis rsc;
             try {
                 rsc = pool.getResource();
-            } catch (IllegalStateException ignored) { // handle pings after pool shutdown with 0
+            } catch (JedisConnectionException ignored) { // handle pings after pool shutdown with 0
                 return c;
             }
             try {
@@ -242,7 +246,7 @@ public final class RedisBungee extends Plugin {
             }
             serverIds = getCurrentServerIds();
             uuidTranslator = new UUIDTranslator(this);
-            getProxy().getScheduler().schedule(this, new Runnable() {
+            heartbeatTask = getProxy().getScheduler().schedule(this, new Runnable() {
                 @Override
                 public void run() {
                     Jedis rsc = pool.getResource();
@@ -274,7 +278,7 @@ public final class RedisBungee extends Plugin {
             getProxy().getPluginManager().registerListener(this, dataManager);
             psl = new PubSubListener();
             getProxy().getScheduler().runAsync(this, psl);
-            getProxy().getScheduler().schedule(this, new Runnable() {
+            integrityCheck = getProxy().getScheduler().schedule(this, new Runnable() {
                 @Override
                 public void run() {
                     Jedis tmpRsc = pool.getResource();
@@ -327,6 +331,8 @@ public final class RedisBungee extends Plugin {
             // Poison the PubSub listener
             psl.poison();
             getProxy().getScheduler().cancel(this);
+            integrityCheck.cancel();
+            heartbeatTask.cancel();
 
             getLogger().info("Waiting for all tasks to finish.");
 
