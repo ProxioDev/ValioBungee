@@ -127,11 +127,7 @@ public final class RedisBungee extends Plugin {
         int c = 0;
         if (pool != null) {
             Jedis rsc;
-            try {
-                rsc = pool.getResource();
-            } catch (JedisConnectionException ignored) { // handle pings after pool shutdown with 0
-                return c;
-            }
+            rsc = pool.getResource();
             try {
                 for (String i : getServerIds()) {
                     c += rsc.scard("proxy:" + i + ":usersOnline");
@@ -333,6 +329,7 @@ public final class RedisBungee extends Plugin {
             getProxy().getScheduler().cancel(this);
             integrityCheck.cancel();
             heartbeatTask.cancel();
+            getProxy().getPluginManager().unregisterListeners(this);
 
             getLogger().info("Waiting for all tasks to finish.");
 
