@@ -122,7 +122,12 @@ public final class RedisBungee extends Plugin {
     final int getCount() {
         int c = 0;
         if (pool != null) {
-            Jedis rsc = pool.getResource();
+            Jedis rsc;
+            try {
+                rsc = pool.getResource();
+            } catch (IllegalStateException ignored) { // handle pings after pool shutdown with 0
+                return c;
+            }
             try {
                 for (String i : getServerIds()) {
                     c += rsc.scard("proxy:" + i + ":usersOnline");
