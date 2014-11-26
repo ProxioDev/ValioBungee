@@ -8,9 +8,9 @@ redis-port: 6379
 # OPTIONAL: If your Redis server uses AUTH, set the password required.
 redis-password: ""
 # Maximum connections that will be maintained to the Redis server.
-# The default is an unlimited number of connections.
-# You may need to lower this value in some setups.
-max-redis-connections: -1
+# The default is 8. This setting should be left as-is unless you have some wildly
+# inefficient plugins or a lot of players.
+max-redis-connections: 8
  
 # An identifier for this BungeeCord instance.
 server-id: iluvbungee

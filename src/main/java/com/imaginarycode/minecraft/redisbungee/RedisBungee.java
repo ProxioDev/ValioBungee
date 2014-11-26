@@ -388,7 +388,7 @@ public final class RedisBungee extends Plugin {
                 @Override
                 public JedisPool call() throws Exception {
                     JedisPoolConfig config = new JedisPoolConfig();
-                    config.setMaxTotal(configuration.getInt("max-redis-connections", -1));
+                    config.setMaxTotal(configuration.getInt("max-redis-connections", 8));
                     config.setJmxEnabled(false);
                     return new JedisPool(config, redisServer, redisPort, 0, finalRedisPassword);
                 }
