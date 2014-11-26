@@ -1,16 +1,20 @@
 # RedisBungee configuration file.
 # PLEASE READ THE WIKI: http://minecraft.imaginarycode.com/
-
-# Redis server configuration. Learn more at http://redis.io.
+ 
+# The Redis server you use.
+# Get Redis from http://redis.io/
 redis-server: 127.0.0.1
 redis-port: 6379
-
-# If your Redis server requires a password, set it here.
+# OPTIONAL: If your Redis server uses AUTH, set the password required.
 redis-password: ""
-
+# Maximum connections that will be maintained to the Redis server.
+# The default is an unlimited number of connections.
+# You may need to lower this value in some setups.
+max-redis-connections: -1
+ 
 # An identifier for this BungeeCord instance.
 server-id: iluvbungee
-
+ 
 # Whether or not RedisBungee should install its version of regular BungeeCord commands.
 # Often, the RedisBungee commands are desired, but in some cases someone may wish to
 # override the commands using another plugin.
@@ -21,6 +25,6 @@ server-id: iluvbungee
 # Please note that with build 787+, most commands overridden by RedisBungee were moved to
 # modules, and these must be disabled or overridden yourself.
 register-bungee-commands: true
-
+ 
 # Whether or not /glist showall output should match vanilla BungeeCord.
 canonical-glist: true
