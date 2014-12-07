@@ -263,13 +263,14 @@ public class DataManager implements Listener {
                 });
                 break;
             case SERVER_CHANGE:
-                final DataManagerMessage<ServerChangePayload> message3 = RedisBungee.getGson().fromJson(jsonObject, new TypeToken<DataManagerMessage<ServerChangePayload>>() {
+                final DataManagerMessage<ServerChangePayload> message3 = RedisBungee.getGson().fromJson(jsonObject, new TypeToken<DataManagerMessage<ServerChangePayload>>()
+                {
                 }.getType());
-                serverCache.put(message3.getTarget(), message3.getPayload().getServer());
+                final String oldServer = serverCache.put(message3.getTarget(), message3.getPayload().getServer());
                 plugin.getProxy().getScheduler().runAsync(plugin, new Runnable() {
                     @Override
                     public void run() {
-                        plugin.getProxy().getPluginManager().callEvent(new PlayerChangedServerNetworkEvent(message3.getTarget(), message3.getPayload().getServer()));
+                        plugin.getProxy().getPluginManager().callEvent(new PlayerChangedServerNetworkEvent(message3.getTarget(), oldServer, message3.getPayload().getServer()));
                     }
                 });
                 break;

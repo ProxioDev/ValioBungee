@@ -23,10 +23,12 @@ import java.util.UUID;
 @ToString
 public class PlayerChangedServerNetworkEvent extends Event {
     private final UUID uuid;
+    private final String previousServer;
     private final String server;
 
-    public PlayerChangedServerNetworkEvent(UUID uuid, String server) {
+    public PlayerChangedServerNetworkEvent(UUID uuid, String previousServer, String server) {
         this.uuid = uuid;
+        this.previousServer = previousServer;
         this.server = server;
     }
 
@@ -36,5 +38,9 @@ public class PlayerChangedServerNetworkEvent extends Event {
 
     public String getServer() {
         return server;
+    }
+
+    public String getPreviousServer() {
+        return previousServer;
     }
 }
