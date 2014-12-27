@@ -6,9 +6,9 @@
  */
 package com.imaginarycode.minecraft.redisbungee.util;
 
-
-import com.google.gson.Gson;
+import com.google.common.io.ByteStreams;
 import com.google.gson.reflect.TypeToken;
+import com.imaginarycode.minecraft.redisbungee.RedisBungee;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -17,20 +17,10 @@ import java.net.URLConnection;
 import java.util.*;
 
 public class NameFetcher {
-    public static List<String> nameHistoryFromUuid(UUID uuid) {
-        URLConnection connection;
-        try {
-            connection = new URL("https://api.mojang.com/user/profiles/"
-                    + uuid.toString().replace("-", "").toLowerCase() + "/names"
-            ).openConnection();
-            String text = new Scanner(connection.getInputStream()).useDelimiter("\\Z").next();
-            Type listType = new TypeToken<List<String>>() {
-            }.getType();
-            List<String> list = new Gson().fromJson(text, listType);
-            return list;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public static List<String> nameHistoryFromUuid(UUID uuid) throws IOException {
+        URLConnection connection = new URL("https://api.mojang.com/user/profiles/" + uuid.toString().replace("-", "").toLowerCase() + "/names").openConnection();
+        String text = new String(ByteStreams.toByteArray(connection.getInputStream()));
+        Type listType = new TypeToken<List<String>>() {}.getType();
+        return RedisBungee.getGson().fromJson(text, listType);
     }
 }
