@@ -162,7 +162,7 @@ public final class UUIDTranslator {
             // That didn't work. Let's ask Mojang. This call may fail, because Mojang is insane.
             String name;
             try {
-                name = new NameFetcher(Collections.singletonList(player)).call().get(player);
+                name = NameFetcher.nameHistoryFromUuid(player).get(0);
             } catch (Exception e) {
                 plugin.getLogger().log(Level.SEVERE, "Unable to fetch name from Mojang for " + player, e);
                 return null;

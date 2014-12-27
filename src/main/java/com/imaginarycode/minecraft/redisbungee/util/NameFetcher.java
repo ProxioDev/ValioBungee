@@ -17,10 +17,7 @@ import java.net.URLConnection;
 import java.util.*;
 
 public class NameFetcher {
-    private static Map<UUID, List<String>> cache = new HashMap<>();
-
     public static List<String> nameHistoryFromUuid(UUID uuid) {
-        if (cache.containsKey(uuid)) return cache.get(uuid);
         URLConnection connection;
         try {
             connection = new URL("https://api.mojang.com/user/profiles/"
@@ -30,7 +27,6 @@ public class NameFetcher {
             Type listType = new TypeToken<List<String>>() {
             }.getType();
             List<String> list = new Gson().fromJson(text, listType);
-            cache.put(uuid, list);
             return list;
         } catch (IOException e) {
             e.printStackTrace();
