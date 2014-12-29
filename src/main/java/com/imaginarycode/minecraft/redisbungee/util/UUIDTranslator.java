@@ -70,16 +70,14 @@ public final class UUIDTranslator {
             return UUIDFetcher.getUUID(player);
         }
 
-        // This is a bit of a special case.
         // If we are in offline mode, UUID generation is simple.
-        // We don't even have to cache the UUID, unless we need to reduce GC pressure.
+        // We don't even have to cache the UUID, since this is easy to recalculate.
         if (!plugin.getProxy().getConfig().isOnlineMode()) {
             return UUID.nameUUIDFromBytes(("OfflinePlayer:" + player).getBytes(Charsets.UTF_8));
         }
 
         // Let's try Redis.
-        Jedis jedis = plugin.getPool().getResource();
-        try {
+        try (Jedis jedis = plugin.getPool().getResource()) {
             String stored = jedis.hget("uuid-cache", player.toLowerCase());
             if (stored != null) {
                 // Found an entry value. Deserialize it.
@@ -114,10 +112,6 @@ public final class UUIDTranslator {
             }
         } catch (JedisException e) {
             plugin.getLogger().log(Level.SEVERE, "Unable to fetch UUID for " + player, e);
-            if (jedis != null)
-                plugin.getPool().returnBrokenResource(jedis);
-            // Go ahead and give them what we have.
-            return null;
         }
 
         return null; // Nope, game over!
@@ -139,8 +133,7 @@ public final class UUIDTranslator {
         }
 
         // Okay, it wasn't locally cached. Let's try Redis.
-        Jedis jedis = plugin.getPool().getResource();
-        try {
+        try (Jedis jedis = plugin.getPool().getResource()) {
             String stored = jedis.hget("uuid-cache", player.toString());
             if (stored != null) {
                 // Found an entry value. Deserialize it.
@@ -177,8 +170,6 @@ public final class UUIDTranslator {
         } catch (JedisException e) {
             plugin.getLogger().log(Level.SEVERE, "Unable to fetch name for " + player, e);
             return null;
-        } finally {
-            plugin.getPool().returnResource(jedis);
         }
     }
 
