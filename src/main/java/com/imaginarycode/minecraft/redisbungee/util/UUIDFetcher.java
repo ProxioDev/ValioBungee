@@ -74,7 +74,7 @@ class UUIDFetcher implements Callable<Map<String, UUID>> {
         return uuidMap;
     }
 
-    private class Profile {
+    private static class Profile {
         String id;
         String name;
     }

@@ -94,7 +94,7 @@ public final class RedisBungee extends Plugin {
             Map<String, String> heartbeats = jedis.hgetAll("heartbeats");
             for (Map.Entry<String, String> entry : heartbeats.entrySet()) {
                 try {
-                    long stamp = Long.valueOf(entry.getValue());
+                    long stamp = Long.parseLong(entry.getValue());
                     if (System.currentTimeMillis() < stamp + 30000)
                         servers.add(entry.getKey());
                     else if (nag <= 0) {
