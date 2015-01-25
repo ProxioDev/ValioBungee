@@ -47,7 +47,7 @@ public class RedisBungeeListener implements Listener {
                 }
             }
 
-            plugin.getService().submit((Callable<Void>) new RedisCallable<Void>(plugin) {
+            plugin.getService().submit(new RedisCallable<Void>(plugin) {
                 @Override
                 protected Void call(Jedis jedis) {
                     jedis.sadd("proxy:" + RedisBungee.getApi().getServerId() + ":usersOnline", event.getPlayer().getUniqueId().toString());
@@ -68,7 +68,7 @@ public class RedisBungeeListener implements Listener {
 
     @EventHandler
     public void onPlayerDisconnect(final PlayerDisconnectEvent event) {
-        plugin.getService().submit((Callable<Void>) new RedisCallable<Void>(plugin) {
+        plugin.getService().submit(new RedisCallable<Void>(plugin) {
             @Override
             protected Void call(Jedis jedis) {
                 long timestamp = System.currentTimeMillis();
@@ -84,7 +84,7 @@ public class RedisBungeeListener implements Listener {
 
     @EventHandler
     public void onServerChange(final ServerConnectedEvent event) {
-        plugin.getService().submit((Callable<Void>) new RedisCallable<Void>(plugin) {
+        plugin.getService().submit(new RedisCallable<Void>(plugin) {
             @Override
             protected Void call(Jedis jedis) {
                 jedis.hset("player:" + event.getPlayer().getUniqueId().toString(), "server", event.getServer().getInfo().getName());

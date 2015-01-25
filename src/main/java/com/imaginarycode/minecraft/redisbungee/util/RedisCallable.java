@@ -15,13 +15,8 @@ import java.util.concurrent.Callable;
 import java.util.logging.Level;
 
 @AllArgsConstructor
-public abstract class RedisCallable<T> implements Callable<T>, Runnable {
+public abstract class RedisCallable<T> implements Callable<T> {
     private final RedisBungee plugin;
-
-    @Override
-    public void run() {
-        run(false);
-    }
 
     @Override
     public T call() {
@@ -29,16 +24,10 @@ public abstract class RedisCallable<T> implements Callable<T>, Runnable {
     }
 
     private T run(boolean retry) {
-        Jedis jedis = null;
-
-        try {
-            jedis = plugin.getPool().getResource();
+        try (Jedis jedis = plugin.getPool().getResource()) {
             return call(jedis);
         } catch (JedisConnectionException e) {
             plugin.getLogger().log(Level.SEVERE, "Unable to get connection", e);
-
-            if (jedis != null)
-                plugin.getPool().returnBrokenResource(jedis);
 
             if (!retry) {
                 // Wait one second before retrying the task
@@ -48,10 +37,6 @@ public abstract class RedisCallable<T> implements Callable<T>, Runnable {
                     throw new RuntimeException("task failed to run", e1);
                 }
                 run(true);
-            }
-        } finally {
-            if (jedis != null) {
-                plugin.getPool().returnResource(jedis);
             }
         }
 

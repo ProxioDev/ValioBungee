@@ -12,6 +12,7 @@ import com.google.common.io.ByteStreams;
 import com.google.gson.Gson;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import com.imaginarycode.minecraft.redisbungee.util.UUIDTranslator;
+import com.squareup.okhttp.OkHttpClient;
 import lombok.Getter;
 import lombok.NonNull;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -56,6 +57,8 @@ public final class RedisBungee extends Plugin {
     private DataManager dataManager;
     @Getter
     private ExecutorService service;
+    @Getter
+    private static OkHttpClient httpClient;
     private List<String> serverIds;
     private AtomicInteger nagAboutServers = new AtomicInteger();
     private ScheduledTask integrityCheck;
@@ -428,6 +431,7 @@ public final class RedisBungee extends Plugin {
                     @Override
                     public Void call() throws Exception {
                         service = Executors.newFixedThreadPool(16);
+                        httpClient = new OkHttpClient();
                         return null;
                     }
                 });
