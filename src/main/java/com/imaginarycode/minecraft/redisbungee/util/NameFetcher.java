@@ -6,37 +6,43 @@
  */
 package com.imaginarycode.minecraft.redisbungee.util;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.common.io.ByteStreams;
+import com.google.gson.reflect.TypeToken;
+import com.imaginarycode.minecraft.redisbungee.RedisBungee;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 import java.util.UUID;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class NameFetcher {
-    private static JsonParser parser = new JsonParser();
+    public static List<String> nameHistoryFromUuid(UUID uuid) throws IOException {
+        URLConnection connection = new URL("https://api.mojang.com/user/profiles/" + uuid.toString().replace("-", "").toLowerCase() + "/names").openConnection();
 
-    public static List<String> nameHistoryFromUuid(UUID uuid) {
-        URLConnection connection;
-        try {
-            connection = new URL("https://api.mojang.com/user/profiles/"
-                    + uuid.toString().replace("-", "").toLowerCase() + "/names"
-            ).openConnection();
-            String text = new Scanner(connection.getInputStream()).useDelimiter("\\Z").next();
-            JsonArray list = (JsonArray) parser.parse(text);
-            List<String> names = new ArrayList<>();
-            for (int i = 0; i < list.size(); i++) {
-                names.add(((JsonObject) list.get(i)).get("name").getAsString());
-            }
-            return names;
-        } catch (IOException e) {
-            e.printStackTrace();
+        String text;
+
+        try (InputStream is = connection.getInputStream()) {
+            text = new String(ByteStreams.toByteArray(is));
         }
-        return null;
+
+        Type listType = new TypeToken<List<Name>>() {}.getType();
+        List<Name> names = RedisBungee.getGson().fromJson(text, listType);
+
+        List<String> humanNames = new ArrayList<>();
+        for (Name name : names) {
+            humanNames.add(name.name);
+        }
+        return humanNames;
+    }
+
+    public static class Name {
+        private String name;
     }
 }
