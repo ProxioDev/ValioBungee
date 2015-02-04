@@ -11,6 +11,7 @@ import com.google.common.collect.*;
 import com.google.common.io.ByteStreams;
 import com.google.gson.Gson;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
+import com.imaginarycode.minecraft.redisbungee.util.NameFetcher;
 import com.imaginarycode.minecraft.redisbungee.util.UUIDTranslator;
 import com.squareup.okhttp.OkHttpClient;
 import lombok.Getter;
@@ -432,6 +433,7 @@ public final class RedisBungee extends Plugin {
                     public Void call() throws Exception {
                         service = Executors.newFixedThreadPool(16);
                         httpClient = new OkHttpClient();
+                        NameFetcher.setHttpClient(httpClient);
                         return null;
                     }
                 });
