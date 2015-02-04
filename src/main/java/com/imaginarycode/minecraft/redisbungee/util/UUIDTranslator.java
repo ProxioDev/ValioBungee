@@ -7,6 +7,7 @@
 package com.imaginarycode.minecraft.redisbungee.util;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.Iterables;
 import com.imaginarycode.minecraft.redisbungee.RedisBungee;
 import lombok.Getter;
 import lombok.NonNull;
@@ -16,10 +17,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.exceptions.JedisException;
 
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
@@ -155,7 +153,8 @@ public final class UUIDTranslator {
             // That didn't work. Let's ask Mojang. This call may fail, because Mojang is insane.
             String name;
             try {
-                name = NameFetcher.nameHistoryFromUuid(player).get(0);
+                List<String> nameHist = NameFetcher.nameHistoryFromUuid(player);
+                name = Iterables.getLast(nameHist, null);
             } catch (Exception e) {
                 plugin.getLogger().log(Level.SEVERE, "Unable to fetch name from Mojang for " + player, e);
                 return null;

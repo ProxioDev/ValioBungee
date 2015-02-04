@@ -37,5 +37,6 @@ public class NameFetcher {
 
     public static class Name {
         private String name;
+        private long changedToAt;
     }
 }
