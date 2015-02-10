@@ -6,6 +6,7 @@
  */
 package com.imaginarycode.minecraft.redisbungee;
 
+import com.google.common.net.InetAddresses;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
@@ -24,7 +25,6 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -122,11 +122,7 @@ public class DataManager implements Listener {
         try {
             String result = tmpRsc.hget("player:" + uuid, "ip");
             if (result != null) {
-                address = InetAddress.getByName(result);
-
-                if (address == null)
-                    return null;
-
+                address = InetAddresses.forString(result);
                 ipCache.put(uuid, address);
                 return address;
             }
@@ -137,8 +133,6 @@ public class DataManager implements Listener {
             if (tmpRsc != null)
                 plugin.getPool().returnBrokenResource(tmpRsc);
             throw new RuntimeException("Unable to get server for " + uuid, e);
-        } catch (UnknownHostException e) {
-            return null;
         } finally {
             plugin.getPool().returnResource(tmpRsc);
         }
