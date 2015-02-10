@@ -9,8 +9,10 @@ package com.imaginarycode.minecraft.redisbungee.util;
 import com.google.common.collect.ImmutableList;
 import com.imaginarycode.minecraft.redisbungee.RedisBungee;
 import com.squareup.okhttp.MediaType;
+import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
+import lombok.Setter;
 
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -22,6 +24,9 @@ public class UUIDFetcher implements Callable<Map<String, UUID>> {
     private static final MediaType JSON = MediaType.parse("application/json");
     private final List<String> names;
     private final boolean rateLimiting;
+
+    @Setter
+    private static OkHttpClient httpClient;
 
     public UUIDFetcher(List<String> names, boolean rateLimiting) {
         this.names = ImmutableList.copyOf(names);
@@ -42,7 +47,7 @@ public class UUIDFetcher implements Callable<Map<String, UUID>> {
         for (int i = 0; i < requests; i++) {
             String body = RedisBungee.getGson().toJson(names.subList(i * 100, Math.min((i + 1) * 100, names.size())));
             Request request = new Request.Builder().url(PROFILE_URL).post(RequestBody.create(JSON, body)).build();
-            String response = RedisBungee.getHttpClient().newCall(request).execute().body().string();
+            String response = httpClient.newCall(request).execute().body().string();
             Profile[] array = RedisBungee.getGson().fromJson(response, Profile[].class);
             for (Profile profile : array) {
                 UUID uuid = UUIDFetcher.getUUID(profile.id);
