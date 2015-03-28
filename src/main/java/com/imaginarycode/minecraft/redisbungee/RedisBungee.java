@@ -14,6 +14,7 @@ import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import com.imaginarycode.minecraft.redisbungee.util.NameFetcher;
 import com.imaginarycode.minecraft.redisbungee.util.UUIDFetcher;
 import com.imaginarycode.minecraft.redisbungee.util.UUIDTranslator;
+import com.squareup.okhttp.Dispatcher;
 import com.squareup.okhttp.OkHttpClient;
 import lombok.Getter;
 import lombok.NonNull;
@@ -434,6 +435,8 @@ public final class RedisBungee extends Plugin {
                     public Void call() throws Exception {
                         service = Executors.newFixedThreadPool(16);
                         httpClient = new OkHttpClient();
+                        Dispatcher dispatcher = new Dispatcher(service);
+                        httpClient.setDispatcher(dispatcher);
                         NameFetcher.setHttpClient(httpClient);
                         UUIDFetcher.setHttpClient(httpClient);
                         return null;
