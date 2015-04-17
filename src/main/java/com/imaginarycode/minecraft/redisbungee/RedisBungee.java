@@ -236,7 +236,7 @@ public final class RedisBungee extends Plugin {
         if (pool != null) {
             Jedis tmpRsc = pool.getResource();
             try {
-                tmpRsc.hset("heartbeats", serverId, String.valueOf(System.currentTimeMillis()));
+                tmpRsc.hset("heartbeats", serverId, String.valueOf(System.nanoTime()));
             } finally {
                 pool.returnResource(tmpRsc);
             }
