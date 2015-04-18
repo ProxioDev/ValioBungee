@@ -24,6 +24,7 @@ import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 import redis.clients.jedis.Jedis;
 
+import java.net.InetAddress;
 import java.util.*;
 import java.util.concurrent.Callable;
 
@@ -35,6 +36,7 @@ public class RedisBungeeListener implements Listener {
                     .color(ChatColor.GRAY)
                     .create();
     private final RedisBungee plugin;
+    private final List<InetAddress> exemptAddresses;
 
     @EventHandler
     public void onPlayerConnect(final PostLoginEvent event) {
@@ -54,7 +56,7 @@ public class RedisBungeeListener implements Listener {
                     jedis.hset("player:" + event.getPlayer().getUniqueId().toString(), "online", "0");
                     jedis.hset("player:" + event.getPlayer().getUniqueId().toString(), "ip", event.getPlayer().getAddress().getAddress().getHostAddress());
                     plugin.getUuidTranslator().persistInfo(event.getPlayer().getName(), event.getPlayer().getUniqueId(), jedis);
-                    jedis.hset("player:" + event.getPlayer().getUniqueId().toString(), "proxy", plugin.getServerId());
+                    jedis.hset("player:" + event.getPlayer().getUniqueId().toString(), "proxy", RedisBungee.getConfiguration().getServerId());
                     jedis.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage<>(
                             event.getPlayer().getUniqueId(), DataManager.DataManagerMessage.Action.JOIN,
                             new DataManager.LoginPayload(event.getPlayer().getAddress().getAddress()))));
@@ -98,6 +100,10 @@ public class RedisBungeeListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPing(final ProxyPingEvent event) {
+        if (exemptAddresses.contains(event.getConnection().getAddress().getAddress())) {
+            return;
+        }
+
         event.registerIntent(plugin);
         plugin.getProxy().getScheduler().runAsync(plugin, new Runnable() {
             @Override

@@ -80,7 +80,7 @@ public class DataManager implements Listener {
         ProxiedPlayer player = plugin.getProxy().getPlayer(uuid);
 
         if (player != null)
-            return plugin.getServerId();
+            return RedisBungee.getConfiguration().getServerId();
 
         String server = proxyCache.get(uuid);
 
@@ -165,7 +165,7 @@ public class DataManager implements Listener {
                     plugin.getLogger().info("I found a funny number for when " + uuid + " was last online!");
                     boolean found = false;
                     for (String proxyId : plugin.getServerIds()) {
-                        if (proxyId.equals(plugin.getServerId())) continue;
+                        if (proxyId.equals(RedisBungee.getConfiguration().getServerId())) continue;
                         if (tmpRsc.sismember("proxy:" + proxyId + ":usersOnline", uuid.toString())) {
                             found = true;
                             break;
@@ -225,7 +225,7 @@ public class DataManager implements Listener {
 
         String source = jsonObject.get("source").getAsString();
 
-        if (source.equals(plugin.getServerId()))
+        if (source.equals(RedisBungee.getConfiguration().getServerId()))
             return;
 
         DataManagerMessage.Action action = DataManagerMessage.Action.valueOf(jsonObject.get("action").getAsString());

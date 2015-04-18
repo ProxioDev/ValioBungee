@@ -35,7 +35,7 @@ public class RedisBungeeAPI {
         this.plugin = plugin;
         this.reservedChannels = ImmutableList.of(
                 "redisbungee-allservers",
-                "redisbungee-" + plugin.getServerId(),
+                "redisbungee-" + RedisBungee.getConfiguration().getServerId(),
                 "redisbungee-data"
         );
     }
@@ -197,7 +197,7 @@ public class RedisBungeeAPI {
      * @since 0.2.5
      */
     public final String getServerId() {
-        return plugin.getServerId();
+        return RedisBungee.getConfiguration().getServerId();
     }
 
     /**
