@@ -26,9 +26,6 @@ server-id: iluvbungee
 # modules, and these must be disabled or overridden yourself.
 register-bungee-commands: true
 
-# Whether or not /glist showall output should match vanilla BungeeCord.
-canonical-glist: true
-
 # A list of IP addresses for which RedisBungee will not modify the response for, useful for automatic
 # restart scripts.
 exempt-ip-addresses: []

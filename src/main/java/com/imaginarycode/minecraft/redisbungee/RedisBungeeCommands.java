@@ -56,27 +56,22 @@ class RedisBungeeCommands {
                     BaseComponent[] playersOnline = new ComponentBuilder("").color(ChatColor.YELLOW).append(String.valueOf(count))
                             .append(" player(s) are currently online.").create();
                     if (args.length > 0 && args[0].equals("showall")) {
-                        if (RedisBungee.getConfiguration().isCanonicalGlist()) {
-                            Multimap<String, UUID> serverToPlayers = RedisBungee.getApi().getServerToPlayers();
-                            Multimap<String, String> human = HashMultimap.create();
-                            for (Map.Entry<String, UUID> entry : serverToPlayers.entries()) {
-                                human.put(entry.getKey(), plugin.getUuidTranslator().getNameFromUuid(entry.getValue(), false));
-                            }
-                            for (String server : new TreeSet<>(serverToPlayers.keySet())) {
-                                TextComponent serverName = new TextComponent();
-                                serverName.setColor(ChatColor.GREEN);
-                                serverName.setText("[" + server + "] ");
-                                TextComponent serverCount = new TextComponent();
-                                serverCount.setColor(ChatColor.YELLOW);
-                                serverCount.setText("(" + serverToPlayers.get(server).size() + "): ");
-                                TextComponent serverPlayers = new TextComponent();
-                                serverPlayers.setColor(ChatColor.WHITE);
-                                serverPlayers.setText(Joiner.on(", ").join(human.get(server)));
-                                sender.sendMessage(serverName, serverCount, serverPlayers);
-                            }
-                        } else {
-                            sender.sendMessage(new ComponentBuilder("Players: " + Joiner.on(", ").join(RedisBungee.getApi().getHumanPlayersOnline()))
-                                    .color(ChatColor.YELLOW).create());
+                        Multimap<String, UUID> serverToPlayers = RedisBungee.getApi().getServerToPlayers();
+                        Multimap<String, String> human = HashMultimap.create();
+                        for (Map.Entry<String, UUID> entry : serverToPlayers.entries()) {
+                            human.put(entry.getKey(), plugin.getUuidTranslator().getNameFromUuid(entry.getValue(), false));
+                        }
+                        for (String server : new TreeSet<>(serverToPlayers.keySet())) {
+                            TextComponent serverName = new TextComponent();
+                            serverName.setColor(ChatColor.GREEN);
+                            serverName.setText("[" + server + "] ");
+                            TextComponent serverCount = new TextComponent();
+                            serverCount.setColor(ChatColor.YELLOW);
+                            serverCount.setText("(" + serverToPlayers.get(server).size() + "): ");
+                            TextComponent serverPlayers = new TextComponent();
+                            serverPlayers.setColor(ChatColor.WHITE);
+                            serverPlayers.setText(Joiner.on(", ").join(human.get(server)));
+                            sender.sendMessage(serverName, serverCount, serverPlayers);
                         }
                         sender.sendMessage(playersOnline);
                     } else {

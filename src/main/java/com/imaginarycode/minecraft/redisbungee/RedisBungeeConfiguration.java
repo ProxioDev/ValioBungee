@@ -23,15 +23,12 @@ public class RedisBungeeConfiguration {
     @Getter
     private final boolean registerBungeeCommands;
     @Getter
-    private final boolean canonicalGlist;
-    @Getter
     private final List<InetAddress> exemptAddresses;
 
     public RedisBungeeConfiguration(JedisPool pool, Configuration configuration) {
         this.pool = pool;
         this.serverId = configuration.getString("server-id");
         this.registerBungeeCommands = configuration.getBoolean("register-bungee-commands", true);
-        this.canonicalGlist = configuration.getBoolean("canonical-glist", true);
 
         List<String> stringified = configuration.getStringList("exempt-ip-addresses");
         ImmutableList.Builder<InetAddress> addressBuilder = ImmutableList.builder();
