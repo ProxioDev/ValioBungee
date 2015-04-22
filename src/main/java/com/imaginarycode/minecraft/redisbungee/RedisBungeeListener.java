@@ -176,13 +176,17 @@ public class RedisBungeeListener implements Listener {
                             out.writeLong(RedisBungee.getApi().getLastOnline(plugin.getUuidTranslator().getTranslatedUuid(user, true)));
                             break;
                         case "ServerPlayers":
+                            String type1 = "COUNT";
+                            try {
+                                type1 = in.readUTF();
+                            } catch (Exception e) {}
                             out.writeUTF("ServerPlayers");
                             Multimap<String, UUID> multimap = RedisBungee.getApi().getServerToPlayers();
                             Multimap<String, String> human = HashMultimap.create();
                             for (Map.Entry<String, UUID> entry : multimap.entries()) {
                                 human.put(entry.getKey(), plugin.getUuidTranslator().getNameFromUuid(entry.getValue(), false));
                             }
-                            serializeMultimap(human, out);
+                            serializeMultimap(human, type1.equals("PLAYERS"), out);
                             break;
                         case "Proxy":
                             out.writeUTF("Proxy");
@@ -198,11 +202,15 @@ public class RedisBungeeListener implements Listener {
         }
     }
 
-    private void serializeMultimap(Multimap<String, String> collection, ByteArrayDataOutput output) {
+    private void serializeMultimap(Multimap<String, String> collection, boolean includeNames, ByteArrayDataOutput output) {
         output.writeInt(collection.size());
         for (Map.Entry<String, Collection<String>> entry : collection.asMap().entrySet()) {
             output.writeUTF(entry.getKey());
-            serializeCollection(entry.getValue(), output);
+            if (includeNames) {
+                serializeCollection(entry.getValue(), output);
+            } else {
+                output.writeInt(entry.getValue().size());
+            }
         }
     }
 
