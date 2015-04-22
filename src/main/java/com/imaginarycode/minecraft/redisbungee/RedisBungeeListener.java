@@ -7,6 +7,8 @@
 package com.imaginarycode.minecraft.redisbungee;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
@@ -173,6 +175,19 @@ public class RedisBungeeListener implements Listener {
                             out.writeUTF(user);
                             out.writeLong(RedisBungee.getApi().getLastOnline(plugin.getUuidTranslator().getTranslatedUuid(user, true)));
                             break;
+                        case "ServerPlayers":
+                            out.writeUTF("ServerPlayers");
+                            Multimap<String, UUID> multimap = RedisBungee.getApi().getServerToPlayers();
+                            Multimap<String, String> human = HashMultimap.create();
+                            for (Map.Entry<String, UUID> entry : multimap.entries()) {
+                                human.put(entry.getKey(), plugin.getUuidTranslator().getNameFromUuid(entry.getValue(), false));
+                            }
+                            serializeMultimap(human, out);
+                            break;
+                        case "Proxy":
+                            out.writeUTF("Proxy");
+                            out.writeUTF(RedisBungee.getConfiguration().getServerId());
+                            break;
                         default:
                             break;
                     }
@@ -180,6 +195,21 @@ public class RedisBungeeListener implements Listener {
                     ((Server) event.getSender()).sendData("RedisBungee", out.toByteArray());
                 }
             });
+        }
+    }
+
+    private void serializeMultimap(Multimap<String, String> collection, ByteArrayDataOutput output) {
+        output.writeInt(collection.size());
+        for (Map.Entry<String, Collection<String>> entry : collection.asMap().entrySet()) {
+            output.writeUTF(entry.getKey());
+            serializeCollection(entry.getValue(), output);
+        }
+    }
+
+    private void serializeCollection(Collection<?> collection, ByteArrayDataOutput output) {
+        output.writeInt(collection.size());
+        for (Object o : collection) {
+            output.writeUTF(o.toString());
         }
     }
 
