@@ -98,10 +98,10 @@ public final class RedisBungee extends Plugin {
             for (Map.Entry<String, String> entry : heartbeats.entrySet()) {
                 try {
                     long stamp = Long.parseLong(entry.getValue());
-                    if (System.nanoTime() < stamp + TimeUnit.SECONDS.toNanos(30)) {
+                    if (System.currentTimeMillis() < stamp + 30000)
                         servers.add(entry.getKey());
-                    } else if (nag <= 0) {
-                        getLogger().severe(entry.getKey() + " is " + TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - stamp) + "ms behind! (Time not synchronized or server down?)");
+                    else if (nag <= 0) {
+                        getLogger().severe(entry.getKey() + " is " + (System.currentTimeMillis() - stamp) + "ms behind! (Time not synchronized or server down?)");
                     }
                 } catch (NumberFormatException ignored) {
                 }
@@ -241,7 +241,7 @@ public final class RedisBungee extends Plugin {
                 public void run() {
                     Jedis rsc = pool.getResource();
                     try {
-                        rsc.hset("heartbeats", configuration.getServerId(), String.valueOf(System.nanoTime()));
+                        rsc.hset("heartbeats", configuration.getServerId(), String.valueOf(System.currentTimeMillis()));
                     } catch (JedisConnectionException e) {
                         // Redis server has disappeared!
                         getLogger().log(Level.SEVERE, "Unable to update heartbeat - did your Redis server go away?", e);
