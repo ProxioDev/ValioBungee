@@ -130,20 +130,14 @@ public final class RedisBungee extends Plugin {
     final int getCount() {
         int c = 0;
         if (pool != null) {
-            Jedis rsc;
-            rsc = pool.getResource();
-            try {
+            try (Jedis rsc = pool.getResource()){
                 for (String i : getServerIds()) {
                     c += rsc.scard("proxy:" + i + ":usersOnline");
                 }
             } catch (JedisConnectionException e) {
                 // Redis server has disappeared!
                 getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
-                if (rsc != null)
-                    pool.returnBrokenResource(rsc);
                 throw new RuntimeException("Unable to get total player count", e);
-            } finally {
-                pool.returnResource(rsc);
             }
         }
         return c;
@@ -163,8 +157,7 @@ public final class RedisBungee extends Plugin {
     final Set<UUID> getPlayers() {
         ImmutableSet.Builder<UUID> setBuilder = ImmutableSet.builder();
         if (pool != null) {
-            Jedis rsc = pool.getResource();
-            try {
+            try (Jedis rsc = pool.getResource();) {
                 List<String> keys = new ArrayList<>();
                 for (String i : getServerIds()) {
                     keys.add("proxy:" + i + ":usersOnline");
@@ -183,11 +176,7 @@ public final class RedisBungee extends Plugin {
             } catch (JedisConnectionException e) {
                 // Redis server has disappeared!
                 getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
-                if (rsc != null)
-                    pool.returnBrokenResource(rsc);
                 throw new RuntimeException("Unable to get all players online", e);
-            } finally {
-                pool.returnResource(rsc);
             }
         }
         return setBuilder.build();
@@ -204,17 +193,12 @@ public final class RedisBungee extends Plugin {
     }
 
     final void sendChannelMessage(String channel, String message) {
-        Jedis jedis = pool.getResource();
-        try {
+        try (Jedis jedis = pool.getResource()) {
             jedis.publish(channel, message);
         } catch (JedisConnectionException e) {
             // Redis server has disappeared!
             getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
-            if (jedis != null)
-                pool.returnBrokenResource(jedis);
             throw new RuntimeException("Unable to publish channel message", e);
-        } finally {
-            pool.returnResource(jedis);
         }
     }
 
@@ -271,8 +255,7 @@ public final class RedisBungee extends Plugin {
             integrityCheck = getProxy().getScheduler().schedule(this, new Runnable() {
                 @Override
                 public void run() {
-                    Jedis tmpRsc = pool.getResource();
-                    try {
+                    try (Jedis tmpRsc = pool.getResource()) {
                         Set<String> players = new HashSet<>(getLocalPlayersAsUuidStrings());
                         Set<String> redisCollection = tmpRsc.smembers("proxy:" + configuration.getServerId() + ":usersOnline");
 
@@ -306,8 +289,6 @@ public final class RedisBungee extends Plugin {
                             getLogger().warning("Player " + player + " is on the proxy but not in Redis.");
                             tmpRsc.sadd("proxy:" + configuration.getServerId() + ":usersOnline", player);
                         }
-                    } finally {
-                        pool.returnResource(tmpRsc);
                     }
                 }
             }, 0, 1, TimeUnit.MINUTES);
@@ -387,10 +368,20 @@ public final class RedisBungee extends Plugin {
             FutureTask<JedisPool> task = new FutureTask<>(new Callable<JedisPool>() {
                 @Override
                 public JedisPool call() throws Exception {
+                    // With recent versions of Jedis, we must set the classloader to the one BungeeCord used
+                    // to load RedisBungee with.
+                    ClassLoader previous = Thread.currentThread().getContextClassLoader();
+                    Thread.currentThread().setContextClassLoader(RedisBungee.class.getClassLoader());
+
+                    // Create the pool...
                     JedisPoolConfig config = new JedisPoolConfig();
                     config.setMaxTotal(configuration.getInt("max-redis-connections", 8));
                     config.setJmxEnabled(false);
-                    return new JedisPool(config, redisServer, redisPort, 0, finalRedisPassword);
+                    JedisPool pool = new JedisPool(config, redisServer, redisPort, 0, finalRedisPassword);
+
+                    // Reset classloader and return the pool
+                    Thread.currentThread().setContextClassLoader(previous);
+                    return pool;
                 }
             });
 
