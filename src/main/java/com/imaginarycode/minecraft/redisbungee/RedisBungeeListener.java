@@ -182,11 +182,24 @@ public class RedisBungeeListener implements Listener {
                             } catch (Exception e) {}
                             out.writeUTF("ServerPlayers");
                             Multimap<String, UUID> multimap = RedisBungee.getApi().getServerToPlayers();
-                            Multimap<String, String> human = HashMultimap.create();
-                            for (Map.Entry<String, UUID> entry : multimap.entries()) {
-                                human.put(entry.getKey(), plugin.getUuidTranslator().getNameFromUuid(entry.getValue(), false));
+
+                            boolean includesUsers = type1.equals("PLAYERS");
+
+                            if (includesUsers) {
+                                Multimap<String, String> human = HashMultimap.create();
+                                for (Map.Entry<String, UUID> entry : multimap.entries()) {
+                                    human.put(entry.getKey(), plugin.getUuidTranslator().getNameFromUuid(entry.getValue(), false));
+                                }
+                                serializeMultimap(human, true, out);
+                            } else {
+                                // Due to Java generics, we are forced to coerce UUIDs into strings. This is less
+                                // expensive than looking up names, since we just want counts.
+                                Multimap<String, String> flunk = HashMultimap.create();
+                                for (Map.Entry<String, UUID> entry : multimap.entries()) {
+                                    flunk.put(entry.getKey(), entry.getValue().toString());
+                                }
+                                serializeMultimap(flunk, false, out);
                             }
-                            serializeMultimap(human, type1.equals("PLAYERS"), out);
                             break;
                         case "Proxy":
                             out.writeUTF("Proxy");
