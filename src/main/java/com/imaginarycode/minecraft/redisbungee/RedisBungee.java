@@ -394,9 +394,7 @@ public final class RedisBungee extends Plugin {
             }
 
             // Test the connection
-            Jedis rsc = null;
-            try {
-                rsc = pool.getResource();
+            try (Jedis rsc = pool.getResource()) {
                 rsc.ping();
                 // If that worked, now we can check for an existing, alive Bungee:
                 File crashFile = new File(getDataFolder(), "restarted_from_crash.txt");
@@ -439,16 +437,9 @@ public final class RedisBungee extends Plugin {
 
                 getLogger().log(Level.INFO, "Successfully connected to Redis.");
             } catch (JedisConnectionException e) {
-                if (rsc != null)
-                    pool.returnBrokenResource(rsc);
                 pool.destroy();
                 pool = null;
-                rsc = null;
                 throw e;
-            } finally {
-                if (rsc != null && pool != null) {
-                    pool.returnResource(rsc);
-                }
             }
         } else {
             throw new RuntimeException("No redis server specified!");
