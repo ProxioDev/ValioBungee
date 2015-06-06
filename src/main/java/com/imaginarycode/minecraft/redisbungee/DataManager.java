@@ -56,8 +56,7 @@ public class DataManager implements Listener {
         if (server != null)
             return server;
 
-        Jedis tmpRsc = plugin.getPool().getResource();
-        try {
+        try (Jedis tmpRsc = plugin.getPool().getResource()) {
             server = tmpRsc.hget("player:" + uuid, "server");
 
             if (server == null)
@@ -68,11 +67,7 @@ public class DataManager implements Listener {
         } catch (JedisConnectionException e) {
             // Redis server has disappeared!
             plugin.getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
-            if (tmpRsc != null)
-                plugin.getPool().returnBrokenResource(tmpRsc);
             throw new RuntimeException("Unable to get server for " + uuid, e);
-        } finally {
-            plugin.getPool().returnResource(tmpRsc);
         }
     }
 
@@ -87,8 +82,7 @@ public class DataManager implements Listener {
         if (server != null)
             return server;
 
-        Jedis tmpRsc = plugin.getPool().getResource();
-        try {
+        try (Jedis tmpRsc = plugin.getPool().getResource()) {
             server = tmpRsc.hget("player:" + uuid, "proxy");
 
             if (server == null)
@@ -99,11 +93,7 @@ public class DataManager implements Listener {
         } catch (JedisConnectionException e) {
             // Redis server has disappeared!
             plugin.getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
-            if (tmpRsc != null)
-                plugin.getPool().returnBrokenResource(tmpRsc);
             throw new RuntimeException("Unable to get server for " + uuid, e);
-        } finally {
-            plugin.getPool().returnResource(tmpRsc);
         }
     }
 
@@ -118,8 +108,7 @@ public class DataManager implements Listener {
         if (address != null)
             return address;
 
-        Jedis tmpRsc = plugin.getPool().getResource();
-        try {
+        try (Jedis tmpRsc = plugin.getPool().getResource()) {
             String result = tmpRsc.hget("player:" + uuid, "ip");
             if (result != null) {
                 address = InetAddresses.forString(result);
@@ -130,11 +119,7 @@ public class DataManager implements Listener {
         } catch (JedisConnectionException e) {
             // Redis server has disappeared!
             plugin.getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
-            if (tmpRsc != null)
-                plugin.getPool().returnBrokenResource(tmpRsc);
             throw new RuntimeException("Unable to get server for " + uuid, e);
-        } finally {
-            plugin.getPool().returnResource(tmpRsc);
         }
     }
 
@@ -149,8 +134,7 @@ public class DataManager implements Listener {
         if (time != null)
             return time;
 
-        Jedis tmpRsc = plugin.getPool().getResource();
-        try {
+        try (Jedis tmpRsc = plugin.getPool().getResource()) {
             String result = tmpRsc.hget("player:" + uuid, "online");
             if (result != null)
                 try {
@@ -188,11 +172,7 @@ public class DataManager implements Listener {
         } catch (JedisConnectionException e) {
             // Redis server has disappeared!
             plugin.getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
-            if (tmpRsc != null)
-                plugin.getPool().returnBrokenResource(tmpRsc);
             throw new RuntimeException("Unable to get server for " + uuid, e);
-        } finally {
-            plugin.getPool().returnResource(tmpRsc);
         }
     }
 

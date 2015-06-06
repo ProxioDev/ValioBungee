@@ -87,8 +87,7 @@ public final class RedisBungee extends Plugin {
     }
 
     final List<String> getCurrentServerIds() {
-        Jedis jedis = pool.getResource();
-        try {
+        try (Jedis jedis = pool.getResource()) {
             int nag = nagAboutServers.decrementAndGet();
             if (nag <= 0) {
                 nagAboutServers.set(10);
@@ -109,11 +108,7 @@ public final class RedisBungee extends Plugin {
             return servers.build();
         } catch (JedisConnectionException e) {
             getLogger().log(Level.SEVERE, "Unable to fetch all server IDs", e);
-            if (jedis != null)
-                pool.returnBrokenResource(jedis);
             return Collections.singletonList(configuration.getServerId());
-        } finally {
-            pool.returnResource(jedis);
         }
     }
 
@@ -212,26 +207,19 @@ public final class RedisBungee extends Plugin {
             throw new RuntimeException("Unable to connect to your Redis server!", e);
         }
         if (pool != null) {
-            Jedis tmpRsc = pool.getResource();
-            try {
+            try (Jedis tmpRsc = pool.getResource()) {
                 tmpRsc.hset("heartbeats", configuration.getServerId(), String.valueOf(System.currentTimeMillis()));
-            } finally {
-                pool.returnResource(tmpRsc);
             }
             serverIds = getCurrentServerIds();
             uuidTranslator = new UUIDTranslator(this);
             heartbeatTask = getProxy().getScheduler().schedule(this, new Runnable() {
                 @Override
                 public void run() {
-                    Jedis rsc = pool.getResource();
-                    try {
+                    try (Jedis rsc = pool.getResource()) {
                         rsc.hset("heartbeats", configuration.getServerId(), String.valueOf(System.currentTimeMillis()));
                     } catch (JedisConnectionException e) {
                         // Redis server has disappeared!
                         getLogger().log(Level.SEVERE, "Unable to update heartbeat - did your Redis server go away?", e);
-                        pool.returnBrokenResource(rsc);
-                    } finally {
-                        pool.returnResource(rsc);
                     }
                     serverIds = getCurrentServerIds();
                 }
@@ -316,16 +304,13 @@ public final class RedisBungee extends Plugin {
             } catch (InterruptedException ignored) {
             }
 
-            Jedis tmpRsc = pool.getResource();
-            try {
+            try (Jedis tmpRsc = pool.getResource()) {
                 tmpRsc.hdel("heartbeats", configuration.getServerId());
                 if (tmpRsc.scard("proxy:" + configuration.getServerId() + ":usersOnline") > 0) {
                     Set<String> players = tmpRsc.smembers("proxy:" + configuration.getServerId() + ":usersOnline");
                     for (String member : players)
                         RedisUtil.cleanUpPlayer(member, tmpRsc);
                 }
-            } finally {
-                pool.returnResource(tmpRsc);
             }
 
             pool.destroy();
