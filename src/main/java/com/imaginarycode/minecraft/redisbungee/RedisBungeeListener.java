@@ -42,32 +42,29 @@ public class RedisBungeeListener implements Listener {
 
     @EventHandler
     public void onPlayerConnect(final PostLoginEvent event) {
-        Jedis rsc = plugin.getPool().getResource();
-        try {
+        try (Jedis rsc = plugin.getPool().getResource()) {
             for (String server : plugin.getServerIds()) {
                 if (rsc.sismember("proxy:" + server + ":usersOnline", event.getPlayer().getUniqueId().toString())) {
                     event.getPlayer().disconnect(ALREADY_LOGGED_IN);
                     return;
                 }
             }
-
-            plugin.getService().submit(new RedisCallable<Void>(plugin) {
-                @Override
-                protected Void call(Jedis jedis) {
-                    jedis.sadd("proxy:" + RedisBungee.getApi().getServerId() + ":usersOnline", event.getPlayer().getUniqueId().toString());
-                    jedis.hset("player:" + event.getPlayer().getUniqueId().toString(), "online", "0");
-                    jedis.hset("player:" + event.getPlayer().getUniqueId().toString(), "ip", event.getPlayer().getAddress().getAddress().getHostAddress());
-                    plugin.getUuidTranslator().persistInfo(event.getPlayer().getName(), event.getPlayer().getUniqueId(), jedis);
-                    jedis.hset("player:" + event.getPlayer().getUniqueId().toString(), "proxy", RedisBungee.getConfiguration().getServerId());
-                    jedis.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage<>(
-                            event.getPlayer().getUniqueId(), DataManager.DataManagerMessage.Action.JOIN,
-                            new DataManager.LoginPayload(event.getPlayer().getAddress().getAddress()))));
-                    return null;
-                }
-            });
-        } finally {
-            plugin.getPool().returnResource(rsc);
         }
+
+        plugin.getService().submit(new RedisCallable<Void>(plugin) {
+            @Override
+            protected Void call(Jedis jedis) {
+                jedis.sadd("proxy:" + RedisBungee.getApi().getServerId() + ":usersOnline", event.getPlayer().getUniqueId().toString());
+                jedis.hset("player:" + event.getPlayer().getUniqueId().toString(), "online", "0");
+                jedis.hset("player:" + event.getPlayer().getUniqueId().toString(), "ip", event.getPlayer().getAddress().getAddress().getHostAddress());
+                plugin.getUuidTranslator().persistInfo(event.getPlayer().getName(), event.getPlayer().getUniqueId(), jedis);
+                jedis.hset("player:" + event.getPlayer().getUniqueId().toString(), "proxy", RedisBungee.getConfiguration().getServerId());
+                jedis.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage<>(
+                        event.getPlayer().getUniqueId(), DataManager.DataManagerMessage.Action.JOIN,
+                        new DataManager.LoginPayload(event.getPlayer().getAddress().getAddress()))));
+                return null;
+            }
+        });
     }
 
     @EventHandler
