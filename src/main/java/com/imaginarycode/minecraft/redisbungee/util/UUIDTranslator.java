@@ -92,7 +92,7 @@ public final class UUIDTranslator {
             }
 
             // That didn't work. Let's ask Mojang.
-            if (!expensiveLookups)
+            if (!expensiveLookups || !ProxyServer.getInstance().getConfig().isOnlineMode())
                 return null;
 
             Map<String, UUID> uuidMap1;
@@ -147,7 +147,7 @@ public final class UUIDTranslator {
                 }
             }
 
-            if (!expensiveLookups)
+            if (!expensiveLookups || !ProxyServer.getInstance().getConfig().isOnlineMode())
                 return null;
 
             // That didn't work. Let's ask Mojang. This call may fail, because Mojang is insane.
