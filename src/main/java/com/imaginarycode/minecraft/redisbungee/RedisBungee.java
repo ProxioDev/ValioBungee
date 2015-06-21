@@ -30,7 +30,9 @@ import com.google.common.base.Functions;
 import com.google.common.collect.*;
 import com.google.common.io.ByteStreams;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
+import com.imaginarycode.minecraft.redisbungee.util.LuaManager;
 import com.imaginarycode.minecraft.redisbungee.util.NameFetcher;
 import com.imaginarycode.minecraft.redisbungee.util.UUIDFetcher;
 import com.imaginarycode.minecraft.redisbungee.util.UUIDTranslator;
@@ -53,6 +55,7 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.exceptions.JedisException;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -87,7 +90,8 @@ public final class RedisBungee extends Plugin {
     private AtomicInteger nagAboutServers = new AtomicInteger();
     private ScheduledTask integrityCheck;
     private ScheduledTask heartbeatTask;
-
+    private boolean usingLua;
+    private LuaManager.Script serverToPlayersScript;
 
     /**
      * Fetch the {@link RedisBungeeAPI} object created on plugin start.
@@ -133,13 +137,26 @@ public final class RedisBungee extends Plugin {
     }
 
     final Multimap<String, UUID> serversToPlayers() {
-        ImmutableMultimap.Builder<String, UUID> multimapBuilder = ImmutableMultimap.builder();
-        for (UUID p : getPlayers()) {
-            String name = dataManager.getServer(p);
-            if (name != null)
-                multimapBuilder.put(name, p);
+        if (usingLua) {
+            String string = (String) serverToPlayersScript.eval(ImmutableList.<String>of(), getServerIds());
+            Map<String, Set<UUID>> deserialized = gson.fromJson(string, new TypeToken<Map<String, Set<UUID>>>() {}.getType());
+
+            ImmutableMultimap.Builder<String, UUID> builder = ImmutableMultimap.builder();
+
+            for (Map.Entry<String, Set<UUID>> entry : deserialized.entrySet()) {
+                builder.putAll(entry.getKey(), entry.getValue());
+            }
+
+            return builder.build();
+        } else {
+            ImmutableMultimap.Builder<String, UUID> multimapBuilder = ImmutableMultimap.builder();
+            for (UUID p : getPlayers()) {
+                String name = dataManager.getServer(p);
+                if (name != null)
+                    multimapBuilder.put(name, p);
+            }
+            return multimapBuilder.build();
         }
-        return multimapBuilder.build();
     }
 
     final int getCount() {
@@ -229,6 +246,22 @@ public final class RedisBungee extends Plugin {
         if (pool != null) {
             try (Jedis tmpRsc = pool.getResource()) {
                 tmpRsc.hset("heartbeats", configuration.getServerId(), String.valueOf(System.currentTimeMillis()));
+                // This is more portable than INFO <section>
+                String info = tmpRsc.info();
+                for (String s : info.split("\r\n")) {
+                    if (s.startsWith("redis_version:")) {
+                        String version = s.split(":")[1];
+                        if (!(usingLua = RedisUtil.canUseLua(version))) {
+                            getLogger().warning("Your version of Redis (" + version + ") is below 2.6. RedisBungee will disable optimizations using Lua.");
+                            getLogger().warning("Support for versions of Redis below version 2.6 will be removed in the future.");
+                        } else {
+                            getLogger().info("Using Redis >= 2.6, enabling Lua optimizations.");
+                            LuaManager manager = new LuaManager(this);
+                            serverToPlayersScript = manager.createScript(IOUtil.readInputStreamAsString(getResourceAsStream("lua/server_to_players.lua")));
+                        }
+                        break;
+                    }
+                }
             }
             serverIds = getCurrentServerIds();
             uuidTranslator = new UUIDTranslator(this);

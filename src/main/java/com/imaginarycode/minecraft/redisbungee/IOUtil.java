@@ -26,27 +26,20 @@
  */
 package com.imaginarycode.minecraft.redisbungee;
 
-import redis.clients.jedis.Jedis;
+import com.google.common.io.ByteStreams;
 
-class RedisUtil {
-    public static void cleanUpPlayer(String player, Jedis rsc) {
-        rsc.srem("proxy:" + RedisBungee.getApi().getServerId() + ":usersOnline", player);
-        rsc.hdel("player:" + player, "server");
-        rsc.hdel("player:" + player, "ip");
-        rsc.hdel("player:" + player, "proxy");
-    }
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
-    public static boolean canUseLua(String redisVersion) {
-        // Need to use >=2.6 to use Lua optimizations.
-        String[] args = redisVersion.split("\\.");
-
-        if (args.length < 2) {
-            return false;
+public class IOUtil {
+    public static String readInputStreamAsString(InputStream is) {
+        String string;
+        try {
+            string = new String(ByteStreams.toByteArray(is), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new AssertionError(e);
         }
-
-        int major = Integer.parseInt(args[0]);
-        int minor = Integer.parseInt(args[1]);
-
-        return major >= 3 || (major == 2 && minor >= 6);
+        return string;
     }
 }

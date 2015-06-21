@@ -26,6 +26,8 @@
  */
 package com.imaginarycode.minecraft.redisbungee;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.net.InetAddresses;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -34,6 +36,7 @@ import com.imaginarycode.minecraft.redisbungee.events.PlayerChangedServerNetwork
 import com.imaginarycode.minecraft.redisbungee.events.PlayerJoinedNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerLeftNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
+import com.imaginarycode.minecraft.redisbungee.util.InternalCache;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -42,12 +45,11 @@ import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.exceptions.JedisConnectionException;
 
 import java.net.InetAddress;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
 /**
@@ -58,149 +60,108 @@ import java.util.logging.Level;
 @RequiredArgsConstructor
 public class DataManager implements Listener {
     private final RedisBungee plugin;
-    private final ConcurrentMap<UUID, String> serverCache = new ConcurrentHashMap<>(192, 0.65f, 4);
-    private final ConcurrentMap<UUID, String> proxyCache = new ConcurrentHashMap<>(192, 0.65f, 4);
-    private final ConcurrentMap<UUID, InetAddress> ipCache = new ConcurrentHashMap<>(192, 0.65f, 4);
-    private final ConcurrentMap<UUID, Long> lastOnlineCache = new ConcurrentHashMap<>(192, 0.65f, 4);
+    private final InternalCache<UUID, String> serverCache = createCache();
+    private final InternalCache<UUID, String> proxyCache = createCache();
+    private final InternalCache<UUID, InetAddress> ipCache = createCache();
+    private final InternalCache<UUID, Long> lastOnlineCache = createCache();
+
+    public static <K, V> InternalCache<K, V> createCache() {
+        return new InternalCache<>();
+    }
 
     private final JsonParser parser = new JsonParser();
 
-    public String getServer(UUID uuid) {
+    public String getServer(final UUID uuid) {
         ProxiedPlayer player = plugin.getProxy().getPlayer(uuid);
 
         if (player != null)
             return player.getServer() != null ? player.getServer().getInfo().getName() : null;
 
-        String server = serverCache.get(uuid);
-
-        if (server != null)
-            return server;
-
-        try (Jedis tmpRsc = plugin.getPool().getResource()) {
-            server = tmpRsc.hget("player:" + uuid, "server");
-
-            if (server == null)
-                return null;
-
-            serverCache.put(uuid, server);
-            return server;
-        } catch (JedisConnectionException e) {
-            // Redis server has disappeared!
-            plugin.getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
+        try {
+            return serverCache.get(uuid, new Callable<String>() {
+                @Override
+                public String call() throws Exception {
+                    try (Jedis tmpRsc = plugin.getPool().getResource()) {
+                        return tmpRsc.hget("player:" + uuid, "server");
+                    }
+                }
+            });
+        } catch (ExecutionException e) {
+            plugin.getLogger().log(Level.SEVERE, "Unable to get server", e);
             throw new RuntimeException("Unable to get server for " + uuid, e);
         }
     }
 
-    public String getProxy(UUID uuid) {
+    public String getProxy(final UUID uuid) {
         ProxiedPlayer player = plugin.getProxy().getPlayer(uuid);
 
         if (player != null)
             return RedisBungee.getConfiguration().getServerId();
 
-        String server = proxyCache.get(uuid);
-
-        if (server != null)
-            return server;
-
-        try (Jedis tmpRsc = plugin.getPool().getResource()) {
-            server = tmpRsc.hget("player:" + uuid, "proxy");
-
-            if (server == null)
-                return null;
-
-            proxyCache.put(uuid, server);
-            return server;
-        } catch (JedisConnectionException e) {
-            // Redis server has disappeared!
-            plugin.getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
-            throw new RuntimeException("Unable to get server for " + uuid, e);
+        try {
+            return proxyCache.get(uuid, new Callable<String>() {
+                @Override
+                public String call() throws Exception {
+                    try (Jedis tmpRsc = plugin.getPool().getResource()) {
+                        return tmpRsc.hget("player:" + uuid, "proxy");
+                    }
+                }
+            });
+        } catch (ExecutionException e) {
+            plugin.getLogger().log(Level.SEVERE, "Unable to get proxy", e);
+            throw new RuntimeException("Unable to get proxy for " + uuid, e);
         }
     }
 
-    public InetAddress getIp(UUID uuid) {
+    public InetAddress getIp(final UUID uuid) {
         ProxiedPlayer player = plugin.getProxy().getPlayer(uuid);
 
         if (player != null)
             return player.getAddress().getAddress();
 
-        InetAddress address = ipCache.get(uuid);
-
-        if (address != null)
-            return address;
-
-        try (Jedis tmpRsc = plugin.getPool().getResource()) {
-            String result = tmpRsc.hget("player:" + uuid, "ip");
-            if (result != null) {
-                address = InetAddresses.forString(result);
-                ipCache.put(uuid, address);
-                return address;
-            }
-            return null;
-        } catch (JedisConnectionException e) {
-            // Redis server has disappeared!
-            plugin.getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
-            throw new RuntimeException("Unable to get server for " + uuid, e);
+        try {
+            return ipCache.get(uuid, new Callable<InetAddress>() {
+                @Override
+                public InetAddress call() throws Exception {
+                    try (Jedis tmpRsc = plugin.getPool().getResource()) {
+                        String result = tmpRsc.hget("player:" + uuid, "ip");
+                        return result == null ? null : InetAddresses.forString(result);
+                    }
+                }
+            });
+        } catch (ExecutionException e) {
+            plugin.getLogger().log(Level.SEVERE, "Unable to get IP", e);
+            throw new RuntimeException("Unable to get IP for " + uuid, e);
         }
     }
 
-    public long getLastOnline(UUID uuid) {
+    public long getLastOnline(final UUID uuid) {
         ProxiedPlayer player = plugin.getProxy().getPlayer(uuid);
 
         if (player != null)
             return 0;
 
-        Long time = lastOnlineCache.get(uuid);
-
-        if (time != null)
-            return time;
-
-        try (Jedis tmpRsc = plugin.getPool().getResource()) {
-            String result = tmpRsc.hget("player:" + uuid, "online");
-            if (result != null)
-                try {
-                    time = Long.valueOf(result);
-
-                    if (time == null)
-                        return -1;
-
-                    lastOnlineCache.put(uuid, time);
-                    return time;
-                } catch (NumberFormatException e) {
-                    plugin.getLogger().info("I found a funny number for when " + uuid + " was last online!");
-                    boolean found = false;
-                    for (String proxyId : plugin.getServerIds()) {
-                        if (proxyId.equals(RedisBungee.getConfiguration().getServerId())) continue;
-                        if (tmpRsc.sismember("proxy:" + proxyId + ":usersOnline", uuid.toString())) {
-                            found = true;
-                            break;
-                        }
+        try {
+            return lastOnlineCache.get(uuid, new Callable<Long>() {
+                @Override
+                public Long call() throws Exception {
+                    try (Jedis tmpRsc = plugin.getPool().getResource()) {
+                        String result = tmpRsc.hget("player:" + uuid, "online");
+                        return result == null ? -1 : Long.valueOf(result);
                     }
-
-                    long value = 0;
-
-                    if (!found) {
-                        value = System.currentTimeMillis();
-                        plugin.getLogger().info(uuid + " isn't online. Setting to current time.");
-                    } else {
-                        plugin.getLogger().info(uuid + " is online. Setting to 0. Please check your BungeeCord instances.");
-                        plugin.getLogger().info("If they are working properly, and this error does not resolve in a few minutes, please let Tux know!");
-                    }
-                    tmpRsc.hset("player:" + uuid, "online", Long.toString(value));
-                    return value;
                 }
-            return (long) -1;
-        } catch (JedisConnectionException e) {
-            // Redis server has disappeared!
-            plugin.getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
-            throw new RuntimeException("Unable to get server for " + uuid, e);
+            });
+        } catch (ExecutionException e) {
+            plugin.getLogger().log(Level.SEVERE, "Unable to get last time online", e);
+            throw new RuntimeException("Unable to get last time online for " + uuid, e);
         }
     }
 
     private void invalidate(UUID uuid) {
-        ipCache.remove(uuid);
-        lastOnlineCache.remove(uuid);
-        serverCache.remove(uuid);
-        proxyCache.remove(uuid);
+        ipCache.invalidate(uuid);
+        lastOnlineCache.invalidate(uuid);
+        serverCache.invalidate(uuid);
+        proxyCache.invalidate(uuid);
     }
 
     @EventHandler

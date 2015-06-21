@@ -24,29 +24,41 @@
  *
  * For more information, please refer to <http://unlicense.org/>
  */
-package com.imaginarycode.minecraft.redisbungee;
+package com.imaginarycode.minecraft.redisbungee.util;
 
-import redis.clients.jedis.Jedis;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
 
-class RedisUtil {
-    public static void cleanUpPlayer(String player, Jedis rsc) {
-        rsc.srem("proxy:" + RedisBungee.getApi().getServerId() + ":usersOnline", player);
-        rsc.hdel("player:" + player, "server");
-        rsc.hdel("player:" + player, "ip");
-        rsc.hdel("player:" + player, "proxy");
-    }
+// I would use the Guava, but can't because I need a few more properties.
+public class InternalCache<K, V> {
+    private final ConcurrentMap<K, V> map = new ConcurrentHashMap<>(128, 0.75f, 4);
 
-    public static boolean canUseLua(String redisVersion) {
-        // Need to use >=2.6 to use Lua optimizations.
-        String[] args = redisVersion.split("\\.");
+    public V get(K key, Callable<V> loader) throws ExecutionException {
+        V value = map.get(key);
 
-        if (args.length < 2) {
-            return false;
+        if (value == null) {
+            try {
+                value = loader.call();
+            } catch (Exception e) {
+                throw new ExecutionException(e);
+            }
+
+            if (value == null)
+                return null;
+
+            map.putIfAbsent(key, value);
         }
 
-        int major = Integer.parseInt(args[0]);
-        int minor = Integer.parseInt(args[1]);
+        return value;
+    }
 
-        return major >= 3 || (major == 2 && minor >= 6);
+    public V put(K key, V value) {
+        return map.put(key, value);
+    }
+
+    public void invalidate(K key) {
+        map.remove(key);
     }
 }

@@ -24,29 +24,47 @@
  *
  * For more information, please refer to <http://unlicense.org/>
  */
-package com.imaginarycode.minecraft.redisbungee;
+package com.imaginarycode.minecraft.redisbungee.util;
 
+import com.imaginarycode.minecraft.redisbungee.RedisBungee;
+import lombok.RequiredArgsConstructor;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.exceptions.JedisDataException;
 
-class RedisUtil {
-    public static void cleanUpPlayer(String player, Jedis rsc) {
-        rsc.srem("proxy:" + RedisBungee.getApi().getServerId() + ":usersOnline", player);
-        rsc.hdel("player:" + player, "server");
-        rsc.hdel("player:" + player, "ip");
-        rsc.hdel("player:" + player, "proxy");
+import java.util.List;
+
+@RequiredArgsConstructor
+public class LuaManager {
+    private final RedisBungee plugin;
+
+    public Script createScript(String script) {
+        try (Jedis jedis = plugin.getPool().getResource()) {
+            String hash = jedis.scriptLoad(script);
+            return new Script(script, hash);
+        }
     }
 
-    public static boolean canUseLua(String redisVersion) {
-        // Need to use >=2.6 to use Lua optimizations.
-        String[] args = redisVersion.split("\\.");
+    @RequiredArgsConstructor
+    public class Script {
+        private final String script;
+        private final String hashed;
 
-        if (args.length < 2) {
-            return false;
+        public Object eval(List<String> keys, List<String> args) {
+            Object data;
+
+            try (Jedis jedis = plugin.getPool().getResource()) {
+                try {
+                    data = jedis.evalsha(hashed, keys, args);
+                } catch (JedisDataException e) {
+                    if (e.getMessage().startsWith("NOSCRIPT")) {
+                        data = jedis.eval(script, keys, args);
+                    } else {
+                        throw e;
+                    }
+                }
+            }
+
+            return data;
         }
-
-        int major = Integer.parseInt(args[0]);
-        int minor = Integer.parseInt(args[1]);
-
-        return major >= 3 || (major == 2 && minor >= 6);
     }
 }
