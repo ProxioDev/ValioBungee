@@ -45,6 +45,7 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Pipeline;
 
 import java.net.InetAddress;
 import java.util.*;
@@ -74,14 +75,16 @@ public class RedisBungeeListener implements Listener {
         plugin.getService().submit(new RedisCallable<Void>(plugin) {
             @Override
             protected Void call(Jedis jedis) {
-                jedis.sadd("proxy:" + RedisBungee.getApi().getServerId() + ":usersOnline", event.getPlayer().getUniqueId().toString());
-                jedis.hset("player:" + event.getPlayer().getUniqueId().toString(), "online", "0");
-                jedis.hset("player:" + event.getPlayer().getUniqueId().toString(), "ip", event.getPlayer().getAddress().getAddress().getHostAddress());
-                plugin.getUuidTranslator().persistInfo(event.getPlayer().getName(), event.getPlayer().getUniqueId(), jedis);
-                jedis.hset("player:" + event.getPlayer().getUniqueId().toString(), "proxy", RedisBungee.getConfiguration().getServerId());
-                jedis.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage<>(
+                Pipeline pipeline = jedis.pipelined();
+                pipeline.sadd("proxy:" + RedisBungee.getApi().getServerId() + ":usersOnline", event.getPlayer().getUniqueId().toString());
+                pipeline.hset("player:" + event.getPlayer().getUniqueId().toString(), "online", "0");
+                pipeline.hset("player:" + event.getPlayer().getUniqueId().toString(), "ip", event.getPlayer().getAddress().getAddress().getHostAddress());
+                plugin.getUuidTranslator().persistInfo(event.getPlayer().getName(), event.getPlayer().getUniqueId(), pipeline);
+                pipeline.hset("player:" + event.getPlayer().getUniqueId().toString(), "proxy", RedisBungee.getConfiguration().getServerId());
+                pipeline.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage<>(
                         event.getPlayer().getUniqueId(), DataManager.DataManagerMessage.Action.JOIN,
                         new DataManager.LoginPayload(event.getPlayer().getAddress().getAddress()))));
+                pipeline.sync();
                 return null;
             }
         });
@@ -92,12 +95,14 @@ public class RedisBungeeListener implements Listener {
         plugin.getService().submit(new RedisCallable<Void>(plugin) {
             @Override
             protected Void call(Jedis jedis) {
+                Pipeline pipeline = jedis.pipelined();
                 long timestamp = System.currentTimeMillis();
-                jedis.hset("player:" + event.getPlayer().getUniqueId().toString(), "online", String.valueOf(timestamp));
-                RedisUtil.cleanUpPlayer(event.getPlayer().getUniqueId().toString(), jedis);
-                jedis.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage<>(
+                pipeline.hset("player:" + event.getPlayer().getUniqueId().toString(), "online", String.valueOf(timestamp));
+                RedisUtil.cleanUpPlayer(event.getPlayer().getUniqueId().toString(), pipeline);
+                pipeline.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage<>(
                         event.getPlayer().getUniqueId(), DataManager.DataManagerMessage.Action.LEAVE,
                         new DataManager.LogoutPayload(timestamp))));
+                pipeline.sync();
                 return null;
             }
         });
@@ -108,10 +113,12 @@ public class RedisBungeeListener implements Listener {
         plugin.getService().submit(new RedisCallable<Void>(plugin) {
             @Override
             protected Void call(Jedis jedis) {
-                jedis.hset("player:" + event.getPlayer().getUniqueId().toString(), "server", event.getServer().getInfo().getName());
-                jedis.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage<>(
+                Pipeline pipeline = jedis.pipelined();
+                pipeline.hset("player:" + event.getPlayer().getUniqueId().toString(), "server", event.getServer().getInfo().getName());
+                pipeline.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage<>(
                         event.getPlayer().getUniqueId(), DataManager.DataManagerMessage.Action.SERVER_CHANGE,
                         new DataManager.ServerChangePayload(event.getServer().getInfo().getName()))));
+                pipeline.sync();
                 return null;
             }
         });

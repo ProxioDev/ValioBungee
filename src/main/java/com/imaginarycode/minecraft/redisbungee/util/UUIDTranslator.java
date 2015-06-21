@@ -34,6 +34,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.ProxyServer;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.exceptions.JedisException;
 
@@ -193,6 +194,12 @@ public final class UUIDTranslator {
     }
 
     public final void persistInfo(String name, UUID uuid, Jedis jedis) {
+        addToMaps(name, uuid);
+        jedis.hset("uuid-cache", name.toLowerCase(), RedisBungee.getGson().toJson(uuidToNameMap.get(uuid)));
+        jedis.hset("uuid-cache", uuid.toString(), RedisBungee.getGson().toJson(uuidToNameMap.get(uuid)));
+    }
+
+    public final void persistInfo(String name, UUID uuid, Pipeline jedis) {
         addToMaps(name, uuid);
         jedis.hset("uuid-cache", name.toLowerCase(), RedisBungee.getGson().toJson(uuidToNameMap.get(uuid)));
         jedis.hset("uuid-cache", uuid.toString(), RedisBungee.getGson().toJson(uuidToNameMap.get(uuid)));
