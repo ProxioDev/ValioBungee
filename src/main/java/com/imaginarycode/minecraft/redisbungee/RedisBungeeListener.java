@@ -200,14 +200,25 @@ public class RedisBungeeListener implements Listener {
                             out.writeLong(RedisBungee.getApi().getLastOnline(plugin.getUuidTranslator().getTranslatedUuid(user, true)));
                             break;
                         case "ServerPlayers":
-                            String type1 = "COUNT";
-                            try {
-                                type1 = in.readUTF();
-                            } catch (Exception e) {}
+                            String type1 = in.readUTF();
                             out.writeUTF("ServerPlayers");
                             Multimap<String, UUID> multimap = RedisBungee.getApi().getServerToPlayers();
 
-                            boolean includesUsers = type1.equals("PLAYERS");
+                            boolean includesUsers;
+
+                            switch (type1) {
+                                case "COUNT":
+                                    includesUsers = false;
+                                    break;
+                                case "PLAYERS":
+                                    includesUsers = true;
+                                    break;
+                                default:
+                                    // TODO: Should I raise an error?
+                                    return;
+                            }
+
+                            out.writeUTF(type1);
 
                             if (includesUsers) {
                                 Multimap<String, String> human = HashMultimap.create();
@@ -230,7 +241,7 @@ public class RedisBungeeListener implements Listener {
                             out.writeUTF(RedisBungee.getConfiguration().getServerId());
                             break;
                         default:
-                            break;
+                            return;
                     }
 
                     ((Server) event.getSender()).sendData("RedisBungee", out.toByteArray());
