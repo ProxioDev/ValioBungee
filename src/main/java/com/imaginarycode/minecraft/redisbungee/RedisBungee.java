@@ -463,7 +463,7 @@ public final class RedisBungee extends Plugin {
                 FutureTask<Void> task2 = new FutureTask<>(new Callable<Void>() {
                     @Override
                     public Void call() throws Exception {
-                        service = Executors.newFixedThreadPool(16);
+                        service = Executors.newCachedThreadPool();
                         httpClient = new OkHttpClient();
                         Dispatcher dispatcher = new Dispatcher(service);
                         httpClient.setDispatcher(dispatcher);
