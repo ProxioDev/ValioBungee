@@ -30,7 +30,6 @@ import com.google.common.base.Functions;
 import com.google.common.collect.*;
 import com.google.common.io.ByteStreams;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import com.imaginarycode.minecraft.redisbungee.util.LuaManager;
 import com.imaginarycode.minecraft.redisbungee.util.NameFetcher;
@@ -55,7 +54,6 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.exceptions.JedisException;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -138,13 +136,22 @@ public final class RedisBungee extends Plugin {
 
     final Multimap<String, UUID> serversToPlayers() {
         if (usingLua) {
-            String string = (String) serverToPlayersScript.eval(ImmutableList.<String>of(), getServerIds());
-            Map<String, Set<UUID>> deserialized = gson.fromJson(string, new TypeToken<Map<String, Set<UUID>>>() {}.getType());
+            Collection<String> data = (Collection<String>) serverToPlayersScript.eval(ImmutableList.<String>of(), getServerIds());
 
             ImmutableMultimap.Builder<String, UUID> builder = ImmutableMultimap.builder();
 
-            for (Map.Entry<String, Set<UUID>> entry : deserialized.entrySet()) {
-                builder.putAll(entry.getKey(), entry.getValue());
+            // TODO: This seems pretty slow, but execution times over the long term seem to stay below that of the
+            // Java implementation, at least. If you have a better idea, I want to see it!
+            String key = null;
+
+            for (String s : data) {
+                if (key == null) {
+                    key = s;
+                    continue;
+                }
+
+                builder.put(key, UUID.fromString(s));
+                key = null;
             }
 
             return builder.build();

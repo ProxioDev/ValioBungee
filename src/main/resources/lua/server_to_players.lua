@@ -1,5 +1,3 @@
--- This script needs all active proxies available specified as args.
-local insert = table.insert
 local call = redis.call
 
 local serverToData = {}
@@ -9,15 +7,11 @@ for _, proxy in ipairs(ARGV) do
     for _, player in ipairs(players) do
         local server = call("HGET", "player:" .. player, "server")
         if server then
-            local map = serverToData[server]
-            if not map then
-                map = {}
-                serverToData[server] = map
-            end
-            insert(map, player)
+            local sz = #serverToData
+            serverToData[sz + 1] = server
+            serverToData[sz + 2] = player
         end
     end
 end
 
--- Redis can't map Lua associative tables back, so we have to send it as JSON.
-return cjson.encode(serverToData)
+return serverToData
