@@ -129,6 +129,18 @@ public final class RedisBungee extends Plugin {
         }
     }
 
+    public Set<UUID> getPlayersOnProxy(String server) {
+        checkArgument(getServerIds().contains(server), server + " is not a valid proxy ID");
+        try (Jedis jedis = pool.getResource()) {
+            Set<String> users = jedis.smembers("proxy:" + server + ":usersOnline");
+            ImmutableSet.Builder<UUID> builder = ImmutableSet.builder();
+            for (String user : users) {
+                builder.add(UUID.fromString(user));
+            }
+            return builder.build();
+        }
+    }
+
     final Multimap<String, UUID> serversToPlayers() {
         if (usingLua) {
             Collection<String> data = (Collection<String>) serverToPlayersScript.eval(ImmutableList.<String>of(), getServerIds());
@@ -295,6 +307,7 @@ public final class RedisBungee extends Plugin {
             getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.ServerId(this));
             getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.ServerIds());
             getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.PlayerProxyCommand(this));
+            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.PlistCommand(this));
             api = new RedisBungeeAPI(this);
             getProxy().getPluginManager().registerListener(this, new RedisBungeeListener(this, configuration.getExemptAddresses()));
             getProxy().getPluginManager().registerListener(this, dataManager);

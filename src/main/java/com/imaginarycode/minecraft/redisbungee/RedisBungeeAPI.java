@@ -143,6 +143,16 @@ public class RedisBungeeAPI {
     }
 
     /**
+     * Get a list of players on the specified proxy.
+     *
+     * @param server a server name
+     * @return a Set with all UUIDs found on this proxy
+     */
+    public final Set<UUID> getPlayersOnProxy(@NonNull String server) {
+        return plugin.getPlayersOnProxy(server);
+    }
+
+    /**
      * Convenience method: Checks if the specified player is online.
      *
      * @param player a player name
