@@ -24,7 +24,7 @@
  *
  * For more information, please refer to <http://unlicense.org/>
  */
-package com.imaginarycode.minecraft.redisbungee;
+package com.imaginarycode.minecraft.redisbungee.util;
 
 import com.google.common.io.ByteStreams;
 
