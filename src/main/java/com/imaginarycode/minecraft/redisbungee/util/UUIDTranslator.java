@@ -105,6 +105,8 @@ public final class UUIDTranslator {
                 // Check for expiry:
                 if (entry.expired()) {
                     jedis.hdel("uuid-cache", player.toLowerCase());
+                    // Doesn't hurt to also remove the UUID entry as well.
+                    jedis.hdel("uuid-cache", entry.getUuid().toString());
                 } else {
                     nameToUuidMap.put(player.toLowerCase(), entry);
                     uuidToNameMap.put(entry.getUuid(), entry);
@@ -161,6 +163,9 @@ public final class UUIDTranslator {
                 // Check for expiry:
                 if (entry.expired()) {
                     jedis.hdel("uuid-cache", player.toString());
+                    // Doesn't hurt to also remove the named entry as well.
+                    // TODO: Since UUIDs are fixed, we could look up the name and see if the UUID matches.
+                    jedis.hdel("uuid-cache", entry.getName());
                 } else {
                     nameToUuidMap.put(entry.getName().toLowerCase(), entry);
                     uuidToNameMap.put(player, entry);
