@@ -6,12 +6,10 @@ for _, proxy in ipairs(ARGV) do
     for _, player in ipairs(players) do
         local server = redis.call("HGET", "player:" .. player, "server")
         if server then
-            if serverToData[server] then
-                local data = serverToData[server]
-                data[#data + 1] = player
-            else
+            if not serverToData[server] then
                 serverToData[server] = {player}
             end
+            table.insert(serverToData[server], player)
         end
     end
 end
