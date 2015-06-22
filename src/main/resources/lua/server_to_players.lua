@@ -7,7 +7,7 @@ for _, proxy in ipairs(ARGV) do
         local server = redis.call("HGET", "player:" .. player, "server")
         if server then
             if not serverToData[server] then
-                serverToData[server] = {player}
+                serverToData[server] = {}
             end
             table.insert(serverToData[server], player)
         end
