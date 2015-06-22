@@ -75,12 +75,15 @@ public class RedisBungeeListener implements Listener {
         plugin.getService().submit(new RedisCallable<Void>(plugin) {
             @Override
             protected Void call(Jedis jedis) {
+                Map<String, String> playerData = new HashMap<>(4);
+                playerData.put("online", "0");
+                playerData.put("ip", event.getPlayer().getAddress().getAddress().getHostAddress());
+                playerData.put("proxy", RedisBungee.getConfiguration().getServerId());
+
                 Pipeline pipeline = jedis.pipelined();
                 pipeline.sadd("proxy:" + RedisBungee.getApi().getServerId() + ":usersOnline", event.getPlayer().getUniqueId().toString());
-                pipeline.hset("player:" + event.getPlayer().getUniqueId().toString(), "online", "0");
-                pipeline.hset("player:" + event.getPlayer().getUniqueId().toString(), "ip", event.getPlayer().getAddress().getAddress().getHostAddress());
                 plugin.getUuidTranslator().persistInfo(event.getPlayer().getName(), event.getPlayer().getUniqueId(), pipeline);
-                pipeline.hset("player:" + event.getPlayer().getUniqueId().toString(), "proxy", RedisBungee.getConfiguration().getServerId());
+                pipeline.hmset("player:" + event.getPlayer().getUniqueId().toString(), playerData);
                 pipeline.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage<>(
                         event.getPlayer().getUniqueId(), DataManager.DataManagerMessage.Action.JOIN,
                         new DataManager.LoginPayload(event.getPlayer().getAddress().getAddress()))));

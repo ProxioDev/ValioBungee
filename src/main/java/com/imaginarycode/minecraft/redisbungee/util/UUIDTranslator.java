@@ -27,6 +27,7 @@
 package com.imaginarycode.minecraft.redisbungee.util;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.imaginarycode.minecraft.redisbungee.RedisBungee;
 import lombok.Getter;
@@ -200,14 +201,14 @@ public final class UUIDTranslator {
 
     public final void persistInfo(String name, UUID uuid, Jedis jedis) {
         addToMaps(name, uuid);
-        jedis.hset("uuid-cache", name.toLowerCase(), RedisBungee.getGson().toJson(uuidToNameMap.get(uuid)));
-        jedis.hset("uuid-cache", uuid.toString(), RedisBungee.getGson().toJson(uuidToNameMap.get(uuid)));
+        String json = RedisBungee.getGson().toJson(uuidToNameMap.get(uuid));
+        jedis.hmset("uuid-cache", ImmutableMap.of(name, json, uuid.toString(), json));
     }
 
     public final void persistInfo(String name, UUID uuid, Pipeline jedis) {
         addToMaps(name, uuid);
-        jedis.hset("uuid-cache", name.toLowerCase(), RedisBungee.getGson().toJson(uuidToNameMap.get(uuid)));
-        jedis.hset("uuid-cache", uuid.toString(), RedisBungee.getGson().toJson(uuidToNameMap.get(uuid)));
+        String json = RedisBungee.getGson().toJson(uuidToNameMap.get(uuid));
+        jedis.hmset("uuid-cache", ImmutableMap.of(name, json, uuid.toString(), json));
     }
 
     @RequiredArgsConstructor
