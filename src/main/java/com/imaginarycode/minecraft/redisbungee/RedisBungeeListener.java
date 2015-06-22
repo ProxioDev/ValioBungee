@@ -39,6 +39,8 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ServerPing;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.connection.Server;
 import net.md_5.bungee.api.event.*;
 import net.md_5.bungee.api.plugin.Listener;
@@ -61,33 +63,59 @@ public class RedisBungeeListener implements Listener {
     private final RedisBungee plugin;
     private final List<InetAddress> exemptAddresses;
 
-    @EventHandler
-    public void onPlayerConnect(final PostLoginEvent event) {
-        try (Jedis rsc = plugin.getPool().getResource()) {
-            for (String server : plugin.getServerIds()) {
-                if (rsc.sismember("proxy:" + server + ":usersOnline", event.getPlayer().getUniqueId().toString())) {
-                    event.getPlayer().disconnect(ALREADY_LOGGED_IN);
-                    return;
-                }
-            }
-        }
-
-        plugin.getService().submit(new RedisCallable<Void>(plugin) {
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onLogin(final LoginEvent event) {
+        event.registerIntent(plugin);
+        plugin.getProxy().getScheduler().runAsync(plugin, new RedisCallable<Void>(plugin) {
             @Override
             protected Void call(Jedis jedis) {
+                if (event.isCancelled()) {
+                    event.completeIntent(plugin);
+                    return null;
+                }
+
+                // If a player with this name isn't on this proxy, we make sure they aren't trying to use an existing
+                // player's name. This is BungeeCord behavior I disapprove of but I don't really care at this point.
+                ProxiedPlayer player = plugin.getProxy().getPlayer(event.getConnection().getName());
+
+                if (player == null) {
+                    String online = jedis.hget("player:" + event.getConnection().getUniqueId().toString(), "online");
+
+                    if (online != null && online.equals("0")) {
+                        event.setCancelled(true);
+                        // TODO: Make it accept a BaseComponent[] like everything else.
+                        event.setCancelReason(TextComponent.toLegacyText(ALREADY_LOGGED_IN));
+                        event.completeIntent(plugin);
+                        return null;
+                    }
+                }
+
                 Map<String, String> playerData = new HashMap<>(4);
                 playerData.put("online", "0");
-                playerData.put("ip", event.getPlayer().getAddress().getAddress().getHostAddress());
+                playerData.put("ip", event.getConnection().getAddress().getAddress().getHostAddress());
                 playerData.put("proxy", RedisBungee.getConfiguration().getServerId());
 
                 Pipeline pipeline = jedis.pipelined();
-                pipeline.sadd("proxy:" + RedisBungee.getApi().getServerId() + ":usersOnline", event.getPlayer().getUniqueId().toString());
-                plugin.getUuidTranslator().persistInfo(event.getPlayer().getName(), event.getPlayer().getUniqueId(), pipeline);
-                pipeline.hmset("player:" + event.getPlayer().getUniqueId().toString(), playerData);
-                pipeline.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage<>(
+                pipeline.sadd("proxy:" + RedisBungee.getApi().getServerId() + ":usersOnline", event.getConnection().getUniqueId().toString());
+                plugin.getUuidTranslator().persistInfo(event.getConnection().getName(), event.getConnection().getUniqueId(), pipeline);
+                pipeline.hmset("player:" + event.getConnection().getUniqueId().toString(), playerData);
+                // We're not publishing, the API says we only publish at PostLoginEvent time.
+                pipeline.sync();
+
+                event.completeIntent(plugin);
+                return null;
+            }
+        });
+    }
+
+    @EventHandler
+    public void onPostLogin(final PostLoginEvent event) {
+        plugin.getProxy().getScheduler().runAsync(plugin, new RedisCallable<Void>(plugin) {
+            @Override
+            protected Void call(Jedis jedis) {
+                jedis.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage<>(
                         event.getPlayer().getUniqueId(), DataManager.DataManagerMessage.Action.JOIN,
                         new DataManager.LoginPayload(event.getPlayer().getAddress().getAddress()))));
-                pipeline.sync();
                 return null;
             }
         });
@@ -95,7 +123,7 @@ public class RedisBungeeListener implements Listener {
 
     @EventHandler
     public void onPlayerDisconnect(final PlayerDisconnectEvent event) {
-        plugin.getService().submit(new RedisCallable<Void>(plugin) {
+        plugin.getProxy().getScheduler().runAsync(plugin, new RedisCallable<Void>(plugin) {
             @Override
             protected Void call(Jedis jedis) {
                 Pipeline pipeline = jedis.pipelined();
@@ -113,7 +141,7 @@ public class RedisBungeeListener implements Listener {
 
     @EventHandler
     public void onServerChange(final ServerConnectedEvent event) {
-        plugin.getService().submit(new RedisCallable<Void>(plugin) {
+        plugin.getProxy().getScheduler().runAsync(plugin, new RedisCallable<Void>(plugin) {
             @Override
             protected Void call(Jedis jedis) {
                 Pipeline pipeline = jedis.pipelined();

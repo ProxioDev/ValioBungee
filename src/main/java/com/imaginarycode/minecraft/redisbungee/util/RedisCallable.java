@@ -35,12 +35,16 @@ import java.util.concurrent.Callable;
 import java.util.logging.Level;
 
 @AllArgsConstructor
-public abstract class RedisCallable<T> implements Callable<T> {
+public abstract class RedisCallable<T> implements Callable<T>, Runnable {
     private final RedisBungee plugin;
 
     @Override
     public T call() {
         return run(false);
+    }
+
+    public void run() {
+        call();
     }
 
     private T run(boolean retry) {

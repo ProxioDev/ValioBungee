@@ -78,8 +78,6 @@ public final class RedisBungee extends Plugin {
     @Getter
     private DataManager dataManager;
     @Getter
-    private ExecutorService service;
-    @Getter
     private static OkHttpClient httpClient;
     private List<String> serverIds;
     private AtomicInteger nagAboutServers = new AtomicInteger();
@@ -356,16 +354,6 @@ public final class RedisBungee extends Plugin {
             heartbeatTask.cancel();
             getProxy().getPluginManager().unregisterListeners(this);
 
-            getLogger().info("Waiting for all tasks to finish.");
-
-            service.shutdown();
-            try {
-                if (!service.awaitTermination(60, TimeUnit.SECONDS)) {
-                    service.shutdownNow();
-                }
-            } catch (InterruptedException ignored) {
-            }
-
             try (Jedis tmpRsc = pool.getResource()) {
                 tmpRsc.hdel("heartbeats", configuration.getServerId());
                 if (tmpRsc.scard("proxy:" + configuration.getServerId() + ":usersOnline") > 0) {
@@ -451,7 +439,7 @@ public final class RedisBungee extends Plugin {
                     try {
                         Long value = Long.valueOf(rsc.hget("heartbeats", serverId));
                         if (value != null && System.currentTimeMillis() < value + 20000) {
-                            getLogger().severe("You have launched a possible imposter BungeeCord instance. Another instance is already running.");
+                            getLogger().severe("You have launched a possible impostor BungeeCord instance. Another instance is already running.");
                             getLogger().severe("For data consistency reasons, RedisBungee will now disable itself.");
                             getLogger().severe("If this instance is coming up from a crash, create a file in your RedisBungee plugins directory with the name 'restarted_from_crash.txt' and RedisBungee will not perform this check.");
                             throw new RuntimeException("Possible imposter instance!");
@@ -463,9 +451,8 @@ public final class RedisBungee extends Plugin {
                 FutureTask<Void> task2 = new FutureTask<>(new Callable<Void>() {
                     @Override
                     public Void call() throws Exception {
-                        service = Executors.newCachedThreadPool();
                         httpClient = new OkHttpClient();
-                        Dispatcher dispatcher = new Dispatcher(service);
+                        Dispatcher dispatcher = new Dispatcher(getExecutorService());
                         httpClient.setDispatcher(dispatcher);
                         NameFetcher.setHttpClient(httpClient);
                         UUIDFetcher.setHttpClient(httpClient);
