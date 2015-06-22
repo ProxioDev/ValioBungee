@@ -262,6 +262,11 @@ public final class RedisBungee extends Plugin {
                         break;
                     }
                 }
+
+                long uuidCacheSize = tmpRsc.hlen("uuid-cache");
+                if (uuidCacheSize > 750000) {
+                    getLogger().info("Looks like you have a really big UUID cache! Run https://www.spigotmc.org/resources/redisbungeecleaner.8505/ as soon as possible.");
+                }
             }
             serverIds = getCurrentServerIds();
             uuidTranslator = new UUIDTranslator(this);
