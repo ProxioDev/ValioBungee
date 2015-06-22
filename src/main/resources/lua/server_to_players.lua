@@ -11,8 +11,8 @@ for _, proxy in ipairs(ARGV) do
         if server then
             local map = serverToData[server]
             if not map then
-                serverToData[server] = {}
-                map = serverToData[server]
+                map = {}
+                serverToData[server] = map
             end
             insert(map, player)
         end
