@@ -19,5 +19,5 @@ for _, proxy in ipairs(ARGV) do
     end
 end
 
--- Redis can't map a Lua table back, so we have to send it as JSON.
+-- Redis can't map Lua associative tables back, so we have to send it as JSON.
 return cjson.encode(serverToData)
