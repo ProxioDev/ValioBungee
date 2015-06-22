@@ -9,10 +9,12 @@ for _, proxy in ipairs(ARGV) do
     for _, player in ipairs(players) do
         local server = call("HGET", "player:" .. player, "server")
         if server then
-            if not serverToData[server] then
+            local map = serverToData[server]
+            if not map then
                 serverToData[server] = {}
+                map = serverToData[server]
             end
-            insert(serverToData[server], player)
+            insert(map, player)
         end
     end
 end
