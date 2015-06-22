@@ -60,6 +60,11 @@ public class RedisBungeeListener implements Listener {
                     .append("\n\nIf you were disconnected forcefully, please wait up to one minute.\nIf this does not resolve your issue, please contact staff.")
                     .color(ChatColor.GRAY)
                     .create();
+    private static final BaseComponent[] ONLINE_MODE_RECONNECT =
+            new ComponentBuilder("Whoops! You need to reconnect.").color(ChatColor.RED)
+                    .append("\n\nWe found someone online using your username. They were kicked and you may reconnect.\nIf this does not work, please contact staff.")
+                    .color(ChatColor.GRAY)
+                    .create();
     private final RedisBungee plugin;
     private final List<InetAddress> exemptAddresses;
 
@@ -74,20 +79,28 @@ public class RedisBungeeListener implements Listener {
                     return null;
                 }
 
-                // If a player with this name isn't on this proxy, we make sure they aren't trying to use an existing
-                // player's name. This is BungeeCord behavior I disapprove of but I don't really care at this point.
-                ProxiedPlayer player = plugin.getProxy().getPlayer(event.getConnection().getName());
+                // We make sure they aren't trying to use an existing player's name.
+                // This is problematic for online-mode servers as they always disconnect old clients.
+                if (plugin.getProxy().getConfig().isOnlineMode()) {
+                    ProxiedPlayer player = plugin.getProxy().getPlayer(event.getConnection().getName());
 
-                if (player == null) {
-                    String online = jedis.hget("player:" + event.getConnection().getUniqueId().toString(), "online");
-
-                    if (online != null && online.equals("0")) {
+                    if (player != null) {
                         event.setCancelled(true);
                         // TODO: Make it accept a BaseComponent[] like everything else.
-                        event.setCancelReason(TextComponent.toLegacyText(ALREADY_LOGGED_IN));
+                        event.setCancelReason(TextComponent.toLegacyText(ONLINE_MODE_RECONNECT));
                         event.completeIntent(plugin);
                         return null;
                     }
+                }
+
+                String online = jedis.hget("player:" + event.getConnection().getUniqueId().toString(), "online");
+
+                if (online != null && online.equals("0")) {
+                    event.setCancelled(true);
+                    // TODO: Make it accept a BaseComponent[] like everything else.
+                    event.setCancelReason(TextComponent.toLegacyText(ALREADY_LOGGED_IN));
+                    event.completeIntent(plugin);
+                    return null;
                 }
 
                 Map<String, String> playerData = new HashMap<>(4);
