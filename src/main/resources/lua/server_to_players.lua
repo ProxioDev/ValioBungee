@@ -1,15 +1,18 @@
 -- This script needs all active proxies available specified as args.
+local insert = table.insert
+local call = redis.call
+
 local serverToData = {}
 
 for _, proxy in ipairs(ARGV) do
-    local players = redis.call("SMEMBERS", "proxy:" .. proxy .. ":usersOnline")
+    local players = call("SMEMBERS", "proxy:" .. proxy .. ":usersOnline")
     for _, player in ipairs(players) do
-        local server = redis.call("HGET", "player:" .. player, "server")
+        local server = call("HGET", "player:" .. player, "server")
         if server then
             if not serverToData[server] then
                 serverToData[server] = {}
             end
-            table.insert(serverToData[server], player)
+            insert(serverToData[server], player)
         end
     end
 end
