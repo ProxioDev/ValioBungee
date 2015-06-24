@@ -26,8 +26,6 @@
  */
 package com.imaginarycode.minecraft.redisbungee;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.google.common.net.InetAddresses;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -50,6 +48,7 @@ import java.net.InetAddress;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 /**
@@ -57,16 +56,32 @@ import java.util.logging.Level;
  *
  * @since 0.3.3
  */
-@RequiredArgsConstructor
 public class DataManager implements Listener {
     private final RedisBungee plugin;
+    // TODO: Add cleanup for this.
     private final InternalCache<UUID, String> serverCache = createCache();
-    private final InternalCache<UUID, String> proxyCache = createCache();
-    private final InternalCache<UUID, InetAddress> ipCache = createCache();
-    private final InternalCache<UUID, Long> lastOnlineCache = createCache();
+    private final InternalCache<UUID, String> proxyCache = createCache(TimeUnit.MINUTES.toMillis(60));
+    private final InternalCache<UUID, InetAddress> ipCache = createCache(TimeUnit.MINUTES.toMillis(60));
+    private final InternalCache<UUID, Long> lastOnlineCache = createCache(TimeUnit.MINUTES.toMillis(60));
+
+    public DataManager(RedisBungee plugin) {
+        this.plugin = plugin;
+        plugin.getProxy().getScheduler().schedule(plugin, new Runnable() {
+            @Override
+            public void run() {
+                proxyCache.cleanup();
+                ipCache.cleanup();
+                lastOnlineCache.cleanup();
+            }
+        }, 1, 1, TimeUnit.MINUTES);
+    }
 
     public static <K, V> InternalCache<K, V> createCache() {
         return new InternalCache<>();
+    }
+
+    public static <K, V> InternalCache<K, V> createCache(long entryWriteExpiry) {
+        return new InternalCache<>(entryWriteExpiry);
     }
 
     private final JsonParser parser = new JsonParser();

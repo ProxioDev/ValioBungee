@@ -26,10 +26,12 @@
  */
 package com.imaginarycode.minecraft.redisbungee;
 
+import com.google.common.annotations.VisibleForTesting;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 
-class RedisUtil {
+@VisibleForTesting
+public class RedisUtil {
     // Compatibility restraints prevent me from using using HDEL with multiple keys.
     public static void cleanUpPlayer(String player, Jedis rsc) {
         rsc.srem("proxy:" + RedisBungee.getApi().getServerId() + ":usersOnline", player);
