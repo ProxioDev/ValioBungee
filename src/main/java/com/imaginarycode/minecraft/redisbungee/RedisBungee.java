@@ -84,7 +84,7 @@ public final class RedisBungee extends Plugin {
     @Getter
     private static OkHttpClient httpClient;
     private List<String> serverIds;
-    private AtomicInteger nagAboutServers = new AtomicInteger();
+    private final AtomicInteger nagAboutServers = new AtomicInteger();
     private ScheduledTask integrityCheck;
     private ScheduledTask heartbeatTask;
     private boolean usingLua;
@@ -107,7 +107,7 @@ public final class RedisBungee extends Plugin {
         return serverIds;
     }
 
-    final List<String> getCurrentServerIds() {
+    private List<String> getCurrentServerIds() {
         try (Jedis jedis = pool.getResource()) {
             int nag = nagAboutServers.decrementAndGet();
             if (nag <= 0) {
@@ -193,21 +193,21 @@ public final class RedisBungee extends Plugin {
         return c;
     }
 
-    final Set<UUID> getLocalPlayers() {
+    private Set<UUID> getLocalPlayers() {
         ImmutableSet.Builder<UUID> setBuilder = ImmutableSet.builder();
         for (ProxiedPlayer pp : getProxy().getPlayers())
             setBuilder = setBuilder.add(pp.getUniqueId());
         return setBuilder.build();
     }
 
-    final Collection<String> getLocalPlayersAsUuidStrings() {
+    private Collection<String> getLocalPlayersAsUuidStrings() {
         return Collections2.transform(getLocalPlayers(), Functions.toStringFunction());
     }
 
     final Set<UUID> getPlayers() {
         ImmutableSet.Builder<UUID> setBuilder = ImmutableSet.builder();
         if (pool != null) {
-            try (Jedis rsc = pool.getResource();) {
+            try (Jedis rsc = pool.getResource()) {
                 List<String> keys = new ArrayList<>();
                 for (String i : getServerIds()) {
                     keys.add("proxy:" + i + ":usersOnline");
@@ -454,12 +454,12 @@ public final class RedisBungee extends Plugin {
                     crashFile.delete();
                 } else if (rsc.hexists("heartbeats", serverId)) {
                     try {
-                        Long value = Long.valueOf(rsc.hget("heartbeats", serverId));
-                        if (value != null && System.currentTimeMillis() < value + 20000) {
+                        long value = Long.parseLong(rsc.hget("heartbeats", serverId));
+                        if (System.currentTimeMillis() < value + 20000) {
                             getLogger().severe("You have launched a possible impostor BungeeCord instance. Another instance is already running.");
                             getLogger().severe("For data consistency reasons, RedisBungee will now disable itself.");
                             getLogger().severe("If this instance is coming up from a crash, create a file in your RedisBungee plugins directory with the name 'restarted_from_crash.txt' and RedisBungee will not perform this check.");
-                            throw new RuntimeException("Possible imposter instance!");
+                            throw new RuntimeException("Possible impostor instance!");
                         }
                     } catch (NumberFormatException ignored) {
                     }
@@ -523,7 +523,7 @@ public final class RedisBungee extends Plugin {
         }
     }
 
-    class JedisPubSubHandler extends JedisPubSub {
+    private class JedisPubSubHandler extends JedisPubSub {
         @Override
         public void onMessage(final String s, final String s2) {
             if (s2.trim().length() == 0) return;

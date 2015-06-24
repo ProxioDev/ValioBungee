@@ -51,7 +51,7 @@ public class UUIDFetcher implements Callable<Map<String, UUID>> {
     @Setter
     private static OkHttpClient httpClient;
 
-    public UUIDFetcher(List<String> names, boolean rateLimiting) {
+    private UUIDFetcher(List<String> names, boolean rateLimiting) {
         this.names = ImmutableList.copyOf(names);
         this.rateLimiting = rateLimiting;
     }

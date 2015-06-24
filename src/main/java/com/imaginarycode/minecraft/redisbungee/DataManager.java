@@ -76,11 +76,11 @@ public class DataManager implements Listener {
         }, 1, 1, TimeUnit.MINUTES);
     }
 
-    public static <K, V> InternalCache<K, V> createCache() {
+    private static <K, V> InternalCache<K, V> createCache() {
         return new InternalCache<>();
     }
 
-    public static <K, V> InternalCache<K, V> createCache(long entryWriteExpiry) {
+    private static <K, V> InternalCache<K, V> createCache(long entryWriteExpiry) {
         return new InternalCache<>(entryWriteExpiry);
     }
 
