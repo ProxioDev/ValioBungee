@@ -13,7 +13,7 @@ redis-password: ""
 max-redis-connections: 8
 
 # An identifier for this BungeeCord instance.
-server-id: iluvbungee
+server-id: test1
 
 # Whether or not RedisBungee should install its version of regular BungeeCord commands.
 # Often, the RedisBungee commands are desired, but in some cases someone may wish to
