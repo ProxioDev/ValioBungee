@@ -26,7 +26,6 @@
  */
 package com.imaginarycode.minecraft.redisbungee;
 
-import com.google.common.base.Functions;
 import com.google.common.collect.*;
 import com.google.common.io.ByteStreams;
 import com.google.gson.Gson;
@@ -193,15 +192,12 @@ public final class RedisBungee extends Plugin {
         return c;
     }
 
-    private Set<UUID> getLocalPlayers() {
-        ImmutableSet.Builder<UUID> setBuilder = ImmutableSet.builder();
-        for (ProxiedPlayer pp : getProxy().getPlayers())
-            setBuilder = setBuilder.add(pp.getUniqueId());
-        return setBuilder.build();
-    }
-
-    private Collection<String> getLocalPlayersAsUuidStrings() {
-        return Collections2.transform(getLocalPlayers(), Functions.toStringFunction());
+    private Set<String> getLocalPlayersAsUuidStrings() {
+        ImmutableSet.Builder<String> builder = ImmutableSet.builder();
+        for (ProxiedPlayer player : getProxy().getPlayers()) {
+            builder.add(player.getUniqueId().toString());
+        }
+        return builder.build();
     }
 
     final Set<UUID> getPlayers() {
@@ -321,7 +317,7 @@ public final class RedisBungee extends Plugin {
                 @Override
                 public void run() {
                     try (Jedis tmpRsc = pool.getResource()) {
-                        Set<String> players = new HashSet<>(getLocalPlayersAsUuidStrings());
+                        Set<String> players = getLocalPlayersAsUuidStrings();
                         Set<String> redisCollection = tmpRsc.smembers("proxy:" + configuration.getServerId() + ":usersOnline");
 
                         for (String member : redisCollection) {
