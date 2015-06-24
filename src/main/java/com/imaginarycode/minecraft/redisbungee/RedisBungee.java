@@ -1,11 +1,11 @@
 /**
  * This is free and unencumbered software released into the public domain.
- *
+ * <p/>
  * Anyone is free to copy, modify, publish, use, compile, sell, or
  * distribute this software, either in source code form or as a compiled
  * binary, for any purpose, commercial or non-commercial, and by any
  * means.
- *
+ * <p/>
  * In jurisdictions that recognize copyright laws, the author or authors
  * of this software dedicate any and all copyright interest in the
  * software to the public domain. We make this dedication for the benefit
@@ -13,7 +13,7 @@
  * successors. We intend this dedication to be an overt act of
  * relinquishment in perpetuity of all present and future rights to this
  * software under copyright law.
- *
+ * <p/>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -21,7 +21,7 @@
  * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
- *
+ * <p/>
  * For more information, please refer to <http://unlicense.org/>
  */
 package com.imaginarycode.minecraft.redisbungee;
@@ -52,7 +52,10 @@ import redis.clients.jedis.exceptions.JedisException;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
@@ -176,7 +179,7 @@ public final class RedisBungee extends Plugin {
     final int getCount() {
         int c = 0;
         if (pool != null) {
-            try (Jedis rsc = pool.getResource()){
+            try (Jedis rsc = pool.getResource()) {
                 for (String i : getServerIds()) {
                     c += rsc.scard("proxy:" + i + ":usersOnline");
                 }
@@ -346,7 +349,7 @@ public final class RedisBungee extends Plugin {
                             if (redisCollection.contains(player))
                                 continue;
 
-                            // Player not online according to Redis but not BungeeCord. Fire another consumer event.
+                            // Player not online according to Redis but not BungeeCord.
                             getLogger().warning("Player " + player + " is on the proxy but not in Redis.");
                             tmpRsc.sadd("proxy:" + configuration.getServerId() + ":usersOnline", player);
                         }
@@ -446,9 +449,9 @@ public final class RedisBungee extends Plugin {
                 rsc.ping();
                 // If that worked, now we can check for an existing, alive Bungee:
                 File crashFile = new File(getDataFolder(), "restarted_from_crash.txt");
-                if (crashFile.exists())
+                if (crashFile.exists()) {
                     crashFile.delete();
-                else if (rsc.hexists("heartbeats", serverId)) {
+                } else if (rsc.hexists("heartbeats", serverId)) {
                     try {
                         Long value = Long.valueOf(rsc.hget("heartbeats", serverId));
                         if (value != null && System.currentTimeMillis() < value + 20000) {
@@ -479,7 +482,7 @@ public final class RedisBungee extends Plugin {
                 try {
                     task2.get();
                 } catch (InterruptedException | ExecutionException e) {
-                    throw new RuntimeException("Unable to create executor", e);
+                    throw new RuntimeException("Unable to create HTTP client", e);
                 }
 
                 getLogger().log(Level.INFO, "Successfully connected to Redis.");
