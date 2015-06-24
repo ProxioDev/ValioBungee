@@ -36,6 +36,7 @@ import com.squareup.okhttp.Dispatcher;
 import com.squareup.okhttp.OkHttpClient;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -496,17 +497,13 @@ public final class RedisBungee extends Plugin {
         }
     }
 
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
     class PubSubListener implements Runnable {
-        private Jedis rsc;
         private JedisPubSubHandler jpsh;
-
-        private PubSubListener() {
-        }
 
         @Override
         public void run() {
-            try {
-                rsc = pool.getResource();
+            try (Jedis rsc = pool.getResource()) {
                 jpsh = new JedisPubSubHandler();
                 rsc.subscribe(jpsh, "redisbungee-" + configuration.getServerId(), "redisbungee-allservers", "redisbungee-data");
             } catch (JedisException | ClassCastException ignored) {
@@ -536,26 +533,6 @@ public final class RedisBungee extends Plugin {
                     getProxy().getPluginManager().callEvent(new PubSubMessageEvent(s, s2));
                 }
             });
-        }
-
-        @Override
-        public void onPMessage(String s, String s2, String s3) {
-        }
-
-        @Override
-        public void onSubscribe(String s, int i) {
-        }
-
-        @Override
-        public void onUnsubscribe(String s, int i) {
-        }
-
-        @Override
-        public void onPUnsubscribe(String s, int i) {
-        }
-
-        @Override
-        public void onPSubscribe(String s, int i) {
         }
     }
 }
