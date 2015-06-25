@@ -35,11 +35,13 @@ import com.google.common.io.ByteStreams;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import com.imaginarycode.minecraft.redisbungee.util.RedisCallable;
 import lombok.AllArgsConstructor;
+import net.md_5.bungee.api.AbstractReconnectHandler;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ServerPing;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.connection.Server;
 import net.md_5.bungee.api.event.*;
@@ -170,6 +172,12 @@ public class RedisBungeeListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPing(final ProxyPingEvent event) {
         if (exemptAddresses.contains(event.getConnection().getAddress().getAddress())) {
+            return;
+        }
+
+        ServerInfo forced = AbstractReconnectHandler.getForcedHost(event.getConnection());
+
+        if (forced != null && event.getConnection().getListener().isPingPassthrough()) {
             return;
         }
 
