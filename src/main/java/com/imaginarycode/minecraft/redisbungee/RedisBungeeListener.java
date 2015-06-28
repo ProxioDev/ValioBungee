@@ -94,14 +94,14 @@ public class RedisBungeeListener implements Listener {
                     }
                 }
 
-                String online = jedis.hget("player:" + event.getConnection().getUniqueId().toString(), "online");
-
-                if (online != null && online.equals("0")) {
-                    event.setCancelled(true);
-                    // TODO: Make it accept a BaseComponent[] like everything else.
-                    event.setCancelReason(TextComponent.toLegacyText(ALREADY_LOGGED_IN));
-                    event.completeIntent(plugin);
-                    return null;
+                for (String s : plugin.getServerIds()) {
+                    if (jedis.sismember("proxy:" + s + ":usersOnline", s)) {
+                        event.setCancelled(true);
+                        // TODO: Make it accept a BaseComponent[] like everything else.
+                        event.setCancelReason(TextComponent.toLegacyText(ALREADY_LOGGED_IN));
+                        event.completeIntent(plugin);
+                        return null;
+                    }
                 }
 
                 Map<String, String> playerData = new HashMap<>(4);
