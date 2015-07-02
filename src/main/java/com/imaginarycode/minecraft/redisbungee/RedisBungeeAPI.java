@@ -36,10 +36,7 @@ import lombok.NonNull;
 import net.md_5.bungee.api.config.ServerInfo;
 
 import java.net.InetAddress;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * This class exposes some internal RedisBungee functions. You obtain an instance of this object by invoking {@link RedisBungee#getApi()}.
@@ -105,21 +102,17 @@ public class RedisBungeeAPI {
 
     /**
      * Get a combined list of players on this network, as a collection of usernames.
-     * <p>
-     * <strong>Note that this function returns an immutable {@link java.util.Collection}, and usernames
-     * are lazily calculated (but cached, see the contract of {@link #getNameFromUuid(java.util.UUID)}).</strong>
      *
      * @return a Set with all players found
      * @see #getNameFromUuid(java.util.UUID)
      * @since 0.3
      */
     public final Collection<String> getHumanPlayersOnline() {
-        return Collections2.transform(((ImmutableSet<UUID>) getPlayersOnline()).asList(), new Function<UUID, String>() {
-            @Override
-            public String apply(UUID uuid) {
-                return getNameFromUuid(uuid, false);
-            }
-        });
+        Set<String> names = new HashSet<>();
+        for (UUID uuid : getPlayersOnline()) {
+            names.add(getNameFromUuid(uuid, false));
+        }
+        return names;
     }
 
     /**
@@ -269,8 +262,7 @@ public class RedisBungeeAPI {
      * Fetch a name from the specified UUID. UUIDs are cached locally and in Redis. This function falls back to Mojang
      * as a last resort, so calls <strong>may</strong> be blocking.
      * <p>
-     * For the common use case of translating a list of UUIDs into names, use {@link #getHumanPlayersOnline()}
-     * as the efficiency of that function is slightly greater as the names are calculated lazily.
+     * For the common use case of translating a list of UUIDs into names, use {@link #getHumanPlayersOnline()} instead.
      * <p>
      * If performance is a concern, use {@link #getNameFromUuid(java.util.UUID, boolean)} as this allows you to disable Mojang lookups.
      *
@@ -286,8 +278,7 @@ public class RedisBungeeAPI {
      * Fetch a name from the specified UUID. UUIDs are cached locally and in Redis. This function can fall back to Mojang
      * as a last resort if {@code expensiveLookups} is true, so calls <strong>may</strong> be blocking.
      * <p>
-     * For the common use case of translating the list of online players into names, use {@link #getHumanPlayersOnline()}
-     * as the efficiency of that function is slightly greater as the names are calculated lazily.
+     * For the common use case of translating the list of online players into names, use {@link #getHumanPlayersOnline()}.
      * <p>
      * If performance is a concern, set {@code expensiveLookups} to false as this will disable lookups via Mojang.
      *
