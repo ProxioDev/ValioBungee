@@ -314,7 +314,7 @@ class RedisBungeeCommands {
         private final RedisBungee plugin;
 
         PlistCommand(RedisBungee plugin) {
-            super("plist", "redisbungee.command.plist", "redisbungee", "rplist");
+            super("plist", "redisbungee.command.plist", "rplist");
             this.plugin = plugin;
         }
 
@@ -358,6 +358,25 @@ class RedisBungeeCommands {
                     }
                 }
             });
+        }
+    }
+
+    public static class DebugCommand extends Command {
+        private final RedisBungee plugin;
+
+        DebugCommand(RedisBungee plugin) {
+            super("rdebug", "redisbungee.command.debug");
+            this.plugin = plugin;
+        }
+
+        @Override
+        public void execute(final CommandSender sender, final String[] args) {
+            TextComponent poolActiveStat = new TextComponent("Currently active pool objects: " + plugin.getPool().getNumActive());
+            TextComponent poolIdleStat = new TextComponent("Currently idle pool objects: " + plugin.getPool().getNumIdle());
+            TextComponent poolWaitingStat = new TextComponent("Waiting on free objects: " + plugin.getPool().getNumWaiters());
+            sender.sendMessage(poolActiveStat);
+            sender.sendMessage(poolIdleStat);
+            sender.sendMessage(poolWaitingStat);
         }
     }
 }
