@@ -108,15 +108,9 @@ public class RedisBungeeListener implements Listener {
                     }
                 }
 
-                Map<String, String> playerData = new HashMap<>(4);
-                playerData.put("online", "0");
-                playerData.put("ip", event.getConnection().getAddress().getAddress().getHostAddress());
-                playerData.put("proxy", RedisBungee.getConfiguration().getServerId());
-
                 Pipeline pipeline = jedis.pipelined();
-                pipeline.sadd("proxy:" + RedisBungee.getApi().getServerId() + ":usersOnline", event.getConnection().getUniqueId().toString());
                 plugin.getUuidTranslator().persistInfo(event.getConnection().getName(), event.getConnection().getUniqueId(), pipeline);
-                pipeline.hmset("player:" + event.getConnection().getUniqueId().toString(), playerData);
+                RedisUtil.createPlayer(event.getConnection(), pipeline);
                 // We're not publishing, the API says we only publish at PostLoginEvent time.
                 pipeline.sync();
 

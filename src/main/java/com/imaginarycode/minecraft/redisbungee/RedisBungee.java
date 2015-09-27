@@ -37,16 +37,14 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
-import redis.clients.jedis.JedisPubSub;
+import redis.clients.jedis.*;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.exceptions.JedisException;
 
@@ -343,14 +341,23 @@ public final class RedisBungee extends Plugin {
                             }
                         }
 
+                        Pipeline pipeline = tmpRsc.pipelined();
+
                         for (String player : players) {
                             if (redisCollection.contains(player))
                                 continue;
 
                             // Player not online according to Redis but not BungeeCord.
                             getLogger().warning("Player " + player + " is on the proxy but not in Redis.");
-                            tmpRsc.sadd("proxy:" + configuration.getServerId() + ":usersOnline", player);
+
+                            ProxiedPlayer proxiedPlayer = ProxyServer.getInstance().getPlayer(UUID.fromString(player));
+                            if (proxiedPlayer == null)
+                                continue; // We'll deal with it later.
+
+                            RedisUtil.createPlayer(proxiedPlayer.getPendingConnection(), pipeline);
                         }
+
+                        pipeline.sync();
                     }
                 }
             }, 0, 1, TimeUnit.MINUTES);

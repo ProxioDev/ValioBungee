@@ -29,12 +29,26 @@ package com.imaginarycode.minecraft.redisbungee;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import net.md_5.bungee.api.connection.PendingConnection;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @VisibleForTesting
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class RedisUtil {
+    protected static void createPlayer(PendingConnection connection, Pipeline pipeline) {
+        Map<String, String> playerData = new HashMap<>(4);
+        playerData.put("online", "0");
+        playerData.put("ip", connection.getAddress().getAddress().getHostAddress());
+        playerData.put("proxy", RedisBungee.getConfiguration().getServerId());
+
+        pipeline.sadd("proxy:" + RedisBungee.getApi().getServerId() + ":usersOnline", connection.getUniqueId().toString());
+        pipeline.hmset("player:" + connection.getUniqueId().toString(), playerData);
+    }
+
     // Compatibility restraints prevent me from using using HDEL with multiple keys.
     public static void cleanUpPlayer(String player, Jedis rsc) {
         rsc.srem("proxy:" + RedisBungee.getApi().getServerId() + ":usersOnline", player);
