@@ -357,7 +357,7 @@ public final class RedisBungee extends Plugin {
                             if (proxiedPlayer == null)
                                 continue; // We'll deal with it later.
 
-                            RedisUtil.createPlayer(proxiedPlayer, pipeline);
+                            RedisUtil.createPlayer(proxiedPlayer, pipeline, true);
                         }
 
                         pipeline.sync();
