@@ -30,6 +30,7 @@ import com.google.common.annotations.VisibleForTesting;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.md_5.bungee.api.connection.PendingConnection;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 
@@ -39,6 +40,12 @@ import java.util.Map;
 @VisibleForTesting
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class RedisUtil {
+    protected static void createPlayer(ProxiedPlayer player, Pipeline pipeline) {
+        createPlayer(player.getPendingConnection(), pipeline);
+        if (player.getServer() != null)
+            pipeline.hset("player:" + player.getUniqueId().toString(), "server", player.getServer().getInfo().getName());
+    }
+
     protected static void createPlayer(PendingConnection connection, Pipeline pipeline) {
         Map<String, String> playerData = new HashMap<>(4);
         playerData.put("online", "0");
@@ -55,6 +62,8 @@ public class RedisUtil {
         rsc.hdel("player:" + player, "server");
         rsc.hdel("player:" + player, "ip");
         rsc.hdel("player:" + player, "proxy");
+        long timestamp = System.currentTimeMillis();
+        rsc.hset("player:" + player, "online", String.valueOf(timestamp));
     }
 
     public static void cleanUpPlayer(String player, Pipeline rsc) {
@@ -62,6 +71,8 @@ public class RedisUtil {
         rsc.hdel("player:" + player, "server");
         rsc.hdel("player:" + player, "ip");
         rsc.hdel("player:" + player, "proxy");
+        long timestamp = System.currentTimeMillis();
+        rsc.hset("player:" + player, "online", String.valueOf(timestamp));
     }
 
     public static boolean canUseLua(String redisVersion) {

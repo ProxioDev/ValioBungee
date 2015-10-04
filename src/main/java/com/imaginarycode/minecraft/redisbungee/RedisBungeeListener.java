@@ -140,7 +140,6 @@ public class RedisBungeeListener implements Listener {
             protected Void call(Jedis jedis) {
                 Pipeline pipeline = jedis.pipelined();
                 long timestamp = System.currentTimeMillis();
-                pipeline.hset("player:" + event.getPlayer().getUniqueId().toString(), "online", String.valueOf(timestamp));
                 RedisUtil.cleanUpPlayer(event.getPlayer().getUniqueId().toString(), pipeline);
                 pipeline.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage<>(
                         event.getPlayer().getUniqueId(), DataManager.DataManagerMessage.Action.LEAVE,
