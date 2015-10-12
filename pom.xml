@@ -115,33 +115,6 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>com.mycila</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <version>2.3</version>
-                <configuration>
-                    <header>license-maven-friendly.txt</header>
-                    <properties>
-                        <owner>tuxed</owner>
-                        <year>2013</year>
-                        <email>write@imaginarycode.com</email>
-                    </properties>
-                    <excludes>
-                        <exclude>README.md</exclude>
-                        <exclude>LICENSE</exclude>
-                        <exclude>.gitignore</exclude>
-                        <exclude>src/test/resources/**</exclude>
-                        <exclude>src/main/resources/**</exclude>
-                    </excludes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>2.9.1</version>
