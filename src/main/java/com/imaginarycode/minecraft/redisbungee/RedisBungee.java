@@ -104,6 +104,29 @@ public final class RedisBungee extends Plugin {
         }
     }
 
+    private List<String> getLaggedServerIds() {
+        try (Jedis jedis = pool.getResource()) {
+            int nag = nagAboutServers.decrementAndGet();
+            if (nag <= 0) {
+                nagAboutServers.set(10);
+            }
+            ImmutableList.Builder<String> servers = ImmutableList.builder();
+            Map<String, String> heartbeats = jedis.hgetAll("heartbeats");
+            for (Map.Entry<String, String> entry : heartbeats.entrySet()) {
+                try {
+                    long stamp = Long.parseLong(entry.getValue());
+                    if (System.currentTimeMillis() > stamp + 30000)
+                        servers.add(entry.getKey());
+                } catch (NumberFormatException ignored) {
+                }
+            }
+            return servers.build();
+        } catch (JedisConnectionException e) {
+            getLogger().log(Level.SEVERE, "Unable to fetch lagged server IDs", e);
+            return Collections.emptyList();
+        }
+    }
+
     public Set<UUID> getPlayersOnProxy(String server) {
         checkArgument(getServerIds().contains(server), server + " is not a valid proxy ID");
         try (Jedis jedis = pool.getResource()) {
@@ -292,6 +315,19 @@ public final class RedisBungee extends Plugin {
                     try (Jedis tmpRsc = pool.getResource()) {
                         Set<String> players = getLocalPlayersAsUuidStrings();
                         Set<String> playersInRedis = tmpRsc.smembers("proxy:" + configuration.getServerId() + ":usersOnline");
+                        List<String> lagged = getLaggedServerIds();
+
+                        // Clean up lagged players.
+                        for (String s : lagged) {
+                            Set<String> laggedPlayers = tmpRsc.smembers("proxy:" + s + ":usersOnline");
+                            tmpRsc.del("proxy:" + s + ":usersOnline");
+                            if (!laggedPlayers.isEmpty()) {
+                                getLogger().info("Cleaning up lagged proxy " + s + " (" + laggedPlayers.size() + " players)...");
+                                for (String laggedPlayer : laggedPlayers) {
+                                    RedisUtil.cleanUpPlayer(laggedPlayer, tmpRsc);
+                                }
+                            }
+                        }
 
                         for (Iterator<String> it = playersInRedis.iterator(); it.hasNext(); ) {
                             String member = it.next();
