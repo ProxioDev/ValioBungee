@@ -319,7 +319,7 @@ class RedisBungeeCommands {
                             serverName.setText("[" + server + "] ");
                             TextComponent serverCount = new TextComponent();
                             serverCount.setColor(ChatColor.YELLOW);
-                            serverCount.setText("(" + serverToPlayers.get(server).size() + "): ");
+                            serverCount.setText("(" + human.get(server).size() + "): ");
                             TextComponent serverPlayers = new TextComponent();
                             serverPlayers.setColor(ChatColor.WHITE);
                             serverPlayers.setText(Joiner.on(", ").join(human.get(server)));

@@ -34,7 +34,7 @@ import java.util.*;
 public class RedisBungeeListener implements Listener {
     private static final BaseComponent[] ALREADY_LOGGED_IN =
             new ComponentBuilder("You are already logged on to this server.").color(ChatColor.RED)
-                    .append("\n\nIf you were disconnected forcefully, please wait up to one minute.\nIf this does not resolve your issue, please contact staff.")
+                    .append("\n\nIt may help to try logging in again in a few minutes.\nIf this does not resolve your issue, please contact staff.")
                     .color(ChatColor.GRAY)
                     .create();
     private static final BaseComponent[] ONLINE_MODE_RECONNECT =
