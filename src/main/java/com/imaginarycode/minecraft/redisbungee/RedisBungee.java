@@ -254,23 +254,23 @@ public final class RedisBungee extends Plugin {
         }
         if (pool != null) {
             try (Jedis tmpRsc = pool.getResource()) {
-                tmpRsc.hset("heartbeats", configuration.getServerId(), String.valueOf(System.currentTimeMillis()));
                 // This is more portable than INFO <section>
                 String info = tmpRsc.info();
                 for (String s : info.split("\r\n")) {
                     if (s.startsWith("redis_version:")) {
                         String version = s.split(":")[1];
                         if (!(usingLua = RedisUtil.canUseLua(version))) {
-                            getLogger().warning("Your version of Redis (" + version + ") is below 2.6. RedisBungee will disable optimizations using Lua.");
-                            getLogger().warning("Support for versions of Redis below version 2.6 will be removed in the future.");
+                            getLogger().warning("Your version of Redis (" + version + ") is not at least version 2.6. RedisBungee requires a newer version.");
+                            throw new RuntimeException("Unsupported Redis version detected");
                         } else {
-                            getLogger().info("Using Redis >= 2.6, enabling Lua optimizations.");
                             LuaManager manager = new LuaManager(this);
                             serverToPlayersScript = manager.createScript(IOUtil.readInputStreamAsString(getResourceAsStream("lua/server_to_players.lua")));
                         }
                         break;
                     }
                 }
+
+                tmpRsc.hset("heartbeats", configuration.getServerId(), String.valueOf(System.currentTimeMillis()));
 
                 long uuidCacheSize = tmpRsc.hlen("uuid-cache");
                 if (uuidCacheSize > 750000) {
