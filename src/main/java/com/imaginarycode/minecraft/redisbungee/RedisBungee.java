@@ -60,6 +60,7 @@ public final class RedisBungee extends Plugin {
     private ScheduledTask heartbeatTask;
     private boolean usingLua;
     private LuaManager.Script serverToPlayersScript;
+    private volatile int playerCount = 0;
 
     /**
      * Fetch the {@link RedisBungeeAPI} object created on plugin start.
@@ -153,6 +154,10 @@ public final class RedisBungee extends Plugin {
     }
 
     final int getCount() {
+        return playerCount;
+    }
+
+    final int getCurrentCount() {
         int c = 0;
         if (pool != null) {
             try (Jedis rsc = pool.getResource()) {
@@ -262,6 +267,7 @@ public final class RedisBungee extends Plugin {
                     getLogger().info("Looks like you have a really big UUID cache! Run https://www.spigotmc.org/resources/redisbungeecleaner.8505/ as soon as possible.");
                 }
             }
+            playerCount = getCurrentCount();
             serverIds = getCurrentServerIds(true, false);
             uuidTranslator = new UUIDTranslator(this);
             heartbeatTask = getProxy().getScheduler().schedule(this, new Runnable() {
@@ -275,6 +281,7 @@ public final class RedisBungee extends Plugin {
                         getLogger().log(Level.SEVERE, "Unable to update heartbeat - did your Redis server go away?", e);
                     }
                     serverIds = getCurrentServerIds(true, false);
+                    playerCount = getCurrentCount();
                 }
             }, 0, 3, TimeUnit.SECONDS);
             dataManager = new DataManager(this);
