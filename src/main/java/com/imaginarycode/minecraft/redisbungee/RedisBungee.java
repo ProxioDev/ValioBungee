@@ -267,8 +267,8 @@ public final class RedisBungee extends Plugin {
                     getLogger().info("Looks like you have a really big UUID cache! Run https://www.spigotmc.org/resources/redisbungeecleaner.8505/ as soon as possible.");
                 }
             }
-            playerCount = getCurrentCount();
             serverIds = getCurrentServerIds(true, false);
+            playerCount = getCurrentCount();
             uuidTranslator = new UUIDTranslator(this);
             heartbeatTask = getProxy().getScheduler().schedule(this, new Runnable() {
                 @Override
