@@ -78,20 +78,24 @@ public final class RedisBungee extends Plugin {
         return serverIds;
     }
 
-    private List<String> getCurrentServerIds() {
+    private List<String> getCurrentServerIds(boolean nag, boolean lagged) {
         try (Jedis jedis = pool.getResource()) {
-            int nag = nagAboutServers.decrementAndGet();
-            if (nag <= 0) {
-                nagAboutServers.set(10);
+            long time = getRedisTime(jedis.time());
+            int nagTime = 0;
+            if (nag) {
+                nagTime = nagAboutServers.decrementAndGet();
+                if (nagTime <= 0) {
+                    nagAboutServers.set(10);
+                }
             }
             ImmutableList.Builder<String> servers = ImmutableList.builder();
             Map<String, String> heartbeats = jedis.hgetAll("heartbeats");
             for (Map.Entry<String, String> entry : heartbeats.entrySet()) {
                 try {
                     long stamp = Long.parseLong(entry.getValue());
-                    if (System.currentTimeMillis() < stamp + 30000)
+                    if (lagged ? time >= stamp + 30 : time <= stamp + 30)
                         servers.add(entry.getKey());
-                    else if (nag <= 0) {
+                    else if (nag && nagTime <= 0) {
                         getLogger().severe(entry.getKey() + " is " + (System.currentTimeMillis() - stamp) + "ms behind! (Time not synchronized or server down?)");
                     }
                 } catch (NumberFormatException ignored) {
@@ -99,31 +103,8 @@ public final class RedisBungee extends Plugin {
             }
             return servers.build();
         } catch (JedisConnectionException e) {
-            getLogger().log(Level.SEVERE, "Unable to fetch all server IDs", e);
+            getLogger().log(Level.SEVERE, "Unable to fetch server IDs", e);
             return Collections.singletonList(configuration.getServerId());
-        }
-    }
-
-    private List<String> getLaggedServerIds() {
-        try (Jedis jedis = pool.getResource()) {
-            int nag = nagAboutServers.decrementAndGet();
-            if (nag <= 0) {
-                nagAboutServers.set(10);
-            }
-            ImmutableList.Builder<String> servers = ImmutableList.builder();
-            Map<String, String> heartbeats = jedis.hgetAll("heartbeats");
-            for (Map.Entry<String, String> entry : heartbeats.entrySet()) {
-                try {
-                    long stamp = Long.parseLong(entry.getValue());
-                    if (System.currentTimeMillis() > stamp + 30000)
-                        servers.add(entry.getKey());
-                } catch (NumberFormatException ignored) {
-                }
-            }
-            return servers.build();
-        } catch (JedisConnectionException e) {
-            getLogger().log(Level.SEVERE, "Unable to fetch lagged server IDs", e);
-            return Collections.emptyList();
         }
     }
 
@@ -243,6 +224,10 @@ public final class RedisBungee extends Plugin {
         }
     }
 
+    private long getRedisTime(List<String> timeRes) {
+        return Long.parseLong(timeRes.get(0));
+    }
+
     @Override
     public void onEnable() {
         try {
@@ -260,7 +245,7 @@ public final class RedisBungee extends Plugin {
                     if (s.startsWith("redis_version:")) {
                         String version = s.split(":")[1];
                         if (!(usingLua = RedisUtil.canUseLua(version))) {
-                            getLogger().warning("Your version of Redis (" + version + ") is not at least version 2.6. RedisBungee requires a newer version.");
+                            getLogger().warning("Your version of Redis (" + version + ") is not at least version 2.6. RedisBungee requires a newer version of Redis.");
                             throw new RuntimeException("Unsupported Redis version detected");
                         } else {
                             LuaManager manager = new LuaManager(this);
@@ -277,18 +262,19 @@ public final class RedisBungee extends Plugin {
                     getLogger().info("Looks like you have a really big UUID cache! Run https://www.spigotmc.org/resources/redisbungeecleaner.8505/ as soon as possible.");
                 }
             }
-            serverIds = getCurrentServerIds();
+            serverIds = getCurrentServerIds(true, false);
             uuidTranslator = new UUIDTranslator(this);
             heartbeatTask = getProxy().getScheduler().schedule(this, new Runnable() {
                 @Override
                 public void run() {
                     try (Jedis rsc = pool.getResource()) {
-                        rsc.hset("heartbeats", configuration.getServerId(), String.valueOf(System.currentTimeMillis()));
+                        long redisTime = getRedisTime(rsc.time());
+                        rsc.hset("heartbeats", configuration.getServerId(), String.valueOf(redisTime));
                     } catch (JedisConnectionException e) {
                         // Redis server has disappeared!
                         getLogger().log(Level.SEVERE, "Unable to update heartbeat - did your Redis server go away?", e);
                     }
-                    serverIds = getCurrentServerIds();
+                    serverIds = getCurrentServerIds(true, false);
                 }
             }, 0, 3, TimeUnit.SECONDS);
             dataManager = new DataManager(this);
@@ -315,7 +301,7 @@ public final class RedisBungee extends Plugin {
                     try (Jedis tmpRsc = pool.getResource()) {
                         Set<String> players = getLocalPlayersAsUuidStrings();
                         Set<String> playersInRedis = tmpRsc.smembers("proxy:" + configuration.getServerId() + ":usersOnline");
-                        List<String> lagged = getLaggedServerIds();
+                        List<String> lagged = getCurrentServerIds(false, true);
 
                         // Clean up lagged players.
                         for (String s : lagged) {
