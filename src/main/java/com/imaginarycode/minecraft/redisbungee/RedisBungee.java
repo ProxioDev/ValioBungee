@@ -96,7 +96,7 @@ public final class RedisBungee extends Plugin {
                     if (lagged ? time >= stamp + 30 : time <= stamp + 30)
                         servers.add(entry.getKey());
                     else if (nag && nagTime <= 0) {
-                        getLogger().severe(entry.getKey() + " is " + (System.currentTimeMillis() - stamp) + "ms behind! (Time not synchronized or server down?)");
+                        getLogger().severe(entry.getKey() + " is " + (time - stamp) + " seconds behind! (Time not synchronized or server down?)");
                     }
                 } catch (NumberFormatException ignored) {
                 }
@@ -505,10 +505,22 @@ public final class RedisBungee extends Plugin {
 
         @Override
         public void run() {
+            boolean broken = false;
             try (Jedis rsc = pool.getResource()) {
-                jpsh = new JedisPubSubHandler();
-                rsc.subscribe(jpsh, "redisbungee-" + configuration.getServerId(), "redisbungee-allservers", "redisbungee-data");
-            } catch (JedisException | ClassCastException ignored) {
+                try {
+                    jpsh = new JedisPubSubHandler();
+                    rsc.subscribe(jpsh, "redisbungee-" + configuration.getServerId(), "redisbungee-allservers", "redisbungee-data");
+                } catch (Exception e) {
+                    // FIXME: Extremely ugly hack
+                    // Attempt to unsubscribe this instance and try again.
+                    getLogger().log(Level.INFO, "PubSub error, attempting to recover.", e);
+                    jpsh.unsubscribe();
+                    broken = true;
+                }
+            }
+
+            if (broken) {
+                run();
             }
         }
 
