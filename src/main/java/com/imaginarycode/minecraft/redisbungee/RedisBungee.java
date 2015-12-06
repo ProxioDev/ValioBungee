@@ -20,7 +20,6 @@ import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
 import redis.clients.jedis.*;
 import redis.clients.jedis.exceptions.JedisConnectionException;
-import redis.clients.jedis.exceptions.JedisException;
 
 import java.io.*;
 import java.util.*;
@@ -60,6 +59,7 @@ public final class RedisBungee extends Plugin {
     private ScheduledTask heartbeatTask;
     private boolean usingLua;
     private LuaManager.Script serverToPlayersScript;
+    private LuaManager.Script getPlayerCountScript;
 
     /**
      * Fetch the {@link RedisBungeeAPI} object created on plugin start.
@@ -121,51 +121,26 @@ public final class RedisBungee extends Plugin {
     }
 
     final Multimap<String, UUID> serversToPlayers() {
-        if (usingLua) {
-            Collection<String> data = (Collection<String>) serverToPlayersScript.eval(ImmutableList.<String>of(), getServerIds());
+        Collection<String> data = (Collection<String>) serverToPlayersScript.eval(ImmutableList.<String>of(), getServerIds());
 
-            ImmutableMultimap.Builder<String, UUID> builder = ImmutableMultimap.builder();
-
-            // TODO: This seems pretty slow, but execution times over the long term seem to stay below that of the
-            // Java implementation, at least. If you have a better idea, I want to see it!
-            String key = null;
-
-            for (String s : data) {
-                if (key == null) {
-                    key = s;
-                    continue;
-                }
-
-                builder.put(key, UUID.fromString(s));
-                key = null;
+        ImmutableMultimap.Builder<String, UUID> builder = ImmutableMultimap.builder();
+        String key = null;
+        for (String s : data) {
+            if (key == null) {
+                key = s;
+                continue;
             }
 
-            return builder.build();
-        } else {
-            ImmutableMultimap.Builder<String, UUID> multimapBuilder = ImmutableMultimap.builder();
-            for (UUID p : getPlayers()) {
-                String name = dataManager.getServer(p);
-                if (name != null)
-                    multimapBuilder.put(name, p);
-            }
-            return multimapBuilder.build();
+            builder.put(key, UUID.fromString(s));
+            key = null;
         }
+
+        return builder.build();
     }
 
     final int getCount() {
-        int c = 0;
-        if (pool != null) {
-            try (Jedis rsc = pool.getResource()) {
-                for (String i : getServerIds()) {
-                    c += rsc.scard("proxy:" + i + ":usersOnline");
-                }
-            } catch (JedisConnectionException e) {
-                // Redis server has disappeared!
-                getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
-                throw new RuntimeException("Unable to get total player count", e);
-            }
-        }
-        return c;
+        Long count = (Long) getPlayerCountScript.eval(ImmutableList.<String>of(), ImmutableList.<String>of());
+        return count.intValue();
     }
 
     private Set<String> getLocalPlayersAsUuidStrings() {
@@ -250,6 +225,7 @@ public final class RedisBungee extends Plugin {
                         } else {
                             LuaManager manager = new LuaManager(this);
                             serverToPlayersScript = manager.createScript(IOUtil.readInputStreamAsString(getResourceAsStream("lua/server_to_players.lua")));
+                            getPlayerCountScript = manager.createScript(IOUtil.readInputStreamAsString(getResourceAsStream("lua/get_player_count.lua")));
                         }
                         break;
                     }
