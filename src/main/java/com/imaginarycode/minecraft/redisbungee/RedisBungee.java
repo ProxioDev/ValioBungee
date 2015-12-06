@@ -54,7 +54,7 @@ public final class RedisBungee extends Plugin {
     private DataManager dataManager;
     @Getter
     private static OkHttpClient httpClient;
-    private List<String> serverIds;
+    private volatile List<String> serverIds;
     private final AtomicInteger nagAboutServers = new AtomicInteger();
     private ScheduledTask integrityCheck;
     private ScheduledTask heartbeatTask;
