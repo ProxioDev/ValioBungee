@@ -7,7 +7,7 @@ local heartbeats = c("HGETALL", "heartbeats")
 local total = 0
 local key
 
-for _, v in pairs(heartbeats) do
+for _, v in ipairs(heartbeats) do
     if not key then
         key = v
     else
