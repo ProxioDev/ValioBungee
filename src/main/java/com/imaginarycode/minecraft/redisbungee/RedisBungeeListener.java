@@ -45,7 +45,7 @@ public class RedisBungeeListener implements Listener {
     private final RedisBungee plugin;
     private final List<InetAddress> exemptAddresses;
 
-    private static final List<String> ASYNC_PING_EVENT_HOSTILE = ImmutableList.of("ServerListPlus");
+    private static final List<String> ASYNC_PING_EVENT_HOSTILE = ImmutableList.of("ServerListPlus", "SwiftMOTD");
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onLogin(final LoginEvent event) {
