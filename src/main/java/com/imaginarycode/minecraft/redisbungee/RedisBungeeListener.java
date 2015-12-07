@@ -159,25 +159,13 @@ public class RedisBungeeListener implements Listener {
             plugin.getProxy().getScheduler().runAsync(plugin, new Runnable() {
                 @Override
                 public void run() {
-                    ServerPing old = event.getResponse();
-                    ServerPing reply = new ServerPing();
-                    reply.setPlayers(new ServerPing.Players(old.getPlayers().getMax(), plugin.getCount(), old.getPlayers().getSample()));
-                    reply.setDescription(old.getDescription());
-                    reply.setFavicon(old.getFaviconObject());
-                    reply.setVersion(old.getVersion());
-                    event.setResponse(reply);
+                    event.getResponse().getPlayers().setOnline(plugin.getCount());
                     event.completeIntent(plugin);
                 }
             });
         } else {
             // Async ping event will not work as an async-hostile plugin was found, so perform the ping modification synchronously.
-            ServerPing old = event.getResponse();
-            ServerPing reply = new ServerPing();
-            reply.setPlayers(new ServerPing.Players(old.getPlayers().getMax(), plugin.getCount(), old.getPlayers().getSample()));
-            reply.setDescription(old.getDescription());
-            reply.setFavicon(old.getFaviconObject());
-            reply.setVersion(old.getVersion());
-            event.setResponse(reply);
+            event.getResponse().getPlayers().setOnline(plugin.getCount());
         }
     }
 
