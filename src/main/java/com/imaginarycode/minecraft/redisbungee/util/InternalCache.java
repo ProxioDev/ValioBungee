@@ -64,7 +64,7 @@ public class InternalCache<K, V> {
         long fixedReference = System.currentTimeMillis();
         for (Iterator<Map.Entry<K, Holder>> it = map.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry<K, Holder> entry = it.next();
-            if (entry.getValue().expiry > fixedReference)
+            if (entry.getValue().expiry <= fixedReference)
                 it.remove();
         }
     }

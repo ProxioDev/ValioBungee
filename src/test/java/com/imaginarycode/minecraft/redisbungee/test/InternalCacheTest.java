@@ -97,7 +97,19 @@ public class InternalCacheTest {
                 }
             }));
             try {
-                Thread.sleep(20);
+                Thread.sleep(5);
+            } catch (InterruptedException e) {
+                throw new AssertionError(e);
+            }
+            cache.cleanup();
+            Assert.assertEquals(one, cache.get("hi", new Callable<Object>() {
+                @Override
+                public Object call() throws Exception {
+                    return two;
+                }
+            }));
+            try {
+                Thread.sleep(5);
             } catch (InterruptedException e) {
                 throw new AssertionError(e);
             }
