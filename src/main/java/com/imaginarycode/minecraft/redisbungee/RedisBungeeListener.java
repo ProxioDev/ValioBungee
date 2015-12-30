@@ -2,7 +2,6 @@ package com.imaginarycode.minecraft.redisbungee;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
@@ -12,8 +11,6 @@ import com.imaginarycode.minecraft.redisbungee.util.RedisCallable;
 import lombok.AllArgsConstructor;
 import net.md_5.bungee.api.AbstractReconnectHandler;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.ServerPing;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -44,8 +41,6 @@ public class RedisBungeeListener implements Listener {
                     .create();
     private final RedisBungee plugin;
     private final List<InetAddress> exemptAddresses;
-
-    private static final List<String> ASYNC_PING_EVENT_HOSTILE = ImmutableList.of("ServerListPlus", "SwiftMOTD");
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onLogin(final LoginEvent event) {
@@ -146,27 +141,7 @@ public class RedisBungeeListener implements Listener {
             return;
         }
 
-        boolean runAsync = true;
-        for (String s : ASYNC_PING_EVENT_HOSTILE) {
-            if (ProxyServer.getInstance().getPluginManager().getPlugin(s) != null) {
-                runAsync = false;
-                break;
-            }
-        }
-
-        if (runAsync) {
-            event.registerIntent(plugin);
-            plugin.getProxy().getScheduler().runAsync(plugin, new Runnable() {
-                @Override
-                public void run() {
-                    event.getResponse().getPlayers().setOnline(plugin.getCount());
-                    event.completeIntent(plugin);
-                }
-            });
-        } else {
-            // Async ping event will not work as an async-hostile plugin was found, so perform the ping modification synchronously.
-            event.getResponse().getPlayers().setOnline(plugin.getCount());
-        }
+        event.getResponse().getPlayers().setOnline(plugin.getCount());
     }
 
     @EventHandler
