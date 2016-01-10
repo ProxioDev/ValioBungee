@@ -26,6 +26,10 @@ server-id: test1
 # modules, and these must be disabled or overridden yourself.
 register-bungee-commands: true
 
+# Whether or not to use asynchronous ping event handling. This will greatly reduce lag and issues when pinging servers,
+# but this isn't compatible with some MOTD plugins.
+use-async-ping: true
+
 # A list of IP addresses for which RedisBungee will not modify the response for, useful for automatic
 # restart scripts.
 exempt-ip-addresses: []

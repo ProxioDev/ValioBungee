@@ -45,8 +45,6 @@ public class RedisBungeeListener implements Listener {
     private final RedisBungee plugin;
     private final List<InetAddress> exemptAddresses;
 
-    private static final List<String> ASYNC_PING_EVENT_HOSTILE = ImmutableList.of("ServerListPlus", "SwiftMOTD");
-
     @EventHandler(priority = EventPriority.LOWEST)
     public void onLogin(final LoginEvent event) {
         event.registerIntent(plugin);
@@ -146,15 +144,7 @@ public class RedisBungeeListener implements Listener {
             return;
         }
 
-        boolean runAsync = true;
-        for (String s : ASYNC_PING_EVENT_HOSTILE) {
-            if (ProxyServer.getInstance().getPluginManager().getPlugin(s) != null) {
-                runAsync = false;
-                break;
-            }
-        }
-
-        if (runAsync) {
+        if (RedisBungee.getConfiguration().isUseAsyncPing()) {
             event.registerIntent(plugin);
             plugin.getProxy().getScheduler().runAsync(plugin, new Runnable() {
                 @Override
@@ -164,7 +154,6 @@ public class RedisBungeeListener implements Listener {
                 }
             });
         } else {
-            // Async ping event will not work as an async-hostile plugin was found, so perform the ping modification synchronously.
             event.getResponse().getPlayers().setOnline(plugin.getCount());
         }
     }

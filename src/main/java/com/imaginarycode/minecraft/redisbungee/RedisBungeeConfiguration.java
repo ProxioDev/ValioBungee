@@ -18,11 +18,14 @@ public class RedisBungeeConfiguration {
     private final boolean registerBungeeCommands;
     @Getter
     private final List<InetAddress> exemptAddresses;
+    @Getter
+    private final boolean useAsyncPing;
 
     public RedisBungeeConfiguration(JedisPool pool, Configuration configuration) {
         this.pool = pool;
         this.serverId = configuration.getString("server-id");
         this.registerBungeeCommands = configuration.getBoolean("register-bungee-commands", true);
+        this.useAsyncPing = configuration.getBoolean("use-async-ping", true);
 
         List<String> stringified = configuration.getStringList("exempt-ip-addresses");
         ImmutableList.Builder<InetAddress> addressBuilder = ImmutableList.builder();
