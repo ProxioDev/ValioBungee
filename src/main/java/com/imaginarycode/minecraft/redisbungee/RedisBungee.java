@@ -60,6 +60,10 @@ public final class RedisBungee extends Plugin {
     private boolean usingLua;
     private LuaManager.Script serverToPlayersScript;
     private LuaManager.Script getPlayerCountScript;
+    private LuaManager.Script getServerPlayersScript;
+
+    private static final Object SERVER_TO_PLAYERS_KEY = new Object();
+    private final InternalCache<Object, Multimap<String, UUID>> serverToPlayersCache = new InternalCache<>(2000);
 
     /**
      * Fetch the {@link RedisBungeeAPI} object created on plugin start.
@@ -121,21 +125,30 @@ public final class RedisBungee extends Plugin {
     }
 
     final Multimap<String, UUID> serversToPlayers() {
-        Collection<String> data = (Collection<String>) serverToPlayersScript.eval(ImmutableList.<String>of(), getServerIds());
+        try {
+            return serverToPlayersCache.get(SERVER_TO_PLAYERS_KEY, new Callable<Multimap<String, UUID>>() {
+                @Override
+                public Multimap<String, UUID> call() throws Exception {
+                    Collection<String> data = (Collection<String>) serverToPlayersScript.eval(ImmutableList.<String>of(), getServerIds());
 
-        ImmutableMultimap.Builder<String, UUID> builder = ImmutableMultimap.builder();
-        String key = null;
-        for (String s : data) {
-            if (key == null) {
-                key = s;
-                continue;
-            }
+                    ImmutableMultimap.Builder<String, UUID> builder = ImmutableMultimap.builder();
+                    String key = null;
+                    for (String s : data) {
+                        if (key == null) {
+                            key = s;
+                            continue;
+                        }
 
-            builder.put(key, UUID.fromString(s));
-            key = null;
+                        builder.put(key, UUID.fromString(s));
+                        key = null;
+                    }
+
+                    return builder.build();
+                }
+            });
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
         }
-
-        return builder.build();
     }
 
     final int getCount() {
@@ -181,15 +194,7 @@ public final class RedisBungee extends Plugin {
 
     final Set<UUID> getPlayersOnServer(@NonNull String server) {
         checkArgument(getProxy().getServers().containsKey(server), "server does not exist");
-        Multimap<String, UUID> serversToPlayers = serversToPlayers();
-
-        for (String s : serversToPlayers.keySet()) {
-            if (s.equalsIgnoreCase(server)) {
-                return ImmutableSet.copyOf(serversToPlayers.get(s));
-            }
-        }
-
-        return Collections.emptySet();
+        return ImmutableSet.copyOf((Collection<UUID>) getServerPlayersScript.eval(ImmutableList.<String>of(), ImmutableList.<String>of(server)));
     }
 
     final void sendProxyCommand(@NonNull String proxyId, @NonNull String command) {
@@ -234,6 +239,7 @@ public final class RedisBungee extends Plugin {
                             LuaManager manager = new LuaManager(this);
                             serverToPlayersScript = manager.createScript(IOUtil.readInputStreamAsString(getResourceAsStream("lua/server_to_players.lua")));
                             getPlayerCountScript = manager.createScript(IOUtil.readInputStreamAsString(getResourceAsStream("lua/get_player_count.lua")));
+                            getServerPlayersScript = manager.createScript(IOUtil.readInputStreamAsString(getResourceAsStream("lua/get_server_players.lua")));
                         }
                         break;
                     }
