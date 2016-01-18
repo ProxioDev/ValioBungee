@@ -144,18 +144,7 @@ public class RedisBungeeListener implements Listener {
             return;
         }
 
-        if (RedisBungee.getConfiguration().isUseAsyncPing()) {
-            event.registerIntent(plugin);
-            plugin.getProxy().getScheduler().runAsync(plugin, new Runnable() {
-                @Override
-                public void run() {
-                    event.getResponse().getPlayers().setOnline(plugin.getCount());
-                    event.completeIntent(plugin);
-                }
-            });
-        } else {
-            event.getResponse().getPlayers().setOnline(plugin.getCount());
-        }
+        event.getResponse().getPlayers().setOnline(plugin.getCount());
     }
 
     @EventHandler

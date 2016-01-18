@@ -55,6 +55,7 @@ public final class RedisBungee extends Plugin {
     private static OkHttpClient httpClient;
     private volatile List<String> serverIds;
     private final AtomicInteger nagAboutServers = new AtomicInteger();
+    private final AtomicInteger globalPlayerCount = new AtomicInteger();
     private ScheduledTask integrityCheck;
     private ScheduledTask heartbeatTask;
     private boolean usingLua;
@@ -152,6 +153,10 @@ public final class RedisBungee extends Plugin {
     }
 
     final int getCount() {
+        return globalPlayerCount.get();
+    }
+
+    final int getCurrentCount() {
         Long count = (Long) getPlayerCountScript.eval(ImmutableList.<String>of(), ImmutableList.<String>of());
         return count.intValue();
     }
@@ -265,6 +270,7 @@ public final class RedisBungee extends Plugin {
                         getLogger().log(Level.SEVERE, "Unable to update heartbeat - did your Redis server go away?", e);
                     }
                     serverIds = getCurrentServerIds(true, false);
+                    globalPlayerCount.set(getCurrentCount());
                 }
             }, 0, 3, TimeUnit.SECONDS);
             dataManager = new DataManager(this);
