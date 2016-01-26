@@ -101,7 +101,7 @@ public final class UUIDTranslator {
             }
             for (Map.Entry<String, UUID> entry : uuidMap1.entrySet()) {
                 if (entry.getKey().equalsIgnoreCase(player)) {
-                    persistInfo(entry.getKey(), entry.getValue(), jedis);
+                    persistInfo(entry.getKey().toLowerCase(), entry.getValue(), jedis);
                     return entry.getValue();
                 }
             }
@@ -161,7 +161,7 @@ public final class UUIDTranslator {
             }
 
             if (name != null) {
-                persistInfo(name, player, jedis);
+                persistInfo(name.toLowerCase(), player, jedis);
                 return name;
             }
 
