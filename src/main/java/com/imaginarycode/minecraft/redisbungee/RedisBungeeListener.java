@@ -81,7 +81,7 @@ public class RedisBungeeListener implements Listener {
                 }
 
                 Pipeline pipeline = jedis.pipelined();
-                plugin.getUuidTranslator().persistInfo(event.getConnection().getName().toLowerCase(), event.getConnection().getUniqueId(), pipeline);
+                plugin.getUuidTranslator().persistInfo(event.getConnection().getName(), event.getConnection().getUniqueId(), pipeline);
                 RedisUtil.createPlayer(event.getConnection(), pipeline, false);
                 // We're not publishing, the API says we only publish at PostLoginEvent time.
                 pipeline.sync();

@@ -101,7 +101,7 @@ public final class UUIDTranslator {
             }
             for (Map.Entry<String, UUID> entry : uuidMap1.entrySet()) {
                 if (entry.getKey().equalsIgnoreCase(player)) {
-                    persistInfo(entry.getKey().toLowerCase(), entry.getValue(), jedis);
+                    persistInfo(entry.getKey(), entry.getValue(), jedis);
                     return entry.getValue();
                 }
             }
@@ -161,7 +161,7 @@ public final class UUIDTranslator {
             }
 
             if (name != null) {
-                persistInfo(name.toLowerCase(), player, jedis);
+                persistInfo(name, player, jedis);
                 return name;
             }
 
@@ -175,13 +175,13 @@ public final class UUIDTranslator {
     public final void persistInfo(String name, UUID uuid, Jedis jedis) {
         addToMaps(name, uuid);
         String json = RedisBungee.getGson().toJson(uuidToNameMap.get(uuid));
-        jedis.hmset("uuid-cache", ImmutableMap.of(name, json, uuid.toString(), json));
+        jedis.hmset("uuid-cache", ImmutableMap.of(name.toLowerCase(), json, uuid.toString(), json));
     }
 
     public final void persistInfo(String name, UUID uuid, Pipeline jedis) {
         addToMaps(name, uuid);
         String json = RedisBungee.getGson().toJson(uuidToNameMap.get(uuid));
-        jedis.hmset("uuid-cache", ImmutableMap.of(name, json, uuid.toString(), json));
+        jedis.hmset("uuid-cache", ImmutableMap.of(name.toLowerCase(), json, uuid.toString(), json));
     }
 
     @RequiredArgsConstructor
