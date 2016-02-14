@@ -199,7 +199,12 @@ public final class RedisBungee extends Plugin {
 
     final Set<UUID> getPlayersOnServer(@NonNull String server) {
         checkArgument(getProxy().getServers().containsKey(server), "server does not exist");
-        return ImmutableSet.copyOf((Collection<UUID>) getServerPlayersScript.eval(ImmutableList.<String>of(), ImmutableList.<String>of(server)));
+        Collection<String> asStrings = (Collection<String>) getServerPlayersScript.eval(ImmutableList.<String>of(), ImmutableList.<String>of(server));
+        ImmutableSet.Builder<UUID> builder = ImmutableSet.builder();
+        for (String s : asStrings) {
+            builder.add(UUID.fromString(s));
+        }
+        return builder.build();
     }
 
     final void sendProxyCommand(@NonNull String proxyId, @NonNull String command) {
