@@ -175,13 +175,13 @@ public final class UUIDTranslator {
     public final void persistInfo(String name, UUID uuid, Jedis jedis) {
         addToMaps(name, uuid);
         String json = RedisBungee.getGson().toJson(uuidToNameMap.get(uuid));
-        jedis.hmset("uuid-cache", ImmutableMap.of(name, json, uuid.toString(), json));
+        jedis.hmset("uuid-cache", ImmutableMap.of(name.toLowerCase(), json, uuid.toString(), json));
     }
 
     public final void persistInfo(String name, UUID uuid, Pipeline jedis) {
         addToMaps(name, uuid);
         String json = RedisBungee.getGson().toJson(uuidToNameMap.get(uuid));
-        jedis.hmset("uuid-cache", ImmutableMap.of(name, json, uuid.toString(), json));
+        jedis.hmset("uuid-cache", ImmutableMap.of(name.toLowerCase(), json, uuid.toString(), json));
     }
 
     @RequiredArgsConstructor
