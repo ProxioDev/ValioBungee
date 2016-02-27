@@ -120,13 +120,14 @@ public class RedisBungeeListener implements Listener {
 
     @EventHandler
     public void onServerChange(final ServerConnectedEvent event) {
+        final String currentServer = event.getPlayer().getServer() == null ? null : event.getPlayer().getServer().getInfo().getName();
         plugin.getProxy().getScheduler().runAsync(plugin, new RedisCallable<Void>(plugin) {
             @Override
             protected Void call(Jedis jedis) {
                 jedis.hset("player:" + event.getPlayer().getUniqueId().toString(), "server", event.getServer().getInfo().getName());
                 jedis.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage<>(
                         event.getPlayer().getUniqueId(), DataManager.DataManagerMessage.Action.SERVER_CHANGE,
-                        new DataManager.ServerChangePayload(event.getServer().getInfo().getName()))));
+                        new DataManager.ServerChangePayload(event.getServer().getInfo().getName(), currentServer))));
                 return null;
             }
         });

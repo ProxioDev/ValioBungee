@@ -1,5 +1,7 @@
 package com.imaginarycode.minecraft.redisbungee;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.net.InetAddresses;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -8,7 +10,6 @@ import com.imaginarycode.minecraft.redisbungee.events.PlayerChangedServerNetwork
 import com.imaginarycode.minecraft.redisbungee.events.PlayerJoinedNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerLeftNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
-import com.imaginarycode.minecraft.redisbungee.util.InternalCache;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -19,6 +20,7 @@ import net.md_5.bungee.event.EventHandler;
 import redis.clients.jedis.Jedis;
 
 import java.net.InetAddress;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -33,29 +35,20 @@ import java.util.logging.Level;
 public class DataManager implements Listener {
     private final RedisBungee plugin;
     // TODO: Add cleanup for this.
-    private final InternalCache<UUID, String> serverCache = createCache();
-    private final InternalCache<UUID, String> proxyCache = createCache(TimeUnit.MINUTES.toMillis(60));
-    private final InternalCache<UUID, InetAddress> ipCache = createCache(TimeUnit.MINUTES.toMillis(60));
-    private final InternalCache<UUID, Long> lastOnlineCache = createCache(TimeUnit.MINUTES.toMillis(60));
+    private final Cache<UUID, String> serverCache = createCache();
+    private final Cache<UUID, String> proxyCache = createCache();
+    private final Cache<UUID, InetAddress> ipCache = createCache();
+    private final Cache<UUID, Long> lastOnlineCache = createCache();
 
     public DataManager(RedisBungee plugin) {
         this.plugin = plugin;
-        plugin.getProxy().getScheduler().schedule(plugin, new Runnable() {
-            @Override
-            public void run() {
-                proxyCache.cleanup();
-                ipCache.cleanup();
-                lastOnlineCache.cleanup();
-            }
-        }, 1, 1, TimeUnit.MINUTES);
     }
 
-    private static <K, V> InternalCache<K, V> createCache() {
-        return new InternalCache<>();
-    }
-
-    private static <K, V> InternalCache<K, V> createCache(long entryWriteExpiry) {
-        return new InternalCache<>(entryWriteExpiry);
+    private static <K, V> Cache<K, V> createCache() {
+        return CacheBuilder.newBuilder()
+                .maximumSize(1000)
+                .expireAfterWrite(1, TimeUnit.HOURS)
+                .build();
     }
 
     private final JsonParser parser = new JsonParser();
@@ -71,7 +64,7 @@ public class DataManager implements Listener {
                 @Override
                 public String call() throws Exception {
                     try (Jedis tmpRsc = plugin.getPool().getResource()) {
-                        return tmpRsc.hget("player:" + uuid, "server");
+                        return Objects.requireNonNull(tmpRsc.hget("player:" + uuid, "server"), "user not found");
                     }
                 }
             });
@@ -92,11 +85,13 @@ public class DataManager implements Listener {
                 @Override
                 public String call() throws Exception {
                     try (Jedis tmpRsc = plugin.getPool().getResource()) {
-                        return tmpRsc.hget("player:" + uuid, "proxy");
+                        return Objects.requireNonNull(tmpRsc.hget("player:" + uuid, "proxy"), "user not found");
                     }
                 }
             });
         } catch (ExecutionException e) {
+            if (e.getCause() instanceof NullPointerException && e.getCause().getMessage().equals("user not found"))
+                return null; // HACK
             plugin.getLogger().log(Level.SEVERE, "Unable to get proxy", e);
             throw new RuntimeException("Unable to get proxy for " + uuid, e);
         }
@@ -114,11 +109,15 @@ public class DataManager implements Listener {
                 public InetAddress call() throws Exception {
                     try (Jedis tmpRsc = plugin.getPool().getResource()) {
                         String result = tmpRsc.hget("player:" + uuid, "ip");
-                        return result == null ? null : InetAddresses.forString(result);
+                        if (result == null)
+                            throw new NullPointerException("user not found");
+                        return InetAddresses.forString(result);
                     }
                 }
             });
         } catch (ExecutionException e) {
+            if (e.getCause() instanceof NullPointerException && e.getCause().getMessage().equals("user not found"))
+                return null; // HACK
             plugin.getLogger().log(Level.SEVERE, "Unable to get IP", e);
             throw new RuntimeException("Unable to get IP for " + uuid, e);
         }
@@ -209,11 +208,11 @@ public class DataManager implements Listener {
             case SERVER_CHANGE:
                 final DataManagerMessage<ServerChangePayload> message3 = RedisBungee.getGson().fromJson(jsonObject, new TypeToken<DataManagerMessage<ServerChangePayload>>() {
                 }.getType());
-                final String oldServer = serverCache.put(message3.getTarget(), message3.getPayload().getServer());
+                serverCache.put(message3.getTarget(), message3.getPayload().getServer());
                 plugin.getProxy().getScheduler().runAsync(plugin, new Runnable() {
                     @Override
                     public void run() {
-                        plugin.getProxy().getPluginManager().callEvent(new PlayerChangedServerNetworkEvent(message3.getTarget(), oldServer, message3.getPayload().getServer()));
+                        plugin.getProxy().getPluginManager().callEvent(new PlayerChangedServerNetworkEvent(message3.getTarget(), message3.getPayload().getOldServer(), message3.getPayload().getServer()));
                     }
                 });
                 break;
@@ -245,6 +244,7 @@ public class DataManager implements Listener {
     @RequiredArgsConstructor
     static class ServerChangePayload {
         private final String server;
+        private final String oldServer;
     }
 
     @Getter
