@@ -3,6 +3,7 @@ package com.imaginarycode.minecraft.redisbungee;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.net.InetAddresses;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
@@ -68,7 +69,9 @@ public class DataManager implements Listener {
                     }
                 }
             });
-        } catch (ExecutionException e) {
+        } catch (ExecutionException | UncheckedExecutionException e) {
+            if (e.getCause() instanceof NullPointerException && e.getCause().getMessage().equals("user not found"))
+                return null; // HACK
             plugin.getLogger().log(Level.SEVERE, "Unable to get server", e);
             throw new RuntimeException("Unable to get server for " + uuid, e);
         }
@@ -89,7 +92,7 @@ public class DataManager implements Listener {
                     }
                 }
             });
-        } catch (ExecutionException e) {
+        } catch (ExecutionException | UncheckedExecutionException e) {
             if (e.getCause() instanceof NullPointerException && e.getCause().getMessage().equals("user not found"))
                 return null; // HACK
             plugin.getLogger().log(Level.SEVERE, "Unable to get proxy", e);
@@ -115,7 +118,7 @@ public class DataManager implements Listener {
                     }
                 }
             });
-        } catch (ExecutionException e) {
+        } catch (ExecutionException | UncheckedExecutionException e) {
             if (e.getCause() instanceof NullPointerException && e.getCause().getMessage().equals("user not found"))
                 return null; // HACK
             plugin.getLogger().log(Level.SEVERE, "Unable to get IP", e);
