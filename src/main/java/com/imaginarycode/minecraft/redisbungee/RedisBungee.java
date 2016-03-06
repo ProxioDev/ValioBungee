@@ -320,37 +320,33 @@ public final class RedisBungee extends Plugin {
                             }
                         }
 
-                        for (Iterator<String> it = playersInRedis.iterator(); it.hasNext(); ) {
-                            String member = it.next();
-                            if (!players.contains(member)) {
-                                // Are they simply on a different proxy?
-                                String found = null;
-                                for (String proxyId : getServerIds()) {
-                                    if (proxyId.equals(configuration.getServerId())) continue;
-                                    if (tmpRsc.sismember("proxy:" + proxyId + ":usersOnline", member)) {
-                                        // Just clean up the set.
-                                        found = proxyId;
-                                        break;
-                                    }
-                                }
-                                if (found == null) {
-                                    RedisUtil.cleanUpPlayer(member, tmpRsc);
-                                    getLogger().warning("Player found in set that was not found locally and globally: " + member);
-                                } else {
-                                    tmpRsc.srem("proxy:" + configuration.getServerId() + ":usersOnline", member);
-                                    getLogger().warning("Player found in set that was not found locally, but is on another proxy: " + member);
-                                }
+                        Set<String> absentLocally = new HashSet<>(playersInRedis);
+                        absentLocally.removeAll(players);
+                        Set<String> absentInRedis = new HashSet<>(players);
+                        absentInRedis.removeAll(playersInRedis);
 
-                                it.remove();
+                        for (String member : absentLocally) {
+                            boolean found = false;
+                            for (String proxyId : getServerIds()) {
+                                if (proxyId.equals(configuration.getServerId())) continue;
+                                if (tmpRsc.sismember("proxy:" + proxyId + ":usersOnline", member)) {
+                                    // Just clean up the set.
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            if (!found) {
+                                RedisUtil.cleanUpPlayer(member, tmpRsc);
+                                getLogger().warning("Player found in set that was not found locally and globally: " + member);
+                            } else {
+                                tmpRsc.srem("proxy:" + configuration.getServerId() + ":usersOnline", member);
+                                getLogger().warning("Player found in set that was not found locally, but is on another proxy: " + member);
                             }
                         }
 
                         Pipeline pipeline = tmpRsc.pipelined();
 
-                        for (String player : players) {
-                            if (playersInRedis.contains(player))
-                                continue;
-
+                        for (String player : absentLocally) {
                             // Player not online according to Redis but not BungeeCord.
                             getLogger().warning("Player " + player + " is on the proxy but not in Redis.");
 
