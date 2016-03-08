@@ -1,4 +1,4 @@
-package com.imaginarycode.minecraft.redisbungee.util;
+package com.imaginarycode.minecraft.redisbungee.util.uuid;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;

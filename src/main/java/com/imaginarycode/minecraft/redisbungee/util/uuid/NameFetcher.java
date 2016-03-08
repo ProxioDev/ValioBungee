@@ -1,9 +1,10 @@
-package com.imaginarycode.minecraft.redisbungee.util;
+package com.imaginarycode.minecraft.redisbungee.util.uuid;
 
 import com.google.gson.reflect.TypeToken;
 import com.imaginarycode.minecraft.redisbungee.RedisBungee;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
+import com.squareup.okhttp.ResponseBody;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,7 +23,9 @@ public class NameFetcher {
     public static List<String> nameHistoryFromUuid(UUID uuid) throws IOException {
         String url = "https://api.mojang.com/user/profiles/" + uuid.toString().replace("-", "") + "/names";
         Request request = new Request.Builder().url(url).get().build();
-        String response = httpClient.newCall(request).execute().body().string();
+        ResponseBody body = httpClient.newCall(request).execute().body();
+        String response = body.string();
+        body.close();
 
         Type listType = new TypeToken<List<Name>>() {
         }.getType();

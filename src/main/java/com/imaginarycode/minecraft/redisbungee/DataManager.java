@@ -35,7 +35,6 @@ import java.util.logging.Level;
  */
 public class DataManager implements Listener {
     private final RedisBungee plugin;
-    // TODO: Add cleanup for this.
     private final Cache<UUID, String> serverCache = createCache();
     private final Cache<UUID, String> proxyCache = createCache();
     private final Cache<UUID, InetAddress> ipCache = createCache();
@@ -46,6 +45,7 @@ public class DataManager implements Listener {
     }
 
     private static <K, V> Cache<K, V> createCache() {
+        // TODO: Allow customization via cache specification, ala ServerListPlus
         return CacheBuilder.newBuilder()
                 .maximumSize(1000)
                 .expireAfterWrite(1, TimeUnit.HOURS)

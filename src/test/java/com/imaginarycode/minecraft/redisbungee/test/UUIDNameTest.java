@@ -1,7 +1,7 @@
 package com.imaginarycode.minecraft.redisbungee.test;
 
-import com.imaginarycode.minecraft.redisbungee.util.NameFetcher;
-import com.imaginarycode.minecraft.redisbungee.util.UUIDFetcher;
+import com.imaginarycode.minecraft.redisbungee.util.uuid.NameFetcher;
+import com.imaginarycode.minecraft.redisbungee.util.uuid.UUIDFetcher;
 import com.squareup.okhttp.OkHttpClient;
 import org.junit.Test;
 

@@ -1,11 +1,8 @@
-package com.imaginarycode.minecraft.redisbungee.util;
+package com.imaginarycode.minecraft.redisbungee.util.uuid;
 
 import com.google.common.collect.ImmutableList;
 import com.imaginarycode.minecraft.redisbungee.RedisBungee;
-import com.squareup.okhttp.MediaType;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
+import com.squareup.okhttp.*;
 import lombok.Setter;
 
 import java.util.HashMap;
@@ -44,7 +41,9 @@ public class UUIDFetcher implements Callable<Map<String, UUID>> {
         for (int i = 0; i < requests; i++) {
             String body = RedisBungee.getGson().toJson(names.subList(i * 100, Math.min((i + 1) * 100, names.size())));
             Request request = new Request.Builder().url(PROFILE_URL).post(RequestBody.create(JSON, body)).build();
-            String response = httpClient.newCall(request).execute().body().string();
+            ResponseBody responseBody = httpClient.newCall(request).execute().body();
+            String response = responseBody.string();
+            responseBody.close();
             Profile[] array = RedisBungee.getGson().fromJson(response, Profile[].class);
             for (Profile profile : array) {
                 UUID uuid = UUIDFetcher.getUUID(profile.id);
