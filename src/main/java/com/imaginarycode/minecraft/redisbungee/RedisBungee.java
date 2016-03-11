@@ -519,7 +519,14 @@ public final class RedisBungee extends Plugin {
                     // FIXME: Extremely ugly hack
                     // Attempt to unsubscribe this instance and try again.
                     getLogger().log(Level.INFO, "PubSub error, attempting to recover.", e);
-                    jpsh.unsubscribe();
+                    try {
+                        jpsh.unsubscribe();
+                    } catch (Exception e1) {
+                        /* This may fail with
+                        - java.net.SocketException: Broken pipe
+                        - redis.clients.jedis.exceptions.JedisConnectionException: JedisPubSub was not subscribed to a Jedis instance
+                        */
+                    }
                     broken = true;
                 }
             }
