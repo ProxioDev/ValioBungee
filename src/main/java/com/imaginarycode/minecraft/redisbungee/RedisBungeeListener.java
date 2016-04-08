@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Multiset;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
@@ -229,13 +230,7 @@ public class RedisBungeeListener implements Listener {
                                 }
                                 serializeMultimap(human, true, out);
                             } else {
-                                // Due to Java generics, we are forced to coerce UUIDs into strings. This is less
-                                // expensive than looking up names, since we just want counts.
-                                Multimap<String, String> flunk = HashMultimap.create();
-                                for (Map.Entry<String, UUID> entry : multimap.entries()) {
-                                    flunk.put(entry.getKey(), entry.getValue().toString());
-                                }
-                                serializeMultimap(flunk, false, out);
+                                serializeMultiset(multimap.keys(), out);
                             }
                             break;
                         case "Proxy":
@@ -252,8 +247,16 @@ public class RedisBungeeListener implements Listener {
         }
     }
 
+    private void serializeMultiset(Multiset<String> collection, ByteArrayDataOutput output) {
+        output.writeInt(collection.elementSet().size());
+        for (Multiset.Entry<String> entry : collection.entrySet()) {
+            output.writeUTF(entry.getElement());
+            output.writeInt(entry.getCount());
+        }
+    }
+
     private void serializeMultimap(Multimap<String, String> collection, boolean includeNames, ByteArrayDataOutput output) {
-        output.writeInt(collection.size());
+        output.writeInt(collection.keySet().size());
         for (Map.Entry<String, Collection<String>> entry : collection.asMap().entrySet()) {
             output.writeUTF(entry.getKey());
             if (includeNames) {
