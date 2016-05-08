@@ -2,7 +2,6 @@ package com.imaginarycode.minecraft.redisbungee;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
 import com.google.common.io.ByteArrayDataInput;
@@ -13,8 +12,6 @@ import com.imaginarycode.minecraft.redisbungee.util.RedisCallable;
 import lombok.AllArgsConstructor;
 import net.md_5.bungee.api.AbstractReconnectHandler;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.ServerPing;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -52,43 +49,43 @@ public class RedisBungeeListener implements Listener {
         plugin.getProxy().getScheduler().runAsync(plugin, new RedisCallable<Void>(plugin) {
             @Override
             protected Void call(Jedis jedis) {
-                if (event.isCancelled()) {
-                    event.completeIntent(plugin);
+                try {
+                    if (event.isCancelled()) {
+                        return null;
+                    }
+
+                    // We make sure they aren't trying to use an existing player's name.
+                    // This is problematic for online-mode servers as they always disconnect old clients.
+                    if (plugin.getProxy().getConfig().isOnlineMode()) {
+                        ProxiedPlayer player = plugin.getProxy().getPlayer(event.getConnection().getName());
+
+                        if (player != null) {
+                            event.setCancelled(true);
+                            // TODO: Make it accept a BaseComponent[] like everything else.
+                            event.setCancelReason(TextComponent.toLegacyText(ONLINE_MODE_RECONNECT));
+                            return null;
+                        }
+                    }
+
+                    for (String s : plugin.getServerIds()) {
+                        if (jedis.sismember("proxy:" + s + ":usersOnline", event.getConnection().getUniqueId().toString())) {
+                            event.setCancelled(true);
+                            // TODO: Make it accept a BaseComponent[] like everything else.
+                            event.setCancelReason(TextComponent.toLegacyText(ALREADY_LOGGED_IN));
+                            return null;
+                        }
+                    }
+
+                    Pipeline pipeline = jedis.pipelined();
+                    plugin.getUuidTranslator().persistInfo(event.getConnection().getName(), event.getConnection().getUniqueId(), pipeline);
+                    RedisUtil.createPlayer(event.getConnection(), pipeline, false);
+                    // We're not publishing, the API says we only publish at PostLoginEvent time.
+                    pipeline.sync();
+
                     return null;
+                } finally {
+                    event.completeIntent(plugin);
                 }
-
-                // We make sure they aren't trying to use an existing player's name.
-                // This is problematic for online-mode servers as they always disconnect old clients.
-                if (plugin.getProxy().getConfig().isOnlineMode()) {
-                    ProxiedPlayer player = plugin.getProxy().getPlayer(event.getConnection().getName());
-
-                    if (player != null) {
-                        event.setCancelled(true);
-                        // TODO: Make it accept a BaseComponent[] like everything else.
-                        event.setCancelReason(TextComponent.toLegacyText(ONLINE_MODE_RECONNECT));
-                        event.completeIntent(plugin);
-                        return null;
-                    }
-                }
-
-                for (String s : plugin.getServerIds()) {
-                    if (jedis.sismember("proxy:" + s + ":usersOnline", event.getConnection().getUniqueId().toString())) {
-                        event.setCancelled(true);
-                        // TODO: Make it accept a BaseComponent[] like everything else.
-                        event.setCancelReason(TextComponent.toLegacyText(ALREADY_LOGGED_IN));
-                        event.completeIntent(plugin);
-                        return null;
-                    }
-                }
-
-                Pipeline pipeline = jedis.pipelined();
-                plugin.getUuidTranslator().persistInfo(event.getConnection().getName(), event.getConnection().getUniqueId(), pipeline);
-                RedisUtil.createPlayer(event.getConnection(), pipeline, false);
-                // We're not publishing, the API says we only publish at PostLoginEvent time.
-                pipeline.sync();
-
-                event.completeIntent(plugin);
-                return null;
             }
         });
     }
