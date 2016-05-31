@@ -427,19 +427,10 @@ public final class RedisBungee extends Plugin {
             FutureTask<JedisPool> task = new FutureTask<>(new Callable<JedisPool>() {
                 @Override
                 public JedisPool call() throws Exception {
-                    // With recent versions of Jedis, we must set the classloader to the one BungeeCord used
-                    // to load RedisBungee with.
-                    ClassLoader previous = Thread.currentThread().getContextClassLoader();
-                    Thread.currentThread().setContextClassLoader(RedisBungee.class.getClassLoader());
-
                     // Create the pool...
                     JedisPoolConfig config = new JedisPoolConfig();
                     config.setMaxTotal(configuration.getInt("max-redis-connections", 8));
-                    JedisPool pool = new JedisPool(config, redisServer, redisPort, 0, finalRedisPassword);
-
-                    // Reset classloader and return the pool
-                    Thread.currentThread().setContextClassLoader(previous);
-                    return pool;
+                    return new JedisPool(config, redisServer, redisPort, 0, finalRedisPassword);
                 }
             });
 
