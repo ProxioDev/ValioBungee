@@ -169,7 +169,7 @@ public class RedisBungeeListener implements Listener {
                                 original = plugin.getPlayers();
                             } else {
                                 try {
-                                    original = plugin.getPlayersOnServer(type);
+                                    original = RedisBungee.getApi().getPlayersOnServer(type);
                                 } catch (IllegalArgumentException ignored) {
                                 }
                             }
@@ -187,7 +187,7 @@ public class RedisBungeeListener implements Listener {
                             } else {
                                 out.writeUTF(type);
                                 try {
-                                    out.writeInt(plugin.getPlayersOnServer(type).size());
+                                    out.writeInt(RedisBungee.getApi().getPlayersOnServer(type).size());
                                 } catch (IllegalArgumentException e) {
                                     out.writeInt(0);
                                 }
