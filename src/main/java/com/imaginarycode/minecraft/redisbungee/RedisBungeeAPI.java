@@ -2,6 +2,7 @@ package com.imaginarycode.minecraft.redisbungee;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import lombok.NonNull;
 import net.md_5.bungee.api.config.ServerInfo;
@@ -103,7 +104,7 @@ public class RedisBungeeAPI {
      * @return a Set with all players found on this server
      */
     public final Set<UUID> getPlayersOnServer(@NonNull String server) {
-        return plugin.getPlayersOnServer(server);
+        return ImmutableSet.copyOf(getServerToPlayers().get(server));
     }
 
     /**

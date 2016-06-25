@@ -67,7 +67,6 @@ public final class RedisBungee extends Plugin {
     private boolean usingLua;
     private LuaManager.Script serverToPlayersScript;
     private LuaManager.Script getPlayerCountScript;
-    private LuaManager.Script getServerPlayersScript;
 
     private static final Object SERVER_TO_PLAYERS_KEY = new Object();
     private final Cache<Object, Multimap<String, UUID>> serverToPlayersCache = CacheBuilder.newBuilder()
@@ -205,16 +204,6 @@ public final class RedisBungee extends Plugin {
         return setBuilder.build();
     }
 
-    final Set<UUID> getPlayersOnServer(@NonNull String server) {
-        checkArgument(getProxy().getServers().containsKey(server), "server does not exist");
-        Collection<String> asStrings = (Collection<String>) getServerPlayersScript.eval(ImmutableList.<String>of(), ImmutableList.<String>of(server));
-        ImmutableSet.Builder<UUID> builder = ImmutableSet.builder();
-        for (String s : asStrings) {
-            builder.add(UUID.fromString(s));
-        }
-        return builder.build();
-    }
-
     final void sendProxyCommand(@NonNull String proxyId, @NonNull String command) {
         checkArgument(getServerIds().contains(proxyId) || proxyId.equals("allservers"), "proxyId is invalid");
         sendChannelMessage("redisbungee-" + proxyId, command);
@@ -258,7 +247,6 @@ public final class RedisBungee extends Plugin {
                             LuaManager manager = new LuaManager(this);
                             serverToPlayersScript = manager.createScript(IOUtil.readInputStreamAsString(getResourceAsStream("lua/server_to_players.lua")));
                             getPlayerCountScript = manager.createScript(IOUtil.readInputStreamAsString(getResourceAsStream("lua/get_player_count.lua")));
-                            getServerPlayersScript = manager.createScript(IOUtil.readInputStreamAsString(getResourceAsStream("lua/get_server_players.lua")));
                         }
                         break;
                     }
