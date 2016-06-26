@@ -27,12 +27,9 @@ import redis.clients.jedis.*;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
 import java.io.*;
+import java.lang.reflect.Field;
 import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
@@ -225,7 +222,14 @@ public final class RedisBungee extends Plugin {
 
     @Override
     public void onEnable() {
-        ((ThreadPoolExecutor) getExecutorService()).setMaximumPoolSize(32);
+        ThreadFactory factory = ((ThreadPoolExecutor) getExecutorService()).getThreadFactory();
+        try {
+            Field field = this.getClass().getDeclaredField("executorService");
+            field.setAccessible(true);
+            field.set(this, Executors.newFixedThreadPool(24, factory));
+        } catch (Exception e) {
+
+        }
         try {
             loadConfig();
         } catch (IOException e) {
