@@ -59,8 +59,8 @@ public final class RedisBungee extends Plugin {
     private volatile List<String> serverIds;
     private final AtomicInteger nagAboutServers = new AtomicInteger();
     private final AtomicInteger globalPlayerCount = new AtomicInteger();
-    private ScheduledTask integrityCheck;
-    private ScheduledTask heartbeatTask;
+    private Future<?> integrityCheck;
+    private Future<?> heartbeatTask;
     private boolean usingLua;
     private LuaManager.Script serverToPlayersScript;
     private LuaManager.Script getPlayerCountScript;
@@ -223,12 +223,14 @@ public final class RedisBungee extends Plugin {
     @Override
     public void onEnable() {
         ThreadFactory factory = ((ThreadPoolExecutor) getExecutorService()).getThreadFactory();
+        getExecutorService().shutdownNow();
+        ScheduledExecutorService service;
         try {
-            Field field = this.getClass().getDeclaredField("executorService");
+            Field field = Plugin.class.getDeclaredField("service");
             field.setAccessible(true);
-            field.set(this, Executors.newFixedThreadPool(24, factory));
+            field.set(this, service = Executors.newScheduledThreadPool(24, factory));
         } catch (Exception e) {
-
+            throw new RuntimeException("Can't replace BungeeCord thread pool with our own", e);
         }
         try {
             loadConfig();
@@ -265,7 +267,7 @@ public final class RedisBungee extends Plugin {
             }
             serverIds = getCurrentServerIds(true, false);
             uuidTranslator = new UUIDTranslator(this);
-            heartbeatTask = getProxy().getScheduler().schedule(this, new Runnable() {
+            heartbeatTask = service.scheduleAtFixedRate(new Runnable() {
                 @Override
                 public void run() {
                     try (Jedis rsc = pool.getResource()) {
@@ -297,7 +299,7 @@ public final class RedisBungee extends Plugin {
             getProxy().getPluginManager().registerListener(this, dataManager);
             psl = new PubSubListener();
             getProxy().getScheduler().runAsync(this, psl);
-            integrityCheck = getProxy().getScheduler().schedule(this, new Runnable() {
+            integrityCheck = service.scheduleAtFixedRate(new Runnable() {
                 @Override
                 public void run() {
                     try (Jedis tmpRsc = pool.getResource()) {
@@ -367,9 +369,8 @@ public final class RedisBungee extends Plugin {
         if (pool != null) {
             // Poison the PubSub listener
             psl.poison();
-            getProxy().getScheduler().cancel(this);
-            integrityCheck.cancel();
-            heartbeatTask.cancel();
+            integrityCheck.cancel(true);
+            heartbeatTask.cancel(true);
             getProxy().getPluginManager().unregisterListeners(this);
 
             try (Jedis tmpRsc = pool.getResource()) {
