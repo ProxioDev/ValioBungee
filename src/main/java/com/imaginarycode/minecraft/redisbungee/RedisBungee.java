@@ -276,9 +276,14 @@ public final class RedisBungee extends Plugin {
                     } catch (JedisConnectionException e) {
                         // Redis server has disappeared!
                         getLogger().log(Level.SEVERE, "Unable to update heartbeat - did your Redis server go away?", e);
+                        return;
                     }
-                    serverIds = getCurrentServerIds(true, false);
-                    globalPlayerCount.set(getCurrentCount());
+                    try {
+                        serverIds = getCurrentServerIds(true, false);
+                        globalPlayerCount.set(getCurrentCount());
+                    } catch (Throwable e) {
+                        getLogger().log(Level.SEVERE, "Unable to update data - did your Redis server go away?", e);
+                    }
                 }
             }, 0, 3, TimeUnit.SECONDS);
             dataManager = new DataManager(this);
@@ -357,6 +362,8 @@ public final class RedisBungee extends Plugin {
                         }
 
                         pipeline.sync();
+                    } catch (Throwable e) {
+                        getLogger().log(Level.SEVERE, "Unable to fix up stored player data", e);
                     }
                 }
             }, 0, 1, TimeUnit.MINUTES);

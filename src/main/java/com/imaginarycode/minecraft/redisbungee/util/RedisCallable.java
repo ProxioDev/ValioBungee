@@ -34,7 +34,7 @@ public abstract class RedisCallable<T> implements Callable<T>, Runnable {
                 } catch (InterruptedException e1) {
                     throw new RuntimeException("task failed to run", e1);
                 }
-                run(true);
+                return run(true);
             }
         }
 
