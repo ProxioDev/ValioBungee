@@ -258,7 +258,8 @@ public final class RedisBungee extends Plugin {
                     }
                 }
 
-                tmpRsc.hset("heartbeats", configuration.getServerId(), String.valueOf(System.currentTimeMillis()));
+                long redisTime = getRedisTime(tmpRsc.time());
+                tmpRsc.hset("heartbeats", configuration.getServerId(), String.valueOf(redisTime));
 
                 long uuidCacheSize = tmpRsc.hlen("uuid-cache");
                 if (uuidCacheSize > 750000) {
@@ -454,7 +455,8 @@ public final class RedisBungee extends Plugin {
                 } else if (rsc.hexists("heartbeats", serverId)) {
                     try {
                         long value = Long.parseLong(rsc.hget("heartbeats", serverId));
-                        if (System.currentTimeMillis() < value + 20000) {
+                        long redisTime = getRedisTime(rsc.time());
+                        if (redisTime < value + 20) {
                             getLogger().severe("You have launched a possible impostor BungeeCord instance. Another instance is already running.");
                             getLogger().severe("For data consistency reasons, RedisBungee will now disable itself.");
                             getLogger().severe("If this instance is coming up from a crash, create a file in your RedisBungee plugins directory with the name 'restarted_from_crash.txt' and RedisBungee will not perform this check.");
