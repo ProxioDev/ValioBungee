@@ -258,8 +258,7 @@ public final class RedisBungee extends Plugin {
                     }
                 }
 
-                long redisTime = getRedisTime(tmpRsc.time());
-                tmpRsc.hset("heartbeats", configuration.getServerId(), String.valueOf(redisTime));
+                tmpRsc.hset("heartbeats", configuration.getServerId(), tmpRsc.time().get(0));
 
                 long uuidCacheSize = tmpRsc.hlen("uuid-cache");
                 if (uuidCacheSize > 750000) {
