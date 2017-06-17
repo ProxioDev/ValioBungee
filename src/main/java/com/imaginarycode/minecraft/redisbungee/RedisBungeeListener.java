@@ -234,6 +234,12 @@ public class RedisBungeeListener implements Listener {
                             out.writeUTF("Proxy");
                             out.writeUTF(RedisBungee.getConfiguration().getServerId());
                             break;
+                        case "PlayerProxy":
+                            String username = in.readUTF();
+                            out.writeUTF("PlayerProxy");
+                            out.writeUTF(username);
+                            out.writeUTF(RedisBungee.getApi().getProxy(plugin.getUuidTranslator().getTranslatedUuid(username, true)));
+                            break;
                         default:
                             return;
                     }
