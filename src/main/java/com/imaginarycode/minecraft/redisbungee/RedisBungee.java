@@ -350,7 +350,7 @@ public final class RedisBungee extends Plugin {
 
                         Pipeline pipeline = tmpRsc.pipelined();
 
-                        for (String player : absentLocally) {
+                        for (String player : absentInRedis) {
                             // Player not online according to Redis but not BungeeCord.
                             getLogger().warning("Player " + player + " is on the proxy but not in Redis.");
 
