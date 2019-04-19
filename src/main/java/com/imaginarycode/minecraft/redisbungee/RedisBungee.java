@@ -368,6 +368,7 @@ public final class RedisBungee extends Plugin {
                 }
             }, 0, 1, TimeUnit.MINUTES);
         }
+        getProxy().registerChannel("legacy:RedisBungee");
         getProxy().registerChannel("RedisBungee");
     }
 
@@ -501,13 +502,18 @@ public final class RedisBungee extends Plugin {
     class PubSubListener implements Runnable {
         private JedisPubSubHandler jpsh;
 
+        private Set<String> addedChannels = new HashSet<String>();
+
         @Override
         public void run() {
             boolean broken = false;
             try (Jedis rsc = pool.getResource()) {
                 try {
                     jpsh = new JedisPubSubHandler();
-                    rsc.subscribe(jpsh, "redisbungee-" + configuration.getServerId(), "redisbungee-allservers", "redisbungee-data");
+                    addedChannels.add("redisbungee-" + configuration.getServerId());
+                    addedChannels.add("redisbungee-allservers");
+                    addedChannels.add("redisbungee-data");
+                    rsc.subscribe(jpsh, addedChannels.toArray(new String[0]));
                 } catch (Exception e) {
                     // FIXME: Extremely ugly hack
                     // Attempt to unsubscribe this instance and try again.
@@ -522,6 +528,9 @@ public final class RedisBungee extends Plugin {
                     }
                     broken = true;
                 }
+            } catch (JedisConnectionException e) {
+                getLogger().log(Level.INFO, "PubSub error, attempting to recover in 5 secs.");
+                getProxy().getScheduler().schedule(RedisBungee.this, PubSubListener.this, 5, TimeUnit.SECONDS);
             }
 
             if (broken) {
@@ -530,14 +539,17 @@ public final class RedisBungee extends Plugin {
         }
 
         public void addChannel(String... channel) {
+            addedChannels.addAll(Arrays.asList(channel));
             jpsh.subscribe(channel);
         }
 
         public void removeChannel(String... channel) {
+            addedChannels.removeAll(Arrays.asList(channel));
             jpsh.unsubscribe(channel);
         }
 
         public void poison() {
+            addedChannels.clear();
             jpsh.unsubscribe();
         }
     }
