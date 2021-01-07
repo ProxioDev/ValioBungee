@@ -12,7 +12,7 @@ this will be deployed soon on [Govindas limework!](https://Limework.net)
 
 ## Compiling
 
-Now you can use maven without installing it using Maven wrapper https://github.com/takari/maven-wrapper :)
+Now you can use maven without installing it using Maven wrapper [github?](https://github.com/takari/maven-wrapper) :)
 
 RedisBungee is distributed as a [maven](http://maven.apache.org) project. To compile it and install it in your local Maven repository:
 
