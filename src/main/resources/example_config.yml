@@ -12,6 +12,9 @@ redis-password: ""
 # inefficient plugins or a lot of players.
 max-redis-connections: 8
 
+# since redis can support ssl by version 6 you can use ssl in redis bungee too! (
+useSSL: false
+
 # An identifier for this BungeeCord instance.
 server-id: test1
 

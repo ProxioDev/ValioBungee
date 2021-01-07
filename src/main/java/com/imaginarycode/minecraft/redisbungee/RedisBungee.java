@@ -19,7 +19,6 @@ import lombok.NonNull;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
-import net.md_5.bungee.api.scheduler.ScheduledTask;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
@@ -413,6 +412,7 @@ public final class RedisBungee extends Plugin {
 
         final String redisServer = configuration.getString("redis-server", "localhost");
         final int redisPort = configuration.getInt("redis-port", 6379);
+        final boolean useSSL = configuration.getBoolean("useSSL");
         String redisPassword = configuration.getString("redis-password");
         String serverId = configuration.getString("server-id");
 
@@ -433,7 +433,7 @@ public final class RedisBungee extends Plugin {
                     // Create the pool...
                     JedisPoolConfig config = new JedisPoolConfig();
                     config.setMaxTotal(configuration.getInt("max-redis-connections", 8));
-                    return new JedisPool(config, redisServer, redisPort, 0, finalRedisPassword);
+                    return new JedisPool(config, redisServer, redisPort, 0, finalRedisPassword, useSSL);
                 }
             });
 
