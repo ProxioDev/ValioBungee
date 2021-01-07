@@ -23,3 +23,11 @@ RedisBungee is distributed as a [maven](http://maven.apache.org) project. To com
 ## Configuration
 
 **REDISBUNGEE REQUIRES A REDIS SERVER**, preferably with reasonably low latency. The default [config](https://github.com/minecrafter/RedisBungee/blob/master/src/main/resources/example_config.yml) is saved when the plugin first starts.
+
+##License!
+
+this project is distruped using Eclipse Public License 1.0
+
+which you can find it [here](https://github.com/Limework/RedisBungee/blob/master/LICENSE)
+
+you can find the orginal redisBungee by minecrafter [here](https://github.com/minecrafter/RedisBungee)
