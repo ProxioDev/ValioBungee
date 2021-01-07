@@ -6,7 +6,7 @@ RedisBungee bridges [Redis](http://redis.io) and BungeeCord together.
 
 RedisBungee was used on thechunk server which we think was shutdown due website not loading...
 
-this will be deployed soon on govindas limework! (https://Limework.net) !
+this will be deployed soon on [Govindas limework!](https://Limework.net) 
 
 ~~This is the solution deployed on [The Chunk](http://thechunk.net) to make sure our multi-Bungee setup flows smoothly together.~~
 
@@ -35,4 +35,4 @@ this project is distruped using Eclipse Public License 1.0
 
 which you can find it [here](https://github.com/Limework/RedisBungee/blob/master/LICENSE)
 
-you can find the orginal redisBungee by minecrafter [here](https://github.com/minecrafter/RedisBungee)
+you can find the orginal redisBungee by minecrafter [here](https://github.com/minecrafter/RedisBungee) or spigot page [here](https://www.spigotmc.org/resources/redisbungee.13494/)
