@@ -1,6 +1,6 @@
 # Limework fork of RedisBungee
 
-this fork was made due maintainer of redisBungee became unactive so we took the place to develop it!
+this fork was made due the maintainer of redisBungee became inactive, so we took the place to develop it!
 
 RedisBungee bridges [Redis](http://redis.io) and BungeeCord together. 
 
@@ -21,9 +21,9 @@ RedisBungee is distributed as a [maven](http://maven.apache.org) project. To com
     mvnw clean install
 
 ## Javadocs
+The current version is 0.6-snapshot! will be updated every version number change!
 
-will be availale soon!
-
+https://limework.net/JavaDocs/RedisBungee/
 
 ## Configuration
 
@@ -31,8 +31,8 @@ will be availale soon!
 
 ## License!
 
-this project is distruped using Eclipse Public License 1.0
+This project is distributed under Eclipse Public License 1.0
 
 which you can find it [here](https://github.com/Limework/RedisBungee/blob/master/LICENSE)
 
-you can find the orginal redisBungee by minecrafter [here](https://github.com/minecrafter/RedisBungee) or spigot page [here](https://www.spigotmc.org/resources/redisbungee.13494/)
+you can find the original redisBungee by minecrafter [here](https://github.com/minecrafter/RedisBungee) or spigot page [here](https://www.spigotmc.org/resources/redisbungee.13494/)
