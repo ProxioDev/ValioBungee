@@ -20,11 +20,16 @@ RedisBungee is distributed as a [maven](http://maven.apache.org) project. To com
     cd RedisBungee
     mvnw clean install
 
+## Javadocs
+
+will be availale soon!
+
+
 ## Configuration
 
 **REDISBUNGEE REQUIRES A REDIS SERVER**, preferably with reasonably low latency. The default [config](https://github.com/minecrafter/RedisBungee/blob/master/src/main/resources/example_config.yml) is saved when the plugin first starts.
 
-##License!
+## License!
 
 this project is distruped using Eclipse Public License 1.0
 
