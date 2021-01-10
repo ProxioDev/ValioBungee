@@ -1,5 +1,7 @@
 # Limework fork of RedisBungee
 
+Spigot link: [click](https://www.spigotmc.org/resources/redisbungee.87700/)
+
 this fork was made due the maintainer of redisBungee became inactive, so we took the place to develop it!
 
 RedisBungee bridges [Redis](http://redis.io) and BungeeCord together. 
