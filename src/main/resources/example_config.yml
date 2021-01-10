@@ -1,5 +1,5 @@
 # RedisBungee configuration file.
-# PLEASE READ THE WIKI: https://github.com/minecrafter/RedisBungee/wiki
+# PLEASE READ THE WIKI: https://github.com/Limework/RedisBungee/wiki
 
 # The Redis server you use.
 # Get Redis from http://redis.io/
@@ -12,7 +12,8 @@ redis-password: ""
 # inefficient plugins or a lot of players.
 max-redis-connections: 8
 
-# since redis can support ssl by version 6 you can use ssl in redis bungee too! (
+# since redis can support ssl by version 6 you can use ssl in redis bungee too! 
+# you must disable this if redis version is under 6 you must disable this or connection wont work!!!
 useSSL: false
 
 # An identifier for this BungeeCord instance.
