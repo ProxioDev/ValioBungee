@@ -5,10 +5,9 @@ this fork was made due the maintainer of redisBungee became inactive, so we took
 RedisBungee bridges [Redis](http://redis.io) and BungeeCord together. 
 
 RedisBungee was used on thechunk server which we think was shutdown due website not loading...
+~~This is the solution deployed on [The Chunk](http://thechunk.net) to make sure our multi-Bungee setup flows smoothly together.~~
 
 this will be deployed soon on [Govindas limework!](https://Limework.net) 
-
-~~This is the solution deployed on [The Chunk](http://thechunk.net) to make sure our multi-Bungee setup flows smoothly together.~~
 
 ## Compiling
 
