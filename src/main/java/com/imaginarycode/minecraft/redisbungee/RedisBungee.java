@@ -415,9 +415,6 @@ public final class RedisBungee extends Plugin {
         final boolean useSSL = configuration.getBoolean("useSSL");
         String redisPassword = configuration.getString("redis-password");
         String serverId = configuration.getString("server-id");
-        if (serverId == null || serverId.isEmpty()) {
-            serverId = UUID.randomUUID().toString();
-        }
 
         if (redisPassword != null && (redisPassword.isEmpty() || redisPassword.equals("none"))) {
             redisPassword = null;
@@ -425,7 +422,8 @@ public final class RedisBungee extends Plugin {
 
         // Configuration sanity checks.
         if (serverId == null || serverId.isEmpty()) {
-            throw new RuntimeException("server-id is not specified in the configuration or is empty");
+            configuration.set("server-id", UUID.randomUUID().toString());
+            ConfigurationProvider.getProvider(YamlConfiguration.class).save(configuration, new File(getDataFolder(), "config.yml"));
         }
 
         if (redisServer != null && !redisServer.isEmpty()) {

@@ -22,11 +22,7 @@ public class RedisBungeeConfiguration {
 
     public RedisBungeeConfiguration(JedisPool pool, Configuration configuration) {
         this.pool = pool;
-        String serverId = configuration.getString("server-id");
-        if (serverId == null || serverId.isEmpty()) {
-            serverId = UUID.randomUUID().toString();
-        }
-        this.serverId = serverId;
+        this.serverId = configuration.getString("server-id");
 
         this.registerBungeeCommands = configuration.getBoolean("register-bungee-commands", true);
 
