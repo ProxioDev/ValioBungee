@@ -8,6 +8,7 @@ import redis.clients.jedis.JedisPool;
 
 import java.net.InetAddress;
 import java.util.List;
+import java.util.UUID;
 
 public class RedisBungeeConfiguration {
     @Getter
@@ -21,7 +22,12 @@ public class RedisBungeeConfiguration {
 
     public RedisBungeeConfiguration(JedisPool pool, Configuration configuration) {
         this.pool = pool;
-        this.serverId = configuration.getString("server-id");
+        String serverId = configuration.getString("server-id");
+        if (serverId == null || serverId.isEmpty()) {
+            serverId = UUID.randomUUID().toString();
+        }
+        this.serverId = serverId;
+
         this.registerBungeeCommands = configuration.getBoolean("register-bungee-commands", true);
 
         List<String> stringified = configuration.getStringList("exempt-ip-addresses");

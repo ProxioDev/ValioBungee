@@ -415,6 +415,9 @@ public final class RedisBungee extends Plugin {
         final boolean useSSL = configuration.getBoolean("useSSL");
         String redisPassword = configuration.getString("redis-password");
         String serverId = configuration.getString("server-id");
+        if (serverId == null || serverId.isEmpty()) {
+            serverId = UUID.randomUUID().toString();
+        }
 
         if (redisPassword != null && (redisPassword.isEmpty() || redisPassword.equals("none"))) {
             redisPassword = null;

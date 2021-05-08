@@ -17,7 +17,7 @@ max-redis-connections: 8
 useSSL: false
 
 # An identifier for this BungeeCord instance.
-server-id: test1
+server-id: ""
 
 # Whether or not RedisBungee should install its version of regular BungeeCord commands.
 # Often, the RedisBungee commands are desired, but in some cases someone may wish to
