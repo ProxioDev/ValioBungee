@@ -422,8 +422,12 @@ public final class RedisBungee extends Plugin {
 
         // Configuration sanity checks.
         if (serverId == null || serverId.isEmpty()) {
-            configuration.set("server-id", UUID.randomUUID().toString());
+            String genId = UUID.randomUUID().toString();
+            getLogger().info("Generated server id " + genId + " and saving it to config.");
+            configuration.set("server-id",genId);
             ConfigurationProvider.getProvider(YamlConfiguration.class).save(configuration, new File(getDataFolder(), "config.yml"));
+        } else {
+            getLogger().info("Loaded server id " + serverId + '.');
         }
 
         if (redisServer != null && !redisServer.isEmpty()) {
