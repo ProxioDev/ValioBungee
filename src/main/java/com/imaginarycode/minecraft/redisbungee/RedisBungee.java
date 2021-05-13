@@ -104,7 +104,8 @@ public final class RedisBungee extends Plugin {
                     if (lagged ? time >= stamp + 30 : time <= stamp + 30)
                         servers.add(entry.getKey());
                     else if (nag && nagTime <= 0) {
-                        getLogger().severe(entry.getKey() + " is " + (time - stamp) + " seconds behind! (Time not synchronized or server down?)");
+                        getLogger().severe(entry.getKey() + " is " + (time - stamp) + " seconds behind! (Time not synchronized or server down?) and was removed from heartbeat.");
+                        jedis.hdel("heartbeats",  entry.getKey());
                     }
                 } catch (NumberFormatException ignored) {
                 }
