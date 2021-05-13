@@ -2,14 +2,14 @@
 
 Spigot link: [click](https://www.spigotmc.org/resources/redisbungee.87700/)
 
-this fork was made due the maintainer of redisBungee became inactive, so we took the place to develop it!
+this fork was made due the maintainer of Redis Bungee became inactive, so we took the place to develop it!
 
 RedisBungee bridges [Redis](http://redis.io) and BungeeCord together. 
 
 RedisBungee was used on thechunk server which we think was shutdown due website not loading...
 ~~This is the solution deployed on [The Chunk](http://thechunk.net) to make sure our multi-Bungee setup flows smoothly together.~~
 
-this will be deployed soon on [Govindas limework!](https://Limework.net) 
+This currently deployed on [Govindas limework!](https://Limework.net) 
 
 ## Compiling
 
@@ -20,10 +20,12 @@ RedisBungee is distributed as a [maven](http://maven.apache.org) project. To com
     git clone https://github.com/Limework/RedisBungee.git
     cd RedisBungee
     mvnw clean install
+And also sorry we dont have maven repo at the momment due complicated setup to deal with.
+as now we are trying to setup one soon as possible 
+
 
 ## Javadocs
-The current version is 0.6-snapshot! will be updated every version number change!
-
+This Java docs hosted on limework website! currently this version is 0.6.0 (note: any version 0.6.* wont have any api changes unless if we change our mind.)
 https://limework.net/JavaDocs/RedisBungee/
 
 ## Configuration
