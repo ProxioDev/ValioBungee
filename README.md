@@ -7,7 +7,7 @@ The maintainer of RedisBungee has became inactive, so we have taken the developm
 RedisBungee bridges [Redis](http://redis.io) and BungeeCord together. 
 
 
-This currently deployed on [Govindas Limework!](https://Limework.net) 
+This is currently deployed on [Govindas Limework!](https://Limework.net) 
 
 ## Compiling
 
