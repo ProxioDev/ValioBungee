@@ -1,6 +1,6 @@
 # Limework fork of RedisBungee
 
-[![BUILD](https://github.com/Limework/RedisBungee/actions/workflows/maven.yml/badge.svg?branch=master)](https://github.com/Limework/RedisBungee/actions/workflows/maven.yml)
+[![RedisBungee Build](https://github.com/Limework/RedisBungee/actions/workflows/maven.yml/badge.svg)](https://github.com/Limework/RedisBungee/actions/workflows/maven.yml)
 
 Spigot link: [click](https://www.spigotmc.org/resources/redisbungee.87700/)
 
