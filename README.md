@@ -6,7 +6,7 @@ Spigot link: [click](https://www.spigotmc.org/resources/redisbungee.87700/)
 
 The maintainer of RedisBungee has became inactive, so we have taken the development of the plugin.
 
-RedisBungee bridges [Redis](http://redis.io) and BungeeCord together. 
+RedisBungee bridges [Redis](https://redis.io) and [BungeeCord](https://github.com/SpigotMC/BungeeCord) together. 
 
 
 This is currently deployed on [Govindas Limework!](https://Limework.net) 
@@ -15,7 +15,7 @@ This is currently deployed on [Govindas Limework!](https://Limework.net)
 
 Now you can use maven without installing it using Maven wrapper [github?](https://github.com/takari/maven-wrapper) :)
 
-RedisBungee is distributed as a [maven](http://maven.apache.org) project. To compile it and install it in your local Maven repository:
+RedisBungee is distributed as a [maven](https://maven.apache.org) project. To compile it and install it in your local Maven repository:
 
     git clone https://github.com/Limework/RedisBungee.git
     cd RedisBungee
