@@ -16,8 +16,12 @@ max-redis-connections: 8
 # you must disable this if redis version is under 6 you must disable this or connection wont work!!!
 useSSL: false
 
+
 # An identifier for this BungeeCord instance.
 server-id: test1
+# Should use random string? if enabled proxy id will be like this "test1-66cd2aeb-91f3-43a7-a106-e0307b098652"
+# this great for servers who run replicas in Kubernetes or any auto deploying replica service
+use-random-id-string: false
 
 # Whether or not RedisBungee should install its version of regular BungeeCord commands.
 # Often, the RedisBungee commands are desired, but in some cases someone may wish to

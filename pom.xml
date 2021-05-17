@@ -6,7 +6,7 @@
 
     <groupId>com.imaginarycode.minecraft</groupId>
     <artifactId>RedisBungee</artifactId>
-    <version>0.6.1</version>
+    <version>0.6.2</version>
 
     <repositories>
         <repository>
