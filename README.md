@@ -21,7 +21,14 @@ RedisBungee is distributed as a [maven](https://maven.apache.org) project. To co
     cd RedisBungee
     mvnw clean install
 
+And use it in your pom file.
 
+    <dependency>
+      <groupId>com.imaginarycode.minecraft</groupId>
+      <artifactId>RedisBungee</artifactId>
+      <version>0.6.2</version>
+      <scope>provided</scope>
+    </dependency>
 
 ## Javadocs
 Hosted on limework website. Version 0.6.0 (note: any version 0.6.* will not have API changes.)
