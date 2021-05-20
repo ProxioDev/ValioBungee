@@ -1,7 +1,7 @@
 name: ${project.name}
 main: com.imaginarycode.minecraft.redisbungee.RedisBungee
 version: ${project.version}
-author: Chunker and Govindas limework
+author: Chunkr and Govindas limework
 authors:
   - chunkr
   - Govindas Limework

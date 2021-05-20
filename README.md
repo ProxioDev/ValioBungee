@@ -26,7 +26,7 @@ And use it in your pom file.
     <dependency>
       <groupId>com.imaginarycode.minecraft</groupId>
       <artifactId>RedisBungee</artifactId>
-      <version>0.6.2</version>
+      <version>0.6.3</version>
       <scope>provided</scope>
     </dependency>
 
