@@ -105,7 +105,7 @@ public final class RedisBungee extends Plugin {
                         servers.add(entry.getKey());
                     else if (nag && nagTime <= 0) {
                         getLogger().warning(entry.getKey() + " is " + (time - stamp) + " seconds behind! (Time not synchronized or server down?) and was removed from heartbeat.");
-                        jedis.hdel("heartbeats",  entry.getKey());
+                        jedis.hdel("heartbeats", entry.getKey());
                     }
                 } catch (NumberFormatException ignored) {
                 }
@@ -415,13 +415,8 @@ public final class RedisBungee extends Plugin {
         final int redisPort = configuration.getInt("redis-port", 6379);
         final boolean useSSL = configuration.getBoolean("useSSL");
         String redisPassword = configuration.getString("redis-password");
-        String serverId;
+        String serverId = configuration.getString("server-id");
         final String randomUUID = UUID.randomUUID().toString();
-        if (configuration.getBoolean("use-random-id-string", false)) {
-            serverId = configuration.getString("server-id") + "-" + randomUUID;
-        } else {
-            serverId = configuration.getString("server-id");
-        }
 
         if (redisPassword != null && (redisPassword.isEmpty() || redisPassword.equals("none"))) {
             redisPassword = null;
@@ -429,12 +424,20 @@ public final class RedisBungee extends Plugin {
 
         // Configuration sanity checks.
         if (serverId == null || serverId.isEmpty()) {
+            /*
+            *  this check causes the config comments to disappear somehow
+            *  I think due snake yaml limitations so as todo: write our own yaml parser?
+            */
             String genId = UUID.randomUUID().toString();
             getLogger().info("Generated server id " + genId + " and saving it to config.");
-            configuration.set("server-id",genId);
+            configuration.set("server-id", genId);
             ConfigurationProvider.getProvider(YamlConfiguration.class).save(configuration, new File(getDataFolder(), "config.yml"));
         } else {
             getLogger().info("Loaded server id " + serverId + '.');
+        }
+
+        if (configuration.getBoolean("use-random-id-string", false)) {
+            serverId = configuration.getString("server-id") + "-" + randomUUID;
         }
 
         if (redisServer != null && !redisServer.isEmpty()) {
