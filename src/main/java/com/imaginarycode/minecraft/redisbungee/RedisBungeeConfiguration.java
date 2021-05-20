@@ -20,9 +20,14 @@ public class RedisBungeeConfiguration {
     @Getter
     private final List<InetAddress> exemptAddresses;
 
-    public RedisBungeeConfiguration(JedisPool pool, Configuration configuration) {
+
+    public RedisBungeeConfiguration(JedisPool pool, Configuration configuration, String randomUUID) {
         this.pool = pool;
-        this.serverId = configuration.getString("server-id");
+        if (configuration.getBoolean("use-random-id-string", false)) {
+            this.serverId = configuration.getString("server-id") + "-" + randomUUID;
+        } else {
+            this.serverId = configuration.getString("server-id");
+        }
 
         this.registerBungeeCommands = configuration.getBoolean("register-bungee-commands", true);
 
@@ -35,4 +40,5 @@ public class RedisBungeeConfiguration {
 
         this.exemptAddresses = addressBuilder.build();
     }
+
 }

@@ -104,7 +104,8 @@ public final class RedisBungee extends Plugin {
                     if (lagged ? time >= stamp + 30 : time <= stamp + 30)
                         servers.add(entry.getKey());
                     else if (nag && nagTime <= 0) {
-                        getLogger().severe(entry.getKey() + " is " + (time - stamp) + " seconds behind! (Time not synchronized or server down?)");
+                        getLogger().warning(entry.getKey() + " is " + (time - stamp) + " seconds behind! (Time not synchronized or server down?) and was removed from heartbeat.");
+                        jedis.hdel("heartbeats",  entry.getKey());
                     }
                 } catch (NumberFormatException ignored) {
                 }
@@ -414,7 +415,13 @@ public final class RedisBungee extends Plugin {
         final int redisPort = configuration.getInt("redis-port", 6379);
         final boolean useSSL = configuration.getBoolean("useSSL");
         String redisPassword = configuration.getString("redis-password");
-        String serverId = configuration.getString("server-id");
+        String serverId;
+        final String randomUUID = UUID.randomUUID().toString();
+        if (configuration.getBoolean("use-random-id-string", false)) {
+            serverId = configuration.getString("server-id") + "-" + randomUUID;
+        } else {
+            serverId = configuration.getString("server-id");
+        }
 
         if (redisPassword != null && (redisPassword.isEmpty() || redisPassword.equals("none"))) {
             redisPassword = null;
@@ -479,7 +486,7 @@ public final class RedisBungee extends Plugin {
                         httpClient.setDispatcher(dispatcher);
                         NameFetcher.setHttpClient(httpClient);
                         UUIDFetcher.setHttpClient(httpClient);
-                        RedisBungee.configuration = new RedisBungeeConfiguration(RedisBungee.this.getPool(), configuration);
+                        RedisBungee.configuration = new RedisBungeeConfiguration(RedisBungee.this.getPool(), configuration, randomUUID);
                         return null;
                     }
                 });

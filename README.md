@@ -1,39 +1,47 @@
 # Limework fork of RedisBungee
 
+[![RedisBungee Build](https://github.com/Limework/RedisBungee/actions/workflows/maven.yml/badge.svg)](https://github.com/Limework/RedisBungee/actions/workflows/maven.yml)
+
 Spigot link: [click](https://www.spigotmc.org/resources/redisbungee.87700/)
 
-this fork was made due the maintainer of redisBungee became inactive, so we took the place to develop it!
+The maintainer of RedisBungee has became inactive, so we have taken the development of the plugin.
 
-RedisBungee bridges [Redis](http://redis.io) and BungeeCord together. 
+RedisBungee bridges [Redis](https://redis.io) and [BungeeCord](https://github.com/SpigotMC/BungeeCord) together. 
 
-RedisBungee was used on thechunk server which we think was shutdown due website not loading...
-~~This is the solution deployed on [The Chunk](http://thechunk.net) to make sure our multi-Bungee setup flows smoothly together.~~
 
-this will be deployed soon on [Govindas limework!](https://Limework.net) 
+This is currently deployed on [Govindas Limework!](https://Limework.net) 
 
 ## Compiling
 
 Now you can use maven without installing it using Maven wrapper [github?](https://github.com/takari/maven-wrapper) :)
 
-RedisBungee is distributed as a [maven](http://maven.apache.org) project. To compile it and install it in your local Maven repository:
+RedisBungee is distributed as a [maven](https://maven.apache.org) project. To compile it and install it in your local Maven repository:
 
     git clone https://github.com/Limework/RedisBungee.git
     cd RedisBungee
     mvnw clean install
 
-## Javadocs
-The current version is 0.6-snapshot! will be updated every version number change!
+And use it in your pom file.
 
+    <dependency>
+      <groupId>com.imaginarycode.minecraft</groupId>
+      <artifactId>RedisBungee</artifactId>
+      <version>0.6.2</version>
+      <scope>provided</scope>
+    </dependency>
+
+## Javadocs
+Hosted on limework website. Version 0.6.0 (note: any version 0.6.* will not have API changes.)
 https://limework.net/JavaDocs/RedisBungee/
 
 ## Configuration
 
-**REDISBUNGEE REQUIRES A REDIS SERVER**, preferably with reasonably low latency. The default [config](https://github.com/minecrafter/RedisBungee/blob/master/src/main/resources/example_config.yml) is saved when the plugin first starts.
+**REDISBUNGEE REQUIRES A REDIS SERVER**, preferably with reasonably low latency. The default [config](https://github.com/limework/RedisBungee/blob/master/src/main/resources/example_config.yml) is saved when the plugin first starts.
 
 ## License!
 
 This project is distributed under Eclipse Public License 1.0
 
-which you can find it [here](https://github.com/Limework/RedisBungee/blob/master/LICENSE)
+You can find it [here](https://github.com/Limework/RedisBungee/blob/master/LICENSE)
 
-you can find the original redisBungee by minecrafter [here](https://github.com/minecrafter/RedisBungee) or spigot page [here](https://www.spigotmc.org/resources/redisbungee.13494/)
+You can find the original RedisBungee by minecrafter [here](https://github.com/minecrafter/RedisBungee) or spigot page [here](https://www.spigotmc.org/resources/redisbungee.13494/)
