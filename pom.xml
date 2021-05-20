@@ -8,13 +8,6 @@
     <artifactId>RedisBungee</artifactId>
     <version>0.6.3</version>
 
-    <distributionManagement>
-        <repository>
-            <id>Limework-Maven-Public</id>
-            <url>http://mc.limework.net:8081/repository/public-maven/</url>
-        </repository>
-    </distributionManagement>
-
 
     <repositories>
         <repository>
