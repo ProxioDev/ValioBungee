@@ -17,7 +17,7 @@ max-redis-connections: 8
 useSSL: false
 
 
-# An identifier for this BungeeCord instance.
+# An identifier for this BungeeCord instance. Will randomly generate if leaving it blank.
 server-id: "test1"
 # Should use random string? if enabled proxy id will be like this "test1-66cd2aeb-91f3-43a7-a106-e0307b098652"
 # this great for servers who run replicas in Kubernetes or any auto deploying replica service
