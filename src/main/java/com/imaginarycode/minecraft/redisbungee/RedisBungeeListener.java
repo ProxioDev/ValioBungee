@@ -14,7 +14,6 @@ import net.md_5.bungee.api.AbstractReconnectHandler;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.connection.Server;
@@ -62,7 +61,7 @@ public class RedisBungeeListener implements Listener {
                         if (player != null) {
                             event.setCancelled(true);
                             // TODO: Make it accept a BaseComponent[] like everything else.
-                            event.setCancelReason(TextComponent.toLegacyText(ONLINE_MODE_RECONNECT));
+                            event.setCancelReason(ONLINE_MODE_RECONNECT);
                             return null;
                         }
                     }
@@ -71,7 +70,7 @@ public class RedisBungeeListener implements Listener {
                         if (jedis.sismember("proxy:" + s + ":usersOnline", event.getConnection().getUniqueId().toString())) {
                             event.setCancelled(true);
                             // TODO: Make it accept a BaseComponent[] like everything else.
-                            event.setCancelReason(TextComponent.toLegacyText(ALREADY_LOGGED_IN));
+                            event.setCancelReason(ALREADY_LOGGED_IN);
                             return null;
                         }
                     }
@@ -146,107 +145,105 @@ public class RedisBungeeListener implements Listener {
         event.getResponse().getPlayers().setOnline(plugin.getCount());
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     @EventHandler
     public void onPluginMessage(final PluginMessageEvent event) {
         if ((event.getTag().equals("legacy:redisbungee") || event.getTag().equals("RedisBungee")) && event.getSender() instanceof Server) {
             final String currentChannel = event.getTag();
             final byte[] data = Arrays.copyOf(event.getData(), event.getData().length);
-            plugin.getProxy().getScheduler().runAsync(plugin, new Runnable() {
-                @Override
-                public void run() {
-                    ByteArrayDataInput in = ByteStreams.newDataInput(data);
+            plugin.getProxy().getScheduler().runAsync(plugin, () -> {
+                ByteArrayDataInput in = ByteStreams.newDataInput(data);
 
-                    String subchannel = in.readUTF();
-                    ByteArrayDataOutput out = ByteStreams.newDataOutput();
-                    String type;
+                String subchannel = in.readUTF();
+                ByteArrayDataOutput out = ByteStreams.newDataOutput();
+                String type;
 
-                    switch (subchannel) {
-                        case "PlayerList":
-                            out.writeUTF("PlayerList");
-                            Set<UUID> original = Collections.emptySet();
-                            type = in.readUTF();
-                            if (type.equals("ALL")) {
-                                out.writeUTF("ALL");
-                                original = plugin.getPlayers();
-                            } else {
-                                try {
-                                    original = RedisBungee.getApi().getPlayersOnServer(type);
-                                } catch (IllegalArgumentException ignored) {
-                                }
+                switch (subchannel) {
+                    case "PlayerList":
+                        out.writeUTF("PlayerList");
+                        Set<UUID> original = Collections.emptySet();
+                        type = in.readUTF();
+                        if (type.equals("ALL")) {
+                            out.writeUTF("ALL");
+                            original = plugin.getPlayers();
+                        } else {
+                            try {
+                                original = RedisBungee.getApi().getPlayersOnServer(type);
+                            } catch (IllegalArgumentException ignored) {
                             }
-                            Set<String> players = new HashSet<>();
-                            for (UUID uuid : original)
-                                players.add(plugin.getUuidTranslator().getNameFromUuid(uuid, false));
-                            out.writeUTF(Joiner.on(',').join(players));
-                            break;
-                        case "PlayerCount":
-                            out.writeUTF("PlayerCount");
-                            type = in.readUTF();
-                            if (type.equals("ALL")) {
-                                out.writeUTF("ALL");
-                                out.writeInt(plugin.getCount());
-                            } else {
-                                out.writeUTF(type);
-                                try {
-                                    out.writeInt(RedisBungee.getApi().getPlayersOnServer(type).size());
-                                } catch (IllegalArgumentException e) {
-                                    out.writeInt(0);
-                                }
+                        }
+                        Set<String> players = new HashSet<>();
+                        for (UUID uuid : original)
+                            players.add(plugin.getUuidTranslator().getNameFromUuid(uuid, false));
+                        out.writeUTF(Joiner.on(',').join(players));
+                        break;
+                    case "PlayerCount":
+                        out.writeUTF("PlayerCount");
+                        type = in.readUTF();
+                        if (type.equals("ALL")) {
+                            out.writeUTF("ALL");
+                            out.writeInt(plugin.getCount());
+                        } else {
+                            out.writeUTF(type);
+                            try {
+                                out.writeInt(RedisBungee.getApi().getPlayersOnServer(type).size());
+                            } catch (IllegalArgumentException e) {
+                                out.writeInt(0);
                             }
-                            break;
-                        case "LastOnline":
-                            String user = in.readUTF();
-                            out.writeUTF("LastOnline");
-                            out.writeUTF(user);
-                            out.writeLong(RedisBungee.getApi().getLastOnline(plugin.getUuidTranslator().getTranslatedUuid(user, true)));
-                            break;
-                        case "ServerPlayers":
-                            String type1 = in.readUTF();
-                            out.writeUTF("ServerPlayers");
-                            Multimap<String, UUID> multimap = RedisBungee.getApi().getServerToPlayers();
+                        }
+                        break;
+                    case "LastOnline":
+                        String user = in.readUTF();
+                        out.writeUTF("LastOnline");
+                        out.writeUTF(user);
+                        out.writeLong(RedisBungee.getApi().getLastOnline(plugin.getUuidTranslator().getTranslatedUuid(user, true)));
+                        break;
+                    case "ServerPlayers":
+                        String type1 = in.readUTF();
+                        out.writeUTF("ServerPlayers");
+                        Multimap<String, UUID> multimap = RedisBungee.getApi().getServerToPlayers();
 
-                            boolean includesUsers;
+                        boolean includesUsers;
 
-                            switch (type1) {
-                                case "COUNT":
-                                    includesUsers = false;
-                                    break;
-                                case "PLAYERS":
-                                    includesUsers = true;
-                                    break;
-                                default:
-                                    // TODO: Should I raise an error?
-                                    return;
+                        switch (type1) {
+                            case "COUNT":
+                                includesUsers = false;
+                                break;
+                            case "PLAYERS":
+                                includesUsers = true;
+                                break;
+                            default:
+                                // TODO: Should I raise an error?
+                                return;
+                        }
+
+                        out.writeUTF(type1);
+
+                        if (includesUsers) {
+                            Multimap<String, String> human = HashMultimap.create();
+                            for (Map.Entry<String, UUID> entry : multimap.entries()) {
+                                human.put(entry.getKey(), plugin.getUuidTranslator().getNameFromUuid(entry.getValue(), false));
                             }
-
-                            out.writeUTF(type1);
-
-                            if (includesUsers) {
-                                Multimap<String, String> human = HashMultimap.create();
-                                for (Map.Entry<String, UUID> entry : multimap.entries()) {
-                                    human.put(entry.getKey(), plugin.getUuidTranslator().getNameFromUuid(entry.getValue(), false));
-                                }
-                                serializeMultimap(human, true, out);
-                            } else {
-                                serializeMultiset(multimap.keys(), out);
-                            }
-                            break;
-                        case "Proxy":
-                            out.writeUTF("Proxy");
-                            out.writeUTF(RedisBungee.getConfiguration().getServerId());
-                            break;
-                        case "PlayerProxy":
-                            String username = in.readUTF();
-                            out.writeUTF("PlayerProxy");
-                            out.writeUTF(username);
-                            out.writeUTF(RedisBungee.getApi().getProxy(plugin.getUuidTranslator().getTranslatedUuid(username, true)));
-                            break;
-                        default:
-                            return;
-                    }
-
-                    ((Server) event.getSender()).sendData(currentChannel, out.toByteArray());
+                            serializeMultimap(human, true, out);
+                        } else {
+                            serializeMultiset(multimap.keys(), out);
+                        }
+                        break;
+                    case "Proxy":
+                        out.writeUTF("Proxy");
+                        out.writeUTF(RedisBungee.getConfiguration().getServerId());
+                        break;
+                    case "PlayerProxy":
+                        String username = in.readUTF();
+                        out.writeUTF("PlayerProxy");
+                        out.writeUTF(username);
+                        out.writeUTF(RedisBungee.getApi().getProxy(plugin.getUuidTranslator().getTranslatedUuid(username, true)));
+                        break;
+                    default:
+                        return;
                 }
+
+                ((Server) event.getSender()).sendData(currentChannel, out.toByteArray());
             });
         }
     }
@@ -259,6 +256,7 @@ public class RedisBungeeListener implements Listener {
         }
     }
 
+    @SuppressWarnings("SameParameterValue")
     private void serializeMultimap(Multimap<String, String> collection, boolean includeNames, ByteArrayDataOutput output) {
         output.writeInt(collection.keySet().size());
         for (Map.Entry<String, Collection<String>> entry : collection.asMap().entrySet()) {
