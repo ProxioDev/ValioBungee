@@ -15,12 +15,14 @@ This is currently deployed on [Govindas Limework!](https://Limework.net)
 
 Now you can use maven without installing it using Maven wrapper [github?](https://github.com/takari/maven-wrapper) :)
 
-RedisBungee is distributed as a [maven](https://maven.apache.org) project. To compile it and install it in your local Maven repository:
-for latest commits you can use this way.
-    
+RedisBungee is distributed as a [maven](https://maven.apache.org) project. 
+
+To compile and installing to in your local Maven repository:
+
     git clone https://github.com/Limework/RedisBungee.git
     cd RedisBungee
     mvnw clean install
+    mvnw package
 
 And use it in your pom file.
 
