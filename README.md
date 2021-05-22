@@ -1,6 +1,6 @@
 # Limework fork of RedisBungee
 
-[![RedisBungee Build](https://github.com/Limework/RedisBungee/actions/workflows/maven.yml/badge.svg)](https://github.com/Limework/RedisBungee/actions/workflows/maven.yml)
+[![RedisBungee Build](https://github.com/Limework/RedisBungee/actions/workflows/maven.yml/badge.svg)](https://github.com/Limework/RedisBungee/actions/workflows/maven.yml) [![](https://jitpack.io/v/limework/redisbungee.svg)](https://jitpack.io/#limework/redisbungee)
 
 Spigot link: [click](https://www.spigotmc.org/resources/redisbungee.87700/)
 
@@ -16,7 +16,8 @@ This is currently deployed on [Govindas Limework!](https://Limework.net)
 Now you can use maven without installing it using Maven wrapper [github?](https://github.com/takari/maven-wrapper) :)
 
 RedisBungee is distributed as a [maven](https://maven.apache.org) project. To compile it and install it in your local Maven repository:
-
+for latest commits you can use this way.
+    
     git clone https://github.com/Limework/RedisBungee.git
     cd RedisBungee
     mvnw clean install
@@ -29,6 +30,24 @@ And use it in your pom file.
       <version>0.6.3</version>
       <scope>provided</scope>
     </dependency>
+
+Or if you want to use the jitpack maven server
+
+    <repositories>
+		<repository>
+		    <id>jitpack.io</id>
+		    <url>https://jitpack.io</url>
+		</repository>
+	</repositories>
+    
+And use it in your pom file.
+    
+    <dependency>
+	    <groupId>com.github.limework</groupId>
+	    <artifactId>redisbungee</artifactId>
+	    <version>0.6.3</version>
+	</dependency>
+
 
 ## Javadocs
 Hosted on limework website. Version 0.6.0 (note: any version 0.6.* will not have API changes.)
