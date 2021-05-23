@@ -66,3 +66,9 @@ This project is distributed under Eclipse Public License 1.0
 You can find it [here](https://github.com/Limework/RedisBungee/blob/master/LICENSE)
 
 You can find the original RedisBungee by minecrafter [here](https://github.com/minecrafter/RedisBungee) or spigot page [here](https://www.spigotmc.org/resources/redisbungee.13494/)
+
+## YourKit
+
+YourKit supports open source projects with innovative and intelligent tools for monitoring and profiling Java and .NET applications. YourKit is the creator of [YourKit Java Profiler](https://www.yourkit.com/java/profiler/), [YourKit .NET Profiler](https://www.yourkit.com/.net/profiler/) and [YourKit YouMonitor](https://www.yourkit.com/youmonitor/).
+
+![YourKit](https://www.yourkit.com/images/yklogo.png)
