@@ -6,8 +6,7 @@ Spigot link: [click](https://www.spigotmc.org/resources/redisbungee.87700/)
 
 The maintainer of RedisBungee has became inactive, so we have taken the development of the plugin.
 
-RedisBungee bridges [Redis](https://redis.io) and [BungeeCord](https://github.com/SpigotMC/BungeeCord) together. 
-
+RedisBungee uses [Redis](https://redis.io) to Synchronize data between [BungeeCord](https://github.com/SpigotMC/BungeeCord) proxies
 
 This is currently deployed on [Govindas Limework!](https://Limework.net) 
 
