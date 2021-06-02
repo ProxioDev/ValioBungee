@@ -25,29 +25,19 @@ To compile and installing to in your local Maven repository:
 
 And use it in your pom file.
 
-    <dependency>
-      <groupId>com.imaginarycode.minecraft</groupId>
-      <artifactId>RedisBungee</artifactId>
-      <version>0.6.3</version>
-      <scope>provided</scope>
-    </dependency>
+	<dependency>
+	    <groupId>com.github.Limework</groupId>
+	    <artifactId>RedisBungee</artifactId>
+	    <version>0.6.3</version>
+	    <scope>provided</scope>
+	</dependency>
 
-Or if you want to use the jitpack maven server
-
-    <repositories>
+	<repositories>
 		<repository>
 		    <id>jitpack.io</id>
 		    <url>https://jitpack.io</url>
 		</repository>
 	</repositories>
-    
-And use it in your pom file.
-    
-    <dependency>
-	    <groupId>com.github.limework</groupId>
-	    <artifactId>redisbungee</artifactId>
-	    <version>0.6.3</version>
-	</dependency>
 
 
 ## Javadocs
