@@ -10,6 +10,11 @@ RedisBungee uses [Redis](https://redis.io) to Synchronize data between [BungeeCo
 
 This is currently deployed on [Govindas Limework!](https://Limework.net) 
 
+## Notice about older version of than redis 6
+
+Due increasing issues with people running older version of redis, now within next updates redisbungee will stop working on any version
+running below redis 6.
+
 ## Compiling
 
 Now you can use maven without installing it using Maven wrapper [github?](https://github.com/takari/maven-wrapper) :)
