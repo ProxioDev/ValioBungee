@@ -10,6 +10,9 @@ RedisBungee uses [Redis](https://redis.io) to Synchronize data between [BungeeCo
 
 This is currently deployed on [Govindas Limework!](https://Limework.net) 
 
+![image](https://limework.net/logo.png)
+
+
 ## Notice: about older versions of redis than redis 6
 
 Due increasing issues with people running older version of redis, now within next updates redisbungee will stop working on any version
