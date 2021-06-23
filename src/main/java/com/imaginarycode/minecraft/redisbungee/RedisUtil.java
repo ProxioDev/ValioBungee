@@ -58,16 +58,13 @@ public class RedisUtil {
     }
 
     public static boolean canUseLua(String redisVersion) {
-        // Need to use >=2.6 to use Lua optimizations.
+        // Need to use >=6.2 to use Lua optimizations.
         String[] args = redisVersion.split("\\.");
-
         if (args.length < 2) {
             return false;
         }
-
         int major = Integer.parseInt(args[0]);
         int minor = Integer.parseInt(args[1]);
-
-        return major >= 3 || (major == 2 && minor >= 6);
+        return major >= 6 && minor >= 2;
     }
 }
