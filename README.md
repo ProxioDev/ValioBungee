@@ -13,10 +13,9 @@ This is currently deployed on [Govindas Limework!](https://Limework.net)
 ![image](https://limework.net/logo.png)
 
 
-## Notice: about older versions of redis than redis 6
+## Notice: about older versions of redis than redis 6.2
 
-Due increasing issues with people running older version of redis, now within next updates redisbungee will stop working on any version
-running below redis 6.
+As of now Version 0.6.4-SNAPSHOT is only supporting redis 6.2 and above!
 
 ## Compiling
 
