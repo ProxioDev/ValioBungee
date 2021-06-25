@@ -8,11 +8,6 @@ The maintainer of RedisBungee has became inactive, so we have taken the developm
 
 RedisBungee uses [Redis](https://redis.io) to Synchronize data between [BungeeCord](https://github.com/SpigotMC/BungeeCord) proxies
 
-This is currently deployed on [Govindas Limework!](https://Limework.net) 
-
-![image](https://limework.net/logo.png)
-
-
 ## Notice: about older versions of redis than redis 6.0
 
 As of now Version 0.7.0-SNAPSHOT is only supporting redis 6.0 and above!
