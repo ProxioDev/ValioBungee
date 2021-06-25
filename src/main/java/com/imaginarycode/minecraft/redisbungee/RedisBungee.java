@@ -263,7 +263,7 @@ public final class RedisBungee extends Plugin {
                     if (s.startsWith("redis_version:")) {
                         String version = s.split(":")[1];
                         if (!RedisUtil.isRedisVersionSupported((version))) {
-                            getLogger().warning("Your version of Redis (" + version + ") is not at least version 6.2 RedisBungee requires a newer version of Redis.");
+                            getLogger().warning("Your version of Redis (" + version + ") is not at least version 6.0 RedisBungee requires a newer version of Redis.");
                             throw new RuntimeException("Unsupported Redis version detected");
                         }
                         getLogger().info("found a supported redis version: " + version);

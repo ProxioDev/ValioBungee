@@ -5,19 +5,38 @@
 # Get Redis from http://redis.io/
 redis-server: 127.0.0.1
 redis-port: 6379
-# OPTIONAL: If your Redis server uses AUTH, set the password required.
-redis-password: ""
-# Maximum connections that will be maintained to the Redis server.
-# The default is 8. This setting should be left as-is unless you have some wildly
-# inefficient plugins or a lot of players.
-max-redis-connections: 8
 
-# since redis can support ssl by version 6 you can use ssl in redis bungee too! 
-# you must disable this if redis version is under 6 you must disable this or connection wont work!!!
+#################################################################
+# If enabled redis-server and redis-port will be ignored.
+use-sentinel: false
+
+sentinels:
+  - "127.0.0.1:6379"
+  - "127.0.0.1:6378"
+  - "127.0.0.1:6377"
+
+# Your master name
+master-name: mymaster
+
+##################################################################
+
+# OPTIONAL: If your Redis server or sentinel uses AUTH, set the password required.
+# WARNING: Leaving your Redis server or sentinel exposed without a password is extremely unsafe
+# and could cause issues like data not being sync and etc.
+redis-password: ""
+
+# Maximum connections that will be maintained to the Redis server.
+# The default is 10. This setting should be left as-is unless you have some wildly
+# inefficient plugins or a lot of players.
+max-redis-connections: 10
+
+# since redis can support ssl by version 6 you can use ssl in redis bungee too!
+# its' recommended to use redis with ssl to encrypt the traffic.
 useSSL: false
 
-# An identifier for this BungeeCord instance. Will randomly generate if leaving it blank.
+# An identifier for this BungeeCord instance. Will randomly generate a UUID String if leaving it blank.
 server-id: "test1"
+
 # Should use random string? if this  is enabled the proxy id will be like this if server-id is test1: "test1-66cd2aeb-91f3-43a7-a106-e0307b098652"
 # or if id is limework-bungee it will be "limework-bungee-66cd2aeb-91f3-43a7-a106-e0307b098652"
 # this great for servers who run replicas in Kubernetes or any auto deploying replica service
