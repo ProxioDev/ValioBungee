@@ -12,8 +12,8 @@ import java.util.Map;
 import java.util.UUID;
 
 public class UUIDNameTest {
-    private String[] uuidsToTest = {"68ec43f7234b41b48764dfb38b9ffe8c", "652a2bc4e8cd405db7b698156ee2dc09"};
-    private String[] namesToTest = {"vemacs"};
+    private final String[] uuidsToTest = {"68ec43f7234b41b48764dfb38b9ffe8c", "652a2bc4e8cd405db7b698156ee2dc09"};
+    private final String[] namesToTest = {"vemacs"};
 
     @Test
     public void testUuidToName() throws IOException {
@@ -27,7 +27,7 @@ public class UUIDNameTest {
     }
 
     @Test
-    public void testNameToUuid() throws IOException {
+    public void testNameToUuid() {
         OkHttpClient httpClient = new OkHttpClient();
         UUIDFetcher.setHttpClient(httpClient);
         for (String name : namesToTest) {

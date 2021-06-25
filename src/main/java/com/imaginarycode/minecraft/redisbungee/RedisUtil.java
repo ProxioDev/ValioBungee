@@ -25,13 +25,13 @@ public class RedisUtil {
         Map<String, String> playerData = new HashMap<>(4);
         playerData.put("online", "0");
         playerData.put("ip", connection.getAddress().getAddress().getHostAddress());
-        playerData.put("proxy", RedisBungee.getConfiguration().getServerId());
+        playerData.put("proxy", RedisBungee.getPluginInstance().getConfiguration().getServerId());
 
         pipeline.sadd("proxy:" + RedisBungee.getApi().getServerId() + ":usersOnline", connection.getUniqueId().toString());
         pipeline.hmset("player:" + connection.getUniqueId().toString(), playerData);
 
         if (fireEvent) {
-            pipeline.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage<>(
+            pipeline.publish("redisbungee-data", RedisBungee.getPluginInstance().getGson().toJson(new DataManager.DataManagerMessage<>(
                     connection.getUniqueId(), DataManager.DataManagerMessage.Action.JOIN,
                     new DataManager.LoginPayload(connection.getAddress().getAddress()))));
         }
@@ -57,7 +57,12 @@ public class RedisUtil {
                 new DataManager.LogoutPayload(timestamp))));
     }
 
+    @Deprecated
     public static boolean canUseLua(String redisVersion) {
+        return isRedisVersionSupported(redisVersion);
+    }
+
+    public static boolean isRedisVersionSupported(String redisVersion) {
         // Need to use >=6.2 to use Lua optimizations.
         String[] args = redisVersion.split("\\.");
         if (args.length < 2) {

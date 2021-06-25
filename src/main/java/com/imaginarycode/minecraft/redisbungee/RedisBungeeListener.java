@@ -145,7 +145,7 @@ public class RedisBungeeListener implements Listener {
         event.getResponse().getPlayers().setOnline(plugin.getCount());
     }
 
-    @SuppressWarnings("UnstableApiUsage")
+    @SuppressWarnings({"UnstableApiUsage", "null"})
     @EventHandler
     public void onPluginMessage(final PluginMessageEvent event) {
         if ((event.getTag().equals("legacy:redisbungee") || event.getTag().equals("RedisBungee")) && event.getSender() instanceof Server) {
@@ -158,6 +158,7 @@ public class RedisBungeeListener implements Listener {
                 ByteArrayDataOutput out = ByteStreams.newDataOutput();
                 String type;
 
+                UUID uuid;
                 switch (subchannel) {
                     case "PlayerList":
                         out.writeUTF("PlayerList");
@@ -168,13 +169,12 @@ public class RedisBungeeListener implements Listener {
                             original = plugin.getPlayers();
                         } else {
                             try {
-                                original = RedisBungee.getApi().getPlayersOnServer(type);
+                                original = plugin.getRedisBungeeAPI().getPlayersOnServer(type);
                             } catch (IllegalArgumentException ignored) {
                             }
                         }
                         Set<String> players = new HashSet<>();
-                        for (UUID uuid : original)
-                            players.add(plugin.getUuidTranslator().getNameFromUuid(uuid, false));
+                        original.forEach((u -> players.add(plugin.getUuidTranslator().getNameFromUuid(u, false))));
                         out.writeUTF(Joiner.on(',').join(players));
                         break;
                     case "PlayerCount":
@@ -196,7 +196,9 @@ public class RedisBungeeListener implements Listener {
                         String user = in.readUTF();
                         out.writeUTF("LastOnline");
                         out.writeUTF(user);
-                        out.writeLong(RedisBungee.getApi().getLastOnline(plugin.getUuidTranslator().getTranslatedUuid(user, true)));
+                        uuid = plugin.getUuidTranslator().getTranslatedUuid(user, true);
+                        assert uuid != null;
+                        out.writeLong(RedisBungee.getApi().getLastOnline(uuid));
                         break;
                     case "ServerPlayers":
                         String type1 = in.readUTF();
@@ -231,13 +233,15 @@ public class RedisBungeeListener implements Listener {
                         break;
                     case "Proxy":
                         out.writeUTF("Proxy");
-                        out.writeUTF(RedisBungee.getConfiguration().getServerId());
+                        out.writeUTF(plugin.getConfiguration().getServerId());
                         break;
                     case "PlayerProxy":
                         String username = in.readUTF();
                         out.writeUTF("PlayerProxy");
                         out.writeUTF(username);
-                        out.writeUTF(RedisBungee.getApi().getProxy(plugin.getUuidTranslator().getTranslatedUuid(username, true)));
+                        uuid = plugin.getUuidTranslator().getTranslatedUuid(username, true);
+                        assert uuid != null;
+                        out.writeUTF(RedisBungee.getApi().getProxy(uuid));
                         break;
                     default:
                         return;

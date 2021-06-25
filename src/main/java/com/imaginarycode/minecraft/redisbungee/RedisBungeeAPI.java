@@ -24,7 +24,7 @@ public class RedisBungeeAPI {
         this.plugin = plugin;
         this.reservedChannels = ImmutableList.of(
                 "redisbungee-allservers",
-                "redisbungee-" + RedisBungee.getConfiguration().getServerId(),
+                "redisbungee-" + getServerId(),
                 "redisbungee-data"
         );
     }
@@ -192,7 +192,7 @@ public class RedisBungeeAPI {
      * @since 0.2.5
      */
     public final String getServerId() {
-        return RedisBungee.getConfiguration().getServerId();
+        return plugin.getConfiguration().getServerId();
     }
 
     /**
@@ -213,7 +213,7 @@ public class RedisBungeeAPI {
      * @since 0.3
      */
     public final void registerPubSubChannels(String... channels) {
-        RedisBungee.getPubSubListener().addChannel(channels);
+       plugin.getPubSubListener().addChannel(channels);
     }
 
     /**
@@ -227,7 +227,7 @@ public class RedisBungeeAPI {
             Preconditions.checkArgument(!reservedChannels.contains(channel), "attempting to unregister internal channel");
         }
 
-        RedisBungee.getPubSubListener().removeChannel(channels);
+        plugin.getPubSubListener().removeChannel(channels);
     }
 
     /**

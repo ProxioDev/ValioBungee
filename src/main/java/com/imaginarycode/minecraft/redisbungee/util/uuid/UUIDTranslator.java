@@ -74,7 +74,7 @@ public final class UUIDTranslator {
             String stored = jedis.hget("uuid-cache", player.toLowerCase());
             if (stored != null) {
                 // Found an entry value. Deserialize it.
-                CachedUUIDEntry entry = RedisBungee.getGson().fromJson(stored, CachedUUIDEntry.class);
+                CachedUUIDEntry entry = plugin.getGson().fromJson(stored, CachedUUIDEntry.class);
 
                 // Check for expiry:
                 if (entry.expired()) {
@@ -132,7 +132,7 @@ public final class UUIDTranslator {
             String stored = jedis.hget("uuid-cache", player.toString());
             if (stored != null) {
                 // Found an entry value. Deserialize it.
-                CachedUUIDEntry entry = RedisBungee.getGson().fromJson(stored, CachedUUIDEntry.class);
+                CachedUUIDEntry entry = plugin.getGson().fromJson(stored, CachedUUIDEntry.class);
 
                 // Check for expiry:
                 if (entry.expired()) {
@@ -186,7 +186,7 @@ public final class UUIDTranslator {
 
     @RequiredArgsConstructor
     @Getter
-    private class CachedUUIDEntry {
+    private static class CachedUUIDEntry {
         private final String name;
         private final UUID uuid;
         private final Calendar expiry;

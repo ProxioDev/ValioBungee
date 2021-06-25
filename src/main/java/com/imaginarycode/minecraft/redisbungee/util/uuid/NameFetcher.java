@@ -29,6 +29,7 @@ public class NameFetcher {
 
         Type listType = new TypeToken<List<Name>>() {
         }.getType();
+
         List<Name> names = RedisBungee.getGson().fromJson(response, listType);
 
         List<String> humanNames = new ArrayList<>();

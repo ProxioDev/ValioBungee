@@ -33,6 +33,7 @@ import java.util.logging.Level;
  *
  * @since 0.3.3
  */
+@SuppressWarnings({"u", "deprecation"})
 public class DataManager implements Listener {
     private final RedisBungee plugin;
     private final Cache<UUID, String> serverCache = createCache();
@@ -61,12 +62,9 @@ public class DataManager implements Listener {
             return player.getServer() != null ? player.getServer().getInfo().getName() : null;
 
         try {
-            return serverCache.get(uuid, new Callable<String>() {
-                @Override
-                public String call() throws Exception {
-                    try (Jedis tmpRsc = plugin.getPool().getResource()) {
-                        return Objects.requireNonNull(tmpRsc.hget("player:" + uuid, "server"), "user not found");
-                    }
+            return serverCache.get(uuid, () -> {
+                try (Jedis tmpRsc = plugin.getPool().getResource()) {
+                    return Objects.requireNonNull(tmpRsc.hget("player:" + uuid, "server"), "user not found");
                 }
             });
         } catch (ExecutionException | UncheckedExecutionException e) {
@@ -81,15 +79,12 @@ public class DataManager implements Listener {
         ProxiedPlayer player = plugin.getProxy().getPlayer(uuid);
 
         if (player != null)
-            return RedisBungee.getConfiguration().getServerId();
+            return plugin.getConfiguration().getServerId();
 
         try {
-            return proxyCache.get(uuid, new Callable<String>() {
-                @Override
-                public String call() throws Exception {
-                    try (Jedis tmpRsc = plugin.getPool().getResource()) {
-                        return Objects.requireNonNull(tmpRsc.hget("player:" + uuid, "proxy"), "user not found");
-                    }
+            return proxyCache.get(uuid, () -> {
+                try (Jedis tmpRsc = plugin.getPool().getResource()) {
+                    return Objects.requireNonNull(tmpRsc.hget("player:" + uuid, "proxy"), "user not found");
                 }
             });
         } catch (ExecutionException | UncheckedExecutionException e) {
@@ -107,15 +102,12 @@ public class DataManager implements Listener {
             return player.getAddress().getAddress();
 
         try {
-            return ipCache.get(uuid, new Callable<InetAddress>() {
-                @Override
-                public InetAddress call() throws Exception {
-                    try (Jedis tmpRsc = plugin.getPool().getResource()) {
-                        String result = tmpRsc.hget("player:" + uuid, "ip");
-                        if (result == null)
-                            throw new NullPointerException("user not found");
-                        return InetAddresses.forString(result);
-                    }
+            return ipCache.get(uuid, () -> {
+                try (Jedis tmpRsc = plugin.getPool().getResource()) {
+                    String result = tmpRsc.hget("player:" + uuid, "ip");
+                    if (result == null)
+                        throw new NullPointerException("user not found");
+                    return InetAddresses.forString(result);
                 }
             });
         } catch (ExecutionException | UncheckedExecutionException e) {
@@ -133,13 +125,10 @@ public class DataManager implements Listener {
             return 0;
 
         try {
-            return lastOnlineCache.get(uuid, new Callable<Long>() {
-                @Override
-                public Long call() throws Exception {
-                    try (Jedis tmpRsc = plugin.getPool().getResource()) {
-                        String result = tmpRsc.hget("player:" + uuid, "online");
-                        return result == null ? -1 : Long.valueOf(result);
-                    }
+            return lastOnlineCache.get(uuid, () -> {
+                try (Jedis tmpRsc = plugin.getPool().getResource()) {
+                    String result = tmpRsc.hget("player:" + uuid, "online");
+                    return result == null ? -1 : Long.parseLong(result);
                 }
             });
         } catch (ExecutionException e) {
@@ -177,7 +166,7 @@ public class DataManager implements Listener {
 
         String source = jsonObject.get("source").getAsString();
 
-        if (source.equals(RedisBungee.getConfiguration().getServerId()))
+        if (source.equals(plugin.getRedisBungeeAPI().getServerId()))
             return;
 
         DataManagerMessage.Action action = DataManagerMessage.Action.valueOf(jsonObject.get("action").getAsString());
@@ -189,35 +178,20 @@ public class DataManager implements Listener {
                 proxyCache.put(message1.getTarget(), message1.getSource());
                 lastOnlineCache.put(message1.getTarget(), (long) 0);
                 ipCache.put(message1.getTarget(), message1.getPayload().getAddress());
-                plugin.getProxy().getScheduler().runAsync(plugin, new Runnable() {
-                    @Override
-                    public void run() {
-                        plugin.getProxy().getPluginManager().callEvent(new PlayerJoinedNetworkEvent(message1.getTarget()));
-                    }
-                });
+                plugin.getProxy().getScheduler().runAsync(plugin, () -> plugin.getProxy().getPluginManager().callEvent(new PlayerJoinedNetworkEvent(message1.getTarget())));
                 break;
             case LEAVE:
                 final DataManagerMessage<LogoutPayload> message2 = RedisBungee.getGson().fromJson(jsonObject, new TypeToken<DataManagerMessage<LogoutPayload>>() {
                 }.getType());
                 invalidate(message2.getTarget());
                 lastOnlineCache.put(message2.getTarget(), message2.getPayload().getTimestamp());
-                plugin.getProxy().getScheduler().runAsync(plugin, new Runnable() {
-                    @Override
-                    public void run() {
-                        plugin.getProxy().getPluginManager().callEvent(new PlayerLeftNetworkEvent(message2.getTarget()));
-                    }
-                });
+                plugin.getProxy().getScheduler().runAsync(plugin, () -> plugin.getProxy().getPluginManager().callEvent(new PlayerLeftNetworkEvent(message2.getTarget())));
                 break;
             case SERVER_CHANGE:
-                final DataManagerMessage<ServerChangePayload> message3 = RedisBungee.getGson().fromJson(jsonObject, new TypeToken<DataManagerMessage<ServerChangePayload>>() {
+                final DataManagerMessage<ServerChangePayload> message3 = plugin.getGson().fromJson(jsonObject, new TypeToken<DataManagerMessage<ServerChangePayload>>() {
                 }.getType());
                 serverCache.put(message3.getTarget(), message3.getPayload().getServer());
-                plugin.getProxy().getScheduler().runAsync(plugin, new Runnable() {
-                    @Override
-                    public void run() {
-                        plugin.getProxy().getPluginManager().callEvent(new PlayerChangedServerNetworkEvent(message3.getTarget(), message3.getPayload().getOldServer(), message3.getPayload().getServer()));
-                    }
-                });
+                plugin.getProxy().getScheduler().runAsync(plugin, () -> plugin.getProxy().getPluginManager().callEvent(new PlayerChangedServerNetworkEvent(message3.getTarget(), message3.getPayload().getOldServer(), message3.getPayload().getServer())));
                 break;
         }
     }
