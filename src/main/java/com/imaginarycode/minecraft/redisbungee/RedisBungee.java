@@ -444,13 +444,11 @@ public final class RedisBungee extends Plugin {
             getLogger().info("Generated server id " + genId + " and saving it to config.");
             configuration.set("server-id", genId);
             ConfigurationProvider.getProvider(YamlConfiguration.class).save(configuration, new File(getDataFolder(), "config.yml"));
-        } else {
-            getLogger().info("Loaded server id " + serverId + '.');
         }
-
         if (configuration.getBoolean("use-random-id-string", false)) {
             serverId = configuration.getString("server-id") + "-" + randomUUID;
         }
+        getLogger().info("Loaded server id " + serverId + '.');
 
         if (redisServer != null && !redisServer.isEmpty()) {
             final String finalRedisPassword = redisPassword;
