@@ -15,7 +15,7 @@ This is currently deployed on [Govindas Limework!](https://Limework.net)
 
 ## Notice: about older versions of redis than redis 6.2
 
-As of now Version 0.6.4-SNAPSHOT is only supporting redis 6.2 and above!
+As of now Version 0.7.0-SNAPSHOT is only supporting redis 6.2 and above!
 
 ## Compiling
 
