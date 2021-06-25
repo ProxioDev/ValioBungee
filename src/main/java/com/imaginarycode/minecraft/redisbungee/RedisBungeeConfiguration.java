@@ -4,15 +4,15 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.net.InetAddresses;
 import lombok.Getter;
 import net.md_5.bungee.config.Configuration;
-import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.util.Pool;
 
 import java.net.InetAddress;
 import java.util.List;
-import java.util.UUID;
 
 public class RedisBungeeConfiguration {
     @Getter
-    private final JedisPool pool;
+    private final Pool<Jedis> pool;
     @Getter
     private final String serverId;
     @Getter
@@ -21,7 +21,7 @@ public class RedisBungeeConfiguration {
     private final List<InetAddress> exemptAddresses;
 
 
-    public RedisBungeeConfiguration(JedisPool pool, Configuration configuration, String randomUUID) {
+    public RedisBungeeConfiguration(Pool<Jedis> pool, Configuration configuration, String randomUUID) {
         this.pool = pool;
         if (configuration.getBoolean("use-random-id-string", false)) {
             this.serverId = configuration.getString("server-id") + "-" + randomUUID;

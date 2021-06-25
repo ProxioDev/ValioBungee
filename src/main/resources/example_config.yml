@@ -6,33 +6,49 @@
 redis-server: 127.0.0.1
 redis-port: 6379
 
-#################################################################
-# If enabled redis-server and redis-port will be ignored.
-use-sentinel: false
-
-sentinels:
-  - "127.0.0.1:6379"
-  - "127.0.0.1:6378"
-  - "127.0.0.1:6377"
-
-# Your master name
-master-name: mymaster
-
-##################################################################
-
-# OPTIONAL: If your Redis server or sentinel uses AUTH, set the password required.
+# OPTIONAL: If your Redis server or sentinel(s) uses AUTH, set the password required.
 # WARNING: Leaving your Redis server or sentinel exposed without a password is extremely unsafe
 # and could cause issues like data not being sync and etc.
 redis-password: ""
+
+# since redis can support ssl by version 6 you can use ssl in redis bungee too!
+# its' recommended to use redis with ssl to encrypt the traffic.
+useSSL: false
+
+#################################################################
+# REDIS SENTINEL
+# WARNING: THIS BETA AND NOT TESTED REPORT ANY ISSUES at issues pages in
+
+# If enabled config options redis-server, redis-port and redis-password will be ignored.
+use-sentinel: false
+
+# you can have many sentinels as you want as long its like this format
+#  sentinels:
+#    - "<ip-address>:<port>"
+#    - .....
+#
+sentinels:
+  - "127.0.0.1:26379"
+  - "127.0.0.1:26378"
+  - "127.0.0.1:26377"
+
+# enables ssl for sentinels connections.
+use-SSL-sentinels: false
+# to enable ssl for master and salve just set useSSL: true
+
+# Sentinel password
+sentinel-password: ""
+
+# Your master name
+master-name: mymaster
+master-password: ""
+##################################################################
 
 # Maximum connections that will be maintained to the Redis server.
 # The default is 10. This setting should be left as-is unless you have some wildly
 # inefficient plugins or a lot of players.
 max-redis-connections: 10
 
-# since redis can support ssl by version 6 you can use ssl in redis bungee too!
-# its' recommended to use redis with ssl to encrypt the traffic.
-useSSL: false
 
 # An identifier for this BungeeCord instance. Will randomly generate a UUID String if leaving it blank.
 server-id: "test1"

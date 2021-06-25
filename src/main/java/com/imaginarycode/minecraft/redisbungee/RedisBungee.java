@@ -24,6 +24,7 @@ import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
 import redis.clients.jedis.*;
 import redis.clients.jedis.exceptions.JedisConnectionException;
+import redis.clients.jedis.util.Pool;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -51,7 +52,7 @@ public final class RedisBungee extends Plugin {
     private PubSubListener psl = null;
 
     @Getter
-    private JedisPool pool;
+    private Pool<Jedis> pool;
 
     @Getter
     private UUIDTranslator uuidTranslator;
@@ -422,16 +423,36 @@ public final class RedisBungee extends Plugin {
         }
 
         final Configuration configuration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(file);
-
         final String redisServer = configuration.getString("redis-server", "localhost");
         final int redisPort = configuration.getInt("redis-port", 6379);
-        final boolean useSSL = configuration.getBoolean("useSSL");
+        final boolean useSSL = configuration.getBoolean("useSSL", false);
+
+        final boolean useSentinel = configuration.getBoolean("use-sentinel", false);
+
+        final Set<HostAndPort> sentinels = new HashSet<>();
+        configuration.getList("sentinels").forEach(obj -> {
+            String[] co = ((String)obj).split(":");
+            sentinels.add(new HostAndPort(co[0],Integer.parseInt(co[1])));
+        });
+        final boolean useSSLSentinels = configuration.getBoolean("use-SSL-sentinels", false);
+        String redisSentinelPassword = configuration.getString("sentinel-password", "none");
+        final String masterName = configuration.getString("master-name");
+        String redisMasterPassword = configuration.getString("master-password", "none");
+
+
         String redisPassword = configuration.getString("redis-password");
         String serverId = configuration.getString("server-id");
         final String randomUUID = UUID.randomUUID().toString();
 
         if (redisPassword != null && (redisPassword.isEmpty() || redisPassword.equals("none"))) {
             redisPassword = null;
+        }
+        if (redisMasterPassword != null && (redisMasterPassword.isEmpty() || redisMasterPassword.equals("none"))) {
+            redisMasterPassword = null;
+        }
+
+        if (redisSentinelPassword != null && (redisSentinelPassword.isEmpty() || redisSentinelPassword.equals("none"))) {
+            redisSentinelPassword = null;
         }
 
         // Configuration sanity checks.
@@ -452,12 +473,20 @@ public final class RedisBungee extends Plugin {
 
         if (redisServer != null && !redisServer.isEmpty()) {
             final String finalRedisPassword = redisPassword;
-            FutureTask<JedisPool> task = new FutureTask<>(new Callable<JedisPool>() {
+            String finalRedisMasterPassword = redisMasterPassword;
+            String finalRedisSentinelPassword = redisSentinelPassword;
+            FutureTask<Pool<Jedis>> task = new FutureTask<>(new Callable<Pool<Jedis>>() {
                 @Override
-                public JedisPool call() throws Exception {
+                public Pool<Jedis> call() throws Exception {
                     // Create the pool...
                     JedisPoolConfig config = new JedisPoolConfig();
-                    config.setMaxTotal(configuration.getInt("max-redis-connections", 8));
+                    config.setMaxTotal(configuration.getInt("max-redis-connections", 10));
+                    if (useSentinel) {
+                        JedisClientConfig masteClientConfig =  DefaultJedisClientConfig.builder().password(finalRedisMasterPassword).ssl(useSSL).build();
+                        JedisClientConfig sentinelClientConfig =  DefaultJedisClientConfig.builder().ssl(useSSLSentinels).password(finalRedisSentinelPassword).build();
+                        return new JedisSentinelPool(masterName, sentinels, config, masteClientConfig, sentinelClientConfig);
+                    }
+
                     return new JedisPool(config, redisServer, redisPort, 0, finalRedisPassword, useSSL);
                 }
             });
