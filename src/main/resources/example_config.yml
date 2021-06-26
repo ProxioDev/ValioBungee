@@ -18,6 +18,7 @@ useSSL: false
 #################################################################
 # REDIS SENTINEL
 # WARNING: THIS BETA AND NOT TESTED REPORT ANY ISSUES at issues pages in
+# https://github.com/limework/redisbungee
 
 # If enabled config options redis-server, redis-port and redis-password will be ignored.
 use-sentinel: false
