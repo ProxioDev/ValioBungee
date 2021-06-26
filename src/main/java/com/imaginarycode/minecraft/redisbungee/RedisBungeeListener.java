@@ -44,6 +44,9 @@ public class RedisBungeeListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onLogin(final LoginEvent event) {
+        if (event.isCancelled()){
+            return;
+        }
         event.registerIntent(plugin);
         plugin.getProxy().getScheduler().runAsync(plugin, new RedisCallable<Void>(plugin) {
             @Override
