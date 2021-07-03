@@ -29,6 +29,8 @@ To compile and installing to in your local Maven repository:
     mvnw clean install
     mvnw package
 
+If you have deb maven installed, you can use the `mvn` command instead.
+
 And use it in your pom file.
 
     <dependency>
