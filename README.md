@@ -19,16 +19,17 @@ As of now Version 0.6.4-SNAPSHOT is only supporting redis 6.2 and above!
 
 ## Compiling
 
-Now you can use maven without installing it using Maven wrapper [github?](https://github.com/takari/maven-wrapper) :)
+Now you can use Maven without installing it using [Maven wrappe](https://github.com/takari/maven-wrapper) :)
 
 RedisBungee is distributed as a [maven](https://maven.apache.org) project. 
 
 To compile and installing to in your local Maven repository:
 
-    git clone https://github.com/Limework/RedisBungee.git
-    cd RedisBungee
+    git clone https://github.com/Limework/RedisBungee.git .
     mvnw clean install
     mvnw package
+
+If you have deb maven installed, you can use the `mvn` command instead.
 
 And use it in your pom file.
 
