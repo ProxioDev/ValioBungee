@@ -8,11 +8,11 @@ The maintainer of RedisBungee has became inactive, so we have taken the developm
 RedisBungee uses [Redis](https://redis.io) to Synchronize data between [BungeeCord](https://github.com/SpigotMC/BungeeCord) proxies
 
 # 0.7 API BREAKING CHANGE:
-if you plan to use redis-bungee 0.7 the api has breaking change. 
+we do not advice using version (0.7) till we finish making it stable , 
+but if you plan to use redis-bungee 0.7 the api has breaking change. 
 JedisPool was changed to Pool<Jedis> to support Redis Sentinel
 If ANYONE found a good way to fix this api breaking change
 pull requests are welcomed :)
-
 ## Notice: about older versions of redis than redis 6.0
 
 As of now Version 0.6.4-SNAPSHOT is only supporting redis 6.0 and above!
