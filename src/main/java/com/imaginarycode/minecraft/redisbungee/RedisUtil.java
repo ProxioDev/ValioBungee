@@ -65,6 +65,6 @@ public class RedisUtil {
         }
         int major = Integer.parseInt(args[0]);
         int minor = Integer.parseInt(args[1]);
-        return major >= 6 && minor >= 2;
+        return major >= 6 && minor >= 0;
     }
 }

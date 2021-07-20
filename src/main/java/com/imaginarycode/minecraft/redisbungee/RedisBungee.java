@@ -248,7 +248,7 @@ public final class RedisBungee extends Plugin {
                         String version = s.split(":")[1];
                         getLogger().info(version + " <- redis version");
                         if (!(usingLua = RedisUtil.canUseLua(version))) {
-                            getLogger().warning("Your version of Redis (" + version + ") is not at least version 6.2 RedisBungee requires a newer version of Redis.");
+                            getLogger().warning("Your version of Redis (" + version + ") is not at least version 6.0 RedisBungee requires a newer version of Redis.");
                             throw new RuntimeException("Unsupported Redis version detected");
                         } else {
                             LuaManager manager = new LuaManager(this);
