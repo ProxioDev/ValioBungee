@@ -8,8 +8,8 @@ public class RedisUtilTest {
     @Test
     public void testRedisLuaCheck() {
         Assert.assertTrue(RedisUtil.canUseLua("6.2.0"));
-        Assert.assertFalse(RedisUtil.canUseLua("6.1.0"));
-        Assert.assertFalse(RedisUtil.canUseLua("6.0.0"));
+        Assert.assertTrue(RedisUtil.canUseLua("6.1.0"));
+        Assert.assertTrue(RedisUtil.canUseLua("6.0.0"));
         Assert.assertFalse(RedisUtil.canUseLua("2.6.0"));
         Assert.assertFalse(RedisUtil.canUseLua("2.2.12"));
         Assert.assertFalse(RedisUtil.canUseLua("1.2.4"));
