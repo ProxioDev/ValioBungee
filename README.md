@@ -9,7 +9,7 @@ RedisBungee uses [Redis](https://redis.io) to Synchronize data between [BungeeCo
 
 ## Notice: about older versions of redis than redis 6.0
 
-As of now Version 0.6.4-SNAPSHOT is only supporting redis 6.0 and above!
+As of now Version 0.6.4 is only supporting redis 6.0 and above!
 
 ## Compiling
 
@@ -53,9 +53,11 @@ And use it in your pom file.
 
 
 ## Javadocs
-Hosted on limework website. Version 0.6.0 (note: any version 0.6.* will not have API changes.)
+Hosted on limework website. Version 0.6.0 ~~(note: any version 0.6.* will not have API changes.)~~
 https://limework.net/JavaDocs/RedisBungee/
 
+Note: we might add more api into RedisBungeeApi Class but we wont remove the old ones to
+keep old plugins working....
 ## Configuration
 
 **REDISBUNGEE REQUIRES A REDIS SERVER**, preferably with reasonably low latency. The default [config](https://github.com/limework/RedisBungee/blob/master/src/main/resources/example_config.yml) is saved when the plugin first starts.
