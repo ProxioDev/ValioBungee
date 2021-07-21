@@ -224,13 +224,15 @@ public final class RedisBungee extends Plugin {
     public void onEnable() {
         ThreadFactory factory = ((ThreadPoolExecutor) getExecutorService()).getThreadFactory();
         getExecutorService().shutdownNow();
-        ScheduledExecutorService service;
+        ScheduledExecutorService service = Executors.newScheduledThreadPool(24, factory);
         try {
             Field field = Plugin.class.getDeclaredField("service");
             field.setAccessible(true);
-            field.set(this, service = Executors.newScheduledThreadPool(24, factory));
+            ExecutorService builtinService = (ExecutorService) field.get(this);
+            field.set(this, service);
+            builtinService.shutdownNow();
         } catch (Exception e) {
-            throw new RuntimeException("Can't replace BungeeCord thread pool with our own", e);
+            getLogger().log(Level.WARNING, "Can't replace BungeeCord thread pool with our own", e);
         }
         try {
             loadConfig();
