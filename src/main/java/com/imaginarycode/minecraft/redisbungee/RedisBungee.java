@@ -223,7 +223,6 @@ public final class RedisBungee extends Plugin {
     @Override
     public void onEnable() {
         ThreadFactory factory = ((ThreadPoolExecutor) getExecutorService()).getThreadFactory();
-        getExecutorService().shutdownNow();
         ScheduledExecutorService service = Executors.newScheduledThreadPool(24, factory);
         try {
             Field field = Plugin.class.getDeclaredField("service");
