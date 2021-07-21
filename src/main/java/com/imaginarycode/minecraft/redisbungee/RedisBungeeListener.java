@@ -74,13 +74,6 @@ public class RedisBungeeListener implements Listener {
                             return null;
                         }
                     }
-
-                    Pipeline pipeline = jedis.pipelined();
-                    plugin.getUuidTranslator().persistInfo(event.getConnection().getName(), event.getConnection().getUniqueId(), pipeline);
-                    RedisUtil.createPlayer(event.getConnection(), pipeline, false);
-                    // We're not publishing, the API says we only publish at PostLoginEvent time.
-                    pipeline.sync();
-
                     return null;
                 } finally {
                     event.completeIntent(plugin);
@@ -94,6 +87,15 @@ public class RedisBungeeListener implements Listener {
         plugin.getProxy().getScheduler().runAsync(plugin, new RedisCallable<Void>(plugin) {
             @Override
             protected Void call(Jedis jedis) {
+                // this code was moved out from login event due being async..
+                // and it can be canceld but it will show as false in redis-bungee
+                // which will register the player into the redis database.
+                Pipeline pipeline = jedis.pipelined();
+                plugin.getUuidTranslator().persistInfo(event.getPlayer().getName(), event.getPlayer().getUniqueId(), pipeline);
+                RedisUtil.createPlayer(event.getPlayer(), pipeline, false);
+                pipeline.sync();
+                // the end of moved code.
+
                 jedis.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage<>(
                         event.getPlayer().getUniqueId(), DataManager.DataManagerMessage.Action.JOIN,
                         new DataManager.LoginPayload(event.getPlayer().getAddress().getAddress()))));
