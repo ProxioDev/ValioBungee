@@ -88,7 +88,7 @@ public class RedisBungeeListener implements Listener {
             @Override
             protected Void call(Jedis jedis) {
                 // this code was moved out from login event due being async..
-                // and it can be canceld but it will show as false in redis-bungee
+                // and it can be cancelled but it will show as false in redis-bungee
                 // which will register the player into the redis database.
                 Pipeline pipeline = jedis.pipelined();
                 plugin.getUuidTranslator().persistInfo(event.getPlayer().getName(), event.getPlayer().getUniqueId(), pipeline);
