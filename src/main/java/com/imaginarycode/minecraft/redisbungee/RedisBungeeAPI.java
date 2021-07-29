@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import lombok.NonNull;
 import net.md_5.bungee.api.config.ServerInfo;
+import redis.clients.jedis.JedisPool;
 
 import java.net.InetAddress;
 import java.util.*;
@@ -19,9 +20,11 @@ import java.util.*;
 public class RedisBungeeAPI {
     private final RedisBungee plugin;
     private final List<String> reservedChannels;
+    private static RedisBungeeAPI redisBungeeApi;
 
     RedisBungeeAPI(RedisBungee plugin) {
         this.plugin = plugin;
+        this.redisBungeeApi = this;
         this.reservedChannels = ImmutableList.of(
                 "redisbungee-allservers",
                 "redisbungee-" + RedisBungee.getConfiguration().getServerId(),
@@ -296,4 +299,26 @@ public class RedisBungeeAPI {
     public final UUID getUuidFromName(@NonNull String name, boolean expensiveLookups) {
         return plugin.getUuidTranslator().getTranslatedUuid(name, expensiveLookups);
     }
+
+    /**
+     * This gets Redis Bungee Jedis pool
+     *
+     * @return {@link JedisPool}
+     * @since 0.6.5
+     */
+    public JedisPool getJedisPool() {
+        return this.plugin.getPool();
+    }
+
+    /**
+     * This alternative to {@link RedisBungee#getApi()}
+     * which now deprecated. but to maintain old plugins compatibility it won't be removed.
+     *
+     * @return the API instance.
+     * @since 0.6.5
+     */
+    public static RedisBungeeAPI getRedisBungeeApi() {
+        return redisBungeeApi;
+    }
+
 }

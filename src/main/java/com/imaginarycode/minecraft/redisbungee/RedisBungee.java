@@ -37,7 +37,13 @@ import static com.google.common.base.Preconditions.checkArgument;
 /**
  * The RedisBungee plugin.
  * <p>
- * The only function of interest is {@link #getApi()}, which exposes some functions in this class.
+ * The only function of interest is {@link #getApi()}, which deprecated now,
+ * Please check {@link RedisBungeeAPI#getRedisBungeeApi()},
+ *
+ * which exposes some functions in this class.
+ * but if you want old version support,
+ * then you can use old method {@link #getApi()}
+ *
  */
 public final class RedisBungee extends Plugin {
     @Getter
@@ -70,10 +76,12 @@ public final class RedisBungee extends Plugin {
             .build();
 
     /**
+     * @deprecated
      * Fetch the {@link RedisBungeeAPI} object created on plugin start.
      *
      * @return the {@link RedisBungeeAPI} object
      */
+    @Deprecated
     public static RedisBungeeAPI getApi() {
         return api;
     }
