@@ -76,10 +76,11 @@ public final class RedisBungee extends Plugin {
             .build();
 
     /**
-     * @deprecated
      * Fetch the {@link RedisBungeeAPI} object created on plugin start.
      *
-     * @return the {@link RedisBungeeAPI} object
+     * @deprecated Please use {@link RedisBungeeAPI#getRedisBungeeApi()}
+     *
+     * @return the {@link RedisBungeeAPI} object instance.
      */
     @Deprecated
     public static RedisBungeeAPI getApi() {
