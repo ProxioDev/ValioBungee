@@ -24,7 +24,7 @@ public class RedisBungeeAPI {
 
     RedisBungeeAPI(RedisBungee plugin) {
         this.plugin = plugin;
-        this.redisBungeeApi = this;
+        redisBungeeApi = this;
         this.reservedChannels = ImmutableList.of(
                 "redisbungee-allservers",
                 "redisbungee-" + RedisBungee.getConfiguration().getServerId(),
