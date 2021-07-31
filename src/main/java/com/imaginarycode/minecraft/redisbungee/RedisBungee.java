@@ -239,8 +239,9 @@ public final class RedisBungee extends Plugin {
             ExecutorService builtinService = (ExecutorService) field.get(this);
             field.set(this, service);
             builtinService.shutdownNow();
-        } catch (Exception e) {
-            getLogger().log(Level.WARNING, "Can't replace BungeeCord thread pool with our own", e);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            getLogger().log(Level.WARNING, "Can't replace BungeeCord thread pool with our own");
+            getLogger().log(Level.INFO, "skipping replacement.....");
         }
         try {
             loadConfig();
