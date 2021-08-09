@@ -39,7 +39,7 @@ public class RedisUtil {
 
     public static void cleanUpPlayer(String player, Jedis rsc) {
         rsc.srem("proxy:" + RedisBungee.getApi().getServerId() + ":usersOnline", player);
-        rsc.hdel("player:" + player, "server",  "ip", "proxy");
+        rsc.hdel("player:" + player, "server", "ip", "proxy");
         long timestamp = System.currentTimeMillis();
         rsc.hset("player:" + player, "online", String.valueOf(timestamp));
         rsc.publish("redisbungee-data", RedisBungee.getGson().toJson(new DataManager.DataManagerMessage<>(
@@ -57,7 +57,7 @@ public class RedisUtil {
                 new DataManager.LogoutPayload(timestamp))));
     }
 
-    public static boolean canUseLua(String redisVersion) {
+    public static boolean isRedisVersionRight(String redisVersion) {
         // Need to use >=6.2 to use Lua optimizations.
         String[] args = redisVersion.split("\\.");
         if (args.length < 2) {
@@ -66,5 +66,11 @@ public class RedisUtil {
         int major = Integer.parseInt(args[0]);
         int minor = Integer.parseInt(args[1]);
         return major >= 6 && minor >= 0;
+    }
+
+    // Ham1255: i am keeping this if some plugin uses this *IF*
+    @Deprecated
+    public static boolean canUseLua(String redisVersion) {
+        return isRedisVersionRight(redisVersion);
     }
 }

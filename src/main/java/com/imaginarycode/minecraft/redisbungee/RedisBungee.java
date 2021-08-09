@@ -66,7 +66,6 @@ public final class RedisBungee extends Plugin {
     private final AtomicInteger globalPlayerCount = new AtomicInteger();
     private Future<?> integrityCheck;
     private Future<?> heartbeatTask;
-    private boolean usingLua;
     private LuaManager.Script serverToPlayersScript;
     private LuaManager.Script getPlayerCountScript;
 
@@ -258,7 +257,7 @@ public final class RedisBungee extends Plugin {
                     if (s.startsWith("redis_version:")) {
                         String version = s.split(":")[1];
                         getLogger().info(version + " <- redis version");
-                        if (!(usingLua = RedisUtil.canUseLua(version))) {
+                        if (!RedisUtil.isRedisVersionRight(version)) {
                             getLogger().warning("Your version of Redis (" + version + ") is not at least version 6.0 RedisBungee requires a newer version of Redis.");
                             throw new RuntimeException("Unsupported Redis version detected");
                         } else {
