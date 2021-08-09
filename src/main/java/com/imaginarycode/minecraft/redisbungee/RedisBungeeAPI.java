@@ -17,6 +17,7 @@ import java.util.*;
  * @author tuxed
  * @since 0.2.3
  */
+@SuppressWarnings("unused")
 public class RedisBungeeAPI {
     private final RedisBungee plugin;
     private final List<String> reservedChannels;
