@@ -1,4 +1,4 @@
-# RedisMC fork of RedisBungee
+# Proxio fork of RedisBungee
 ### was called the 'limework fork'
 [![RedisBungee Build](https://github.com/Limework/RedisBungee/actions/workflows/maven.yml/badge.svg)](https://github.com/Limework/RedisBungee/actions/workflows/maven.yml) [![](https://jitpack.io/v/limework/redisbungee.svg)](https://jitpack.io/#limework/redisbungee)
 
