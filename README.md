@@ -49,7 +49,8 @@ And use it in your pom file.
     <dependency>
 	    <groupId>com.github.limework</groupId>
 	    <artifactId>redisbungee</artifactId>
-	    <version>0.6.4</version>
+	    <version>0.6.5</version>
+        <scope>provided</scope>
 	</dependency>
 
 
