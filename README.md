@@ -1,5 +1,5 @@
 # Proxio fork of RedisBungee
-### was called the 'limework fork'
+
 [![RedisBungee Build](https://github.com/Limework/RedisBungee/actions/workflows/maven.yml/badge.svg)](https://github.com/Limework/RedisBungee/actions/workflows/maven.yml) [![](https://jitpack.io/v/limework/redisbungee.svg)](https://jitpack.io/#limework/redisbungee)
 
 Spigot link: [click](https://www.spigotmc.org/resources/redisbungee.87700/)
@@ -8,9 +8,13 @@ The maintainer of RedisBungee has became inactive, so we have taken the developm
 
 RedisBungee uses [Redis](https://redis.io) to Synchronize data between [BungeeCord](https://github.com/SpigotMC/BungeeCord) proxies
 
-## Notice: about older versions of redis than redis 6.0
+## Notice 1: about older versions of redis than redis 6.0
 
 As of now Version 0.6.4 is only supporting redis 6.0 and above!
+
+## Notice 2: users on git.limework.net
+
+please create the issues on github as its main project source.
 
 ## Compiling
 
