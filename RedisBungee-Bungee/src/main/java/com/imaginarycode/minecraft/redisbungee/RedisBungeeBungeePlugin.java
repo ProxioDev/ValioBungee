@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.io.ByteStreams;
 import com.google.gson.Gson;
+import com.imaginarycode.minecraft.redisbungee.events.bungee.*;
 import com.imaginarycode.minecraft.redisbungee.internal.*;
 import com.imaginarycode.minecraft.redisbungee.internal.util.IOUtil;
 import com.imaginarycode.minecraft.redisbungee.internal.util.LuaManager;
@@ -171,32 +172,74 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
 
     @Override
     public Set<UUID> getPlayersOnProxy(String proxyId) {
-        return null;
+        checkArgument(getServerIds().contains(proxyId), proxyId + " is not a valid proxy ID");
+        try (Jedis jedis = requestJedis()) {
+            Set<String> users = jedis.smembers("proxy:" + proxyId + ":usersOnline");
+            ImmutableSet.Builder<UUID> builder = ImmutableSet.builder();
+            for (String user : users) {
+                builder.add(UUID.fromString(user));
+            }
+            return builder.build();
+        }
     }
 
     @Override
     public void sendProxyCommand(String serverId, String command) {
-
+        checkArgument(getServerIds().contains(serverId) || serverId.equals("allservers"), "proxyId is invalid");
+        sendChannelMessage("redisbungee-" + serverId, command);
     }
 
     @Override
     public List<String> getServerIds() {
-        return null;
+        return serverIds;
     }
 
     @Override
     public List<String> getCurrentServerIds(boolean nag, boolean lagged) {
-        return null;
+        try (Jedis jedis = requestJedis()) {
+            long time = getRedisTime(jedis.time());
+            int nagTime = 0;
+            if (nag) {
+                nagTime = nagAboutServers.decrementAndGet();
+                if (nagTime <= 0) {
+                    nagAboutServers.set(10);
+                }
+            }
+            ImmutableList.Builder<String> servers = ImmutableList.builder();
+            Map<String, String> heartbeats = jedis.hgetAll("heartbeats");
+            for (Map.Entry<String, String> entry : heartbeats.entrySet()) {
+                try {
+                    long stamp = Long.parseLong(entry.getValue());
+                    if (lagged ? time >= stamp + 30 : time <= stamp + 30)
+                        servers.add(entry.getKey());
+                    else if (nag && nagTime <= 0) {
+                        getLogger().warning(entry.getKey() + " is " + (time - stamp) + " seconds behind! (Time not synchronized or server down?) and was removed from heartbeat.");
+                        jedis.hdel("heartbeats", entry.getKey());
+                    }
+                } catch (NumberFormatException ignored) {
+                }
+            }
+            return servers.build();
+        } catch (JedisConnectionException e) {
+            getLogger().log(Level.SEVERE, "Unable to fetch server IDs", e);
+            return Collections.singletonList(configuration.getServerId());
+        }
     }
 
     @Override
     public PubSubListener getPubSubListener() {
-        return null;
+        return this.psl;
     }
 
     @Override
     public void sendChannelMessage(String channel, String message) {
-
+        try (Jedis jedis = requestJedis()) {
+            jedis.publish(channel, message);
+        } catch (JedisConnectionException e) {
+            // Redis server has disappeared!
+            getLogger().log(Level.SEVERE, "Unable to get connection from pool - did your Redis server go away?", e);
+            throw new RuntimeException("Unable to publish channel message", e);
+        }
     }
 
     @Override
@@ -558,7 +601,6 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
         }
     }
 
-
     @Override
     public void onEnable() {
         enable();
@@ -567,5 +609,25 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
     @Override
     public void onDisable() {
         disable();
+    }
+
+    @Override
+    public Class<?> getPubSubEventClass() {
+        return PubSubMessageEvent.class;
+    }
+
+    @Override
+    public Class<?> getNetworkJoinEventClass() {
+        return PlayerJoinedNetworkEvent.class;
+    }
+
+    @Override
+    public Class<?> getServerChangeEventClass() {
+        return PlayerChangedServerNetworkEvent.class;
+    }
+
+    @Override
+    public Class<?> getNetworkQuitEventClass() {
+        return PlayerJoinedNetworkEvent.class;
     }
 }
