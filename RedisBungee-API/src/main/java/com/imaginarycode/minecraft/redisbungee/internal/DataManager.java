@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @since 0.3.3
  */
-public abstract class DataManager<P, PS, PL, PD> {
+public abstract class DataManager<P, PL, PD, PS> {
     private final RedisBungeePlugin<P> plugin;
     private final Cache<UUID, String> serverCache = createCache();
     private final Cache<UUID, String> proxyCache = createCache();
@@ -141,16 +141,15 @@ public abstract class DataManager<P, PS, PL, PD> {
         }
     }
 
-    private void invalidate(UUID uuid) {
+    protected void invalidate(UUID uuid) {
         ipCache.invalidate(uuid);
         lastOnlineCache.invalidate(uuid);
         serverCache.invalidate(uuid);
         proxyCache.invalidate(uuid);
     }
-
-
+    // Invalidate all entries related to this player, since they now lie. (call invalidate(uuid))
     public abstract void onPostLogin(PL event);
-
+    // Invalidate all entries related to this player, since they now lie. (call invalidate(uuid))
     public abstract void onPlayerDisconnect(PD event);
 
     public abstract void onPubSubMessage(PS event);
@@ -285,7 +284,7 @@ public abstract class DataManager<P, PS, PL, PD> {
         private final String server;
         private final String oldServer;
 
-        ServerChangePayload(String server, String oldServer) {
+        public ServerChangePayload(String server, String oldServer) {
             this.server = server;
             this.oldServer = oldServer;
         }
