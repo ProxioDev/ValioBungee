@@ -148,9 +148,9 @@ public abstract class DataManager<P, PL, PD, PS> {
         proxyCache.invalidate(uuid);
     }
 
-
+    // Invalidate all entries related to this player, since they now lie. (call invalidate(uuid))
     public abstract void onPostLogin(PL event);
-
+    // Invalidate all entries related to this player, since they now lie. (call invalidate(uuid))
     public abstract void onPlayerDisconnect(PD event);
 
     public abstract void onPubSubMessage(PS event);
