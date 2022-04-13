@@ -1,0 +1,35 @@
+# RedisBungee configuration file.
+# PLEASE READ THE WIKI: https://github.com/Limework/RedisBungee/wiki
+
+# The Redis server you use.
+# Get Redis from http://redis.io/
+redis-server: 127.0.0.1
+redis-port: 6379
+# OPTIONAL: If your Redis server uses AUTH, set the password required.
+redis-password: ""
+# Maximum connections that will be maintained to the Redis server.
+# The default is 10. This setting should be left as-is unless you have some wildly
+# inefficient plugins or a lot of players.
+max-redis-connections: 10
+
+# since redis can support ssl by version 6 you can use ssl in redis bungee too!
+# but there is more configuration needed to work see https://github.com/ProxioDev/RedisBungee/issues/18
+useSSL: false
+
+# An identifier for this BungeeCord instance. Will randomly generate if leaving it blank.
+server-id: "test1"
+
+# Whether or not RedisBungee should install its version of regular BungeeCord commands.
+# Often, the RedisBungee commands are desired, but in some cases someone may wish to
+# override the commands using another plugin.
+#
+# If you are just denying access to the commands, RedisBungee uses the default BungeeCord
+# permissions - just deny them and access will be denied.
+#
+# Please note that with build 787+, most commands overridden by RedisBungee were moved to
+# modules, and these must be disabled or overridden yourself.
+register-bungee-commands: true
+
+# A list of IP addresses for which RedisBungee will not modify the response for, useful for automatic
+# restart scripts.
+exempt-ip-addresses: []
