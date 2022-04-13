@@ -171,11 +171,11 @@ public abstract class DataManager<P, PL, PD, PS> {
 
         switch (action) {
             case JOIN:
-                final DataManagerMessage message1 = gson.fromJson(jsonObject, new TypeToken<DataManagerMessage>() {
+                final DataManagerMessage<LoginPayload> message1 = gson.fromJson(jsonObject, new TypeToken<DataManagerMessage<LoginPayload>>() {
                 }.getType());
                 proxyCache.put(message1.getTarget(), message1.getSource());
                 lastOnlineCache.put(message1.getTarget(), (long) 0);
-                ipCache.put(message1.getTarget(), ((LoginPayload) message1.getPayload()).getAddress());
+                ipCache.put(message1.getTarget(), message1.getPayload().getAddress());
                 plugin.executeAsync(new Runnable() {
                     @Override
                     public void run() {
@@ -191,10 +191,10 @@ public abstract class DataManager<P, PL, PD, PS> {
                 });
                 break;
             case LEAVE:
-                final DataManagerMessage message2 = gson.fromJson(jsonObject, new TypeToken<DataManagerMessage>() {
+                final DataManagerMessage<LogoutPayload> message2 = gson.fromJson(jsonObject, new TypeToken<DataManagerMessage<LogoutPayload>>() {
                 }.getType());
                 invalidate(message2.getTarget());
-                lastOnlineCache.put(message2.getTarget(), ((LogoutPayload) message2.getPayload()).getTimestamp());
+                lastOnlineCache.put(message2.getTarget(), message2.getPayload().getTimestamp());
                 plugin.executeAsync(new Runnable() {
                     @Override
                     public void run() {
@@ -209,9 +209,9 @@ public abstract class DataManager<P, PL, PD, PS> {
                 });
                 break;
             case SERVER_CHANGE:
-                final DataManagerMessage message3 = gson.fromJson(jsonObject, new TypeToken<DataManagerMessage>() {
+                final DataManagerMessage<ServerChangePayload> message3 = gson.fromJson(jsonObject, new TypeToken<DataManagerMessage<ServerChangePayload>>() {
                 }.getType());
-                serverCache.put(message3.getTarget(), ((ServerChangePayload) message3.getPayload()).getServer());
+                serverCache.put(message3.getTarget(), message3.getPayload().getServer());
                 plugin.executeAsync(new Runnable() {
                     @Override
                     public void run() {
@@ -228,13 +228,13 @@ public abstract class DataManager<P, PL, PD, PS> {
         }
     }
 
-    public static class DataManagerMessage {
+    public static class DataManagerMessage<T> {
         private final UUID target;
         private final String source;
         private final Action action; // for future use!
-        private final Payload payload;
+        private final T payload;
 
-        public DataManagerMessage(UUID target, String source, Action action, Payload payload) {
+        public DataManagerMessage(UUID target, String source, Action action, T payload) {
             this.target = target;
             this.source = source;
             this.action = action;
@@ -253,7 +253,7 @@ public abstract class DataManager<P, PL, PD, PS> {
             return action;
         }
 
-        public Payload getPayload() {
+        public T getPayload() {
             return payload;
         }
 
@@ -264,11 +264,7 @@ public abstract class DataManager<P, PL, PD, PS> {
         }
     }
 
-    public static abstract class Payload {
-    }
-
-
-    public static class LoginPayload extends Payload {
+    public static class LoginPayload {
         private final InetAddress address;
 
         public LoginPayload(InetAddress address) {
@@ -280,7 +276,7 @@ public abstract class DataManager<P, PL, PD, PS> {
         }
     }
 
-    public static class ServerChangePayload extends Payload {
+    public static class ServerChangePayload{
         private final String server;
         private final String oldServer;
 
@@ -299,7 +295,7 @@ public abstract class DataManager<P, PL, PD, PS> {
     }
 
 
-    public static class LogoutPayload extends Payload {
+    public static class LogoutPayload {
         private final long timestamp;
 
         public LogoutPayload(long timestamp) {

@@ -17,7 +17,7 @@ public class RedisUtil {
         rsc.hdel("player:" + player, "server", "ip", "proxy");
         long timestamp = System.currentTimeMillis();
         rsc.hset("player:" + player, "online", String.valueOf(timestamp));
-        rsc.publish("redisbungee-data", gson.toJson(new DataManager.DataManagerMessage(
+        rsc.publish("redisbungee-data", gson.toJson(new DataManager.DataManagerMessage<>(
                 UUID.fromString(player), RedisBungeeAPI.getRedisBungeeApi().getServerId(), DataManager.DataManagerMessage.Action.LEAVE,
                 new DataManager.LogoutPayload(timestamp))));
     }
@@ -27,7 +27,7 @@ public class RedisUtil {
         rsc.hdel("player:" + player, "server", "ip", "proxy");
         long timestamp = System.currentTimeMillis();
         rsc.hset("player:" + player, "online", String.valueOf(timestamp));
-        rsc.publish("redisbungee-data", gson.toJson(new DataManager.DataManagerMessage(
+        rsc.publish("redisbungee-data", gson.toJson(new DataManager.DataManagerMessage<>(
                 UUID.fromString(player), RedisBungeeAPI.getRedisBungeeApi().getServerId(), DataManager.DataManagerMessage.Action.LEAVE,
                 new DataManager.LogoutPayload(timestamp))));
     }

@@ -29,7 +29,7 @@ public class RBUtils {
         pipeline.hmset("player:" + connection.getUniqueId().toString(), playerData);
 
         if (fireEvent) {
-            pipeline.publish("redisbungee-data", gson.toJson(new DataManager.DataManagerMessage(
+            pipeline.publish("redisbungee-data", gson.toJson(new DataManager.DataManagerMessage<>(
                     connection.getUniqueId(), RedisBungeeAPI.getRedisBungeeApi().getServerId(), DataManager.DataManagerMessage.Action.JOIN,
                     new DataManager.LoginPayload(connection.getAddress().getAddress()))));
         }
