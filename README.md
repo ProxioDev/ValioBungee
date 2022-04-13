@@ -1,20 +1,21 @@
-# Proxio fork of RedisBungee
+# RedisBungee By Limework
 
-[![RedisBungee Build](https://github.com/Limework/RedisBungee/actions/workflows/maven.yml/badge.svg)](https://github.com/Limework/RedisBungee/actions/workflows/maven.yml) [![](https://jitpack.io/v/limework/redisbungee.svg)](https://jitpack.io/#limework/redisbungee)
+[![RedisBungee Build](https://github.com/proxiodev/RedisBungee/actions/workflows/maven.yml/badge.svg)](https://github.com/Limework/RedisBungee/actions/workflows/maven.yml) [![](https://jitpack.io/v/limework/redisbungee.svg)](https://jitpack.io/#limework/redisbungee)
 
 Spigot link: [click](https://www.spigotmc.org/resources/redisbungee.87700/)
 
-The maintainer of RedisBungee has became inactive, so we have taken the development of the plugin.
+The main project of RedisBungee is no longer maintained, so we have forked the plugin.
 
 RedisBungee uses [Redis](https://redis.io) to Synchronize data between [BungeeCord](https://github.com/SpigotMC/BungeeCord) proxies
 
 ## Notice 1: about older versions of redis than redis 6.0
 
-As of now Version 0.6.4 is only supporting redis 6.0 and above!
+any versions of redis-bungee 0.6.4 or above only supports 6.0
+Do not Open issues regarding it.
 
 ## Notice 2: users on git.limework.net
 
-please create the issues on github as its main project source.
+please create the issues on GitHub as its main project source.
 
 ## Compiling
 
@@ -25,17 +26,15 @@ RedisBungee is distributed as a [maven](https://maven.apache.org) project.
 To compile and installing to in your local Maven repository:
 
     git clone https://github.com/Limework/RedisBungee.git .
-    mvnw clean install
-    mvnw package
-
-If you have deb maven installed, you can use the `mvn` command instead.
+    mvn clean install
+    mvn package
 
 And use it in your pom file.
 
     <dependency>
       <groupId>com.imaginarycode.minecraft</groupId>
       <artifactId>RedisBungee</artifactId>
-      <version>0.6.5-SNAPSHOT</version>
+      <version>VERSION</version>
       <scope>provided</scope>
     </dependency>
 
@@ -53,26 +52,27 @@ And use it in your pom file.
     <dependency>
 	    <groupId>com.github.limework</groupId>
 	    <artifactId>redisbungee</artifactId>
-	    <version>0.6.5</version>
+	    <version>VERSION</version>
         <scope>provided</scope>
 	</dependency>
 
 
 ## Javadocs
-Hosted on limework website. Version 0.6.0 ~~(note: any version 0.6.* will not have API changes.)~~
-https://limework.net/JavaDocs/RedisBungee/
+~~Hosted on limework website. Version 0.6.0~~ 
+~~https://limework.net/JavaDocs/RedisBungee/~~
 
-Note: we might add more api into RedisBungeeApi Class but we wont remove the old ones to
-keep old plugins working....
+Check out our Java docs on github pages
+https://proxiodev.github.io/RedisBungee-JavaDocs/0.6.5-SNAPSHOT
+
 ## Configuration
 
-**REDISBUNGEE REQUIRES A REDIS SERVER**, preferably with reasonably low latency. The default [config](https://github.com/limework/RedisBungee/blob/master/src/main/resources/example_config.yml) is saved when the plugin first starts.
+**REDISBUNGEE REQUIRES A REDIS SERVER**, preferably with reasonably low latency. The default [config](https://github.com/proxiodev/RedisBungee/blob/master/src/main/resources/example_config.yml) is saved when the plugin first starts.
 
 ## License!
 
 This project is distributed under Eclipse Public License 1.0
 
-You can find it [here](https://github.com/Limework/RedisBungee/blob/master/LICENSE)
+You can find it [here](https://github.com/proxiodev/RedisBungee/blob/master/LICENSE)
 
 You can find the original RedisBungee by minecrafter [here](https://github.com/minecrafter/RedisBungee) or spigot page [here](https://www.spigotmc.org/resources/redisbungee.13494/)
 
