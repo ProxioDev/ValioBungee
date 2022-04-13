@@ -18,18 +18,17 @@ Do not Open issues regarding it.
 please create the issues on GitHub as its main project source.
 
 ## Compiling
-
-Now you can use Maven without installing it using [Maven wrappe](https://github.com/takari/maven-wrapper) :)
-
 RedisBungee is distributed as a [maven](https://maven.apache.org) project. 
 
-To compile and installing to in your local Maven repository:
+To compile the plugin:
 
     git clone https://github.com/Limework/RedisBungee.git .
-    mvn clean install
-    mvn package
+    mvn clean package
+    mvn clean install # to install it in your maven local repo
 
-And use it in your pom file.
+then you should find it in target folder.
+
+if you want to use it on your project considering you have installed it in your local repo
 
     <dependency>
       <groupId>com.imaginarycode.minecraft</groupId>
@@ -37,24 +36,6 @@ And use it in your pom file.
       <version>VERSION</version>
       <scope>provided</scope>
     </dependency>
-
-Or if you want to use the jitpack maven server
-
-    <repositories>
-		<repository>
-		    <id>jitpack.io</id>
-		    <url>https://jitpack.io</url>
-		</repository>
-	</repositories>
-    
-And use it in your pom file.
-    
-    <dependency>
-	    <groupId>com.github.limework</groupId>
-	    <artifactId>redisbungee</artifactId>
-	    <version>VERSION</version>
-        <scope>provided</scope>
-	</dependency>
 
 
 ## Javadocs
