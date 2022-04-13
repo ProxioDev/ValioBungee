@@ -254,7 +254,7 @@ public class RedisBungeeListener extends AbstractRedisBungeeListener<LoginEvent,
             if (message.startsWith("/"))
                 message = message.substring(1);
             plugin.logInfo("Invoking command via PubSub: /" + message);
-            plugin.executeProxyCommand(message);
+            plugin.sendProxyCommand(message);
         }
     }
 }

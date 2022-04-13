@@ -147,9 +147,10 @@ public abstract class DataManager<P, PL, PD, PS> {
         serverCache.invalidate(uuid);
         proxyCache.invalidate(uuid);
     }
-    // Invalidate all entries related to this player, since they now lie. (call invalidate(uuid))
+
+
     public abstract void onPostLogin(PL event);
-    // Invalidate all entries related to this player, since they now lie. (call invalidate(uuid))
+
     public abstract void onPlayerDisconnect(PD event);
 
     public abstract void onPubSubMessage(PS event);
@@ -226,7 +227,6 @@ public abstract class DataManager<P, PL, PD, PS> {
                 break;
         }
     }
-
 
     public static class DataManagerMessage {
         private final UUID target;

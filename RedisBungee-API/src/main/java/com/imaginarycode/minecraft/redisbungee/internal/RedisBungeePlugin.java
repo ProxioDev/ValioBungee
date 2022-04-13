@@ -17,19 +17,29 @@ import java.util.concurrent.TimeUnit;
 
 public interface RedisBungeePlugin<P> {
 
-    void enable();
+    default void enable() {
 
-    void disable();
+    }
+
+    default void disable() {
+
+    }
 
     RedisBungeeConfiguration getConfiguration();
 
     int getCount();
+
+    int getCurrentCount();
+
+    Set<String> getLocalPlayersAsUuidStrings();
 
     DataManager<P, ?, ?, ?> getDataManager();
 
     Set<UUID> getPlayers();
 
     Jedis requestJedis();
+
+    boolean isJedisAvailable();
 
     RedisBungeeAPI getApi();
 
@@ -43,15 +53,17 @@ public interface RedisBungeePlugin<P> {
 
     List<String> getServerIds();
 
+    List<String > getCurrentServerIds(boolean nag, boolean lagged);
+
     PubSubListener getPubSubListener();
 
     void sendChannelMessage(String channel, String message);
 
     void executeAsync(Runnable runnable);
 
-    void executeAsyncAfter(Runnable runnable, TimeUnit timeUnit, int seconds);
+    void executeAsyncAfter(Runnable runnable, TimeUnit timeUnit, int time);
 
-    void callEvent(Object object);
+    void callEvent(Object event);
 
     boolean isOnlineMode();
 
@@ -60,8 +72,6 @@ public interface RedisBungeePlugin<P> {
     void logWarn(String msg);
 
     void logFatal(String msg);
-
-    boolean isPlayerServerNull(P player);
 
     P getPlayer(UUID uuid);
 
@@ -77,7 +87,7 @@ public interface RedisBungeePlugin<P> {
 
     InetAddress getPlayerIp(P player);
 
-    void executeProxyCommand(String cmd);
+    void sendProxyCommand(String cmd);
 
     default Class<?> getPubSubEventClass() {
         return PubSubMessageEvent.class;
@@ -94,5 +104,9 @@ public interface RedisBungeePlugin<P> {
     default Class<?> getNetworkQuitEventClass() {
         return PlayerLeftNetworkEvent.class;
     }
+
+    long getRedisTime(List<String> timeRes);
+
+    void loadConfig() throws Exception;
 
 }
