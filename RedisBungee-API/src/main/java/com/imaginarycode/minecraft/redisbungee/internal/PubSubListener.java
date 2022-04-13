@@ -11,7 +11,7 @@ import java.util.logging.Level;
 
 public class PubSubListener implements Runnable {
     private JedisPubSubHandler jpsh;
-    private Set<String> addedChannels = new HashSet<String>();
+    private final Set<String> addedChannels = new HashSet<String>();
 
     private final RedisBungeePlugin<?> plugin;
 
@@ -24,6 +24,7 @@ public class PubSubListener implements Runnable {
         boolean broken = false;
         try (Jedis rsc = plugin.requestJedis()) {
             try {
+
                 jpsh = new JedisPubSubHandler(plugin);
                 addedChannels.add("redisbungee-" + plugin.getConfiguration().getServerId());
                 addedChannels.add("redisbungee-allservers");

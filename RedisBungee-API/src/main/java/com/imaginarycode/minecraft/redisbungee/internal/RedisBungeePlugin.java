@@ -2,6 +2,10 @@ package com.imaginarycode.minecraft.redisbungee.internal;
 
 import com.google.common.collect.Multimap;
 import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
+import com.imaginarycode.minecraft.redisbungee.events.PlayerChangedServerNetworkEvent;
+import com.imaginarycode.minecraft.redisbungee.events.PlayerJoinedNetworkEvent;
+import com.imaginarycode.minecraft.redisbungee.events.PlayerLeftNetworkEvent;
+import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import com.imaginarycode.minecraft.redisbungee.internal.util.uuid.UUIDTranslator;
 import redis.clients.jedis.Jedis;
 
@@ -75,5 +79,20 @@ public interface RedisBungeePlugin<P> {
 
     void executeProxyCommand(String cmd);
 
+    default Class<?> getPubSubEventClass() {
+        return PubSubMessageEvent.class;
+    }
+
+    default Class<?> getNetworkJoinEventClass() {
+        return PlayerJoinedNetworkEvent.class;
+    }
+
+    default Class<?> getServerChangeEventClass() {
+        return PlayerChangedServerNetworkEvent.class;
+    }
+
+    default Class<?> getNetworkQuitEventClass() {
+        return PlayerLeftNetworkEvent.class;
+    }
 
 }

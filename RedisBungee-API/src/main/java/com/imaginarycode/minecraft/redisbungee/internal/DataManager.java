@@ -11,6 +11,7 @@ import com.google.gson.JsonParser;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import redis.clients.jedis.Jedis;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.util.Objects;
 import java.util.UUID;
@@ -113,7 +114,7 @@ public abstract class DataManager<P, PS, PL, PD> {
         } catch (ExecutionException | UncheckedExecutionException e) {
             if (e.getCause() instanceof NullPointerException && e.getCause().getMessage().equals("user not found"))
                 return null; // HACK
-            plugin.logFatal( "Unable to get IP");
+            plugin.logFatal("Unable to get IP");
             throw new RuntimeException("Unable to get IP for " + uuid, e);
         }
     }
@@ -148,13 +149,9 @@ public abstract class DataManager<P, PS, PL, PD> {
     }
 
 
-    public void onPostLogin(PL event) {
+    public abstract void onPostLogin(PL event);
 
-    }
-
-    public void onPlayerDisconnect(PD event) {
-
-    }
+    public abstract void onPlayerDisconnect(PD event);
 
     public abstract void onPubSubMessage(PS event);
 
@@ -178,11 +175,18 @@ public abstract class DataManager<P, PS, PL, PD> {
                 }.getType());
                 proxyCache.put(message1.getTarget(), message1.getSource());
                 lastOnlineCache.put(message1.getTarget(), (long) 0);
-                ipCache.put(message1.getTarget(), ((LoginPayload)message1.getPayload()).getAddress());
+                ipCache.put(message1.getTarget(), ((LoginPayload) message1.getPayload()).getAddress());
                 plugin.executeAsync(new Runnable() {
                     @Override
                     public void run() {
-                        //plugin.getProxy().getPluginManager().callEvent(new PlayerJoinedNetworkEvent(message1.getTarget()));
+                        Object event;
+                        try {
+                            event = plugin.getNetworkJoinEventClass().getDeclaredConstructor(UUID.class).newInstance(message1.getTarget());
+                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                            throw new RuntimeException("unable to dispatch an network join event", e);
+                        }
+                        plugin.callEvent(event);
+
                     }
                 });
                 break;
@@ -190,28 +194,39 @@ public abstract class DataManager<P, PS, PL, PD> {
                 final DataManagerMessage message2 = gson.fromJson(jsonObject, new TypeToken<DataManagerMessage>() {
                 }.getType());
                 invalidate(message2.getTarget());
-                lastOnlineCache.put(message2.getTarget(), ((LogoutPayload)message2.getPayload()).getTimestamp());
+                lastOnlineCache.put(message2.getTarget(), ((LogoutPayload) message2.getPayload()).getTimestamp());
                 plugin.executeAsync(new Runnable() {
                     @Override
                     public void run() {
-                       // plugin.getProxy().getPluginManager().callEvent(new PlayerLeftNetworkEvent(message2.getTarget()));
+                        Object event;
+                        try {
+                            event = plugin.getNetworkQuitEventClass().getDeclaredConstructor(UUID.class).newInstance(message2.getTarget());
+                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                            throw new RuntimeException("unable to dispatch an network quit event", e);
+                        }
+                        plugin.callEvent(event);
                     }
                 });
                 break;
             case SERVER_CHANGE:
                 final DataManagerMessage message3 = gson.fromJson(jsonObject, new TypeToken<DataManagerMessage>() {
                 }.getType());
-                serverCache.put(message3.getTarget(), ((ServerChangePayload)message3.getPayload()).getServer());
+                serverCache.put(message3.getTarget(), ((ServerChangePayload) message3.getPayload()).getServer());
                 plugin.executeAsync(new Runnable() {
                     @Override
                     public void run() {
-                        //plugin.getProxy().getPluginManager().callEvent(new PlayerChangedServerNetworkEvent(message3.getTarget(), message3.getPayload().getOldServer(), message3.getPayload().getServer()));
+                        Object event;
+                        try {
+                            event = plugin.getServerChangeEventClass().getDeclaredConstructor(UUID.class, String.class, String.class).newInstance(message3.getTarget(), ((ServerChangePayload) message3.getPayload()).getOldServer(), ((ServerChangePayload) message3.getPayload()).getServer());
+                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                            throw new RuntimeException("unable to dispatch an server change event", e);
+                        }
+                        plugin.callEvent(event);
                     }
                 });
                 break;
         }
     }
-
 
 
     public static class DataManagerMessage {
@@ -254,7 +269,7 @@ public abstract class DataManager<P, PS, PL, PD> {
     }
 
 
-    public static class LoginPayload extends Payload{
+    public static class LoginPayload extends Payload {
         private final InetAddress address;
 
         public LoginPayload(InetAddress address) {
@@ -266,7 +281,7 @@ public abstract class DataManager<P, PS, PL, PD> {
         }
     }
 
-    public static class ServerChangePayload extends Payload{
+    public static class ServerChangePayload extends Payload {
         private final String server;
         private final String oldServer;
 

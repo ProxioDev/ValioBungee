@@ -1,19 +1,19 @@
 package com.imaginarycode.minecraft.redisbungee.internal;
 
-import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
+
 import redis.clients.jedis.JedisPubSub;
 
 import java.lang.reflect.InvocationTargetException;
 
+
 public class JedisPubSubHandler extends JedisPubSub {
 
     private final RedisBungeePlugin<?> plugin;
-
+    private final Class<?> eventClass;
     public JedisPubSubHandler(RedisBungeePlugin<?> plugin) {
         this.plugin = plugin;
+        this.eventClass = plugin.getPubSubEventClass();
     }
-
-    private Class<?> bungeeEvent;
 
     @Override
     public void onMessage(final String s, final String s2) {
@@ -21,27 +21,14 @@ public class JedisPubSubHandler extends JedisPubSub {
         plugin.executeAsync(new Runnable() {
             @Override
             public void run() {
-                if (isBungeeEvent()) {
-                    try {
-                        Object object = bungeeEvent.getConstructor(String.class, String.class).newInstance(s, s2);
-                        plugin.callEvent(object);
-                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                        e.printStackTrace();
-                        throw new RuntimeException("unable to fire pubsub event.");
-                    }
-                    return;
+                Object event;
+                try {
+                    event = eventClass.getDeclaredConstructor(String.class, String.class).newInstance(s, s2);
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                  throw new RuntimeException("unable to dispatch an pubsub event", e);
                 }
-                PubSubMessageEvent event = new PubSubMessageEvent(s, s2);
                 plugin.callEvent(event);
             }
         });
-    }
-
-    public boolean isBungeeEvent() {
-        return bungeeEvent != null;
-    }
-
-    public void setBungeeEvent(Class<?> clazz) {
-        bungeeEvent = clazz;
     }
 }
