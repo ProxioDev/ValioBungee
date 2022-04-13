@@ -39,11 +39,8 @@ if you want to use it on your project considering you have installed it in your 
 
 
 ## Javadocs
-~~Hosted on limework website. Version 0.6.0~~ 
-~~https://limework.net/JavaDocs/RedisBungee/~~
-
 Check out our Java docs on github pages
-https://proxiodev.github.io/RedisBungee-JavaDocs/0.6.5-SNAPSHOT
+https://proxiodev.github.io/RedisBungee-JavaDocs/0.7.0-SNAPSHOT
 
 ## Configuration
 
