@@ -22,7 +22,20 @@
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </repository>
     </repositories>
-
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.3.2</version>
+                <configuration>
+                    <source>8</source>
+                    <reportOutputDirectory>../javadoc</reportOutputDirectory>
+                    <destDir>${project.name}</destDir>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 
     <dependencies>

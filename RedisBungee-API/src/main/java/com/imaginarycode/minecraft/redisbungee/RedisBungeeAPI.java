@@ -180,7 +180,8 @@ public class RedisBungeeAPI {
     }
 
     /**
-     * Sends a message to a PubSub channel. The channel has to be subscribed to on this, or another redisbungee instance for {@link PubSubMessageEvent} to fire.
+     * Sends a message to a PubSub channel. The channel has to be subscribed to on this, or another redisbungee instance for
+     * PubSubMessageEvent to fire.
      *
      * @param channel The PubSub channel
      * @param message the message body to send
@@ -213,7 +214,7 @@ public class RedisBungeeAPI {
     }
 
     /**
-     * Register (a) PubSub channel(s), so that you may handle {@link PubSubMessageEvent} for it.
+     * Register (a) PubSub channel(s), so that you may handle PubSubMessageEvent for it.
      *
      * @param channels the channels to register
      * @since 0.3
