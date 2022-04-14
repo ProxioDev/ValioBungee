@@ -31,3 +31,6 @@ manifest.mf
 *.ipr
 *.iws
 .idea/
+
+# java docs
+javadoc
