@@ -297,20 +297,33 @@ public class RedisBungeeAPI {
      *
      * @param name             the UUID to fetch the name for
      * @param expensiveLookups whether or not to perform potentially expensive lookups
-     * @return the UUID for the name
+     * @return the {@link UUID} for the name
      * @since 0.3.2
      */
     public final UUID getUuidFromName(@NonNull String name, boolean expensiveLookups) {
         return plugin.getUuidTranslator().getTranslatedUuid(name, expensiveLookups);
     }
 
+
+
     /**
-     * This gives you instance of Jedis!
-     *
+     * This gets Redis Bungee {@link JedisPool}
      * @return {@link JedisPool}
+     * @deprecated this secluded to be removed when support for redis sentinel or redis cluster is finished, use {@link RedisBungeeAPI#requestJedis()}
+     * @since 0.6.5
+     */
+    @Deprecated
+    public JedisPool getJedisPool() {
+        return this.plugin.getJedisPool();
+    }
+
+
+    /**
+     * This gives you instance of Jedis
+     * @return {@link Jedis}
      * @since 0.7.0
      */
-    public Jedis getJedisPool() {
+    public Jedis requestJedis() {
         return this.plugin.requestJedis();
     }
 

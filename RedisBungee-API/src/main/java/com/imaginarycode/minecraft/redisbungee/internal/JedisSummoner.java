@@ -1,6 +1,7 @@
 package com.imaginarycode.minecraft.redisbungee.internal;
 
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 
 /**
@@ -15,5 +16,8 @@ public interface JedisSummoner {
     Jedis requestJedis();
 
     boolean isJedisAvailable();
+
+    @Deprecated
+    JedisPool getJedisPool();
 
 }

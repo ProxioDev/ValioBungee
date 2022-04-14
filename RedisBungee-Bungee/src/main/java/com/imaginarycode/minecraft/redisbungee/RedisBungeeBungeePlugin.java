@@ -135,6 +135,11 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
     }
 
     @Override
+    public JedisPool getJedisPool() {
+        return this.jedisPool;
+    }
+
+    @Override
     public RedisBungeeAPI getApi() {
         return this.api;
     }
