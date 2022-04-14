@@ -14,8 +14,9 @@ import java.net.InetAddress;
 import java.util.*;
 
 /**
- * This class exposes some internal RedisBungee functions. You obtain an instance of this object by invoking {@link RedisBungeePlugin#getApi()}.
- *
+ * This class exposes some internal RedisBungee functions. You obtain an instance of this object by invoking {@link RedisBungeeAPI#getRedisBungeeApi()}
+ * or somehow you got the Plugin instance by you can call the api using {@link RedisBungeePlugin#getApi()}.
+ * or
  * @author tuxed
  * @since 0.2.3
  *

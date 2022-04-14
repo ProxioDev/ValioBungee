@@ -346,7 +346,9 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
         } catch (JedisConnectionException e) {
             throw new RuntimeException("Unable to connect to your Redis server!", e);
         }
-        api = new RedisBungeeAPI(this);
+        this.api = new RedisBungeeAPI(this);
+        // call old plugin class to support old plugins
+        new RedisBungee(api);
         if (isJedisAvailable()) {
             try (Jedis tmpRsc = requestJedis()) {
                 // This is more portable than INFO <section>

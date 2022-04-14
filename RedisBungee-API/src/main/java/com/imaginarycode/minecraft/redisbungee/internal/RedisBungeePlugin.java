@@ -7,7 +7,6 @@ import com.imaginarycode.minecraft.redisbungee.events.PlayerJoinedNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerLeftNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import com.imaginarycode.minecraft.redisbungee.internal.util.uuid.UUIDTranslator;
-import redis.clients.jedis.Jedis;
 
 import java.net.InetAddress;
 import java.util.List;
@@ -15,7 +14,16 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-public interface RedisBungeePlugin<P> {
+
+
+/**
+ * This Class has all internal methods needed by every redis bungee plugin, and it can be used to implement another platforms than bungeecord
+ *
+ * @author Ham1255
+ * @since 0.7.0
+ *
+ */
+public interface RedisBungeePlugin<P> extends JedisSummoner {
 
     default void enable() {
 
@@ -36,10 +44,6 @@ public interface RedisBungeePlugin<P> {
     DataManager<P, ?, ?, ?> getDataManager();
 
     Set<UUID> getPlayers();
-
-    Jedis requestJedis();
-
-    boolean isJedisAvailable();
 
     RedisBungeeAPI getApi();
 
