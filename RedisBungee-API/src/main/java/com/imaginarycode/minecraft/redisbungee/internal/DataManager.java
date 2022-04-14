@@ -8,7 +8,6 @@ import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import redis.clients.jedis.Jedis;
 
 import java.lang.reflect.InvocationTargetException;

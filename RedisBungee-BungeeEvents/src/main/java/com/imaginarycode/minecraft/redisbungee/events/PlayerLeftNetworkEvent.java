@@ -1,4 +1,4 @@
-package com.imaginarycode.minecraft.redisbungee.events.bungee;
+package com.imaginarycode.minecraft.redisbungee.events;
 
 import net.md_5.bungee.api.plugin.Event;
 
