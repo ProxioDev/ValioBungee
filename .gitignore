@@ -32,5 +32,8 @@ manifest.mf
 *.iws
 .idea/
 
+
+*.versionBackup
+*.versionsBackup
 # java docs
 javadoc
