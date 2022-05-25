@@ -20,24 +20,31 @@ please create the issues on GitHub as its main project source.
 ## Compiling
 RedisBungee is distributed as a [maven](https://maven.apache.org) project. 
 
-To compile the plugin:
-
-    git clone https://github.com/Limework/RedisBungee.git .
-    mvn clean package
-    mvn clean install # to install it in your maven local repo
-
-then you should find it in target folder.
-
-if you want to use it on your project considering you have installed it in your local repo
-
-    <dependency>
-      <groupId>com.imaginarycode.minecraft</groupId>
-      <artifactId>RedisBungee</artifactId>
-      <version>VERSION</version>
-      <scope>provided</scope>
-    </dependency>
-
-
+first, install it to your maven local repo as we don't have public maven repo.
+```
+git clone https://github.com/ProxioDev/RedisBungee.git
+cd RedisBungee
+mvn clean install
+```
+If you want to have `RedisBungeeAPI` class
+```
+<dependency>
+        <groupId>com.imaginarycode.minecraft</groupId>
+        <artifactId>RedisBungee-API</artifactId>
+        <version>0.7.0-SNAPSHOT</version>
+        <scope>provided</scope>
+</dependency>
+```
+and if you want to use the events Import RedisBungee-BungeeEvents which for bungeecord
+`note: you need API imported too`
+```
+<dependency>
+        <groupId>com.imaginarycode.minecraft</groupId>
+        <artifactId>RedisBungee-BungeeEvents</artifactId>
+        <version>0.7.0-SNAPSHOT</version>
+        <scope>provided</scope>
+</dependency>
+```
 ## Javadocs
 Check out our Java docs on github pages
 https://proxiodev.github.io/RedisBungee-JavaDocs/0.7.0-SNAPSHOT
