@@ -26,28 +26,18 @@ git clone https://github.com/ProxioDev/RedisBungee.git
 cd RedisBungee
 mvn clean install
 ```
-If you want to have `RedisBungeeAPI` class
+then to import for bungeecord use:
 ```
 <dependency>
         <groupId>com.imaginarycode.minecraft</groupId>
-        <artifactId>RedisBungee-API</artifactId>
-        <version>0.7.1-SNAPSHOT</version>
-        <scope>provided</scope>
-</dependency>
-```
-and if you want to use the events Import RedisBungee-BungeeEvents which for bungeecord
-`note: you need API imported too`
-```
-<dependency>
-        <groupId>com.imaginarycode.minecraft</groupId>
-        <artifactId>RedisBungee-BungeeEvents</artifactId>
-        <version>0.7.1-SNAPSHOT</version>
+        <artifactId>RedisBungee-Bungee</artifactId>
+        <version>0.7.2-SNAPSHOT</version>
         <scope>provided</scope>
 </dependency>
 ```
 ## Javadocs
 Check out our Java docs on github pages
-https://proxiodev.github.io/RedisBungee-JavaDocs/0.7.0-SNAPSHOT
+https://proxiodev.github.io/RedisBungee-JavaDocs/0.7.2-SNAPSHOT
 
 ## Configuration
 

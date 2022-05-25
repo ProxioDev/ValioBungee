@@ -5,7 +5,7 @@
     <parent>
         <artifactId>RedisBungee</artifactId>
         <groupId>com.imaginarycode.minecraft</groupId>
-        <version>0.7.1-SNAPSHOT</version>
+        <version>0.7.2-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -41,14 +41,22 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.3.2</version>
+                <configuration>
+                    <source>8</source>
+                    <reportOutputDirectory>../javadoc</reportOutputDirectory>
+                    <destDir>${project.name}</destDir>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.2.4</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
+                        <goals><goal>shade</goal></goals>
                         <configuration>
                             <relocations>
                                 <relocation>
@@ -103,12 +111,12 @@
         <dependency>
             <groupId>com.imaginarycode.minecraft</groupId>
             <artifactId>RedisBungee-API</artifactId>
-            <version>0.7.0-SNAPSHOT</version>
+            <version>${parent.version}</version>
         </dependency>
         <dependency>
             <groupId>com.imaginarycode.minecraft</groupId>
             <artifactId>RedisBungee-BungeeEvents</artifactId>
-            <version>0.7.0-SNAPSHOT</version>
+            <version>${parent.version}</version>
         </dependency>
         <dependency>
             <groupId>net.md-5</groupId>
