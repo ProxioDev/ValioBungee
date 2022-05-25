@@ -31,7 +31,7 @@ If you want to have `RedisBungeeAPI` class
 <dependency>
         <groupId>com.imaginarycode.minecraft</groupId>
         <artifactId>RedisBungee-API</artifactId>
-        <version>0.7.0-SNAPSHOT</version>
+        <version>0.7.1-SNAPSHOT</version>
         <scope>provided</scope>
 </dependency>
 ```
@@ -41,7 +41,7 @@ and if you want to use the events Import RedisBungee-BungeeEvents which for bung
 <dependency>
         <groupId>com.imaginarycode.minecraft</groupId>
         <artifactId>RedisBungee-BungeeEvents</artifactId>
-        <version>0.7.0-SNAPSHOT</version>
+        <version>0.7.1-SNAPSHOT</version>
         <scope>provided</scope>
 </dependency>
 ```

@@ -5,7 +5,7 @@
     <parent>
         <artifactId>RedisBungee</artifactId>
         <groupId>com.imaginarycode.minecraft</groupId>
-        <version>0.7.0-SNAPSHOT</version>
+        <version>0.7.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -22,10 +22,99 @@
                     <destDir>${project.name}</destDir>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.4</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <relocations>
+                                <relocation>
+                                    <pattern>redis.clients.jedis</pattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.jedis
+                                    </shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>redis.clients.util</pattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.jedisutil
+                                    </shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.apache.commons.pool</pattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.commonspool
+                                    </shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.squareup.okhttp</pattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.okhttp
+                                    </shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>okio</pattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.okio
+                                    </shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.google</pattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.google
+                                    </shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.json</pattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.json
+                                    </shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.checkerframework</pattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.checkframework
+                                    </shadedPattern>
+                                </relocation>
+                            </relocations>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
+
     <dependencies>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>31.1-jre</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>4.2.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-pool2</artifactId>
+            <version>2.11.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>2.7.5</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
