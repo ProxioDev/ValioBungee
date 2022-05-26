@@ -17,27 +17,9 @@ Do not Open issues regarding it.
 
 please create the issues on GitHub as its main project source.
 
-## Compiling
-RedisBungee is distributed as a [maven](https://maven.apache.org) project. 
+## Compiling and Javadocs
 
-first, install it to your maven local repo as we don't have public maven repo.
-```
-git clone https://github.com/ProxioDev/RedisBungee.git
-cd RedisBungee
-mvn clean install
-```
-then to import for bungeecord use:
-```
-<dependency>
-        <groupId>com.imaginarycode.minecraft</groupId>
-        <artifactId>RedisBungee-Bungee</artifactId>
-        <version>0.7.2-SNAPSHOT</version>
-        <scope>provided</scope>
-</dependency>
-```
-## Javadocs
-Check out our Java docs on github pages
-https://proxiodev.github.io/RedisBungee-JavaDocs/0.7.2-SNAPSHOT
+Has been moved to https://proxiodev.github.io/RedisBungee-JavaDocs/0.7.2-SNAPSHOT
 
 ## Configuration
 
