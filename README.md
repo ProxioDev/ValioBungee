@@ -1,12 +1,51 @@
 # RedisBungee By Limework
 
-[![RedisBungee Build](https://github.com/proxiodev/RedisBungee/actions/workflows/maven.yml/badge.svg)](https://github.com/Limework/RedisBungee/actions/workflows/maven.yml) [![](https://jitpack.io/v/limework/redisbungee.svg)](https://jitpack.io/#limework/redisbungee)
-
 Spigot link: [click](https://www.spigotmc.org/resources/redisbungee.87700/)
 
 The main project of RedisBungee is no longer maintained, so we have forked the plugin.
 
 RedisBungee uses [Redis](https://redis.io) to Synchronize data between [BungeeCord](https://github.com/SpigotMC/BungeeCord) proxies
+
+## Implementing RedisBungee in your plugin: [![RedisBungee Build](https://github.com/proxiodev/RedisBungee/actions/workflows/maven.yml/badge.svg)](https://github.com/Limework/RedisBungee/actions/workflows/maven.yml) [![](https://jitpack.io/v/limework/redisbungee.svg)](https://jitpack.io/#limework/redisbungee)
+
+RedisBungee is distributed as a [maven](https://maven.apache.org) project.
+
+first, install it to your maven local repo as we don't have public maven repo.
+```
+git clone https://github.com/ProxioDev/RedisBungee.git
+cd RedisBungee
+mvn clean install
+```
+then to import for bungeecord use:
+```
+<dependency>
+        <groupId>com.imaginarycode.minecraft</groupId>
+        <artifactId>RedisBungee-Bungee</artifactId>
+        <version>0.7.2-SNAPSHOT</version>
+        <scope>provided</scope>
+</dependency>
+```
+Second method by using jitpack [![](https://jitpack.io/v/limework/redisbungee.svg)](https://jitpack.io/#limework/redisbungee)
+
+first, add this repository
+```
+	<repositories>
+		<repository>
+		    <id>jitpack.io</id>
+		    <url>https://jitpack.io</url>
+		</repository>
+	</repositories>
+```
+then add this in your dependencies
+```
+	<dependency>
+	    <groupId>com.github.limework.redisbungee</groupId>
+	    <artifactId>RedisBungee</artifactId>
+	    <version>0.7.2</version>
+	</dependency>
+	
+```
+
 
 ## Notice 1: about older versions of redis than redis 6.0
 
@@ -17,9 +56,9 @@ Do not Open issues regarding it.
 
 please create the issues on GitHub as its main project source.
 
-## Compiling and Javadocs
+## Javadocs
 
-Has been moved to https://proxiodev.github.io/RedisBungee-JavaDocs/0.7.2-SNAPSHOT
+https://proxiodev.github.io/RedisBungee-JavaDocs/0.7.2-SNAPSHOT
 
 ## Configuration
 
