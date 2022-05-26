@@ -40,7 +40,7 @@ then add this in your dependencies
 ```
 	<dependency>
 	    <groupId>com.github.limework.redisbungee</groupId>
-	    <artifactId>RedisBungee</artifactId>
+	    <artifactId>RedisBungee-Bungee</artifactId>
 	    <version>0.7.2</version>
 	</dependency>
 	
