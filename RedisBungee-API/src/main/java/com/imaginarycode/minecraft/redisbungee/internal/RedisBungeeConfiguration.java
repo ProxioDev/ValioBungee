@@ -9,9 +9,10 @@ import java.util.List;
 public class RedisBungeeConfiguration {
     private final String serverId;
     private final List<InetAddress> exemptAddresses;
+    private final boolean overrideBungeeCommands;
     private static RedisBungeeConfiguration config;
 
-    public RedisBungeeConfiguration(String serverId, List<String> exemptAddresses) {
+    public RedisBungeeConfiguration(String serverId, List<String> exemptAddresses, boolean overrideBungeeCommands) {
         this.serverId = serverId;
 
         ImmutableList.Builder<InetAddress> addressBuilder = ImmutableList.builder();
@@ -20,6 +21,7 @@ public class RedisBungeeConfiguration {
         }
         this.exemptAddresses = addressBuilder.build();
         config = this;
+        this.overrideBungeeCommands = overrideBungeeCommands;
     }
 
     public String getServerId() {
@@ -28,6 +30,10 @@ public class RedisBungeeConfiguration {
 
     public List<InetAddress> getExemptAddresses() {
         return exemptAddresses;
+    }
+
+    public boolean doOverrideBungeeCommands() {
+        return overrideBungeeCommands;
     }
 
     public static RedisBungeeConfiguration getConfig() {

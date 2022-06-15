@@ -405,10 +405,6 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
                 }
             }, 0, 3, TimeUnit.SECONDS);
             dataManager = new BungeeDataManager(this);
-            // glist command
-            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.GlistCommand(this));
-
-
             getProxy().getPluginManager().registerListener(this, new RedisBungeeListener(this, configuration.getExemptAddresses()));
             getProxy().getPluginManager().registerListener(this, dataManager);
             psl = new PubSubListener(this);
@@ -479,6 +475,18 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
         }
         getProxy().registerChannel("legacy:redisbungee");
         getProxy().registerChannel("RedisBungee");
+        // register commands
+        if (configuration.doOverrideBungeeCommands()) {
+            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.GlistCommand(this));
+            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.FindCommand(this));
+            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.LastSeenCommand(this));
+            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.IpCommand(this));
+        }
+        getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.SendToAll(this));
+        getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.ServerId(this));
+        getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.ServerIds(this));
+        getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.PlayerProxyCommand(this));
+        getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.PlistCommand(this));
     }
 
     @Override
@@ -550,7 +558,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
         } else {
             getLogger().info("Loaded server id " + serverId + '.');
         }
-        this.configuration = new RedisBungeeConfiguration(serverId, yamlConfiguration.getStringList("exempt-ip-addresses"));
+        this.configuration = new RedisBungeeConfiguration(serverId, yamlConfiguration.getStringList("exempt-ip-addresses"), yamlConfiguration.getBoolean("register-bungee-commands", true));
 
         if (redisServer != null && !redisServer.isEmpty()) {
             try {
