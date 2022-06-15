@@ -534,7 +534,6 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
         final boolean useSSL = yamlConfiguration.getBoolean("useSSL", false);
         String redisPassword = yamlConfiguration.getString("redis-password", "");
         String serverId = yamlConfiguration.getString("server-id");
-        final String randomUUID = UUID.randomUUID().toString();
 
         // check redis password
         if (redisPassword != null && (redisPassword.isEmpty() || redisPassword.equals("none"))) {
