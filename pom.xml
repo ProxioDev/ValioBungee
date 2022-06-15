@@ -23,7 +23,6 @@
     <modules>
         <module>RedisBungee-API</module>
         <module>RedisBungee-Bungee</module>
-        <module>RedisBungee-BungeeEvents</module>
     </modules>
 
     <dependencies>

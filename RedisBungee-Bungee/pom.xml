@@ -114,11 +114,6 @@
             <version>${parent.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.imaginarycode.minecraft</groupId>
-            <artifactId>RedisBungee-BungeeEvents</artifactId>
-            <version>${parent.version}</version>
-        </dependency>
-        <dependency>
             <groupId>net.md-5</groupId>
             <artifactId>bungeecord-api</artifactId>
             <version>1.17-R0.1-SNAPSHOT</version>
