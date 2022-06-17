@@ -8,14 +8,14 @@ RedisBungee uses [Redis](https://redis.io) to Synchronize data between [BungeeCo
 
 ## Supported Redis versions
 | Redis version | Supported |
-|---------------|-----------|
-| 1.x.x         | &#x2716;	 |
-| 2.x.x         | &#x2716;	 |
-| 3.x.x         | &#x2716;	 |
-| 4.x.x         | &#x2716;	 |
-| 5.x.x         | &#x2716;	 |
-| 6.x.x         | &#x2714;  |
-| 7.x.x         | &#x2714;  |
+|:-------------:|:---------:|
+|     1.x.x     | &#x2716;	 |
+|     2.x.x     | &#x2716;	 |
+|     3.x.x     | &#x2716;	 |
+|     4.x.x     | &#x2716;	 |
+|     5.x.x     | &#x2716;	 |
+|     6.x.x     | &#x2714;  |
+|     7.x.x     | &#x2714;  |
 
 
 ## Implementing RedisBungee in your plugin: [![RedisBungee Build](https://github.com/proxiodev/RedisBungee/actions/workflows/maven.yml/badge.svg)](https://github.com/Limework/RedisBungee/actions/workflows/maven.yml) [![](https://jitpack.io/v/limework/redisbungee.svg)](https://jitpack.io/#limework/redisbungee)
