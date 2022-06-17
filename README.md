@@ -48,10 +48,16 @@ then add this in your dependencies
 ```
 
 
-## Notice 1: about older versions of redis than redis 6.0
-
-any versions of redis-bungee 0.6.4 or above only supports 6.0
-Do not Open issues regarding it.
+## Supported Redis versions
+| Redis version | Supported |
+|---------------|-----------|
+| 1.x.x         | &#x2716;	 |
+| 2.x.x         | &#x2716;	 |
+| 3.x.x         | &#x2716;	 |
+| 4.x.x         | &#x2716;	 |
+| 5.x.x         | &#x2716;	 |
+| 6.x.x         | &#x2714;  |
+| 7.x.x         | &#x2714;  |
 
 ## Notice 2: users on git.limework.net
 
