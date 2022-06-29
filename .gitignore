@@ -3,6 +3,10 @@
 .project
 .settings
 
+# random files
+.png
+.jpg
+
 # netbeans
 nbproject
 nbactions.xml
