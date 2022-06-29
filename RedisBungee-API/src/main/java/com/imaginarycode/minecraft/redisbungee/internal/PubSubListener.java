@@ -21,7 +21,6 @@ public class PubSubListener implements Runnable {
 
     @Override
     public void run() {
-        boolean broken = false;
         try (Jedis rsc = plugin.requestJedis()) {
             try {
 
@@ -42,15 +41,10 @@ public class PubSubListener implements Runnable {
                         - redis.clients.jedis.exceptions.JedisConnectionException: JedisPubSub was not subscribed to a Jedis instance
                         */
                 }
-                broken = true;
             }
         } catch (JedisConnectionException e) {
             plugin.logWarn("PubSub error, attempting to recover in 5 secs.");
             plugin.executeAsyncAfter(this, TimeUnit.SECONDS, 5);
-        }
-
-        if (broken) {
-            run();
         }
     }
 
