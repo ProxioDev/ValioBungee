@@ -5,7 +5,7 @@
 # Get Redis from http://redis.io/
 redis-server: 127.0.0.1
 redis-port: 6379
-# OPTIONAL: If your Redis server uses AUTH, set the password required.
+# OPTIONAL but recommended: If your Redis server uses AUTH, set the password required.
 redis-password: ""
 # Maximum connections that will be maintained to the Redis server.
 # The default is 10. This setting should be left as-is unless you have some wildly
