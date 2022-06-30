@@ -33,7 +33,7 @@ then to import for bungeecord use:
 <dependency>
         <groupId>com.imaginarycode.minecraft</groupId>
         <artifactId>RedisBungee-Bungee</artifactId>
-        <version>0.7.2-SNAPSHOT</version>
+        <version>VERSION</version>
         <scope>provided</scope>
 </dependency>
 ```
@@ -53,7 +53,7 @@ then add this in your dependencies
 	<dependency>
 	    <groupId>com.github.limework.redisbungee</groupId>
 	    <artifactId>RedisBungee-Bungee</artifactId>
-	    <version>0.7.2</version>
+	    <version>VERSION</version>
 	    <scope>provided</scope>
 	</dependency>
 	
