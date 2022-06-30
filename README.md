@@ -4,6 +4,8 @@ Spigot link: [click](https://www.spigotmc.org/resources/redisbungee.87700/)
 
 The main project of RedisBungee is no longer maintained, so we have forked the plugin.
 
+*if you are here for transfering players to another proxy when the first proxy crashs or whatever this plugin wont do it, tell mojang to implmeant transfer packet*
+
 RedisBungee uses [Redis](https://redis.io) to Synchronize data between [BungeeCord](https://github.com/SpigotMC/BungeeCord) proxies
 
 ## Supported Redis versions
