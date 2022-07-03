@@ -8,6 +8,8 @@ The main project of RedisBungee is no longer maintained, so we have forked the p
 
 RedisBungee uses [Redis](https://redis.io) to Synchronize data between [BungeeCord](https://github.com/SpigotMC/BungeeCord) proxies
 
+Velocity version is comming in next few months.
+
 ## Supported Redis versions
 | Redis version | Supported |
 |:-------------:|:---------:|
