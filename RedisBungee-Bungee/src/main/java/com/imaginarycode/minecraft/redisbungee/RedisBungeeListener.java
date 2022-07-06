@@ -27,7 +27,7 @@ import redis.clients.jedis.Pipeline;
 import java.net.InetAddress;
 import java.util.*;
 
-public class RedisBungeeListener extends AbstractRedisBungeeListener<LoginEvent, PostLoginEvent, PlayerDisconnectEvent, ServerConnectedEvent, ProxyPingEvent, PluginMessageEvent, PubSubMessageEvent> implements Listener {
+public class RedisBungeeListener extends AbstractRedisBungeeListener<LoginEvent, PostLoginEvent, PlayerDisconnectEvent, ServerConnectedEvent, ProxyPingEvent, PluginMessageEvent, PubSubMessageEvent, Object> implements Listener {
 
 
     public RedisBungeeListener(RedisBungeePlugin<?> plugin, List<InetAddress> exemptAddresses) {
