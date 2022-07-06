@@ -312,11 +312,6 @@ public class RedisBungeeAPI {
      * @deprecated this secluded to be removed when support for redis sentinel or redis cluster is finished, use {@link RedisBungeeAPI#requestJedis()}
      * @since 0.6.5
      */
-    @Deprecated
-    public JedisPool getJedisPool() {
-        return this.plugin.getJedisPool();
-    }
-
 
     /**
      * This gives you instance of Jedis

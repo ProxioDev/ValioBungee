@@ -13,6 +13,8 @@ import com.imaginarycode.minecraft.redisbungee.events.PlayerChangedServerNetwork
 import com.imaginarycode.minecraft.redisbungee.events.PlayerJoinedNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import com.imaginarycode.minecraft.redisbungee.internal.*;
+import com.imaginarycode.minecraft.redisbungee.internal.summoners.JedisSummoner;
+import com.imaginarycode.minecraft.redisbungee.internal.summoners.SinglePoolJedisSummoner;
 import com.imaginarycode.minecraft.redisbungee.internal.util.IOUtil;
 import com.imaginarycode.minecraft.redisbungee.internal.util.LuaManager;
 import com.imaginarycode.minecraft.redisbungee.internal.util.uuid.NameFetcher;
@@ -48,7 +50,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
     private static final Gson gson = new Gson();
     private RedisBungeeAPI api;
     private PubSubListener psl = null;
-    private JedisPool jedisPool;
+    private JedisSummoner jedisSummoner;
     private UUIDTranslator uuidTranslator;
     private RedisBungeeConfiguration configuration;
     private BungeeDataManager dataManager;
@@ -128,17 +130,12 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
 
     @Override
     public Jedis requestJedis() {
-        return this.jedisPool.getResource();
+        return this.jedisSummoner.requestJedis();
     }
 
     @Override
     public boolean isJedisAvailable() {
-        return !jedisPool.isClosed();
-    }
-
-    @Override
-    public JedisPool getJedisPool() {
-        return this.jedisPool;
+        return this.jedisSummoner.isJedisAvailable();
     }
 
     @Override
@@ -333,7 +330,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
 
 
     @Override
-    public void enable() {
+    public void start() {
         ThreadFactory factory = ((ThreadPoolExecutor) getExecutorService()).getThreadFactory();
         ScheduledExecutorService service = Executors.newScheduledThreadPool(24, factory);
         try {
@@ -490,7 +487,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
     }
 
     @Override
-    public void disable() {
+    public void stop() {
         if (isJedisAvailable()) {
             // Poison the PubSub listener
             psl.poison();
@@ -506,8 +503,11 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
                         RedisUtil.cleanUpPlayer(member, tmpRsc);
                 }
             }
-
-            this.jedisPool.destroy();
+            try {
+                this.jedisSummoner.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -563,7 +563,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
             try {
                 JedisPoolConfig config = new JedisPoolConfig();
                 config.setMaxTotal(yamlConfiguration.getInt("max-redis-connections", 8));
-                this.jedisPool = new JedisPool(config, redisServer, redisPort, 0, redisPassword, useSSL);
+                this.jedisSummoner = new SinglePoolJedisSummoner(new JedisPool(config, redisServer, redisPort, 0, redisPassword, useSSL));
 
             } catch (JedisConnectionException e) {
                 throw new RuntimeException("Unable to create Redis pool", e);
@@ -599,8 +599,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
 
                 getLogger().log(Level.INFO, "Successfully connected to Redis.");
             } catch (JedisConnectionException e) {
-                this.jedisPool.destroy();
-                this.jedisPool = null;
+                this.jedisSummoner.close();
                 throw e;
             }
         } else {
@@ -610,12 +609,12 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
 
     @Override
     public void onEnable() {
-        enable();
+        start();
     }
 
     @Override
     public void onDisable() {
-        disable();
+        stop();
     }
 
     @Override

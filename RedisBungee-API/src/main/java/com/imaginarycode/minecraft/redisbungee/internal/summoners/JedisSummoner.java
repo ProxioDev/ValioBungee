@@ -1,7 +1,10 @@
-package com.imaginarycode.minecraft.redisbungee.internal;
+package com.imaginarycode.minecraft.redisbungee.internal.summoners;
 
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.JedisPool;
+
+import java.io.Closeable;
 
 
 /**
@@ -11,13 +14,10 @@ import redis.clients.jedis.JedisPool;
  * @since 0.7.0
  *
  */
-public interface JedisSummoner {
+public interface JedisSummoner extends Closeable {
 
     Jedis requestJedis();
 
     boolean isJedisAvailable();
-
-    @Deprecated
-    JedisPool getJedisPool();
 
 }

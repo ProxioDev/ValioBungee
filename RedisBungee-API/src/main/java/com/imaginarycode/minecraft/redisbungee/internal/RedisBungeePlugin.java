@@ -3,6 +3,7 @@ package com.imaginarycode.minecraft.redisbungee.internal;
 import com.google.common.collect.Multimap;
 import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
 import com.imaginarycode.minecraft.redisbungee.internal.util.uuid.UUIDTranslator;
+import redis.clients.jedis.Jedis;
 
 import java.net.InetAddress;
 import java.util.List;
@@ -19,15 +20,19 @@ import java.util.concurrent.TimeUnit;
  * @since 0.7.0
  *
  */
-public interface RedisBungeePlugin<P> extends JedisSummoner, EventsPlatform{
+public interface RedisBungeePlugin<P> extends EventsPlatform{
 
-    default void enable() {
+    default void start() {
+
+    }
+
+    default void stop() {
 
     }
 
-    default void disable() {
+    Jedis requestJedis();
 
-    }
+    boolean isJedisAvailable();
 
     RedisBungeeConfiguration getConfiguration();
 
