@@ -304,15 +304,6 @@ public class RedisBungeeAPI {
         return plugin.getUuidTranslator().getTranslatedUuid(name, expensiveLookups);
     }
 
-
-
-    /**
-     * This gets Redis Bungee {@link JedisPool}
-     * @return {@link JedisPool}
-     * @deprecated this secluded to be removed when support for redis sentinel or redis cluster is finished, use {@link RedisBungeeAPI#requestJedis()}
-     * @since 0.6.5
-     */
-
     /**
      * This gives you instance of Jedis
      * @return {@link Jedis}
