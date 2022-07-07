@@ -26,14 +26,13 @@ import redis.clients.jedis.Pipeline;
 import java.net.InetAddress;
 import java.util.*;
 
-public class RedisBungeeListener extends AbstractRedisBungeeListener<LoginEvent, PostLoginEvent, DisconnectEvent, ServerConnectedEvent, ProxyPingEvent, PluginMessageEvent, PubSubMessageEvent, Continuation> {
+public class RedisBungeeListener extends AbstractRedisBungeeListener<LoginEvent, PostLoginEvent, DisconnectEvent, ServerConnectedEvent, ProxyPingEvent, PluginMessageEvent, PubSubMessageEvent> {
 
 
     public RedisBungeeListener(RedisBungeePlugin<?> plugin, List<InetAddress> exemptAddresses) {
         super(plugin, exemptAddresses);
     }
 
-    @Override
     @Subscribe
     public void onLogin(LoginEvent event, Continuation continuation) {
         plugin.executeAsync(new RedisCallable<Void>(plugin) {

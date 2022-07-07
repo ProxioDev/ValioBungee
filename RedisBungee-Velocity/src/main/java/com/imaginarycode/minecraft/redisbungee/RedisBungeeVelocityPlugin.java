@@ -7,9 +7,9 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.io.ByteStreams;
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.inject.Inject;
-import com.imaginarycode.minecraft.redisbungee.commands.RedisBungeeCommands;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerChangedServerNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerJoinedNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
@@ -26,16 +26,21 @@ import com.squareup.okhttp.OkHttpClient;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
+import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.scheduler.ScheduledTask;
+import ninja.leaping.configurate.ConfigurationNode;
+import ninja.leaping.configurate.objectmapping.ObjectMappingException;
+import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 import org.slf4j.Logger;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.exceptions.JedisConnectionException;
+import static com.google.common.base.Preconditions.checkArgument;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -44,10 +49,8 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
+@Plugin(id = "redisbungee", name = "RedisBungee", version = RBUtils.VERSION, url = "https://github.com/ProxioDev/RedisBungee", authors = "ProxioDev")
 public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
 
     private static final Gson gson = new Gson();
@@ -408,7 +411,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
             getProxy().getEventManager().register(this, dataManager);
             psl = new PubSubListener(this);
             getProxy().getScheduler().buildTask(this, psl).schedule();
-            integrityCheck = getProxy().getScheduler().buildTask(null,new Runnable() {
+            integrityCheck = getProxy().getScheduler().buildTask(this,new Runnable() {
                 @Override
                 public void run() {
                     try (Jedis tmpRsc = requestJedis()) {
@@ -526,9 +529,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
         if (!getDataFolder().exists()) {
             getDataFolder().mkdir();
         }
-
         File file = new File(getDataFolder(), "config.yml");
-
         if (!file.exists()) {
             file.createNewFile();
             try (InputStream in = getResourceAsStream("example_config.yml");
@@ -537,21 +538,22 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
             }
         }
 
-        final Configuration yamlConfiguration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(file);
+        final YAMLConfigurationLoader yamlConfiguration = YAMLConfigurationLoader.builder().setFile(file).build();
 
-        final String redisServer = yamlConfiguration.getString("redis-server", "localhost");
-        final int redisPort = yamlConfiguration.getInt("redis-port", 6379);
-        final boolean useSSL = yamlConfiguration.getBoolean("useSSL", false);
-        String redisPassword = yamlConfiguration.getString("redis-password", "");
-        String serverId = yamlConfiguration.getString("server-id");
+        ConfigurationNode node = yamlConfiguration.load();
+        final String redisServer = node.getNode("redis-server").getString();
+        final int redisPort = node.getNode("redis-port").getInt();
+        final boolean useSSL = node.getNode("useSSL").getBoolean();
+        String redisPassword = node.getNode("redis-password").getString();
+        String serverId =  node.getNode("server-id").getString();
 
         // check redis password
         if (redisPassword != null && (redisPassword.isEmpty() || redisPassword.equals("none"))) {
             redisPassword = null;
-            getLogger().warning("INSECURE setup was detected Please set password for your redis instance.");
+            getLogger().warn("INSECURE setup was detected Please set password for your redis instance.");
         }
         if (!useSSL) {
-            getLogger().warning("INSECURE setup was detected Please setup ssl for your redis instance.");
+            getLogger().warn("INSECURE setup was detected Please setup ssl for your redis instance.");
         }
         // Configuration sanity checks.
         if (serverId == null || serverId.isEmpty()) {
@@ -561,18 +563,22 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
              */
             String genId = UUID.randomUUID().toString();
             getLogger().info("Generated server id " + genId + " and saving it to config.");
-            yamlConfiguration.set("server-id", genId);
-            ConfigurationProvider.getProvider(YamlConfiguration.class).save(yamlConfiguration, new File(getDataFolder(), "config.yml"));
+            node.getNode("server-id").setValue(genId);
+            yamlConfiguration.save(node);
             getLogger().info("Server id was generated: " + serverId);
         } else {
             getLogger().info("Loaded server id " + serverId + '.');
         }
-        this.configuration = new RedisBungeeConfiguration(serverId, yamlConfiguration.getStringList("exempt-ip-addresses"), yamlConfiguration.getBoolean("register-bungee-commands", true));
+        try {
+            this.configuration = new RedisBungeeConfiguration(serverId, node.getNode("exempt-ip-addresses").getList(TypeToken.of(String.class)), node.getNode("register-bungee-commands").getBoolean());
+        } catch (ObjectMappingException e) {
+            throw new RuntimeException(e);
+        }
 
         if (redisServer != null && !redisServer.isEmpty()) {
             try {
                 JedisPoolConfig config = new JedisPoolConfig();
-                config.setMaxTotal(yamlConfiguration.getInt("max-redis-connections", 8));
+                config.setMaxTotal(node.getNode("max-redis-connections").getInt());
                 this.jedisSummoner = new SinglePoolJedisSummoner(new JedisPool(config, redisServer, redisPort, 0, redisPassword, useSSL));
 
             } catch (JedisConnectionException e) {
@@ -591,7 +597,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
                         long value = Long.parseLong(rsc.hget("heartbeats", serverId));
                         long redisTime = getRedisTime(rsc.time());
                         if (redisTime < value + 20) {
-                            getLogger().error("You have launched a possible impostor BungeeCord instance. Another instance is already running.");
+                            getLogger().error("You have launched a possible impostor Velocity / Bungeecord instance. Another instance is already running.");
                             getLogger().error("For data consistency reasons, RedisBungee will now disable itself.");
                             getLogger().error("If this instance is coming up from a crash, create a file in your RedisBungee plugins directory with the name 'restarted_from_crash.txt' and RedisBungee will not perform this check.");
                             throw new RuntimeException("Possible impostor instance!");

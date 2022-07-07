@@ -13,6 +13,7 @@ import java.util.Optional;
 
 public class RBUtils {
 
+    public static final String VERSION = "0.8.x-idk-how";
     private static final Gson gson = new Gson();
 
     protected static void createPlayer(Player player, Pipeline pipeline, boolean fireEvent) {

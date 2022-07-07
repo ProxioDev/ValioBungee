@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public abstract class AbstractRedisBungeeListener<LE, PLE, PD, SC, PP, PM, PS, CN> {
+public abstract class AbstractRedisBungeeListener<LE, PLE, PD, SC, PP, PM, PS> {
 
     protected static final String ALREADY_LOGGED_IN = "§cYou are already logged on to this server. \n\nIt may help to try logging in again in a few minutes.\nIf this does not resolve your issue, please contact staff.";
 
@@ -27,9 +27,6 @@ public abstract class AbstractRedisBungeeListener<LE, PLE, PD, SC, PP, PM, PS, C
     }
 
     public void onLogin(LE event) {}
-
-
-    public void onLogin(LE event, CN continuation) {}
 
     public abstract void onPostLogin(PLE event);
 
