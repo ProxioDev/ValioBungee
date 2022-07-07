@@ -83,6 +83,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
         this.server = server;
         this.logger = logger;
         this.dataFolder = dataDirectory.toFile();
+
     }
 
 
@@ -347,7 +348,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
 
 
     @Override
-    public void start() {
+    public void initialize() {
         try {
             loadConfig();
         } catch (IOException e) {
@@ -625,7 +626,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
 
     @Subscribe
     public void proxyInit(ProxyInitializeEvent event) {
-        start();
+        initialize();
     }
 
     @Subscribe

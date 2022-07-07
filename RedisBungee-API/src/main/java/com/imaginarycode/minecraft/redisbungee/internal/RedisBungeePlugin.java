@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  */
 public interface RedisBungeePlugin<P> extends EventsPlatform{
 
-    default void start() {
+    default void initialize() {
 
     }
 

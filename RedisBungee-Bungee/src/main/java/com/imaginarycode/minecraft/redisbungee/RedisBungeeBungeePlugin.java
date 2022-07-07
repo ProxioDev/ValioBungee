@@ -330,7 +330,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
 
 
     @Override
-    public void start() {
+    public void initialize() {
         ThreadFactory factory = ((ThreadPoolExecutor) getExecutorService()).getThreadFactory();
         ScheduledExecutorService service = Executors.newScheduledThreadPool(24, factory);
         try {
@@ -609,7 +609,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
 
     @Override
     public void onEnable() {
-        start();
+        initialize();
     }
 
     @Override
