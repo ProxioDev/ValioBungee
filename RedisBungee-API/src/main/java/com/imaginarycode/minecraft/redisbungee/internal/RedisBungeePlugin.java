@@ -42,7 +42,7 @@ public interface RedisBungeePlugin<P> extends EventsPlatform{
 
     Set<String> getLocalPlayersAsUuidStrings();
 
-    DataManager<P, ?, ?, ?> getDataManager();
+    AbstractDataManager<P, ?, ?, ?> getDataManager();
 
     Set<UUID> getPlayers();
 

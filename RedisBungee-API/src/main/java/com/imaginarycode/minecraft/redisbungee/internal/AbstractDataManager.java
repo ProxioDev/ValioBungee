@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @since 0.3.3
  */
-public abstract class DataManager<P, PL, PD, PS> {
+public abstract class AbstractDataManager<P, PL, PD, PS> {
     private final RedisBungeePlugin<P> plugin;
     private final Cache<UUID, String> serverCache = createCache();
     private final Cache<UUID, String> proxyCache = createCache();
@@ -31,7 +31,7 @@ public abstract class DataManager<P, PL, PD, PS> {
     private final Cache<UUID, Long> lastOnlineCache = createCache();
     private final Gson gson = new Gson();
 
-    public DataManager(RedisBungeePlugin<P> plugin) {
+    public AbstractDataManager(RedisBungeePlugin<P> plugin) {
         this.plugin = plugin;
     }
 

@@ -1,7 +1,7 @@
 package com.imaginarycode.minecraft.redisbungee;
 
 import com.imaginarycode.minecraft.redisbungee.internal.AbstractRedisBungeeListener;
-import com.imaginarycode.minecraft.redisbungee.internal.DataManager;
+import com.imaginarycode.minecraft.redisbungee.internal.AbstractDataManager;
 import com.imaginarycode.minecraft.redisbungee.internal.RedisBungeePlugin;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import com.imaginarycode.minecraft.redisbungee.internal.RedisUtil;
@@ -83,9 +83,9 @@ public class RedisBungeeListener extends AbstractRedisBungeeListener<LoginEvent,
                 pipeline.sync();
                 // the end of moved code.
 
-                jedis.publish("redisbungee-data", gson.toJson(new DataManager.DataManagerMessage<>(
-                        event.getPlayer().getUniqueId(), plugin.getApi().getServerId(), DataManager.DataManagerMessage.Action.JOIN,
-                        new DataManager.LoginPayload(event.getPlayer().getRemoteAddress().getAddress()))));
+                jedis.publish("redisbungee-data", gson.toJson(new AbstractDataManager.DataManagerMessage<>(
+                        event.getPlayer().getUniqueId(), plugin.getApi().getServerId(), AbstractDataManager.DataManagerMessage.Action.JOIN,
+                        new AbstractDataManager.LoginPayload(event.getPlayer().getRemoteAddress().getAddress()))));
                 return null;
             }
         });
@@ -115,9 +115,9 @@ public class RedisBungeeListener extends AbstractRedisBungeeListener<LoginEvent,
             @Override
             protected Void call(Jedis jedis) {
                 jedis.hset("player:" + event.getPlayer().getUniqueId().toString(), "server", event.getServer().getServerInfo().getName());
-                jedis.publish("redisbungee-data", gson.toJson(new DataManager.DataManagerMessage<>(
-                        event.getPlayer().getUniqueId(), plugin.getApi().getServerId(), DataManager.DataManagerMessage.Action.SERVER_CHANGE,
-                        new DataManager.ServerChangePayload(event.getServer().getServerInfo().getName(), currentServer))));
+                jedis.publish("redisbungee-data", gson.toJson(new AbstractDataManager.DataManagerMessage<>(
+                        event.getPlayer().getUniqueId(), plugin.getApi().getServerId(), AbstractDataManager.DataManagerMessage.Action.SERVER_CHANGE,
+                        new AbstractDataManager.ServerChangePayload(event.getServer().getServerInfo().getName(), currentServer))));
                 return null;
             }
         });

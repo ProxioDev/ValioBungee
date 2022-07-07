@@ -1,8 +1,7 @@
 package com.imaginarycode.minecraft.redisbungee;
 
 import com.google.gson.Gson;
-import com.imaginarycode.minecraft.redisbungee.internal.DataManager;
-import com.velocitypowered.api.proxy.InboundConnection;
+import com.imaginarycode.minecraft.redisbungee.internal.AbstractDataManager;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ServerConnection;
 import redis.clients.jedis.Pipeline;
@@ -29,9 +28,9 @@ public class RBUtils {
         pipeline.hmset("player:" + player.getUniqueId().toString(), playerData);
 
         if (fireEvent) {
-            pipeline.publish("redisbungee-data", gson.toJson(new DataManager.DataManagerMessage<>(
-                    player.getUniqueId(), RedisBungeeAPI.getRedisBungeeApi().getServerId(), DataManager.DataManagerMessage.Action.JOIN,
-                    new DataManager.LoginPayload(player.getRemoteAddress().getAddress()))));
+            pipeline.publish("redisbungee-data", gson.toJson(new AbstractDataManager.DataManagerMessage<>(
+                    player.getUniqueId(), RedisBungeeAPI.getRedisBungeeApi().getServerId(), AbstractDataManager.DataManagerMessage.Action.JOIN,
+                    new AbstractDataManager.LoginPayload(player.getRemoteAddress().getAddress()))));
         }
     }
 

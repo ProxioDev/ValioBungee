@@ -17,9 +17,9 @@ public class RedisUtil {
         rsc.hdel("player:" + player, "server", "ip", "proxy");
         long timestamp = System.currentTimeMillis();
         rsc.hset("player:" + player, "online", String.valueOf(timestamp));
-        rsc.publish("redisbungee-data", gson.toJson(new DataManager.DataManagerMessage<>(
-                UUID.fromString(player), RedisBungeeAPI.getRedisBungeeApi().getServerId(), DataManager.DataManagerMessage.Action.LEAVE,
-                new DataManager.LogoutPayload(timestamp))));
+        rsc.publish("redisbungee-data", gson.toJson(new AbstractDataManager.DataManagerMessage<>(
+                UUID.fromString(player), RedisBungeeAPI.getRedisBungeeApi().getServerId(), AbstractDataManager.DataManagerMessage.Action.LEAVE,
+                new AbstractDataManager.LogoutPayload(timestamp))));
     }
 
     public static void cleanUpPlayer(String player, Pipeline rsc) {
@@ -27,9 +27,9 @@ public class RedisUtil {
         rsc.hdel("player:" + player, "server", "ip", "proxy");
         long timestamp = System.currentTimeMillis();
         rsc.hset("player:" + player, "online", String.valueOf(timestamp));
-        rsc.publish("redisbungee-data", gson.toJson(new DataManager.DataManagerMessage<>(
-                UUID.fromString(player), RedisBungeeAPI.getRedisBungeeApi().getServerId(), DataManager.DataManagerMessage.Action.LEAVE,
-                new DataManager.LogoutPayload(timestamp))));
+        rsc.publish("redisbungee-data", gson.toJson(new AbstractDataManager.DataManagerMessage<>(
+                UUID.fromString(player), RedisBungeeAPI.getRedisBungeeApi().getServerId(), AbstractDataManager.DataManagerMessage.Action.LEAVE,
+                new AbstractDataManager.LogoutPayload(timestamp))));
     }
 
     public static boolean isRedisVersionRight(String redisVersion) {

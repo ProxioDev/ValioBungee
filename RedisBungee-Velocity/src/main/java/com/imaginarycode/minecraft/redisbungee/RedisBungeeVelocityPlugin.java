@@ -112,7 +112,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
     }
 
     @Override
-    public DataManager<Player, ?, ?, ?> getDataManager() {
+    public AbstractDataManager<Player, ?, ?, ?> getDataManager() {
         return this.dataManager;
     }
 

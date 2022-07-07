@@ -95,7 +95,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
     }
 
     @Override
-    public DataManager<ProxiedPlayer, ?, ?, ?> getDataManager() {
+    public AbstractDataManager<ProxiedPlayer, ?, ?, ?> getDataManager() {
         return this.dataManager;
     }
 
