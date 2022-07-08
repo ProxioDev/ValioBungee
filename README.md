@@ -4,11 +4,13 @@ Spigot link: [click](https://www.spigotmc.org/resources/redisbungee.87700/)
 
 The main project of RedisBungee is no longer maintained, so we have forked the plugin.
 
-*if you are here for transfering players to another proxy when the first proxy crashs or whatever this plugin wont do it, tell mojang to implement transfer packet*
+*if you are here for transferring players to another proxy when the first proxy crashes or whatever this plugin won't do it, tell mojang to implement transfer packet*
 
-RedisBungee uses [Redis](https://redis.io) to Synchronize data between [BungeeCord](https://github.com/SpigotMC/BungeeCord) proxies
+RedisBungee uses [Redis](https://redis.io) to Synchronize players data between [BungeeCord](https://github.com/SpigotMC/BungeeCord) or [Velocity](https://github.com/PaperMC/Velocity) proxies
 
-Velocity version is coming in next few months.
+If you are looking to use Original RedisBungee without a change to internals,
+with critical bugs fixed, please use version [0.6.5](https://github.com/ProxioDev/RedisBungee/releases/tag/0.6.5)
+`you exspect that you will not get support for old versions.`
 
 ## Supported Redis versions
 | Redis version | Supported |
@@ -62,18 +64,13 @@ then add this in your dependencies
 	</dependency>
 	
 ```
-
-## Notice 2: users on git.limework.net
-
-please create the issues on GitHub as its main project source.
-
 ## Javadocs
 
 https://proxiodev.github.io/RedisBungee-JavaDocs/0.7.2-SNAPSHOT
 
 ## Configuration
 
-**REDISBUNGEE REQUIRES A REDIS SERVER**, preferably with reasonably low latency. The default [config](https://github.com/proxiodev/RedisBungee/blob/master/src/main/resources/example_config.yml) is saved when the plugin first starts.
+**REDISBUNGEE REQUIRES A REDIS SERVER**, preferably with reasonably low latency. The default [config](https://github.com/ProxioDev/RedisBungee/blob/develop/RedisBungee-API/src/main/resources/example_config.yml) is saved when the plugin first starts.
 
 ## License!
 
@@ -81,7 +78,7 @@ This project is distributed under Eclipse Public License 1.0
 
 You can find it [here](https://github.com/proxiodev/RedisBungee/blob/master/LICENSE)
 
-You can find the original RedisBungee by minecrafter [here](https://github.com/minecrafter/RedisBungee) or spigot page [here](https://www.spigotmc.org/resources/redisbungee.13494/)
+You can find the original RedisBungee by Tux [here](https://github.com/minecrafter/RedisBungee) or spigot page [here](https://www.spigotmc.org/resources/redisbungee.13494/)
 
 ## Support
 
