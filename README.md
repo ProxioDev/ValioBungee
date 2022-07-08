@@ -12,6 +12,7 @@ RedisBungee uses [Redis](https://redis.io) to Synchronize players data between [
 If you are looking to use Original RedisBungee without a change to internals,
 with critical bugs fixed, please use version [0.6.5](https://github.com/ProxioDev/RedisBungee/releases/tag/0.6.5) 
 as its last version before internal changes.
+
 `be noted that you will not get support for old versions.`
 
 ## Supported Redis versions
@@ -83,7 +84,7 @@ This project is distributed under Eclipse Public License 1.0
 
 You can find it [here](https://github.com/proxiodev/RedisBungee/blob/master/LICENSE)
 
-You can find the original RedisBungee by Tux [here](https://github.com/minecrafter/RedisBungee) or spigot page [here](https://www.spigotmc.org/resources/redisbungee.13494/)
+You can find the original RedisBungee by Tux [here](https://github.com/minecrafter/RedisBungee) or spigot page **NO LONGER WORKS** [here](https://www.spigotmc.org/resources/redisbungee.13494/)
 
 ## Support
 
