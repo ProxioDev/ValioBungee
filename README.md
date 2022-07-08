@@ -13,7 +13,6 @@ If you are looking to use Original RedisBungee without a change to internals,
 with critical bugs fixed, please use version [0.6.5](https://github.com/ProxioDev/RedisBungee/releases/tag/0.6.5) 
 as its last version before internal changes.
 
-`be noted that you will not get support for old versions.`
 
 ## Supported Redis versions
 | Redis version | Supported |
