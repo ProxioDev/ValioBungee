@@ -8,9 +8,11 @@ The main project of RedisBungee is no longer maintained, so we have forked the p
 
 RedisBungee uses [Redis](https://redis.io) to Synchronize players data between [BungeeCord](https://github.com/SpigotMC/BungeeCord) or [Velocity](https://github.com/PaperMC/Velocity) proxies
 
+
 If you are looking to use Original RedisBungee without a change to internals,
-with critical bugs fixed, please use version [0.6.5](https://github.com/ProxioDev/RedisBungee/releases/tag/0.6.5)
-`you exspect that you will not get support for old versions.`
+with critical bugs fixed, please use version [0.6.5](https://github.com/ProxioDev/RedisBungee/releases/tag/0.6.5) 
+as its last version before internal changes.
+`be noted that you will not get support for old versions.`
 
 ## Supported Redis versions
 | Redis version | Supported |
@@ -64,6 +66,9 @@ then add this in your dependencies
 	</dependency>
 	
 ```
+then in your project plugin.yml add `RedisBungee` to `depends`
+
+instructions for Velocity will be added later.
 ## Javadocs
 
 https://proxiodev.github.io/RedisBungee-JavaDocs/0.7.2-SNAPSHOT
