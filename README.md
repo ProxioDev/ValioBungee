@@ -6,8 +6,9 @@ The main project of RedisBungee is no longer maintained, so we have forked the p
 
 *if you are here for transferring players to another proxy when the first proxy crashes or whatever this plugin won't do it, tell mojang to implement transfer packet*
 
-RedisBungee uses [Redis](https://redis.io) to Synchronize players data between [BungeeCord](https://github.com/SpigotMC/BungeeCord) or [Velocity](https://github.com/PaperMC/Velocity) proxies
+RedisBungee uses [Redis](https://redis.io) to Synchronize players data between [BungeeCord](https://github.com/SpigotMC/BungeeCord) or [Velocity*](https://github.com/PaperMC/Velocity) proxies
 
+Velocity*: *version 3.x.x is only supported*
 
 If you are looking to use Original RedisBungee without a change to internals,
 with critical bugs fixed, please use version [0.6.5](https://github.com/ProxioDev/RedisBungee/releases/tag/0.6.5) 
