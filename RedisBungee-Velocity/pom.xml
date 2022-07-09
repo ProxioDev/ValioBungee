@@ -85,11 +85,6 @@
                                     </shadedPattern>
                                 </relocation>
                                 <relocation>
-                                    <pattern>com.google</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.google
-                                    </shadedPattern>
-                                </relocation>
-                                <relocation>
                                     <pattern>org.json</pattern>
                                     <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.json
                                     </shadedPattern>
@@ -112,6 +107,12 @@
             <groupId>com.imaginarycode.minecraft</groupId>
             <artifactId>RedisBungee-API</artifactId>
             <version>${parent.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.velocitypowered</groupId>
