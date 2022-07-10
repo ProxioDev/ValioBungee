@@ -2,7 +2,7 @@
 name: Bug report
 about: if you find a bug please report it here...
 title: ''
-labels: waiting.....
+labels: waiting
 assignees: ham1255
 
 ---
