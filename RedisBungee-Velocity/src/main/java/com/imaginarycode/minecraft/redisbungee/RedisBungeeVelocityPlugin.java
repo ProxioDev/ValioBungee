@@ -417,7 +417,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
             }
         }).repeat(3, TimeUnit.SECONDS).schedule();
 
-        getProxy().getEventManager().register(this, new RedisBungeeListener(this, configuration.getExemptAddresses()));
+        getProxy().getEventManager().register(this, new RedisBungeeVelocityListener(this, configuration.getExemptAddresses()));
         getProxy().getEventManager().register(this, dataManager);
         getProxy().getScheduler().buildTask(this, psl).schedule();
         integrityCheck = getProxy().getScheduler().buildTask(this, () -> {

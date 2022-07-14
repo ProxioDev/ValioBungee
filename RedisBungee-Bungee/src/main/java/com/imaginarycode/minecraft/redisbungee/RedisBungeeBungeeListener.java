@@ -26,10 +26,10 @@ import redis.clients.jedis.Pipeline;
 import java.net.InetAddress;
 import java.util.*;
 
-public class RedisBungeeListener extends AbstractRedisBungeeListener<LoginEvent, PostLoginEvent, PlayerDisconnectEvent, ServerConnectedEvent, ProxyPingEvent, PluginMessageEvent, PubSubMessageEvent> implements Listener {
+public class RedisBungeeBungeeListener extends AbstractRedisBungeeListener<LoginEvent, PostLoginEvent, PlayerDisconnectEvent, ServerConnectedEvent, ProxyPingEvent, PluginMessageEvent, PubSubMessageEvent> implements Listener {
 
 
-    public RedisBungeeListener(RedisBungeePlugin<?> plugin, List<InetAddress> exemptAddresses) {
+    public RedisBungeeBungeeListener(RedisBungeePlugin<?> plugin, List<InetAddress> exemptAddresses) {
         super(plugin, exemptAddresses);
     }
 
@@ -194,7 +194,7 @@ public class RedisBungeeListener extends AbstractRedisBungeeListener<LoginEvent,
                         String user = in.readUTF();
                         out.writeUTF("LastOnline");
                         out.writeUTF(user);
-                        out.writeLong(plugin.getApi().getLastOnline(plugin.getUuidTranslator().getTranslatedUuid(user, true)));
+                        out.writeLong(plugin.getApi().getLastOnline(Objects.requireNonNull(plugin.getUuidTranslator().getTranslatedUuid(user, true))));
                         break;
                     case "ServerPlayers":
                         String type1 = in.readUTF();
@@ -235,7 +235,7 @@ public class RedisBungeeListener extends AbstractRedisBungeeListener<LoginEvent,
                         String username = in.readUTF();
                         out.writeUTF("PlayerProxy");
                         out.writeUTF(username);
-                        out.writeUTF(plugin.getApi().getProxy(plugin.getUuidTranslator().getTranslatedUuid(username, true)));
+                        out.writeUTF(plugin.getApi().getProxy(Objects.requireNonNull(plugin.getUuidTranslator().getTranslatedUuid(username, true))));
                         break;
                     default:
                         return;

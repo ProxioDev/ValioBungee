@@ -34,11 +34,11 @@ import java.net.InetAddress;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class RedisBungeeListener extends AbstractRedisBungeeListener<LoginEvent, PostLoginEvent, DisconnectEvent, ServerConnectedEvent, ProxyPingEvent, PluginMessageEvent, PubSubMessageEvent> {
+public class RedisBungeeVelocityListener extends AbstractRedisBungeeListener<LoginEvent, PostLoginEvent, DisconnectEvent, ServerConnectedEvent, ProxyPingEvent, PluginMessageEvent, PubSubMessageEvent> {
     // Some messages are using legacy characters
     private final LegacyComponentSerializer serializer = LegacyComponentSerializer.legacySection();
 
-    public RedisBungeeListener(RedisBungeePlugin<?> plugin, List<InetAddress> exemptAddresses) {
+    public RedisBungeeVelocityListener(RedisBungeePlugin<?> plugin, List<InetAddress> exemptAddresses) {
         super(plugin, exemptAddresses);
     }
 
@@ -197,7 +197,7 @@ public class RedisBungeeListener extends AbstractRedisBungeeListener<LoginEvent,
                     String user = in.readUTF();
                     out.writeUTF("LastOnline");
                     out.writeUTF(user);
-                    out.writeLong(plugin.getApi().getLastOnline(plugin.getUuidTranslator().getTranslatedUuid(user, true)));
+                    out.writeLong(plugin.getApi().getLastOnline(Objects.requireNonNull(plugin.getUuidTranslator().getTranslatedUuid(user, true))));
                     break;
                 case "ServerPlayers":
                     String type1 = in.readUTF();
@@ -238,7 +238,7 @@ public class RedisBungeeListener extends AbstractRedisBungeeListener<LoginEvent,
                     String username = in.readUTF();
                     out.writeUTF("PlayerProxy");
                     out.writeUTF(username);
-                    out.writeUTF(plugin.getApi().getProxy(plugin.getUuidTranslator().getTranslatedUuid(username, true)));
+                    out.writeUTF(plugin.getApi().getProxy(Objects.requireNonNull(plugin.getUuidTranslator().getTranslatedUuid(username, true))));
                     break;
                 default:
                     return;
