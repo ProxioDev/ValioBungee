@@ -463,6 +463,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
             }, 0, 1, TimeUnit.MINUTES);
         }
         getProxy().registerChannel("legacy:redisbungee");
+        getProxy().registerChannel("redisbungee:redisbungee");
         getProxy().registerChannel("RedisBungee");
         // register commands
         if (configuration.doOverrideBungeeCommands()) {
