@@ -29,6 +29,7 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.LegacyChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.scheduler.ScheduledTask;
@@ -74,6 +75,10 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
     private LuaManager.Script getPlayerCountScript;
 
     private static final Object SERVER_TO_PLAYERS_KEY = new Object();
+    public static final List<ChannelIdentifier> IDENTIFIERS = List.of(
+        MinecraftChannelIdentifier.create("legacy", "redisbungee"),
+        new LegacyChannelIdentifier("RedisBungee")
+    );
     private final Cache<Object, Multimap<String, UUID>> serverToPlayersCache = CacheBuilder.newBuilder()
             .expireAfterWrite(5, TimeUnit.SECONDS)
             .build();
@@ -476,10 +481,8 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
             }
         }).repeat(1, TimeUnit.MINUTES).schedule();
 
-        // plugin messages are disabled for now
-        MinecraftChannelIdentifier minecraftChannelIdentifier = MinecraftChannelIdentifier.create("legacy", "redisbungee");
-        LegacyChannelIdentifier legacyChannelIdentifier = new LegacyChannelIdentifier("RedisBungee");
-        getProxy().getChannelRegistrar().register(minecraftChannelIdentifier, legacyChannelIdentifier);
+        // register plugin messages
+        IDENTIFIERS.forEach(getProxy().getChannelRegistrar()::register);
 
         // register commands
         // Override Velocity commands
