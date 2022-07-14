@@ -146,11 +146,7 @@ public class RedisBungeeListener extends AbstractRedisBungeeListener<LoginEvent,
     @SuppressWarnings("UnstableApiUsage")
     @EventHandler
     public void onPluginMessage(PluginMessageEvent event) {
-        // this somehow has channel called RedisBungee not sure how it got here, keep it as it might break functionality
-        if (
-                (event.getTag().equals("legacy:redisbungee") || event.getTag().equals("redisbungee:redisbungee")
-                        || event.getTag().equals("RedisBungee")) && event.getSender() instanceof Server
-        ) {
+        if ((event.getTag().equals("legacy:redisbungee") || event.getTag().equals("RedisBungee")) && event.getSender() instanceof Server) {
             final String currentChannel = event.getTag();
             final byte[] data = Arrays.copyOf(event.getData(), event.getData().length);
             plugin.executeAsync(() -> {
