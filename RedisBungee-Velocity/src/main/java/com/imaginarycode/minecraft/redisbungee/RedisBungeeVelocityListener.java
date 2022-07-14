@@ -12,70 +12,71 @@ import com.imaginarycode.minecraft.redisbungee.internal.RedisBungeePlugin;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import com.imaginarycode.minecraft.redisbungee.internal.RedisUtil;
 import com.imaginarycode.minecraft.redisbungee.internal.util.RedisCallable;
-import net.md_5.bungee.api.AbstractReconnectHandler;
-import net.md_5.bungee.api.config.ServerInfo;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.api.connection.Server;
-import net.md_5.bungee.api.event.*;
-import net.md_5.bungee.api.plugin.Listener;
-import net.md_5.bungee.api.plugin.Plugin;
-import net.md_5.bungee.event.EventHandler;
+import com.velocitypowered.api.event.Continuation;
+import com.velocitypowered.api.event.PostOrder;
+import com.velocitypowered.api.event.ResultedEvent;
+import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.connection.DisconnectEvent;
+import com.velocitypowered.api.event.connection.LoginEvent;
+import com.velocitypowered.api.event.connection.PluginMessageEvent;
+import com.velocitypowered.api.event.connection.PostLoginEvent;
+import com.velocitypowered.api.event.player.ServerConnectedEvent;
+import com.velocitypowered.api.event.proxy.ProxyPingEvent;
+import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.ServerConnection;
+import com.velocitypowered.api.proxy.messages.LegacyChannelIdentifier;
+import com.velocitypowered.api.proxy.server.ServerPing;
+import net.kyori.adventure.text.Component;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 
 import java.net.InetAddress;
 import java.util.*;
 
-public class RedisBungeeListener extends AbstractRedisBungeeListener<LoginEvent, PostLoginEvent, PlayerDisconnectEvent, ServerConnectedEvent, ProxyPingEvent, PluginMessageEvent, PubSubMessageEvent> implements Listener {
+public class RedisBungeeVelocityListener extends AbstractRedisBungeeListener<LoginEvent, PostLoginEvent, DisconnectEvent, ServerConnectedEvent, ProxyPingEvent, PluginMessageEvent, PubSubMessageEvent> {
 
 
-    public RedisBungeeListener(RedisBungeePlugin<?> plugin, List<InetAddress> exemptAddresses) {
+    public RedisBungeeVelocityListener(RedisBungeePlugin<?> plugin, List<InetAddress> exemptAddresses) {
         super(plugin, exemptAddresses);
     }
 
-    @Override
-    @EventHandler
-    public void onLogin(LoginEvent event) {
-        event.registerIntent((Plugin) plugin);
+    @Subscribe
+    public void onLogin(LoginEvent event, Continuation continuation) {
         plugin.executeAsync(new RedisCallable<Void>(plugin) {
             @Override
             protected Void call(Jedis jedis) {
                 try {
-                    if (event.isCancelled()) {
+                    if (!event.getResult().isAllowed()) {
                         return null;
                     }
 
                     // We make sure they aren't trying to use an existing player's name.
                     // This is problematic for online-mode servers as they always disconnect old clients.
                     if (plugin.isOnlineMode()) {
-                        ProxiedPlayer player = (ProxiedPlayer) plugin.getPlayer(event.getConnection().getName());
+                        Player player = (Player) plugin.getPlayer(event.getPlayer().getUsername());
 
                         if (player != null) {
-                            event.setCancelled(true);
-                            // TODO: Make it accept a BaseComponent[] like everything else.
-                            event.setCancelReason(ONLINE_MODE_RECONNECT);
+                            event.setResult(ResultedEvent.ComponentResult.denied(Component.text(ONLINE_MODE_RECONNECT)));
                             return null;
                         }
                     }
 
                     for (String s : plugin.getServerIds()) {
-                        if (jedis.sismember("proxy:" + s + ":usersOnline", event.getConnection().getUniqueId().toString())) {
-                            event.setCancelled(true);
-                            // TODO: Make it accept a BaseComponent[] like everything else.
-                            event.setCancelReason(ALREADY_LOGGED_IN);
+                        if (jedis.sismember("proxy:" + s + ":usersOnline", event.getPlayer().getUniqueId().toString())) {
+                            event.setResult(ResultedEvent.ComponentResult.denied(Component.text(ALREADY_LOGGED_IN)));
                             return null;
                         }
                     }
                     return null;
                 } finally {
-                    event.completeIntent((Plugin) plugin);
+                    continuation.resume();
                 }
             }
         });
     }
 
     @Override
-    @EventHandler
+    @Subscribe
     public void onPostLogin(PostLoginEvent event) {
         plugin.executeAsync(new RedisCallable<Void>(plugin) {
             @Override
@@ -84,22 +85,22 @@ public class RedisBungeeListener extends AbstractRedisBungeeListener<LoginEvent,
                 // and it can be cancelled but it will show as false in redis-bungee
                 // which will register the player into the redis database.
                 Pipeline pipeline = jedis.pipelined();
-                plugin.getUuidTranslator().persistInfo(event.getPlayer().getName(), event.getPlayer().getUniqueId(), pipeline);
+                plugin.getUuidTranslator().persistInfo(event.getPlayer().getUsername(), event.getPlayer().getUniqueId(), pipeline);
                 RBUtils.createPlayer(event.getPlayer(), pipeline, false);
                 pipeline.sync();
                 // the end of moved code.
 
-                jedis.publish("redisbungee-data", gson.toJson(new AbstractDataManager.DataManagerMessage(
+                jedis.publish("redisbungee-data", gson.toJson(new AbstractDataManager.DataManagerMessage<>(
                         event.getPlayer().getUniqueId(), plugin.getApi().getServerId(), AbstractDataManager.DataManagerMessage.Action.JOIN,
-                        new AbstractDataManager.LoginPayload(event.getPlayer().getAddress().getAddress()))));
+                        new AbstractDataManager.LoginPayload(event.getPlayer().getRemoteAddress().getAddress()))));
                 return null;
             }
         });
     }
 
     @Override
-    @EventHandler
-    public void onPlayerDisconnect(PlayerDisconnectEvent event) {
+    @Subscribe
+    public void onPlayerDisconnect(DisconnectEvent event) {
         plugin.executeAsync(new RedisCallable<Void>(plugin) {
             @Override
             protected Void call(Jedis jedis) {
@@ -113,41 +114,39 @@ public class RedisBungeeListener extends AbstractRedisBungeeListener<LoginEvent,
     }
 
     @Override
-    @EventHandler
+    @Subscribe
     public void onServerChange(ServerConnectedEvent event) {
-        final String currentServer = event.getPlayer().getServer() == null ? null : event.getPlayer().getServer().getInfo().getName();
+        Optional<ServerConnection> optionalServerConnection = event.getPlayer().getCurrentServer();
+        final String currentServer = optionalServerConnection.map(serverConnection -> serverConnection.getServerInfo().getName()).orElse(null);
         plugin.executeAsync(new RedisCallable<Void>(plugin) {
             @Override
             protected Void call(Jedis jedis) {
-                jedis.hset("player:" + event.getPlayer().getUniqueId().toString(), "server", event.getServer().getInfo().getName());
-                jedis.publish("redisbungee-data", gson.toJson(new AbstractDataManager.DataManagerMessage(
+                jedis.hset("player:" + event.getPlayer().getUniqueId().toString(), "server", event.getServer().getServerInfo().getName());
+                jedis.publish("redisbungee-data", gson.toJson(new AbstractDataManager.DataManagerMessage<>(
                         event.getPlayer().getUniqueId(), plugin.getApi().getServerId(), AbstractDataManager.DataManagerMessage.Action.SERVER_CHANGE,
-                        new AbstractDataManager.ServerChangePayload(event.getServer().getInfo().getName(), currentServer))));
+                        new AbstractDataManager.ServerChangePayload(event.getServer().getServerInfo().getName(), currentServer))));
                 return null;
             }
         });
     }
 
     @Override
-    @EventHandler
+    @Subscribe(order = PostOrder.EARLY)
     public void onPing(ProxyPingEvent event) {
-        if (exemptAddresses.contains(event.getConnection().getAddress().getAddress())) {
+        if (exemptAddresses.contains(event.getConnection().getRemoteAddress().getAddress())) {
             return;
         }
-        ServerInfo forced = AbstractReconnectHandler.getForcedHost(event.getConnection());
-
-        if (forced != null && event.getConnection().getListener().isPingPassthrough()) {
-            return;
-        }
-        event.getResponse().getPlayers().setOnline(plugin.getCount());
+        ServerPing oldPing = event.getPing();
+        int max = oldPing.getPlayers().map(ServerPing.Players::getMax).orElse(0);
+        List<ServerPing.SamplePlayer> list = oldPing.getPlayers().map(ServerPing.Players::getSample).orElse(Collections.emptyList());
+        event.setPing(new ServerPing(oldPing.getVersion(), new ServerPing.Players(plugin.getCount(), max, list), oldPing.getDescriptionComponent(), oldPing.getFavicon().orElse(null)));
     }
 
     @Override
     @SuppressWarnings("UnstableApiUsage")
-    @EventHandler
     public void onPluginMessage(PluginMessageEvent event) {
-        if ((event.getTag().equals("legacy:redisbungee") || event.getTag().equals("RedisBungee")) && event.getSender() instanceof Server) {
-            final String currentChannel = event.getTag();
+        if ((event.getIdentifier().getId().equals("legacy:redisbungee") || event.getIdentifier().getId().equals("RedisBungee")) && event.getSource() instanceof ServerConnection) {
+            final String currentChannel = event.getIdentifier().getId();
             final byte[] data = Arrays.copyOf(event.getData(), event.getData().length);
             plugin.executeAsync(() -> {
                 ByteArrayDataInput in = ByteStreams.newDataInput(data);
@@ -194,7 +193,7 @@ public class RedisBungeeListener extends AbstractRedisBungeeListener<LoginEvent,
                         String user = in.readUTF();
                         out.writeUTF("LastOnline");
                         out.writeUTF(user);
-                        out.writeLong(plugin.getApi().getLastOnline(plugin.getUuidTranslator().getTranslatedUuid(user, true)));
+                        out.writeLong(plugin.getApi().getLastOnline(Objects.requireNonNull(plugin.getUuidTranslator().getTranslatedUuid(user, true))));
                         break;
                     case "ServerPlayers":
                         String type1 = in.readUTF();
@@ -235,26 +234,28 @@ public class RedisBungeeListener extends AbstractRedisBungeeListener<LoginEvent,
                         String username = in.readUTF();
                         out.writeUTF("PlayerProxy");
                         out.writeUTF(username);
-                        out.writeUTF(plugin.getApi().getProxy(plugin.getUuidTranslator().getTranslatedUuid(username, true)));
+                        out.writeUTF(plugin.getApi().getProxy(Objects.requireNonNull(plugin.getUuidTranslator().getTranslatedUuid(username, true))));
                         break;
                     default:
                         return;
                 }
 
-                ((Server) event.getSender()).sendData(currentChannel, out.toByteArray());
+                ((ServerConnection) event.getSource()).sendPluginMessage(new LegacyChannelIdentifier(currentChannel), out.toByteArray());
             });
         }
     }
 
+
     @Override
-    @EventHandler
+    @Subscribe
     public void onPubSubMessage(PubSubMessageEvent event) {
         if (event.getChannel().equals("redisbungee-allservers") || event.getChannel().equals("redisbungee-" + plugin.getApi().getServerId())) {
             String message = event.getMessage();
             if (message.startsWith("/"))
                 message = message.substring(1);
             plugin.logInfo("Invoking command via PubSub: /" + message);
-            ((Plugin) plugin).getProxy().getPluginManager().dispatchCommand(RedisBungeeCommandSender.getSingleton(), message);
+            ((RedisBungeeVelocityPlugin) plugin).getProxy().getCommandManager().executeAsync(RedisBungeeCommandSource.getSingleton(), message);//.dispatchCommand(RedisBungeeCommandSource.getSingleton(), message);
+
         }
     }
 }

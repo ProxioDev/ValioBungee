@@ -7,7 +7,6 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.io.ByteStreams;
-import com.google.gson.Gson;
 import com.imaginarycode.minecraft.redisbungee.commands.RedisBungeeCommands;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerChangedServerNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerJoinedNetworkEvent;
@@ -397,7 +396,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
                 }
             }, 0, 3, TimeUnit.SECONDS);
             dataManager = new BungeeDataManager(this);
-            getProxy().getPluginManager().registerListener(this, new RedisBungeeListener(this, configuration.getExemptAddresses()));
+            getProxy().getPluginManager().registerListener(this, new RedisBungeeBungeeListener(this, configuration.getExemptAddresses()));
             getProxy().getPluginManager().registerListener(this, dataManager);
             psl = new PubSubListener(this);
             getProxy().getScheduler().runAsync(this, psl);

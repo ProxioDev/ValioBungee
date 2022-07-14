@@ -29,6 +29,8 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.proxy.messages.LegacyChannelIdentifier;
+import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.scheduler.ScheduledTask;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
@@ -409,7 +411,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
             }
         }).repeat(3, TimeUnit.SECONDS).schedule();
 
-        getProxy().getEventManager().register(this, new RedisBungeeListener(this, configuration.getExemptAddresses()));
+        getProxy().getEventManager().register(this, new RedisBungeeVelocityListener(this, configuration.getExemptAddresses()));
         getProxy().getEventManager().register(this, dataManager);
         getProxy().getScheduler().buildTask(this, psl).schedule();
         integrityCheck = getProxy().getScheduler().buildTask(this, () -> {
@@ -473,10 +475,10 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
             }
         }).repeat(1, TimeUnit.MINUTES).schedule();
 
-        // plugin messages are disabled for now
-        //getProxy().registerChannel("legacy:redisbungee");
-        //getProxy().registerChannel("RedisBungee");
 
+        getProxy().getChannelRegistrar().register(new LegacyChannelIdentifier("RedisBungee"));
+        getProxy().getChannelRegistrar().register(new LegacyChannelIdentifier("legacy:redisbungee"));
+        getProxy().getChannelRegistrar().register(MinecraftChannelIdentifier.create("legacy", "redisbungee"));
         // register commands
         // those still bungeecord commands will migrate them later.
         // if (configuration.doOverrideBungeeCommands()) {
