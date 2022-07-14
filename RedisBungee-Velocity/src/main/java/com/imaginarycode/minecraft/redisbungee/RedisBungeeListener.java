@@ -19,7 +19,7 @@ import com.velocitypowered.api.event.proxy.ProxyPingEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.ServerPing;
-import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 
@@ -27,7 +27,8 @@ import java.net.InetAddress;
 import java.util.*;
 
 public class RedisBungeeListener extends AbstractRedisBungeeListener<LoginEvent, PostLoginEvent, DisconnectEvent, ServerConnectedEvent, ProxyPingEvent, PluginMessageEvent, PubSubMessageEvent> {
-
+    // Some messages are using legacy characters
+    private final LegacyComponentSerializer serializer = LegacyComponentSerializer.legacySection();
 
     public RedisBungeeListener(RedisBungeePlugin<?> plugin, List<InetAddress> exemptAddresses) {
         super(plugin, exemptAddresses);
@@ -49,14 +50,14 @@ public class RedisBungeeListener extends AbstractRedisBungeeListener<LoginEvent,
                         Player player = (Player) plugin.getPlayer(event.getPlayer().getUsername());
 
                         if (player != null) {
-                            event.setResult(ResultedEvent.ComponentResult.denied(Component.text(ONLINE_MODE_RECONNECT)));
+                            event.setResult(ResultedEvent.ComponentResult.denied(serializer.deserialize(ONLINE_MODE_RECONNECT)));
                             return null;
                         }
                     }
 
                     for (String s : plugin.getServerIds()) {
                         if (jedis.sismember("proxy:" + s + ":usersOnline", event.getPlayer().getUniqueId().toString())) {
-                            event.setResult(ResultedEvent.ComponentResult.denied(Component.text(ALREADY_LOGGED_IN)));
+                            event.setResult(ResultedEvent.ComponentResult.denied(serializer.deserialize(ALREADY_LOGGED_IN)));
                             return null;
                         }
                     }
@@ -153,7 +154,7 @@ public class RedisBungeeListener extends AbstractRedisBungeeListener<LoginEvent,
             if (message.startsWith("/"))
                 message = message.substring(1);
             plugin.logInfo("Invoking command via PubSub: /" + message);
-            ((RedisBungeeVelocityPlugin)plugin).getProxy().getCommandManager().executeAsync(RedisBungeeCommandSource.getSingleton(), message);//.dispatchCommand(RedisBungeeCommandSource.getSingleton(), message);
+            ((RedisBungeeVelocityPlugin)plugin).getProxy().getCommandManager().executeAsync(RedisBungeeCommandSource.getSingleton(), message);
 
         }
     }
