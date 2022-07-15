@@ -111,7 +111,7 @@
         <dependency>
             <groupId>com.imaginarycode.minecraft</groupId>
             <artifactId>RedisBungee-API</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>net.md-5</groupId>

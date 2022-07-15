@@ -119,7 +119,7 @@
         <dependency>
             <groupId>com.imaginarycode.minecraft</groupId>
             <artifactId>RedisBungee-API</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.google.guava</groupId>

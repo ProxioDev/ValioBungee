@@ -22,62 +22,6 @@
                     <destDir>${project.name}</destDir>
                 </configuration>
             </plugin>
-            <!--
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.4</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <configuration>
-                            <relocations>
-                                <relocation>
-                                    <pattern>redis.clients.jedis</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.jedis
-                                    </shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>redis.clients.util</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.jedisutil
-                                    </shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>org.apache.commons.pool</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.commonspool
-                                    </shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>com.squareup.okhttp</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.okhttp
-                                    </shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>okio</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.okio
-                                    </shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>com.google</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.google
-                                    </shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>org.json</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.json
-                                    </shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>org.checkerframework</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.checkframework
-                                    </shadedPattern>
-                                </relocation>
-                            </relocations>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            -->
         </plugins>
     </build>
 
