@@ -54,7 +54,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Plugin(id = "redisbungee", name = "RedisBungee", version = RBUtils.VERSION, url = "https://github.com/ProxioDev/RedisBungee", authors = "ProxioDev")
+@Plugin(id = "redisbungee", name = "RedisBungee", version = PomData.VERSION, url = "https://github.com/ProxioDev/RedisBungee", authors = "ProxioDev")
 public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
     private final ProxyServer server;
     private final Logger logger;
