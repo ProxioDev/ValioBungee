@@ -2,6 +2,7 @@ package com.imaginarycode.minecraft.redisbungee.internal;
 
 import com.google.common.collect.Multimap;
 import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
+import com.imaginarycode.minecraft.redisbungee.internal.summoners.JedisSummoner;
 import com.imaginarycode.minecraft.redisbungee.internal.util.uuid.UUIDTranslator;
 import redis.clients.jedis.Jedis;
 
@@ -33,6 +34,8 @@ public interface RedisBungeePlugin<P> extends EventsPlatform{
     Jedis requestJedis();
 
     boolean isJedisAvailable();
+
+    JedisSummoner getJedisSummoner();
 
     RedisBungeeConfiguration getConfiguration();
 

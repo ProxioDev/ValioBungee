@@ -14,7 +14,7 @@ public class LuaManager {
     }
 
     public Script createScript(String script) {
-        try (Jedis jedis = plugin.requestJedis()) {
+        try (Jedis jedis = plugin.getJedisSummoner().requestJedis()) {
             String hash = jedis.scriptLoad(script);
             return new Script(script, hash);
         }
@@ -40,7 +40,7 @@ public class LuaManager {
         public Object eval(List<String> keys, List<String> args) {
             Object data;
 
-            try (Jedis jedis = plugin.requestJedis()) {
+            try (Jedis jedis = plugin.getJedisSummoner().requestJedis()) {
                 try {
                     data = jedis.evalsha(hashed, keys, args);
                 } catch (JedisDataException e) {

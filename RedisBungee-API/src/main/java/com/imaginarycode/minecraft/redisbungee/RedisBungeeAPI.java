@@ -5,8 +5,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.imaginarycode.minecraft.redisbungee.internal.RedisBungeePlugin;
+import com.imaginarycode.minecraft.redisbungee.internal.summoners.JedisSummoner;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 import java.net.InetAddress;
 import java.util.*;
@@ -309,8 +311,27 @@ public class RedisBungeeAPI {
      * @since 0.7.0
      */
     public Jedis requestJedis() {
-        return this.plugin.requestJedis();
+        return this.plugin.getJedisSummoner().requestJedis();
     }
+
+    /**
+     * This gets Redis Bungee {@link JedisPool}
+     * @return {@link JedisPool}
+     *  @since 0.6.5
+     */
+    public JedisPool getJedisPool() {
+        return this.plugin.getJedisSummoner().getJedisPool();
+    }
+
+    /**
+     * This gets Redis Bungee {@link JedisPool}
+     * @return {@link JedisPool}
+     *  @since 0.6.5
+     */
+    public JedisSummoner getJedisSummoner() {
+        return this.plugin.getJedisSummoner();
+    }
+
 
     /**
      *

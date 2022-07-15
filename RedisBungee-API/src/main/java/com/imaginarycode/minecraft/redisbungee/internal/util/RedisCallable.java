@@ -25,7 +25,7 @@ public abstract class RedisCallable<T> implements Callable<T>, Runnable {
     }
 
     private T run(boolean retry) {
-        try (Jedis jedis = plugin.requestJedis()) {
+        try (Jedis jedis = plugin.getJedisSummoner().requestJedis()) {
             return call(jedis);
         } catch (JedisConnectionException e) {
             plugin.logFatal("Unable to get connection");

@@ -1,5 +1,9 @@
 # RedisBungee configuration file.
-# PLEASE READ THE WIKI: https://github.com/Limework/RedisBungee/wiki
+# PLEASE READ THE WIKI: https://github.com/ProxioDev/RedisBungee/wiki
+
+# Cluster Mode its in different config file redis-cluster.yml
+# enabling this option will ignore redis config of this file
+cluster-mode: false
 
 # The Redis server you use.
 # Get Redis from http://redis.io/

@@ -1,5 +1,7 @@
 package com.imaginarycode.minecraft.redisbungee;
 
+import redis.clients.jedis.JedisPool;
+
 /**
  * This used to be old plugin instance of redis-bungee, but now it's used to get the api for old plugins
  *
@@ -27,6 +29,10 @@ public class RedisBungee {
         return api;
     }
 
+    @Deprecated
+    public JedisPool getPool() {
+        return api.getJedisPool();
+    }
 
 
 }

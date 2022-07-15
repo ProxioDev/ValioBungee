@@ -20,4 +20,6 @@ public interface JedisSummoner extends Closeable {
 
     boolean isJedisAvailable();
 
+    JedisPool getJedisPool();
+
 }

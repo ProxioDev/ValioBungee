@@ -23,6 +23,11 @@ public class SinglePoolJedisSummoner implements JedisSummoner {
     }
 
     @Override
+    public JedisPool getJedisPool() {
+        return this.jedisPool;
+    }
+
+    @Override
     public void close() throws IOException {
         jedisPool.close();
     }

@@ -55,7 +55,7 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
             return serverCache.get(uuid, new Callable<String>() {
                 @Override
                 public String call() throws Exception {
-                    try (Jedis tmpRsc = plugin.requestJedis()) {
+                    try (Jedis tmpRsc = plugin.getJedisSummoner().requestJedis()) {
                         return Objects.requireNonNull(tmpRsc.hget("player:" + uuid, "server"), "user not found");
                     }
                 }
@@ -79,7 +79,7 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
             return proxyCache.get(uuid, new Callable<String>() {
                 @Override
                 public String call() throws Exception {
-                    try (Jedis tmpRsc = plugin.requestJedis()) {
+                    try (Jedis tmpRsc = plugin.getJedisSummoner().requestJedis()) {
                         return Objects.requireNonNull(tmpRsc.hget("player:" + uuid, "proxy"), "user not found");
                     }
                 }
@@ -102,7 +102,7 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
             return ipCache.get(uuid, new Callable<InetAddress>() {
                 @Override
                 public InetAddress call() throws Exception {
-                    try (Jedis tmpRsc = plugin.requestJedis()) {
+                    try (Jedis tmpRsc = plugin.getJedisSummoner().requestJedis()) {
                         String result = tmpRsc.hget("player:" + uuid, "ip");
                         if (result == null)
                             throw new NullPointerException("user not found");
@@ -128,7 +128,7 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
             return lastOnlineCache.get(uuid, new Callable<Long>() {
                 @Override
                 public Long call() throws Exception {
-                    try (Jedis tmpRsc = plugin.requestJedis()) {
+                    try (Jedis tmpRsc = plugin.getJedisSummoner().requestJedis()) {
                         String result = tmpRsc.hget("player:" + uuid, "online");
                         return result == null ? -1 : Long.valueOf(result);
                     }

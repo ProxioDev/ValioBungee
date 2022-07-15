@@ -503,6 +503,11 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
     }
 
     @Override
+    public JedisSummoner getJedisSummoner() {
+        return this.jedisSummoner;
+    }
+
+    @Override
     public void loadConfig() throws IOException {
         if (!getDataFolder().exists() && getDataFolder().mkdir()) {
             getLogger().info("data folder was created");

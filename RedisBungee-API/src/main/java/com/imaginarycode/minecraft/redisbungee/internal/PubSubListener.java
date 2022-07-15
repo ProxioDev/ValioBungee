@@ -21,7 +21,7 @@ public class PubSubListener implements Runnable {
 
     @Override
     public void run() {
-        try (Jedis rsc = plugin.requestJedis()) {
+        try (Jedis rsc = plugin.getJedisSummoner().requestJedis()) {
             try {
 
                 jpsh = new JedisPubSubHandler(plugin);

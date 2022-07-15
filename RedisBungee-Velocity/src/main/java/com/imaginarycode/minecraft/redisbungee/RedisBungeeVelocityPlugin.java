@@ -201,6 +201,11 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
     }
 
     @Override
+    public JedisSummoner getJedisSummoner() {
+        return this.jedisSummoner;
+    }
+
+    @Override
     public RedisBungeeAPI getApi() {
         return this.api;
     }

@@ -73,7 +73,7 @@ public final class UUIDTranslator {
         }
 
         // Let's try Redis.
-        try (Jedis jedis = plugin.requestJedis()) {
+        try (Jedis jedis = plugin.getJedisSummoner().requestJedis()) {
             String stored = jedis.hget("uuid-cache", player.toLowerCase());
             if (stored != null) {
                 // Found an entry value. Deserialize it.
@@ -131,7 +131,7 @@ public final class UUIDTranslator {
         }
 
         // Okay, it wasn't locally cached. Let's try Redis.
-        try (Jedis jedis = plugin.requestJedis()) {
+        try (Jedis jedis = plugin.getJedisSummoner().requestJedis()) {
             String stored = jedis.hget("uuid-cache", player.toString());
             if (stored != null) {
                 // Found an entry value. Deserialize it.
