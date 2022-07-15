@@ -61,10 +61,10 @@ public class RedisBungeeCommands {
                     Multimap<String, String> human = HashMultimap.create();
                     serverToPlayers.forEach((key, value) -> human.put(key, plugin.getUuidTranslator().getNameFromUuid(value, false)));
                     for (String server : new TreeSet<>(serverToPlayers.keySet())) {
-                        Component serverName = Component.text("[" + server + "] ", NamedTextColor.GREEN);
-                        Component serverCount = Component.text("(" + serverToPlayers.get(server).size() + "): ", NamedTextColor.YELLOW);
-                        Component serverPlayers = Component.text(Joiner.on(", ").join(human.get(server)), NamedTextColor.WHITE);
-                        sender.sendMessage(Component.textOfChildren(serverName, serverCount, serverPlayers));
+                        Component serverInfo = Component.text("[" + server + "] ", NamedTextColor.GREEN)
+                                .append(Component.text("(" + serverToPlayers.get(server).size() + "): ", NamedTextColor.YELLOW))
+                                .append(Component.text(Joiner.on(", ").join(human.get(server)), NamedTextColor.WHITE));
+                        sender.sendMessage(serverInfo);
                     }
                     sender.sendMessage(playersOnline);
                 } else {
@@ -326,10 +326,10 @@ public class RedisBungeeCommands {
                         }
                     });
                     for (String server : new TreeSet<>(human.keySet())) {
-                        TextComponent serverName = Component.text("[" + server + "] ", NamedTextColor.RED);
-                        TextComponent serverCount = Component.text("(" + human.get(server).size() + "): ", NamedTextColor.YELLOW);
-                        TextComponent serverPlayers = Component.text(Joiner.on(", ").join(human.get(server)), NamedTextColor.WHITE);
-                        sender.sendMessage(Component.textOfChildren(serverName, serverCount, serverPlayers));
+                        TextComponent serverInfo = Component.text("[" + server + "] ", NamedTextColor.RED)
+                                .append(Component.text("(" + human.get(server).size() + "): ", NamedTextColor.YELLOW))
+                                .append(Component.text(Joiner.on(", ").join(human.get(server)), NamedTextColor.WHITE));
+                        sender.sendMessage(serverInfo);
                     }
                     sender.sendMessage(playersOnline);
                 } else {
