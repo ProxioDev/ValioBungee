@@ -144,6 +144,7 @@ public class RedisBungeeVelocityListener extends AbstractRedisBungeeListener<Log
 
     @Override
     @SuppressWarnings("UnstableApiUsage")
+    @Subscribe
     public void onPluginMessage(PluginMessageEvent event) {
         if ((event.getIdentifier().getId().equals("legacy:redisbungee") || event.getIdentifier().getId().equals("RedisBungee")) && event.getSource() instanceof ServerConnection) {
             final String currentChannel = event.getIdentifier().getId();
