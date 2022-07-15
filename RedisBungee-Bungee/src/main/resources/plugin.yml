@@ -1,6 +1,6 @@
 name: RedisBungee
 main: com.imaginarycode.minecraft.redisbungee.RedisBungeeBungeePlugin
-version: ${project.version}
+version: ${project.parent.version}-${git.commit.id.abbrev}
 author: Chunkr and Govindas limework
 authors:
   - chunkr

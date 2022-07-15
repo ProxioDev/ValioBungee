@@ -7,7 +7,6 @@ import com.google.common.collect.Multimap;
 import com.imaginarycode.minecraft.redisbungee.internal.RedisBungeePlugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
 
 import java.net.InetAddress;
 import java.util.*;
