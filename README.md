@@ -48,7 +48,7 @@ then to import for bungeecord use:
 ```
 Second method by using jitpack [![](https://jitpack.io/v/limework/redisbungee.svg)](https://jitpack.io/#limework/redisbungee)
 
-first, add this repository
+## Setup jitpack repository
 ```
 	<repositories>
 		<repository>
@@ -57,7 +57,8 @@ first, add this repository
 		</repository>
 	</repositories>
 ```
-then add this in your dependencies
+## [BungeeCord](https://github.com/SpigotMC/BungeeCord)
+add this in your project dependencies 
 ```
 	<dependency>
 	    <groupId>com.github.limework.redisbungee</groupId>
@@ -67,9 +68,40 @@ then add this in your dependencies
 	</dependency>
 	
 ```
-then in your project plugin.yml add `RedisBungee` to `depends`
+then in your project plugin.yml add `RedisBungee` to `depends` like this
+```
+name: "yourplugin"
+main: your.main.class
+version: 1.0.0-SNAPSHOT
+author: idk
+depends: [ RedisBungee ]
+```
 
-instructions for Velocity will be added later.
+
+## [Velocity](https://github.com/PaperMC/Velocity)
+```
+	<dependency>
+	    <groupId>com.github.limework.redisbungee</groupId>
+	    <artifactId>RedisBungee-Velocity</artifactId>
+	    <version>VERSION</version>
+	    <scope>provided</scope>
+	</dependency>
+```
+then to make your plugin depends on RedisBungee in make sure your Annotation have `@Dependency(id = "redisbungee")` like this
+```
+@Plugin(
+  id = "myplugin",
+  name = "My Plugin",
+  version = "0.1.0-beta",
+  dependencies = {
+    @Dependency(id = "redisbungee")
+  }
+)
+public class PluginMainClass {
+
+}
+```
+
 ## Javadocs
 
 https://proxiodev.github.io/RedisBungee-JavaDocs/0.7.2-SNAPSHOT
