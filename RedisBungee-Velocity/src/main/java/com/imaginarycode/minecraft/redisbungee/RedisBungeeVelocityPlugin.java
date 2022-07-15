@@ -6,9 +6,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
-import com.google.common.io.ByteStreams;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
+import com.imaginarycode.minecraft.redisbungee.commands.RedisBungeeCommands;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerChangedServerNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerJoinedNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
@@ -29,6 +29,7 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.LegacyChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.scheduler.ScheduledTask;
@@ -48,6 +49,7 @@ import java.io.*;
 import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -56,7 +58,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
     private final ProxyServer server;
     private final Logger logger;
-    private final File dataFolder;
+    private final Path dataFolder;
     private final RedisBungeeAPI api;
     private final PubSubListener psl;
     private JedisSummoner jedisSummoner;
@@ -73,6 +75,10 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
     private LuaManager.Script getPlayerCountScript;
 
     private static final Object SERVER_TO_PLAYERS_KEY = new Object();
+    public static final List<ChannelIdentifier> IDENTIFIERS = List.of(
+        MinecraftChannelIdentifier.create("legacy", "redisbungee"),
+        new LegacyChannelIdentifier("RedisBungee")
+    );
     private final Cache<Object, Multimap<String, UUID>> serverToPlayersCache = CacheBuilder.newBuilder()
             .expireAfterWrite(5, TimeUnit.SECONDS)
             .build();
@@ -82,7 +88,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
     public RedisBungeeVelocityPlugin(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
         this.server = server;
         this.logger = logger;
-        this.dataFolder = dataDirectory.toFile();
+        this.dataFolder = dataDirectory;
         try {
             loadConfig();
         } catch (IOException e) {
@@ -107,9 +113,9 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
             for (String s : info.split("\r\n")) {
                 if (s.startsWith("redis_version:")) {
                     String version = s.split(":")[1];
-                    getLogger().info(version + " <- redis version");
+                    getLogger().info("{} <- redis version", version);
                     if (!RedisUtil.isRedisVersionRight(version)) {
-                        getLogger().error("Your version of Redis (" + version + ") is not at least version 6.0 RedisBungee requires a newer version of Redis.");
+                        getLogger().error("Your version of Redis ({}) is not at least version 6.0 RedisBungee requires a newer version of Redis.", version);
                         throw new RuntimeException("Unsupported Redis version detected");
                     } else {
                         LuaManager manager = new LuaManager(this);
@@ -272,7 +278,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
                     if (lagged ? time >= stamp + 30 : time <= stamp + 30)
                         servers.add(entry.getKey());
                     else if (nag && nagTime <= 0) {
-                        getLogger().warn(entry.getKey() + " is " + (time - stamp) + " seconds behind! (Time not synchronized or server down?) and was removed from heartbeat.");
+                        getLogger().warn("{} is {} seconds behind! (Time not synchronized or server down?) and was removed from heartbeat.", entry.getKey(), (time - stamp));
                         jedis.hdel("heartbeats", entry.getKey());
                     }
                 } catch (NumberFormatException ignored) {
@@ -308,12 +314,12 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
 
     @Override
     public void executeAsyncAfter(Runnable runnable, TimeUnit timeUnit, int time) {
-        this.getProxy().getScheduler().buildTask(this, runnable).delay(time, timeUnit);
+        this.getProxy().getScheduler().buildTask(this, runnable).delay(time, timeUnit).schedule();
     }
 
     @Override
     public void callEvent(Object event) {
-        this.getProxy().getEventManager().fire(event);
+        this.getProxy().getEventManager().fireAndForget(event);
     }
 
     @Override
@@ -425,7 +431,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
                     Set<String> laggedPlayers = tmpRsc.smembers("proxy:" + s + ":usersOnline");
                     tmpRsc.del("proxy:" + s + ":usersOnline");
                     if (!laggedPlayers.isEmpty()) {
-                        getLogger().info("Cleaning up lagged proxy " + s + " (" + laggedPlayers.size() + " players)...");
+                        getLogger().info("Cleaning up lagged proxy {} ({} players)...", s, laggedPlayers.size());
                         for (String laggedPlayer : laggedPlayers) {
                             RedisUtil.cleanUpPlayer(laggedPlayer, tmpRsc);
                         }
@@ -449,10 +455,10 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
                     }
                     if (!found) {
                         RedisUtil.cleanUpPlayer(member, tmpRsc);
-                        getLogger().warn("Player found in set that was not found locally and globally: " + member);
+                        getLogger().warn("Player found in set that was not found locally and globally: {}", member);
                     } else {
                         tmpRsc.srem("proxy:" + configuration.getServerId() + ":usersOnline", member);
-                        getLogger().warn("Player found in set that was not found locally, but is on another proxy: " + member);
+                        getLogger().warn("Player found in set that was not found locally, but is on another proxy: {}", member);
                     }
                 }
 
@@ -460,7 +466,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
 
                 for (String player : absentInRedis) {
                     // Player not online according to Redis but not BungeeCord.
-                    getLogger().warn("Player " + player + " is on the proxy but not in Redis.");
+                    getLogger().warn("Player {} is on the proxy but not in Redis.", player);
 
                     Player playerProxied = getProxy().getPlayer(UUID.fromString(player)).orElse(null);
                     if (playerProxied == null)
@@ -475,24 +481,23 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
             }
         }).repeat(1, TimeUnit.MINUTES).schedule();
 
+        // register plugin messages
+        IDENTIFIERS.forEach(getProxy().getChannelRegistrar()::register);
 
-        getProxy().getChannelRegistrar().register(new LegacyChannelIdentifier("RedisBungee"));
-        getProxy().getChannelRegistrar().register(new LegacyChannelIdentifier("legacy:redisbungee"));
-        getProxy().getChannelRegistrar().register(MinecraftChannelIdentifier.create("legacy", "redisbungee"));
         // register commands
-        // those still bungeecord commands will migrate them later.
-        // if (configuration.doOverrideBungeeCommands()) {
-        //     getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.GlistCommand(this));
-        //     getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.FindCommand(this));
-        //     getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.LastSeenCommand(this));
-        //     getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.IpCommand(this));
-        //
-        // }
-        // getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.SendToAll(this));
-        // getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.ServerId(this));
-        // getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.ServerIds(this));
-        // getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.PlayerProxyCommand(this));
-        // getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.PlistCommand(this));
+        // Override Velocity commands
+        if (configuration.doOverrideBungeeCommands()) {
+            getProxy().getCommandManager().register("glist", new RedisBungeeCommands.GlistCommand(this), "redisbungee", "rglist");
+        }
+        
+        getProxy().getCommandManager().register("sendtoall", new RedisBungeeCommands.SendToAll(this), "rsendtoall");
+        getProxy().getCommandManager().register("serverid", new RedisBungeeCommands.ServerId(this), "rserverid");
+        getProxy().getCommandManager().register("serverids", new RedisBungeeCommands.ServerIds(this));
+        getProxy().getCommandManager().register("pproxy", new RedisBungeeCommands.PlayerProxyCommand(this));
+        getProxy().getCommandManager().register("plist", new RedisBungeeCommands.PlistCommand(this), "rplist");
+        getProxy().getCommandManager().register("lastseen", new RedisBungeeCommands.LastSeenCommand(this), "rlastseen");
+        getProxy().getCommandManager().register("ip", new RedisBungeeCommands.IpCommand(this), "playerip", "rip", "rplayerip");
+        getProxy().getCommandManager().register("find", new RedisBungeeCommands.FindCommand(this), "rfind");
     }
 
     @Override
@@ -526,18 +531,26 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
 
     @Override
     public void loadConfig() throws IOException {
-        if (!getDataFolder().exists() && getDataFolder().mkdir()) {
-            getLogger().info("data folder was created");
+        if (Files.notExists(getDataFolder())) {
+            try {
+                Files.createDirectory(getDataFolder());
+                getLogger().info("data folder was created");
+            } catch (IOException e) {
+                getLogger().error("Cannot create data folder", e);
+            }
+            
         }
-        File file = new File(getDataFolder(), "config.yml");
-        if (!file.exists() && file.createNewFile()) {
-            getLogger().info("config file was created");
-            try (InputStream in = getResourceAsStream("example_config.yml");
-                 OutputStream out = Files.newOutputStream(file.toPath())) {
-                ByteStreams.copy(in, out);
+        Path file = getDataFolder().resolve("config.yml");
+        if (Files.notExists(file)) {
+            try (InputStream in = getResourceAsStream("example_config.yml")) {
+                Files.createFile(file);
+                Files.copy(in, file, StandardCopyOption.REPLACE_EXISTING);
+                getLogger().info("config file was created");
+            } catch (IOException e) {
+                getLogger().error("Cannot create configuration", e);
             }
         }
-        final YAMLConfigurationLoader yamlConfiguration = YAMLConfigurationLoader.builder().setFile(file).build();
+        final YAMLConfigurationLoader yamlConfiguration = YAMLConfigurationLoader.builder().setPath(file).build();
         ConfigurationNode node = yamlConfiguration.load();
         final String redisServer = node.getNode("redis-server").getString();
         final int redisPort = node.getNode("redis-port").getInt();
@@ -560,12 +573,12 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
              *  I think due snake yaml limitations so as todo: write our own yaml parser?
              */
             String genId = UUID.randomUUID().toString();
-            getLogger().info("Generated server id " + genId + " and saving it to config.");
+            getLogger().info("Generated server id {} and saving it to config.", genId);
             node.getNode("server-id").setValue(genId);
             yamlConfiguration.save(node);
-            getLogger().info("Server id was generated: " + serverId);
+            getLogger().info("Server id was generated: {}", serverId);
         } else {
-            getLogger().info("Loaded server id " + serverId + '.');
+            getLogger().info("Loaded server id {}.", serverId);
         }
         try {
             this.configuration = new RedisBungeeConfiguration(serverId, node.getNode("exempt-ip-addresses").getList(TypeToken.of(String.class)), node.getNode("register-bungee-commands").getBoolean());
@@ -587,9 +600,15 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
             try (Jedis rsc = requestJedis()) {
                 rsc.ping();
                 // If that worked, now we can check for an existing, alive Bungee:
-                File crashFile = new File(getDataFolder(), "restarted_from_crash.txt");
-                if (crashFile.exists() && crashFile.delete()) {
-                    getLogger().info("crash file was deleted");
+                Path crashFile = getDataFolder().resolve("restarted_from_crash.txt");
+                if (Files.exists(crashFile)) {
+                    try {
+                        Files.delete(crashFile);
+                        getLogger().info("crash file was deleted");
+                    } catch (IOException e) {
+                        getLogger().error("Cannot delete crash file", e);
+                    }
+                    
                 } else if (rsc.hexists("heartbeats", serverId)) {
                     try {
                         long value = Long.parseLong(rsc.hget("heartbeats", serverId));
@@ -653,7 +672,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
         return logger;
     }
 
-    public File getDataFolder() {
+    public Path getDataFolder() {
         return this.dataFolder;
     }
 

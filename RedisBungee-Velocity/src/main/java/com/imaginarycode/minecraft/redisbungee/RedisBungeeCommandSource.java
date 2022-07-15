@@ -4,13 +4,10 @@ package com.imaginarycode.minecraft.redisbungee;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.permission.Tristate;
 import net.kyori.adventure.permission.PermissionChecker;
-import net.kyori.adventure.util.TriState;
-
-import java.util.Collection;
-import java.util.Collections;
 
 public class RedisBungeeCommandSource implements CommandSource {
     private static final RedisBungeeCommandSource singleton;
+    private final PermissionChecker permissionChecker = PermissionChecker.always(net.kyori.adventure.util.TriState.TRUE);
 
     static {
         singleton = new RedisBungeeCommandSource();
@@ -23,16 +20,16 @@ public class RedisBungeeCommandSource implements CommandSource {
 
     @Override
     public boolean hasPermission(String permission) {
-        return true;
+        return this.permissionChecker.test(permission);
     }
 
     @Override
     public Tristate getPermissionValue(String s) {
-        return null;
+        return Tristate.TRUE;
     }
 
     @Override
     public PermissionChecker getPermissionChecker() {
-        return PermissionChecker.always(TriState.TRUE);
+        return this.permissionChecker;
     }
 }
