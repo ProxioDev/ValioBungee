@@ -104,7 +104,11 @@ public class PluginMainClass {
 
 ## Javadocs
 
-https://proxiodev.github.io/RedisBungee-JavaDocs/0.7.2-SNAPSHOT
+For current version [0.8.0](https://proxiodev.github.io/RedisBungee-JavaDocs/0.8.0-SNAPSHOT/) 
+
+For legacy Version [0.6.5](https://proxiodev.github.io/RedisBungee-JavaDocs/0.6.5-SNAPSHOT/)
+
+
 
 ## Configuration
 
