@@ -3,7 +3,7 @@
 
 # Cluster Mode its in different config file redis-cluster.yml
 # enabling this option will ignore redis config of this file
-cluster-mode: false
+cluster-mode-enabled: false
 
 # The Redis server you use.
 # Get Redis from http://redis.io/
