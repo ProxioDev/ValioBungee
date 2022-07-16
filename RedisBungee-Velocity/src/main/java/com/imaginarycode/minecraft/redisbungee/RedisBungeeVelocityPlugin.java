@@ -13,7 +13,7 @@ import com.imaginarycode.minecraft.redisbungee.events.PlayerChangedServerNetwork
 import com.imaginarycode.minecraft.redisbungee.events.PlayerJoinedNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import com.imaginarycode.minecraft.redisbungee.internal.*;
-import com.imaginarycode.minecraft.redisbungee.internal.summoners.JedisSummoner;
+import com.imaginarycode.minecraft.redisbungee.internal.summoners.Summoner;
 import com.imaginarycode.minecraft.redisbungee.internal.summoners.SinglePoolJedisSummoner;
 import com.imaginarycode.minecraft.redisbungee.internal.util.IOUtil;
 import com.imaginarycode.minecraft.redisbungee.internal.util.LuaManager;
@@ -61,7 +61,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
     private final Path dataFolder;
     private final RedisBungeeAPI api;
     private final PubSubListener psl;
-    private JedisSummoner jedisSummoner;
+    private Summoner jedisSummoner;
     private final UUIDTranslator uuidTranslator;
     private RedisBungeeConfiguration configuration;
     private final VelocityDataManager dataManager;
@@ -201,7 +201,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
     }
 
     @Override
-    public JedisSummoner getJedisSummoner() {
+    public Summoner getSummoner() {
         return this.jedisSummoner;
     }
 

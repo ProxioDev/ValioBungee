@@ -12,7 +12,7 @@ import com.imaginarycode.minecraft.redisbungee.events.PlayerChangedServerNetwork
 import com.imaginarycode.minecraft.redisbungee.events.PlayerJoinedNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import com.imaginarycode.minecraft.redisbungee.internal.*;
-import com.imaginarycode.minecraft.redisbungee.internal.summoners.JedisSummoner;
+import com.imaginarycode.minecraft.redisbungee.internal.summoners.Summoner;
 import com.imaginarycode.minecraft.redisbungee.internal.summoners.SinglePoolJedisSummoner;
 import com.imaginarycode.minecraft.redisbungee.internal.util.IOUtil;
 import com.imaginarycode.minecraft.redisbungee.internal.util.LuaManager;
@@ -48,7 +48,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin<ProxiedPlayer> {
     private RedisBungeeAPI api;
     private PubSubListener psl = null;
-    private JedisSummoner jedisSummoner;
+    private Summoner jedisSummoner;
     private UUIDTranslator uuidTranslator;
     private RedisBungeeConfiguration configuration;
     private BungeeDataManager dataManager;
@@ -503,7 +503,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
     }
 
     @Override
-    public JedisSummoner getJedisSummoner() {
+    public Summoner getSummoner() {
         return this.jedisSummoner;
     }
 

@@ -11,7 +11,6 @@ import com.imaginarycode.minecraft.redisbungee.internal.AbstractDataManager;
 import com.imaginarycode.minecraft.redisbungee.internal.RedisBungeePlugin;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import com.imaginarycode.minecraft.redisbungee.internal.RedisUtil;
-import com.imaginarycode.minecraft.redisbungee.internal.util.RedisCallable;
 import net.md_5.bungee.api.AbstractReconnectHandler;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -21,6 +20,7 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.event.EventHandler;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.Pipeline;
 
 import java.net.InetAddress;
@@ -123,6 +123,11 @@ public class RedisBungeeBungeeListener extends AbstractRedisBungeeListener<Login
                 jedis.publish("redisbungee-data", gson.toJson(new AbstractDataManager.DataManagerMessage(
                         event.getPlayer().getUniqueId(), plugin.getApi().getServerId(), AbstractDataManager.DataManagerMessage.Action.SERVER_CHANGE,
                         new AbstractDataManager.ServerChangePayload(event.getServer().getInfo().getName(), currentServer))));
+                return null;
+            }
+
+            @Override
+            protected Void call(JedisCluster jedisCluster) {
                 return null;
             }
         });

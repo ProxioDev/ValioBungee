@@ -1,25 +1,35 @@
 package com.imaginarycode.minecraft.redisbungee.internal.summoners;
 
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.JedisPool;
 
-import java.io.Closeable;
+import java.io.IOException;
 
+public class JedisSummoner implements Summoner<Jedis> {
 
-/**
- * This class intended for future release to support redis sentinel or redis clusters
- *
- * @author Ham1255
- * @since 0.7.0
- *
- */
-public interface JedisSummoner extends Closeable {
+    private final JedisPool jedisPool;
 
-    Jedis requestJedis();
+    public JedisSummoner(JedisPool jedisPool) {
+        this.jedisPool = jedisPool;
+    }
 
-    boolean isJedisAvailable();
+    @Override
+    public Jedis obtainResource() {
+        return jedisPool.getResource();
+    }
 
-    JedisPool getJedisPool();
+    public JedisPool getJedisPool() {
+        return this.jedisPool;
+    }
 
+    @Override
+    public boolean isAvailable() {
+        return !jedisPool.isClosed();
+    }
+
+    @Override
+    public void close() throws IOException {
+        this.jedisPool.close();
+
+    }
 }

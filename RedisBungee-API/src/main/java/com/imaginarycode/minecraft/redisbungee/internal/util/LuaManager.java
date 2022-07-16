@@ -2,6 +2,7 @@ package com.imaginarycode.minecraft.redisbungee.internal.util;
 
 import com.imaginarycode.minecraft.redisbungee.internal.RedisBungeePlugin;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.exceptions.JedisDataException;
 
 import java.util.List;
@@ -14,10 +15,20 @@ public class LuaManager {
     }
 
     public Script createScript(String script) {
-        try (Jedis jedis = plugin.getJedisSummoner().requestJedis()) {
-            String hash = jedis.scriptLoad(script);
-            return new Script(script, hash);
-        }
+        RedisTask<Script> scriptRedisTask = new RedisTask<Script>(plugin.getApi()) {
+            @Override
+            public Script singleJedisTask(Jedis jedis) {
+                String hash = jedis.scriptLoad(script);
+                return new Script(script, hash);
+            }
+
+            @Override
+            public Script clusterJedisTask(JedisCluster jedisCluster) {
+                String hash = jedisCluster.scriptLoad(script,  null);
+                return new Script(script, hash);
+            }
+        };
+        return scriptRedisTask.execute();
     }
 
     public class Script {
@@ -38,21 +49,40 @@ public class LuaManager {
         }
 
         public Object eval(List<String> keys, List<String> args) {
-            Object data;
-
-            try (Jedis jedis = plugin.getJedisSummoner().requestJedis()) {
-                try {
-                    data = jedis.evalsha(hashed, keys, args);
-                } catch (JedisDataException e) {
-                    if (e.getMessage().startsWith("NOSCRIPT")) {
-                        data = jedis.eval(script, keys, args);
-                    } else {
-                        throw e;
+            RedisTask<Object> objectRedisTask = new RedisTask<Object>(plugin.getApi()) {
+                @Override
+                public Object singleJedisTask(Jedis jedis) {
+                    Object data;
+                    try {
+                        data = jedis.evalsha(hashed, keys, args);
+                    } catch (JedisDataException e) {
+                        if (e.getMessage().startsWith("NOSCRIPT")) {
+                            data = jedis.eval(script, keys, args);
+                        } else {
+                            throw e;
+                        }
                     }
+                    return data;
                 }
-            }
 
-            return data;
+                @Override
+                public Object clusterJedisTask(JedisCluster jedisCluster) {
+                    Object data;
+                    try {
+                        data = jedisCluster.evalsha(hashed, keys, args);
+                    } catch (JedisDataException e) {
+                        if (e.getMessage().startsWith("NOSCRIPT")) {
+                            data = jedisCluster.eval(script, keys, args);
+                        } else {
+                            throw e;
+                        }
+                    }
+                    return data;
+                }
+            };
+
+
+            return objectRedisTask.execute();
         }
     }
 }

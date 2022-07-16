@@ -1,13 +1,14 @@
 package com.imaginarycode.minecraft.redisbungee.internal;
 
+import com.imaginarycode.minecraft.redisbungee.internal.util.RedisTask;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 
 public class PubSubListener implements Runnable {
     private JedisPubSubHandler jpsh;
@@ -21,27 +22,58 @@ public class PubSubListener implements Runnable {
 
     @Override
     public void run() {
-        try (Jedis rsc = plugin.getJedisSummoner().requestJedis()) {
-            try {
-
-                jpsh = new JedisPubSubHandler(plugin);
-                addedChannels.add("redisbungee-" + plugin.getConfiguration().getServerId());
-                addedChannels.add("redisbungee-allservers");
-                addedChannels.add("redisbungee-data");
-                rsc.subscribe(jpsh, addedChannels.toArray(new String[0]));
-            } catch (Exception e) {
-                // FIXME: Extremely ugly hack
-                // Attempt to unsubscribe this instance and try again.
-               plugin.logWarn("PubSub error, attempting to recover.");
+        RedisTask<Void> subTask = new RedisTask<Void>(plugin.getApi()) {
+            @Override
+            public Void singleJedisTask(Jedis jedis) {
                 try {
-                    jpsh.unsubscribe();
-                } catch (Exception e1) {
+                    jpsh = new JedisPubSubHandler(plugin);
+                    addedChannels.add("redisbungee-" + plugin.getConfiguration().getServerId());
+                    addedChannels.add("redisbungee-allservers");
+                    addedChannels.add("redisbungee-data");
+                    jedis.subscribe(jpsh, addedChannels.toArray(new String[0]));
+                } catch (Exception e) {
+                    // FIXME: Extremely ugly hack
+                    // Attempt to unsubscribe this instance and try again.
+                    plugin.logWarn("PubSub error, attempting to recover.");
+                    try {
+                        jpsh.unsubscribe();
+                    } catch (Exception e1) {
                         /* This may fail with
                         - java.net.SocketException: Broken pipe
                         - redis.clients.jedis.exceptions.JedisConnectionException: JedisPubSub was not subscribed to a Jedis instance
                         */
+                    }
                 }
+                return null;
             }
+
+            @Override
+            public Void clusterJedisTask(JedisCluster jedisCluster) {
+                try {
+                    jpsh = new JedisPubSubHandler(plugin);
+                    addedChannels.add("redisbungee-" + plugin.getConfiguration().getServerId());
+                    addedChannels.add("redisbungee-allservers");
+                    addedChannels.add("redisbungee-data");
+                    jedisCluster.subscribe(jpsh, addedChannels.toArray(new String[0]));
+                } catch (Exception e) {
+                    // FIXME: Extremely ugly hack
+                    // Attempt to unsubscribe this instance and try again.
+                    plugin.logWarn("PubSub error, attempting to recover.");
+                    try {
+                        jpsh.unsubscribe();
+                    } catch (Exception e1) {
+                        /* This may fail with
+                        - java.net.SocketException: Broken pipe
+                        - redis.clients.jedis.exceptions.JedisConnectionException: JedisPubSub was not subscribed to a Jedis instance
+                        */
+                    }
+                }
+                return null;
+            }
+        };
+
+        try  {
+            subTask.execute();
         } catch (JedisConnectionException e) {
             plugin.logWarn("PubSub error, attempting to recover in 5 secs.");
             plugin.executeAsyncAfter(this, TimeUnit.SECONDS, 5);

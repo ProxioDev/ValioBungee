@@ -6,6 +6,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.imaginarycode.minecraft.redisbungee.internal.RedisBungeePlugin;
 import com.imaginarycode.minecraft.redisbungee.internal.summoners.JedisSummoner;
+import com.imaginarycode.minecraft.redisbungee.internal.summoners.Summoner;
+import com.imaginarycode.minecraft.redisbungee.internal.util.RedisBungeeMode;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -311,30 +313,60 @@ public class RedisBungeeAPI {
      * @since 0.7.0
      */
     public Jedis requestJedis() {
-        return this.plugin.getJedisSummoner().requestJedis();
+        if (getMode() == RedisBungeeMode.SINGLE) {
+            return ((JedisSummoner) this.plugin.getSummoner()).obtainResource();
+        } else {
+            throw new RuntimeException("RedisBungee is on Cluster MODE!");
+        }
     }
-
     /**
      * This gets Redis Bungee {@link JedisPool}
      * @return {@link JedisPool}
      *  @since 0.6.5
      */
     public JedisPool getJedisPool() {
-        return this.plugin.getJedisSummoner().getJedisPool();
+        if (getMode() == RedisBungeeMode.SINGLE) {
+            return ((JedisSummoner) this.plugin.getSummoner()).getJedisPool();
+        } else {
+            throw new RuntimeException("RedisBungee is on Cluster MODE!");
+        }
     }
 
     /**
-     * This gets Redis Bungee {@link JedisPool}
-     * @return {@link JedisPool}
-     *  @since 0.6.5
-     */
-    public JedisSummoner getJedisSummoner() {
-        return this.plugin.getJedisSummoner();
-    }
-
-
-    /**
+     * returns Summoner class responsible for Single Jedis {@link Jedis}, Cluster Jedis {@link redis.clients.jedis.JedisCluster} handling
      *
+     * @return {@link Summoner}
+     * @since 0.8.0
+     */
+    public Summoner<?> getSummoner() {
+        return this.plugin.getSummoner();
+    }
+
+    /**
+     * This gives you instance of Jedis Cluster
+     * @return {@link redis.clients.jedis.JedisCluster}
+     * @since 0.8.0
+     */
+    public Jedis requestClusterJedis() {
+        if (getMode() == RedisBungeeMode.CLUSTER) {
+            return ((JedisSummoner) this.plugin.getSummoner()).obtainResource();
+        } else {
+            throw new RuntimeException("RedisBungee is on single MODE!");
+        }
+    }
+
+    /**
+     * shows what mode is RedisBungee is on
+     * @return {@link RedisBungeeMode}
+     * @since 0.8.0
+     */
+    public RedisBungeeMode getMode() {
+        return this.plugin.getRedisBungeeMode();
+    }
+
+
+    /**
+     * Api instance
      * @return the API instance.
      * @since 0.6.5
      */

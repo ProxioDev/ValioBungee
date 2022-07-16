@@ -11,7 +11,6 @@ import com.imaginarycode.minecraft.redisbungee.internal.AbstractDataManager;
 import com.imaginarycode.minecraft.redisbungee.internal.RedisBungeePlugin;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import com.imaginarycode.minecraft.redisbungee.internal.RedisUtil;
-import com.imaginarycode.minecraft.redisbungee.internal.util.RedisCallable;
 import com.velocitypowered.api.event.Continuation;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.ResultedEvent;

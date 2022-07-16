@@ -8,7 +8,9 @@ import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.imaginarycode.minecraft.redisbungee.internal.util.RedisTask;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisCluster;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
@@ -52,12 +54,17 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
             return plugin.isPlayerOnAServer(player) ? plugin.getPlayerServerName(player) : null;
 
         try {
-            return serverCache.get(uuid, new Callable<String>() {
+            return serverCache.get(uuid, new RedisTask<String>(plugin.getApi()) {
                 @Override
-                public String call() throws Exception {
-                    try (Jedis tmpRsc = plugin.getJedisSummoner().requestJedis()) {
-                        return Objects.requireNonNull(tmpRsc.hget("player:" + uuid, "server"), "user not found");
-                    }
+                public String singleJedisTask(Jedis jedis) {
+                    return Objects.requireNonNull(jedis.hget("player:" + uuid, "server"), "user not found");
+
+                }
+
+                @Override
+                public String clusterJedisTask(JedisCluster jedisCluster) {
+                    return Objects.requireNonNull(jedisCluster.hget("player:" + uuid, "server"), "user not found");
+
                 }
             });
         } catch (ExecutionException | UncheckedExecutionException e) {
@@ -76,12 +83,15 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
             return plugin.getConfiguration().getServerId();
 
         try {
-            return proxyCache.get(uuid, new Callable<String>() {
+            return proxyCache.get(uuid, new RedisTask<String>(plugin.getApi()) {
                 @Override
-                public String call() throws Exception {
-                    try (Jedis tmpRsc = plugin.getJedisSummoner().requestJedis()) {
-                        return Objects.requireNonNull(tmpRsc.hget("player:" + uuid, "proxy"), "user not found");
-                    }
+                public String singleJedisTask(Jedis jedis) {
+                    return Objects.requireNonNull(jedis.hget("player:" + uuid, "proxy"), "user not found");
+                }
+
+                @Override
+                public String clusterJedisTask(JedisCluster jedisCluster) {
+                    return Objects.requireNonNull(jedisCluster.hget("player:" + uuid, "proxy"), "user not found");
                 }
             });
         } catch (ExecutionException | UncheckedExecutionException e) {
@@ -99,15 +109,21 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
             return plugin.getPlayerIp(player);
 
         try {
-            return ipCache.get(uuid, new Callable<InetAddress>() {
+            return ipCache.get(uuid, new RedisTask<InetAddress>(plugin.getApi()) {
                 @Override
-                public InetAddress call() throws Exception {
-                    try (Jedis tmpRsc = plugin.getJedisSummoner().requestJedis()) {
-                        String result = tmpRsc.hget("player:" + uuid, "ip");
-                        if (result == null)
-                            throw new NullPointerException("user not found");
-                        return InetAddresses.forString(result);
-                    }
+                public InetAddress singleJedisTask(Jedis jedis) {
+                    String result = jedis.hget("player:" + uuid, "ip");
+                    if (result == null)
+                        throw new NullPointerException("user not found");
+                    return InetAddresses.forString(result);
+                }
+
+                @Override
+                public InetAddress clusterJedisTask(JedisCluster jedisCluster) {
+                    String result = jedisCluster.hget("player:" + uuid, "ip");
+                    if (result == null)
+                        throw new NullPointerException("user not found");
+                    return InetAddresses.forString(result);
                 }
             });
         } catch (ExecutionException | UncheckedExecutionException e) {
@@ -125,13 +141,17 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
             return 0;
 
         try {
-            return lastOnlineCache.get(uuid, new Callable<Long>() {
+            return lastOnlineCache.get(uuid, new RedisTask<Long>(plugin.getApi()) {
                 @Override
-                public Long call() throws Exception {
-                    try (Jedis tmpRsc = plugin.getJedisSummoner().requestJedis()) {
-                        String result = tmpRsc.hget("player:" + uuid, "online");
-                        return result == null ? -1 : Long.valueOf(result);
-                    }
+                public Long singleJedisTask(Jedis jedis) {
+                    String result = jedis.hget("player:" + uuid, "online");
+                    return result == null ? -1 : Long.parseLong(result);
+                }
+
+                @Override
+                public Long clusterJedisTask(JedisCluster jedisCluster) {
+                    String result = jedisCluster.hget("player:" + uuid, "online");
+                    return result == null ? -1 : Long.parseLong(result);
                 }
             });
         } catch (ExecutionException e) {
@@ -149,6 +169,7 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
 
     // Invalidate all entries related to this player, since they now lie. (call invalidate(uuid))
     public abstract void onPostLogin(PL event);
+
     // Invalidate all entries related to this player, since they now lie. (call invalidate(uuid))
     public abstract void onPlayerDisconnect(PD event);
 
@@ -181,7 +202,8 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
                         Object event;
                         try {
                             event = plugin.getNetworkJoinEventClass().getDeclaredConstructor(UUID.class).newInstance(message1.getTarget());
-                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                                 NoSuchMethodException e) {
                             throw new RuntimeException("unable to dispatch an network join event", e);
                         }
                         plugin.callEvent(event);
@@ -200,7 +222,8 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
                         Object event;
                         try {
                             event = plugin.getNetworkQuitEventClass().getDeclaredConstructor(UUID.class).newInstance(message2.getTarget());
-                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                                 NoSuchMethodException e) {
                             throw new RuntimeException("unable to dispatch an network quit event", e);
                         }
                         plugin.callEvent(event);
@@ -217,7 +240,8 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
                         Object event;
                         try {
                             event = plugin.getServerChangeEventClass().getDeclaredConstructor(UUID.class, String.class, String.class).newInstance(message3.getTarget(), ((ServerChangePayload) message3.getPayload()).getOldServer(), ((ServerChangePayload) message3.getPayload()).getServer());
-                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                                 NoSuchMethodException e) {
                             throw new RuntimeException("unable to dispatch an server change event", e);
                         }
                         plugin.callEvent(event);
@@ -275,7 +299,7 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
         }
     }
 
-    public static class ServerChangePayload{
+    public static class ServerChangePayload {
         private final String server;
         private final String oldServer;
 
