@@ -1,4 +1,4 @@
-package com.imaginarycode.minecraft.redisbungee.internal.summoners;
+package com.imaginarycode.minecraft.redisbungee.api.summoners;
 
 import redis.clients.jedis.JedisCluster;
 

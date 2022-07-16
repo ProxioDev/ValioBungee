@@ -1,4 +1,4 @@
-package com.imaginarycode.minecraft.redisbungee.internal.util;
+package com.imaginarycode.minecraft.redisbungee.api.util;
 
 import com.google.common.io.ByteStreams;
 

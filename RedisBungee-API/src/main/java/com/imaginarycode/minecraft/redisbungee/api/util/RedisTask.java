@@ -1,10 +1,10 @@
-package com.imaginarycode.minecraft.redisbungee.internal.util;
+package com.imaginarycode.minecraft.redisbungee.api.util;
 
 import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
-import com.imaginarycode.minecraft.redisbungee.internal.RedisBungeePlugin;
-import com.imaginarycode.minecraft.redisbungee.internal.summoners.ClusterJedisSummoner;
-import com.imaginarycode.minecraft.redisbungee.internal.summoners.JedisSummoner;
-import com.imaginarycode.minecraft.redisbungee.internal.summoners.Summoner;
+import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
+import com.imaginarycode.minecraft.redisbungee.api.summoners.ClusterJedisSummoner;
+import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisSummoner;
+import com.imaginarycode.minecraft.redisbungee.api.summoners.Summoner;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
 

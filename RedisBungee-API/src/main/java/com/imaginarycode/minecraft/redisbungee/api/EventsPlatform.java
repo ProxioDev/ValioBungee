@@ -1,4 +1,4 @@
-package com.imaginarycode.minecraft.redisbungee.internal;
+package com.imaginarycode.minecraft.redisbungee.api;
 
 /**
  * Since each platform have their own events' implementation for example Bungeecord events extends Event while velocity don't

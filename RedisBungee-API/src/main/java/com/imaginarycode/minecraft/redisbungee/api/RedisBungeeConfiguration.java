@@ -1,4 +1,4 @@
-package com.imaginarycode.minecraft.redisbungee.internal;
+package com.imaginarycode.minecraft.redisbungee.api;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.net.InetAddresses;

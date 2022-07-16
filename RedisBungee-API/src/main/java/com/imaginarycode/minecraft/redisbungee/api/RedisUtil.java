@@ -1,4 +1,4 @@
-package com.imaginarycode.minecraft.redisbungee.internal;
+package com.imaginarycode.minecraft.redisbungee.api;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.Gson;

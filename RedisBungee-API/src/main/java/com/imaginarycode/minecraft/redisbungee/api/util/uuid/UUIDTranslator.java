@@ -1,13 +1,12 @@
-package com.imaginarycode.minecraft.redisbungee.internal.util.uuid;
+package com.imaginarycode.minecraft.redisbungee.api.util.uuid;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.gson.Gson;
-import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
-import com.imaginarycode.minecraft.redisbungee.internal.RedisBungeePlugin;
+import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 
-import com.imaginarycode.minecraft.redisbungee.internal.util.RedisTask;
+import com.imaginarycode.minecraft.redisbungee.api.util.RedisTask;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;

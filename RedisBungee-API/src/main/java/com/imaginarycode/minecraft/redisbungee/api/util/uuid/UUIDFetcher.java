@@ -1,4 +1,4 @@
-package com.imaginarycode.minecraft.redisbungee.internal.util.uuid;
+package com.imaginarycode.minecraft.redisbungee.api.util.uuid;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;

@@ -1,6 +1,6 @@
-package com.imaginarycode.minecraft.redisbungee.internal;
+package com.imaginarycode.minecraft.redisbungee.api;
 
-import com.imaginarycode.minecraft.redisbungee.internal.util.RedisTask;
+import com.imaginarycode.minecraft.redisbungee.api.util.RedisTask;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.exceptions.JedisConnectionException;

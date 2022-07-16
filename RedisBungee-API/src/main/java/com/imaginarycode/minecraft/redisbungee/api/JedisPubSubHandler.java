@@ -1,4 +1,4 @@
-package com.imaginarycode.minecraft.redisbungee.internal;
+package com.imaginarycode.minecraft.redisbungee.api;
 
 
 import redis.clients.jedis.JedisPubSub;
