@@ -86,6 +86,7 @@ public class PluginMainClass {
 
 }
 ```
+## Getting the latest commits to your code
 If you want to use the latest commits without waiting for releases.
 first, install it to your maven local repo
 ```
@@ -93,7 +94,7 @@ git clone https://github.com/ProxioDev/RedisBungee.git
 cd RedisBungee
 mvn clean install
 ```
-then use any of these to your project.
+then use any of these in your project.
 ```
 <dependency>
         <groupId>com.imaginarycode.minecraft</groupId>
@@ -101,6 +102,8 @@ then use any of these to your project.
         <version>VERSION</version>
         <scope>provided</scope>
 </dependency>
+```
+```
 <dependency>
         <groupId>com.imaginarycode.minecraft</groupId>
         <artifactId>RedisBungee-Velocity</artifactId>
