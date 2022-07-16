@@ -275,6 +275,12 @@ public final class UUIDTranslator {
         jedis.hmset("uuid-cache", ImmutableMap.of(name.toLowerCase(), json, uuid.toString(), json));
     }
 
+    public void persistInfo(String name, UUID uuid, Pipeline pipeline) {
+        addToMaps(name, uuid);
+        String json = gson.toJson(uuidToNameMap.get(uuid));
+        pipeline.hmset("uuid-cache", ImmutableMap.of(name.toLowerCase(), json, uuid.toString(), json));
+    }
+
     public void persistInfo(String name, UUID uuid, JedisCluster jedisCluster) {
         addToMaps(name, uuid);
         String json = gson.toJson(uuidToNameMap.get(uuid));

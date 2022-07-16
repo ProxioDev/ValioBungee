@@ -1,8 +1,8 @@
 # RedisBungee configuration file.
 # PLEASE READ THE WIKI: https://github.com/ProxioDev/RedisBungee/wiki
 
-# Cluster Mode its in different config file redis-cluster.yml
-# enabling this option will ignore redis config of this file
+# Cluster Mode
+# enabling this option will enable cluster mode.
 cluster-mode-enabled: false
 
 # The Redis server you use.

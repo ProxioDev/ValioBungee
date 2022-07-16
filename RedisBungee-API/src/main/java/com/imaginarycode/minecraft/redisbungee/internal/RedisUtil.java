@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.Gson;
 import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.Pipeline;
 
 import java.util.UUID;
@@ -23,6 +24,15 @@ public class RedisUtil {
     }
 
     public static void cleanUpPlayer(String player, Pipeline rsc) {
+        rsc.srem("proxy:" + RedisBungeeAPI.getRedisBungeeApi().getServerId() + ":usersOnline", player);
+        rsc.hdel("player:" + player, "server", "ip", "proxy");
+        long timestamp = System.currentTimeMillis();
+        rsc.hset("player:" + player, "online", String.valueOf(timestamp));
+        rsc.publish("redisbungee-data", gson.toJson(new AbstractDataManager.DataManagerMessage<>(
+                UUID.fromString(player), RedisBungeeAPI.getRedisBungeeApi().getServerId(), AbstractDataManager.DataManagerMessage.Action.LEAVE,
+                new AbstractDataManager.LogoutPayload(timestamp))));
+    }
+    public static void cleanUpPlayer(String player, JedisCluster rsc) {
         rsc.srem("proxy:" + RedisBungeeAPI.getRedisBungeeApi().getServerId() + ":usersOnline", player);
         rsc.hdel("player:" + player, "server", "ip", "proxy");
         long timestamp = System.currentTimeMillis();
