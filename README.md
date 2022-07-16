@@ -31,22 +31,7 @@ as its last version before internal changes.
 
 RedisBungee is distributed as a [maven](https://maven.apache.org) project.
 
-first, install it to your maven local repo as we don't have public maven repo.
-```
-git clone https://github.com/ProxioDev/RedisBungee.git
-cd RedisBungee
-mvn clean install
-```
-then to import for bungeecord use:
-```
-<dependency>
-        <groupId>com.imaginarycode.minecraft</groupId>
-        <artifactId>RedisBungee-Bungee</artifactId>
-        <version>VERSION</version>
-        <scope>provided</scope>
-</dependency>
-```
-Second method by using jitpack [![](https://jitpack.io/v/limework/redisbungee.svg)](https://jitpack.io/#limework/redisbungee)
+By using jitpack [![](https://jitpack.io/v/limework/redisbungee.svg)](https://jitpack.io/#limework/redisbungee)
 
 ## Setup jitpack repository
 ```
@@ -101,7 +86,28 @@ public class PluginMainClass {
 
 }
 ```
-
+If you want to use the latest commits without waiting for releases.
+first, install it to your maven local repo
+```
+git clone https://github.com/ProxioDev/RedisBungee.git
+cd RedisBungee
+mvn clean install
+```
+then use any of these to your project.
+```
+<dependency>
+        <groupId>com.imaginarycode.minecraft</groupId>
+        <artifactId>RedisBungee-Bungee</artifactId>
+        <version>VERSION</version>
+        <scope>provided</scope>
+</dependency>
+<dependency>
+        <groupId>com.imaginarycode.minecraft</groupId>
+        <artifactId>RedisBungee-Velocity</artifactId>
+        <version>VERSION</version>
+        <scope>provided</scope>
+</dependency>
+```
 ## Javadocs
 
 For current version [0.8.0](https://proxiodev.github.io/RedisBungee-JavaDocs/0.8.0-SNAPSHOT/) 
