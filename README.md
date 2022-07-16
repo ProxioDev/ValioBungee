@@ -8,7 +8,7 @@ The main project of RedisBungee is no longer maintained, so we have forked the p
 
 RedisBungee uses [Redis](https://redis.io) to Synchronize players data between [BungeeCord](https://github.com/SpigotMC/BungeeCord) or [Velocity*](https://github.com/PaperMC/Velocity) proxies
 
-Velocity*: *version 3.x.x is only supported*
+Velocity*: *version 3.1.2 or above is only supported, any version below that might work but might be unstable* #40
 
 If you are looking to use Original RedisBungee without a change to internals,
 with critical bugs fixed, please use version [0.6.5](https://github.com/ProxioDev/RedisBungee/releases/tag/0.6.5) 
@@ -87,7 +87,7 @@ depends: [ RedisBungee ]
 	    <scope>provided</scope>
 	</dependency>
 ```
-then to make your plugin depends on RedisBungee in make sure your Annotation have `@Dependency(id = "redisbungee")` like this
+then to make your plugin depends on RedisBungee, make sure your plugin class Annotation have `@Dependency(id = "redisbungee")` like this
 ```
 @Plugin(
   id = "myplugin",
