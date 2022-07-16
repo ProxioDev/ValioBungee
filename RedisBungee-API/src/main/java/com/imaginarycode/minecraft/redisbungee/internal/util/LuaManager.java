@@ -14,6 +14,8 @@ public class LuaManager {
         this.plugin = plugin;
     }
 
+
+
     public Script createScript(String script) {
         RedisTask<Script> scriptRedisTask = new RedisTask<Script>(plugin.getApi()) {
             @Override
