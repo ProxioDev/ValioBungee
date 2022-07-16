@@ -1,6 +1,7 @@
 package com.imaginarycode.minecraft.redisbungee.internal.util;
 
 import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
+import com.imaginarycode.minecraft.redisbungee.internal.RedisBungeePlugin;
 import com.imaginarycode.minecraft.redisbungee.internal.summoners.ClusterJedisSummoner;
 import com.imaginarycode.minecraft.redisbungee.internal.summoners.JedisSummoner;
 import com.imaginarycode.minecraft.redisbungee.internal.summoners.Summoner;
@@ -14,6 +15,8 @@ public abstract class RedisTask<V> implements Runnable, Callable<V> {
     private final Summoner<?> summoner;
     private final RedisBungeeAPI api;
 
+    private RedisBungeePlugin<?> plugin;
+
     @Override
     public V call() throws Exception {
         return execute();
@@ -21,6 +24,12 @@ public abstract class RedisTask<V> implements Runnable, Callable<V> {
 
     public RedisTask(RedisBungeeAPI api) {
         this.api = api;
+        this.summoner = api.getSummoner();
+    }
+
+    public RedisTask(RedisBungeePlugin<?> plugin) {
+        this.plugin = plugin;
+        this.api = plugin.getApi();
         this.summoner = api.getSummoner();
     }
 
@@ -47,4 +56,10 @@ public abstract class RedisTask<V> implements Runnable, Callable<V> {
         return null;
     }
 
+    public RedisBungeePlugin<?> getPlugin() {
+        if (plugin == null) {
+            throw new NullPointerException("Plugin is null in the task");
+        }
+        return plugin;
+    }
 }
