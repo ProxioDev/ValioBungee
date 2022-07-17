@@ -881,8 +881,12 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
             if (yamlConfiguration.getBoolean("cluster-mode-enabled", false)) {
                 GenericObjectPoolConfig<Connection> poolConfig = new GenericObjectPoolConfig<>();
                 poolConfig.setMaxTotal(yamlConfiguration.getInt("max-redis-connections", 8));
-                this.jedisSummoner = new ClusterJedisSummoner(new JedisCluster(new HostAndPort(redisServer, redisPort), 5000, 5000, 60, serverId, redisPassword, poolConfig, useSSL));
-                this.redisBungeeMode = RedisBungeeMode.CLUSTER;
+                if (redisPassword != null) {
+                    this.jedisSummoner = new ClusterJedisSummoner(new JedisCluster(new HostAndPort(redisServer, redisPort), 5000, 5000, 60, serverId, redisPassword, poolConfig, useSSL));
+                } else {
+                    this.jedisSummoner = new ClusterJedisSummoner(new JedisCluster(new HostAndPort(redisServer, redisPort), 5000, 5000, 60, poolConfig));
+                    getLogger().warning("SSL option is ignored in Cluster mode if no PASSWORD is set");
+                }this.redisBungeeMode = RedisBungeeMode.CLUSTER;
                 getLogger().log(Level.INFO, "RedisBungee MODE: CLUSTER");
             } else {
                 JedisPoolConfig config = new JedisPoolConfig();
