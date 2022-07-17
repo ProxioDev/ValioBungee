@@ -55,7 +55,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
 
 @Plugin(id = "redisbungee", name = "RedisBungee", version = PomData.VERSION, url = "https://github.com/ProxioDev/RedisBungee", authors = "ProxioDev")
 public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
@@ -70,7 +69,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
     private RedisBungeeConfiguration configuration;
     private final VelocityDataManager dataManager;
     private final OkHttpClient httpClient;
-    private volatile List<String> serverIds;
+    private volatile List<String> proxiesIds;
     private final AtomicInteger nagAboutServers = new AtomicInteger();
     private final AtomicInteger globalPlayerCount = new AtomicInteger();
     private ScheduledTask integrityCheck;
@@ -165,9 +164,9 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
                         throw new RuntimeException(e);
                     }
                     getLogger().info("crash file was deleted");
-                } else if (jedis.hexists("heartbeats", configuration.getServerId())) {
+                } else if (jedis.hexists("heartbeats", configuration.getProxyId())) {
                     try {
-                        long value = Long.parseLong(jedis.hget("heartbeats", configuration.getServerId()));
+                        long value = Long.parseLong(jedis.hget("heartbeats", configuration.getProxyId()));
                         long redisTime = getRedisTime(jedis.time());
                         if (redisTime < value + 20) {
                             getLogger().error("You have launched a possible impostor Velocity / Bungeecord instance. Another instance is already running.");
@@ -178,7 +177,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
                     } catch (NumberFormatException ignored) {
                     }
                 } else {
-                    jedis.hset("heartbeats", configuration.getServerId(), jedis.time().get(0));
+                    jedis.hset("heartbeats", configuration.getProxyId(), jedis.time().get(0));
                 }
 
                 return null;
@@ -194,9 +193,9 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
                         throw new RuntimeException(e);
                     }
                     getLogger().info("crash file was deleted");
-                } else if (jedisCluster.hexists("heartbeats", configuration.getServerId())) {
+                } else if (jedisCluster.hexists("heartbeats", configuration.getProxyId())) {
                     try {
-                        long value = Long.parseLong(jedisCluster.hget("heartbeats", configuration.getServerId()));
+                        long value = Long.parseLong(jedisCluster.hget("heartbeats", configuration.getProxyId()));
                         long redisTime = getRedisClusterTime();
 
                         if (redisTime < value + 20) {
@@ -208,7 +207,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
                     } catch (NumberFormatException ignored) {
                     }
                 } else {
-                    jedisCluster.hset("heartbeats", configuration.getServerId(), String.valueOf(getRedisClusterTime()));
+                    jedisCluster.hset("heartbeats", configuration.getProxyId(), String.valueOf(getRedisClusterTime()));
                 }
                 return null;
             }
@@ -300,7 +299,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
                 ImmutableSet.Builder<UUID> setBuilder = ImmutableSet.builder();
                 try {
                     List<String> keys = new ArrayList<>();
-                    for (String i : getServerIds()) {
+                    for (String i : getProxiesIds()) {
                         keys.add("proxy:" + i + ":usersOnline");
                     }
                     if (!keys.isEmpty()) {
@@ -327,7 +326,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
                 ImmutableSet.Builder<UUID> setBuilder = ImmutableSet.builder();
                 try {
                     List<String> keys = new ArrayList<>();
-                    for (String i : getServerIds()) {
+                    for (String i : getProxiesIds()) {
                         keys.add("proxy:" + i + ":usersOnline");
                     }
                     if (!keys.isEmpty()) {
@@ -374,7 +373,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
                 @Override
                 public Multimap<String, UUID> jedisTask(Jedis jedis) {
                     ImmutableMultimap.Builder<String, UUID> builder = ImmutableMultimap.builder();
-                    for (String serverId : getServerIds()) {
+                    for (String serverId : getProxiesIds()) {
                         Set<String> players = jedis.smembers("proxy:" + serverId + ":usersOnline");
                         for (String player : players) {
                             builder.put(jedis.hget("player:" + player, "server"), UUID.fromString(player));
@@ -386,7 +385,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
                 @Override
                 public Multimap<String, UUID> clusterJedisTask(JedisCluster jedisCluster) {
                     ImmutableMultimap.Builder<String, UUID> builder = ImmutableMultimap.builder();
-                    for (String serverId : getServerIds()) {
+                    for (String serverId : getProxiesIds()) {
                         Set<String> players = jedisCluster.smembers("proxy:" + serverId + ":usersOnline");
                         for (String player : players) {
                             builder.put(jedisCluster.hget("player:" + player, "server"), UUID.fromString(player));
@@ -402,7 +401,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
 
     @Override
     public Set<UUID> getPlayersOnProxy(String proxyId) {
-        checkArgument(getServerIds().contains(proxyId), proxyId + " is not a valid proxy ID");
+        checkArgument(getProxiesIds().contains(proxyId), proxyId + " is not a valid proxy ID");
         return new RedisTask<Set<UUID>>(api) {
             @Override
             public Set<UUID> jedisTask(Jedis jedis) {
@@ -428,18 +427,18 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
 
     @Override
     public void sendProxyCommand(String serverId, String command) {
-        checkArgument(getServerIds().contains(serverId) || serverId.equals("allservers"), "proxyId is invalid");
+        checkArgument(getProxiesIds().contains(serverId) || serverId.equals("allservers"), "proxyId is invalid");
         sendChannelMessage("redisbungee-" + serverId, command);
     }
 
     @Override
-    public List<String> getServerIds() {
-        return serverIds;
+    public List<String> getProxiesIds() {
+        return proxiesIds;
     }
 
 
     @Override
-    public List<String> getCurrentServerIds(boolean nag, boolean lagged) {
+    public List<String> getCurrentProxiesIds(boolean nag, boolean lagged) {
         return new RedisTask<List<String>>(api) {
             @Override
             public List<String> jedisTask(Jedis jedis) {
@@ -469,7 +468,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
                     return servers.build();
                 } catch (JedisConnectionException e) {
                     getLogger().error("Unable to fetch server IDs", e);
-                    return Collections.singletonList(configuration.getServerId());
+                    return Collections.singletonList(configuration.getProxyId());
                 }
             }
 
@@ -501,7 +500,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
                     return servers.build();
                 } catch (JedisConnectionException e) {
                     getLogger().error("Unable to fetch server IDs", e);
-                    return Collections.singletonList(configuration.getServerId());
+                    return Collections.singletonList(configuration.getProxyId());
                 }
             }
         }.execute();
@@ -613,8 +612,8 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
 
     @Override
     public void sendProxyCommand(String cmd) {
-        checkArgument(getServerIds().contains(this.configuration.getServerId()) || this.configuration.getServerId().equals("allservers"), "proxyId is invalid");
-        sendChannelMessage("redisbungee-" + this.configuration.getServerId(), cmd);
+        checkArgument(getProxiesIds().contains(this.configuration.getProxyId()) || this.configuration.getProxyId().equals("allservers"), "proxyId is invalid");
+        sendChannelMessage("redisbungee-" + this.configuration.getProxyId(), cmd);
     }
 
     @Override
@@ -625,21 +624,21 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
 
     @Override
     public void initialize() {
-        serverIds = getCurrentServerIds(true, false);
+        proxiesIds = getCurrentProxiesIds(true, false);
         // start heartbeat task
         RedisTask<Void> heartBeatRedisTask = new RedisTask<Void>(api) {
             @Override
             public Void jedisTask(Jedis jedis) {
                 try {
                     long redisTime = getRedisTime(jedis.time());
-                    jedis.hset("heartbeats", configuration.getServerId(), String.valueOf(redisTime));
+                    jedis.hset("heartbeats", configuration.getProxyId(), String.valueOf(redisTime));
                 } catch (JedisConnectionException e) {
                     // Redis server has disappeared!
                     getLogger().error("Unable to update heartbeat - did your Redis server go away?", e);
                     return null;
                 }
                 try {
-                    serverIds = getCurrentServerIds(true, false);
+                    proxiesIds = getCurrentProxiesIds(true, false);
                     globalPlayerCount.set(getCurrentCount());
                 } catch (Throwable e) {
                     getLogger().error("Unable to update data - did your Redis server go away?", e);
@@ -651,14 +650,14 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
             public Void clusterJedisTask(JedisCluster jedisCluster) {
                 try {
                     long redisTime = getRedisClusterTime();
-                    jedisCluster.hset("heartbeats", configuration.getServerId(), String.valueOf(redisTime));
+                    jedisCluster.hset("heartbeats", configuration.getProxyId(), String.valueOf(redisTime));
                 } catch (JedisConnectionException e) {
                     // Redis server has disappeared!
                     getLogger().error("Unable to update heartbeat - did your Redis server go away?", e);
                     return null;
                 }
                 try {
-                    serverIds = getCurrentServerIds(true, false);
+                    proxiesIds = getCurrentProxiesIds(true, false);
                     globalPlayerCount.set(getCurrentCount());
                 } catch (Throwable e) {
                     getLogger().error("Unable to update data - did your Redis server go away?", e);
@@ -676,8 +675,8 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
             public Void jedisTask(Jedis jedis) {
                 try {
                     Set<String> players = getLocalPlayersAsUuidStrings();
-                    Set<String> playersInRedis = jedis.smembers("proxy:" + configuration.getServerId() + ":usersOnline");
-                    List<String> lagged = getCurrentServerIds(false, true);
+                    Set<String> playersInRedis = jedis.smembers("proxy:" + configuration.getProxyId() + ":usersOnline");
+                    List<String> lagged = getCurrentProxiesIds(false, true);
 
                     // Clean up lagged players.
                     for (String s : lagged) {
@@ -698,8 +697,8 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
 
                     for (String member : absentLocally) {
                         boolean found = false;
-                        for (String proxyId : getServerIds()) {
-                            if (proxyId.equals(configuration.getServerId())) continue;
+                        for (String proxyId : getProxiesIds()) {
+                            if (proxyId.equals(configuration.getProxyId())) continue;
                             if (jedis.sismember("proxy:" + proxyId + ":usersOnline", member)) {
                                 // Just clean up the set.
                                 found = true;
@@ -710,7 +709,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
                             RedisUtil.cleanUpPlayer(member, jedis);
                             getLogger().warn("Player found in set that was not found locally and globally: {}", member);
                         } else {
-                            jedis.srem("proxy:" + configuration.getServerId() + ":usersOnline", member);
+                            jedis.srem("proxy:" + configuration.getProxyId() + ":usersOnline", member);
                             getLogger().warn("Player found in set that was not found locally, but is on another proxy: {}", member);
                         }
                     }
@@ -739,8 +738,8 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
             public Void clusterJedisTask(JedisCluster jedisCluster) {
                 try {
                     Set<String> players = getLocalPlayersAsUuidStrings();
-                    Set<String> playersInRedis = jedisCluster.smembers("proxy:" + configuration.getServerId() + ":usersOnline");
-                    List<String> lagged = getCurrentServerIds(false, true);
+                    Set<String> playersInRedis = jedisCluster.smembers("proxy:" + configuration.getProxyId() + ":usersOnline");
+                    List<String> lagged = getCurrentProxiesIds(false, true);
 
                     // Clean up lagged players.
                     for (String s : lagged) {
@@ -761,8 +760,8 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
 
                     for (String member : absentLocally) {
                         boolean found = false;
-                        for (String proxyId : getServerIds()) {
-                            if (proxyId.equals(configuration.getServerId())) continue;
+                        for (String proxyId : getProxiesIds()) {
+                            if (proxyId.equals(configuration.getProxyId())) continue;
                             if (jedisCluster.sismember("proxy:" + proxyId + ":usersOnline", member)) {
                                 // Just clean up the set.
                                 found = true;
@@ -773,7 +772,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
                             RedisUtil.cleanUpPlayer(member, jedisCluster);
                             getLogger().warn("Player found in set that was not found locally and globally: {}", member);
                         } else {
-                            jedisCluster.srem("proxy:" + configuration.getServerId() + ":usersOnline", member);
+                            jedisCluster.srem("proxy:" + configuration.getProxyId() + ":usersOnline", member);
                             getLogger().warn("Player found in set that was not found locally, but is on another proxy: {}", member);
                         }
                     }
@@ -830,9 +829,9 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
         new RedisTask<Void>(api) {
             @Override
             public Void jedisTask(Jedis jedis) {
-                jedis.hdel("heartbeats", configuration.getServerId());
-                if (jedis.scard("proxy:" + configuration.getServerId() + ":usersOnline") > 0) {
-                    Set<String> players = jedis.smembers("proxy:" + configuration.getServerId() + ":usersOnline");
+                jedis.hdel("heartbeats", configuration.getProxyId());
+                if (jedis.scard("proxy:" + configuration.getProxyId() + ":usersOnline") > 0) {
+                    Set<String> players = jedis.smembers("proxy:" + configuration.getProxyId() + ":usersOnline");
                     for (String member : players)
                         RedisUtil.cleanUpPlayer(member, jedis);
                 }
@@ -841,9 +840,9 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
 
             @Override
             public Void clusterJedisTask(JedisCluster jedisCluster) {
-                jedisCluster.hdel("heartbeats", configuration.getServerId());
-                if (jedisCluster.scard("proxy:" + configuration.getServerId() + ":usersOnline") > 0) {
-                    Set<String> players = jedisCluster.smembers("proxy:" + configuration.getServerId() + ":usersOnline");
+                jedisCluster.hdel("heartbeats", configuration.getProxyId());
+                if (jedisCluster.scard("proxy:" + configuration.getProxyId() + ":usersOnline") > 0) {
+                    Set<String> players = jedisCluster.smembers("proxy:" + configuration.getProxyId() + ":usersOnline");
                     for (String member : players)
                         RedisUtil.cleanUpPlayer(member, jedisCluster);
                 }

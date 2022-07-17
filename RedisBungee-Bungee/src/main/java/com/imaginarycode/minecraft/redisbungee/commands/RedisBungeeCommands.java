@@ -266,7 +266,7 @@ public class RedisBungeeCommands {
         @Override
         public void execute(CommandSender sender, String[] args) {
             TextComponent textComponent = new TextComponent();
-            textComponent.setText("You are on " + plugin.getApi().getServerId() + ".");
+            textComponent.setText("You are on " + plugin.getApi().getProxyId() + ".");
             textComponent.setColor(ChatColor.YELLOW);
             sender.sendMessage(textComponent);
         }
@@ -282,7 +282,7 @@ public class RedisBungeeCommands {
         @Override
         public void execute(CommandSender sender, String[] strings) {
             TextComponent textComponent = new TextComponent();
-            textComponent.setText("All server IDs: " + Joiner.on(", ").join(plugin.getApi().getAllServers()));
+            textComponent.setText("All server IDs: " + Joiner.on(", ").join(plugin.getApi().getAllProxies()));
             textComponent.setColor(ChatColor.YELLOW);
             sender.sendMessage(textComponent);
         }
@@ -301,8 +301,8 @@ public class RedisBungeeCommands {
             plugin.getProxy().getScheduler().runAsync(plugin, new Runnable() {
                 @Override
                 public void run() {
-                    String proxy = args.length >= 1 ? args[0] : plugin.getConfiguration().getServerId();
-                    if (!plugin.getServerIds().contains(proxy)) {
+                    String proxy = args.length >= 1 ? args[0] : plugin.getConfiguration().getProxyId();
+                    if (!plugin.getProxiesIds().contains(proxy)) {
                         sender.sendMessage(new ComponentBuilder(proxy + " is not a valid proxy. See /serverids for valid proxies.").color(ChatColor.RED).create());
                         return;
                     }

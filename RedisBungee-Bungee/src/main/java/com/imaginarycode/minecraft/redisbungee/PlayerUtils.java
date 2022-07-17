@@ -24,14 +24,14 @@ public class PlayerUtils {
         Map<String, String> playerData = new HashMap<>(4);
         playerData.put("online", "0");
         playerData.put("ip", connection.getAddress().getAddress().getHostAddress());
-        playerData.put("proxy", RedisBungeeAPI.getRedisBungeeApi().getServerId());
+        playerData.put("proxy", RedisBungeeAPI.getRedisBungeeApi().getProxyId());
 
-        pipeline.sadd("proxy:" + RedisBungeeAPI.getRedisBungeeApi().getServerId() + ":usersOnline", connection.getUniqueId().toString());
+        pipeline.sadd("proxy:" + RedisBungeeAPI.getRedisBungeeApi().getProxyId() + ":usersOnline", connection.getUniqueId().toString());
         pipeline.hmset("player:" + connection.getUniqueId().toString(), playerData);
 
         if (fireEvent) {
             pipeline.publish("redisbungee-data", gson.toJson(new AbstractDataManager.DataManagerMessage<>(
-                    connection.getUniqueId(), RedisBungeeAPI.getRedisBungeeApi().getServerId(), AbstractDataManager.DataManagerMessage.Action.JOIN,
+                    connection.getUniqueId(), RedisBungeeAPI.getRedisBungeeApi().getProxyId(), AbstractDataManager.DataManagerMessage.Action.JOIN,
                     new AbstractDataManager.LoginPayload(connection.getAddress().getAddress()))));
         }
     }
@@ -46,14 +46,14 @@ public class PlayerUtils {
         Map<String, String> playerData = new HashMap<>(4);
         playerData.put("online", "0");
         playerData.put("ip", connection.getAddress().getAddress().getHostAddress());
-        playerData.put("proxy", RedisBungeeAPI.getRedisBungeeApi().getServerId());
+        playerData.put("proxy", RedisBungeeAPI.getRedisBungeeApi().getProxyId());
 
-        jedisCluster.sadd("proxy:" + RedisBungeeAPI.getRedisBungeeApi().getServerId() + ":usersOnline", connection.getUniqueId().toString());
+        jedisCluster.sadd("proxy:" + RedisBungeeAPI.getRedisBungeeApi().getProxyId() + ":usersOnline", connection.getUniqueId().toString());
         jedisCluster.hmset("player:" + connection.getUniqueId().toString(), playerData);
 
         if (fireEvent) {
             jedisCluster.publish("redisbungee-data", gson.toJson(new AbstractDataManager.DataManagerMessage<>(
-                    connection.getUniqueId(), RedisBungeeAPI.getRedisBungeeApi().getServerId(), AbstractDataManager.DataManagerMessage.Action.JOIN,
+                    connection.getUniqueId(), RedisBungeeAPI.getRedisBungeeApi().getProxyId(), AbstractDataManager.DataManagerMessage.Action.JOIN,
                     new AbstractDataManager.LoginPayload(connection.getAddress().getAddress()))));
         }
     }

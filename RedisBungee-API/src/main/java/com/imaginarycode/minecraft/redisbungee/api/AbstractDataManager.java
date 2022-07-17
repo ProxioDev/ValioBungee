@@ -79,7 +79,7 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
         P player = plugin.getPlayer(uuid);
 
         if (player != null)
-            return plugin.getConfiguration().getServerId();
+            return plugin.getConfiguration().getProxyId();
 
         try {
             return proxyCache.get(uuid, new RedisTask<String>(plugin.getApi()) {
@@ -183,7 +183,7 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
 
         String source = jsonObject.get("source").getAsString();
 
-        if (source.equals(plugin.getConfiguration().getServerId()))
+        if (source.equals(plugin.getConfiguration().getProxyId()))
             return;
 
         DataManagerMessage.Action action = DataManagerMessage.Action.valueOf(jsonObject.get("action").getAsString());

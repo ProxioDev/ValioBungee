@@ -7,13 +7,13 @@ import java.net.InetAddress;
 import java.util.List;
 
 public class RedisBungeeConfiguration {
-    private final String serverId;
+    private final String proxyId;
     private final List<InetAddress> exemptAddresses;
     private final boolean overrideBungeeCommands;
     private static RedisBungeeConfiguration config;
 
-    public RedisBungeeConfiguration(String serverId, List<String> exemptAddresses, boolean overrideBungeeCommands) {
-        this.serverId = serverId;
+    public RedisBungeeConfiguration(String proxyId, List<String> exemptAddresses, boolean overrideBungeeCommands) {
+        this.proxyId = proxyId;
 
         ImmutableList.Builder<InetAddress> addressBuilder = ImmutableList.builder();
         for (String s : exemptAddresses) {
@@ -24,8 +24,8 @@ public class RedisBungeeConfiguration {
         this.overrideBungeeCommands = overrideBungeeCommands;
     }
 
-    public String getServerId() {
-        return serverId;
+    public String getProxyId() {
+        return proxyId;
     }
 
     public List<InetAddress> getExemptAddresses() {

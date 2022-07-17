@@ -2,7 +2,6 @@ package com.imaginarycode.minecraft.redisbungee.commands;
 
 import java.net.InetAddress;
 import java.text.SimpleDateFormat;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -271,7 +270,7 @@ public class RedisBungeeCommands {
 
         @Override
         public void execute(Invocation invocation) {
-            invocation.source().sendMessage(Component.text("You are on " + plugin.getApi().getServerId() + ".", NamedTextColor.YELLOW));
+            invocation.source().sendMessage(Component.text("You are on " + plugin.getApi().getProxyId() + ".", NamedTextColor.YELLOW));
         }
 
         @Override
@@ -289,7 +288,7 @@ public class RedisBungeeCommands {
         @Override
         public void execute(Invocation invocation) {
             invocation.source().sendMessage(
-                Component.text("All server IDs: " + Joiner.on(", ").join(plugin.getApi().getAllServers()), NamedTextColor.YELLOW));
+                Component.text("All server IDs: " + Joiner.on(", ").join(plugin.getApi().getAllProxies()), NamedTextColor.YELLOW));
         }
 
         @Override
@@ -310,8 +309,8 @@ public class RedisBungeeCommands {
             CommandSource sender= invocation.source();
             String[] args = invocation.arguments();
             plugin.getProxy().getScheduler().buildTask(plugin, () -> {
-                String proxy = args.length >= 1 ? args[0] : plugin.getConfiguration().getServerId();
-                if (!plugin.getServerIds().contains(proxy)) {
+                String proxy = args.length >= 1 ? args[0] : plugin.getConfiguration().getProxyId();
+                if (!plugin.getProxiesIds().contains(proxy)) {
                     sender.sendMessage(Component.text(proxy + " is not a valid proxy. See /serverids for valid proxies.", NamedTextColor.RED));
                     return;
                 }

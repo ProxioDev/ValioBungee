@@ -21,7 +21,6 @@ import java.util.*;
  *
  * @author tuxed
  * @since 0.2.3 | updated 0.7.0
- *
  */
 @SuppressWarnings("unused")
 public class RedisBungeeAPI {
@@ -34,7 +33,7 @@ public class RedisBungeeAPI {
         redisBungeeApi = this;
         this.reservedChannels = ImmutableList.of(
                 "redisbungee-allservers",
-                "redisbungee-" + plugin.getConfiguration().getServerId(),
+                "redisbungee-" + plugin.getConfiguration().getProxyId(),
                 "redisbungee-data"
         );
         new RedisBungee(this);
@@ -175,8 +174,8 @@ public class RedisBungeeAPI {
      *
      * @param proxyId a proxy ID
      * @param command the command to send and execute
-     * @see #getServerId()
-     * @see #getAllServers()
+     * @see #getProxyId()
+     * @see #getAllProxies()
      * @since 0.2.5
      */
     public final void sendProxyCommand(@NonNull String proxyId, @NonNull String command) {
@@ -196,14 +195,38 @@ public class RedisBungeeAPI {
     }
 
     /**
-     * Get the current BungeeCord server ID for this server.
+     * Get the current BungeeCord / Velocity proxy ID for this server.
+     *
+     * @return the current server ID
+     * @see #getAllProxies()
+     * @since 0.8.0
+     */
+    public final String getProxyId() {
+        return plugin.getConfiguration().getProxyId();
+    }
+
+    /**
+     * Get the current BungeeCord / Velocity proxy ID for this server.
      *
      * @return the current server ID
      * @see #getAllServers()
      * @since 0.2.5
+     * @deprecated to avoid confusion between A server and A proxy see #getProxyId()
      */
+    @Deprecated
     public final String getServerId() {
-        return plugin.getConfiguration().getServerId();
+        return getProxyId();
+    }
+
+    /**
+     * Get all the linked proxies in this network.
+     *
+     * @return the list of all proxies
+     * @see #getProxyId()
+     * @since 0.8.0
+     */
+    public final List<String> getAllProxies() {
+        return plugin.getProxiesIds();
     }
 
     /**
@@ -212,9 +235,11 @@ public class RedisBungeeAPI {
      * @return the list of all proxies
      * @see #getServerId()
      * @since 0.2.5
+     * @deprecated to avoid confusion between A server and A proxy see see {@link #getAllProxies()}
      */
+    @Deprecated
     public final List<String> getAllServers() {
-        return plugin.getServerIds();
+        return getAllProxies();
     }
 
     /**
@@ -238,7 +263,7 @@ public class RedisBungeeAPI {
             Preconditions.checkArgument(!reservedChannels.contains(channel), "attempting to unregister internal channel");
         }
 
-       plugin.getPubSubListener().removeChannel(channels);
+        plugin.getPubSubListener().removeChannel(channels);
     }
 
     /**
@@ -310,6 +335,7 @@ public class RedisBungeeAPI {
 
     /**
      * This gives you instance of Jedis
+     *
      * @return {@link Jedis}
      * @since 0.7.0
      */
@@ -320,10 +346,12 @@ public class RedisBungeeAPI {
             throw new RuntimeException("RedisBungee is on Cluster MODE!");
         }
     }
+
     /**
      * This gets Redis Bungee {@link JedisPool}
+     *
      * @return {@link JedisPool}
-     *  @since 0.6.5
+     * @since 0.6.5
      */
     public JedisPool getJedisPool() {
         if (getMode() == RedisBungeeMode.SINGLE) {
@@ -345,6 +373,7 @@ public class RedisBungeeAPI {
 
     /**
      * This gives you instance of Jedis Cluster
+     *
      * @return {@link redis.clients.jedis.JedisCluster}
      * @since 0.8.0
      */
@@ -358,6 +387,7 @@ public class RedisBungeeAPI {
 
     /**
      * shows what mode is RedisBungee is on
+     *
      * @return {@link RedisBungeeMode}
      * @since 0.8.0
      */
@@ -368,6 +398,7 @@ public class RedisBungeeAPI {
 
     /**
      * Api instance
+     *
      * @return the API instance.
      * @since 0.6.5
      */

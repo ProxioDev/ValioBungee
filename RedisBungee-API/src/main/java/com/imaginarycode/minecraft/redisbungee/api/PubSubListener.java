@@ -27,7 +27,7 @@ public class PubSubListener implements Runnable {
             public Void jedisTask(Jedis jedis) {
                 try {
                     jpsh = new JedisPubSubHandler(plugin);
-                    addedChannels.add("redisbungee-" + plugin.getConfiguration().getServerId());
+                    addedChannels.add("redisbungee-" + plugin.getConfiguration().getProxyId());
                     addedChannels.add("redisbungee-allservers");
                     addedChannels.add("redisbungee-data");
                     jedis.subscribe(jpsh, addedChannels.toArray(new String[0]));
@@ -51,7 +51,7 @@ public class PubSubListener implements Runnable {
             public Void clusterJedisTask(JedisCluster jedisCluster) {
                 try {
                     jpsh = new JedisPubSubHandler(plugin);
-                    addedChannels.add("redisbungee-" + plugin.getConfiguration().getServerId());
+                    addedChannels.add("redisbungee-" + plugin.getConfiguration().getProxyId());
                     addedChannels.add("redisbungee-allservers");
                     addedChannels.add("redisbungee-data");
                     jedisCluster.subscribe(jpsh, addedChannels.toArray(new String[0]));

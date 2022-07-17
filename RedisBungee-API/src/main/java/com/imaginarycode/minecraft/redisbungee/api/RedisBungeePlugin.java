@@ -52,9 +52,9 @@ public interface RedisBungeePlugin<P> extends EventsPlatform {
 
     void sendProxyCommand(String serverId, String command);
 
-    List<String> getServerIds();
+    List<String> getProxiesIds();
 
-    List<String> getCurrentServerIds(boolean nag, boolean lagged);
+    List<String> getCurrentProxiesIds(boolean nag, boolean lagged);
 
     PubSubListener getPubSubListener();
 

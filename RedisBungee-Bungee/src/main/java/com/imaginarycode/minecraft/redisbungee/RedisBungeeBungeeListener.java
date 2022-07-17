@@ -59,7 +59,7 @@ public class RedisBungeeBungeeListener extends AbstractRedisBungeeListener<Login
                         }
                     }
 
-                    for (String s : plugin.getServerIds()) {
+                    for (String s : plugin.getProxiesIds()) {
                         if (jedis.sismember("proxy:" + s + ":usersOnline", event.getConnection().getUniqueId().toString())) {
                             event.setCancelled(true);
                             // TODO: Make it accept a BaseComponent[] like everything else.
@@ -93,7 +93,7 @@ public class RedisBungeeBungeeListener extends AbstractRedisBungeeListener<Login
                         }
                     }
 
-                    for (String s : plugin.getServerIds()) {
+                    for (String s : plugin.getProxiesIds()) {
                         if (jedisCluster.sismember("proxy:" + s + ":usersOnline", event.getConnection().getUniqueId().toString())) {
                             event.setCancelled(true);
                             // TODO: Make it accept a BaseComponent[] like everything else.
@@ -125,7 +125,7 @@ public class RedisBungeeBungeeListener extends AbstractRedisBungeeListener<Login
                 // the end of moved code.
 
                 jedis.publish("redisbungee-data", gson.toJson(new AbstractDataManager.DataManagerMessage<>(
-                        event.getPlayer().getUniqueId(), plugin.getApi().getServerId(), AbstractDataManager.DataManagerMessage.Action.JOIN,
+                        event.getPlayer().getUniqueId(), plugin.getApi().getProxyId(), AbstractDataManager.DataManagerMessage.Action.JOIN,
                         new AbstractDataManager.LoginPayload(event.getPlayer().getAddress().getAddress()))));
                 return null;
             }
@@ -142,7 +142,7 @@ public class RedisBungeeBungeeListener extends AbstractRedisBungeeListener<Login
                 // the end of moved code.
 
                 jedisCluster.publish("redisbungee-data", gson.toJson(new AbstractDataManager.DataManagerMessage<>(
-                        event.getPlayer().getUniqueId(), plugin.getApi().getServerId(), AbstractDataManager.DataManagerMessage.Action.JOIN,
+                        event.getPlayer().getUniqueId(), plugin.getApi().getProxyId(), AbstractDataManager.DataManagerMessage.Action.JOIN,
                         new AbstractDataManager.LoginPayload(event.getPlayer().getAddress().getAddress()))));
                 return null;
             }
@@ -182,7 +182,7 @@ public class RedisBungeeBungeeListener extends AbstractRedisBungeeListener<Login
             public Void jedisTask(Jedis jedis) {
                 jedis.hset("player:" + event.getPlayer().getUniqueId().toString(), "server", event.getServer().getInfo().getName());
                 jedis.publish("redisbungee-data", gson.toJson(new AbstractDataManager.DataManagerMessage<>(
-                        event.getPlayer().getUniqueId(), plugin.getApi().getServerId(), AbstractDataManager.DataManagerMessage.Action.SERVER_CHANGE,
+                        event.getPlayer().getUniqueId(), plugin.getApi().getProxyId(), AbstractDataManager.DataManagerMessage.Action.SERVER_CHANGE,
                         new AbstractDataManager.ServerChangePayload(event.getServer().getInfo().getName(), currentServer))));
                 return null;
             }
@@ -191,7 +191,7 @@ public class RedisBungeeBungeeListener extends AbstractRedisBungeeListener<Login
             public Void clusterJedisTask(JedisCluster jedisCluster) {
                 jedisCluster.hset("player:" + event.getPlayer().getUniqueId().toString(), "server", event.getServer().getInfo().getName());
                 jedisCluster.publish("redisbungee-data", gson.toJson(new AbstractDataManager.DataManagerMessage<>(
-                        event.getPlayer().getUniqueId(), plugin.getApi().getServerId(), AbstractDataManager.DataManagerMessage.Action.SERVER_CHANGE,
+                        event.getPlayer().getUniqueId(), plugin.getApi().getProxyId(), AbstractDataManager.DataManagerMessage.Action.SERVER_CHANGE,
                         new AbstractDataManager.ServerChangePayload(event.getServer().getInfo().getName(), currentServer))));
                 return null;
             }
@@ -299,7 +299,7 @@ public class RedisBungeeBungeeListener extends AbstractRedisBungeeListener<Login
                         break;
                     case "Proxy":
                         out.writeUTF("Proxy");
-                        out.writeUTF(plugin.getConfiguration().getServerId());
+                        out.writeUTF(plugin.getConfiguration().getProxyId());
                         break;
                     case "PlayerProxy":
                         String username = in.readUTF();
@@ -319,7 +319,7 @@ public class RedisBungeeBungeeListener extends AbstractRedisBungeeListener<Login
     @Override
     @EventHandler
     public void onPubSubMessage(PubSubMessageEvent event) {
-        if (event.getChannel().equals("redisbungee-allservers") || event.getChannel().equals("redisbungee-" + plugin.getApi().getServerId())) {
+        if (event.getChannel().equals("redisbungee-allservers") || event.getChannel().equals("redisbungee-" + plugin.getApi().getProxyId())) {
             String message = event.getMessage();
             if (message.startsWith("/"))
                 message = message.substring(1);
