@@ -1,8 +1,8 @@
 package com.imaginarycode.minecraft.redisbungee;
 
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
-import com.imaginarycode.minecraft.redisbungee.internal.AbstractDataManager;
-import com.imaginarycode.minecraft.redisbungee.internal.RedisBungeePlugin;
+import com.imaginarycode.minecraft.redisbungee.api.AbstractDataManager;
+import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;

@@ -1,7 +1,7 @@
 package com.imaginarycode.minecraft.redisbungee;
 
 import com.google.gson.Gson;
-import com.imaginarycode.minecraft.redisbungee.internal.AbstractDataManager;
+import com.imaginarycode.minecraft.redisbungee.api.AbstractDataManager;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ServerConnection;
 import redis.clients.jedis.Pipeline;

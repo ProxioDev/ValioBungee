@@ -6,11 +6,12 @@ import com.google.common.collect.Multimap;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import com.imaginarycode.minecraft.redisbungee.internal.AbstractRedisBungeeListener;
-import com.imaginarycode.minecraft.redisbungee.internal.AbstractDataManager;
-import com.imaginarycode.minecraft.redisbungee.internal.RedisBungeePlugin;
+import com.imaginarycode.minecraft.redisbungee.api.AbstractRedisBungeeListener;
+import com.imaginarycode.minecraft.redisbungee.api.AbstractDataManager;
+import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
+import com.imaginarycode.minecraft.redisbungee.api.tasks.RedisTask;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
-import com.imaginarycode.minecraft.redisbungee.internal.RedisUtil;
+import com.imaginarycode.minecraft.redisbungee.api.util.RedisUtil;
 import net.md_5.bungee.api.AbstractReconnectHandler;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -37,9 +38,9 @@ public class RedisBungeeBungeeListener extends AbstractRedisBungeeListener<Login
     @EventHandler
     public void onLogin(LoginEvent event) {
         event.registerIntent((Plugin) plugin);
-        plugin.executeAsync(new RedisCallable<Void>(plugin) {
+        plugin.executeAsync(new RedisTask<Void>(plugin) {
             @Override
-            protected Void call(Jedis jedis) {
+            public Void jedisTask(Jedis jedis) {
                 try {
                     if (event.isCancelled()) {
                         return null;
@@ -71,25 +72,76 @@ public class RedisBungeeBungeeListener extends AbstractRedisBungeeListener<Login
                     event.completeIntent((Plugin) plugin);
                 }
             }
+
+            @Override
+            public Void clusterJedisTask(JedisCluster jedisCluster) {
+                try {
+                    if (event.isCancelled()) {
+                        return null;
+                    }
+
+                    // We make sure they aren't trying to use an existing player's name.
+                    // This is problematic for online-mode servers as they always disconnect old clients.
+                    if (plugin.isOnlineMode()) {
+                        ProxiedPlayer player = (ProxiedPlayer) plugin.getPlayer(event.getConnection().getName());
+
+                        if (player != null) {
+                            event.setCancelled(true);
+                            // TODO: Make it accept a BaseComponent[] like everything else.
+                            event.setCancelReason(ONLINE_MODE_RECONNECT);
+                            return null;
+                        }
+                    }
+
+                    for (String s : plugin.getServerIds()) {
+                        if (jedisCluster.sismember("proxy:" + s + ":usersOnline", event.getConnection().getUniqueId().toString())) {
+                            event.setCancelled(true);
+                            // TODO: Make it accept a BaseComponent[] like everything else.
+                            event.setCancelReason(ALREADY_LOGGED_IN);
+                            return null;
+                        }
+                    }
+                    return null;
+                } finally {
+                    event.completeIntent((Plugin) plugin);
+                }
+            }
         });
     }
 
     @Override
     @EventHandler
     public void onPostLogin(PostLoginEvent event) {
-        plugin.executeAsync(new RedisCallable<Void>(plugin) {
+        plugin.executeAsync(new RedisTask<Void>(plugin) {
             @Override
-            protected Void call(Jedis jedis) {
+            public Void jedisTask(Jedis jedis) {
                 // this code was moved out from login event due being async..
                 // and it can be cancelled but it will show as false in redis-bungee
                 // which will register the player into the redis database.
                 Pipeline pipeline = jedis.pipelined();
                 plugin.getUuidTranslator().persistInfo(event.getPlayer().getName(), event.getPlayer().getUniqueId(), pipeline);
-                RBUtils.createPlayer(event.getPlayer(), pipeline, false);
+                PlayerUtils.createPlayer(event.getPlayer(), pipeline, false);
                 pipeline.sync();
                 // the end of moved code.
 
-                jedis.publish("redisbungee-data", gson.toJson(new AbstractDataManager.DataManagerMessage(
+                jedis.publish("redisbungee-data", gson.toJson(new AbstractDataManager.DataManagerMessage<>(
+                        event.getPlayer().getUniqueId(), plugin.getApi().getServerId(), AbstractDataManager.DataManagerMessage.Action.JOIN,
+                        new AbstractDataManager.LoginPayload(event.getPlayer().getAddress().getAddress()))));
+                return null;
+            }
+
+            @Override
+            public Void clusterJedisTask(JedisCluster jedisCluster) {
+                // this code was moved out from login event due being async..
+                // and it can be cancelled but it will show as false in redis-bungee
+                // which will register the player into the redis database.
+
+                // due no support to pipeline in jedis cluster just use the instance instead.
+                plugin.getUuidTranslator().persistInfo(event.getPlayer().getName(), event.getPlayer().getUniqueId(), jedisCluster);
+                PlayerUtils.createPlayer(event.getPlayer(), jedisCluster, false);
+                // the end of moved code.
+
+                jedisCluster.publish("redisbungee-data", gson.toJson(new AbstractDataManager.DataManagerMessage<>(
                         event.getPlayer().getUniqueId(), plugin.getApi().getServerId(), AbstractDataManager.DataManagerMessage.Action.JOIN,
                         new AbstractDataManager.LoginPayload(event.getPlayer().getAddress().getAddress()))));
                 return null;
@@ -100,12 +152,21 @@ public class RedisBungeeBungeeListener extends AbstractRedisBungeeListener<Login
     @Override
     @EventHandler
     public void onPlayerDisconnect(PlayerDisconnectEvent event) {
-        plugin.executeAsync(new RedisCallable<Void>(plugin) {
+        plugin.executeAsync(new RedisTask<Void>(plugin) {
+
+
             @Override
-            protected Void call(Jedis jedis) {
+            public Void jedisTask(Jedis jedis) {
                 Pipeline pipeline = jedis.pipelined();
                 RedisUtil.cleanUpPlayer(event.getPlayer().getUniqueId().toString(), pipeline);
                 pipeline.sync();
+                return null;
+            }
+
+            @Override
+            public Void clusterJedisTask(JedisCluster jedisCluster) {
+                // Due some reason JedisCluster does not support pipeline, use instance instead
+                RedisUtil.cleanUpPlayer(event.getPlayer().getUniqueId().toString(), jedisCluster);
                 return null;
             }
         });
@@ -116,18 +177,22 @@ public class RedisBungeeBungeeListener extends AbstractRedisBungeeListener<Login
     @EventHandler
     public void onServerChange(ServerConnectedEvent event) {
         final String currentServer = event.getPlayer().getServer() == null ? null : event.getPlayer().getServer().getInfo().getName();
-        plugin.executeAsync(new RedisCallable<Void>(plugin) {
+        plugin.executeAsync(new RedisTask<Void>(plugin) {
             @Override
-            protected Void call(Jedis jedis) {
+            public Void jedisTask(Jedis jedis) {
                 jedis.hset("player:" + event.getPlayer().getUniqueId().toString(), "server", event.getServer().getInfo().getName());
-                jedis.publish("redisbungee-data", gson.toJson(new AbstractDataManager.DataManagerMessage(
+                jedis.publish("redisbungee-data", gson.toJson(new AbstractDataManager.DataManagerMessage<>(
                         event.getPlayer().getUniqueId(), plugin.getApi().getServerId(), AbstractDataManager.DataManagerMessage.Action.SERVER_CHANGE,
                         new AbstractDataManager.ServerChangePayload(event.getServer().getInfo().getName(), currentServer))));
                 return null;
             }
 
             @Override
-            protected Void call(JedisCluster jedisCluster) {
+            public Void clusterJedisTask(JedisCluster jedisCluster) {
+                jedisCluster.hset("player:" + event.getPlayer().getUniqueId().toString(), "server", event.getServer().getInfo().getName());
+                jedisCluster.publish("redisbungee-data", gson.toJson(new AbstractDataManager.DataManagerMessage<>(
+                        event.getPlayer().getUniqueId(), plugin.getApi().getServerId(), AbstractDataManager.DataManagerMessage.Action.SERVER_CHANGE,
+                        new AbstractDataManager.ServerChangePayload(event.getServer().getInfo().getName(), currentServer))));
                 return null;
             }
         });

@@ -61,42 +61,42 @@
                             <relocations>
                                 <relocation>
                                     <pattern>redis.clients.jedis</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.jedis
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.api.jedis
                                     </shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>redis.clients.util</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.jedisutil
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.api.jedisutil
                                     </shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.apache.commons.pool</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.commonspool
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.api.commonspool
                                     </shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.squareup.okhttp</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.okhttp
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.api.okhttp
                                     </shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>okio</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.okio
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.api.okio
                                     </shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.google</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.google
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.api.google
                                     </shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.json</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.json
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.api.json
                                     </shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.checkerframework</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.checkframework
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.api.checkframework
                                     </shadedPattern>
                                 </relocation>
                             </relocations>

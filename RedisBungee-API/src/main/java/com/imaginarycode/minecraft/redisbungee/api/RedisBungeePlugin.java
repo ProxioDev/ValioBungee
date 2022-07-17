@@ -12,15 +12,13 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 
-
 /**
  * This Class has all internal methods needed by every redis bungee plugin, and it can be used to implement another platforms than bungeecord
  *
  * @author Ham1255
  * @since 0.7.0
- *
  */
-public interface RedisBungeePlugin<P> extends EventsPlatform{
+public interface RedisBungeePlugin<P> extends EventsPlatform {
 
     default void initialize() {
 
@@ -56,7 +54,7 @@ public interface RedisBungeePlugin<P> extends EventsPlatform{
 
     List<String> getServerIds();
 
-    List<String > getCurrentServerIds(boolean nag, boolean lagged);
+    List<String> getCurrentServerIds(boolean nag, boolean lagged);
 
     PubSubListener getPubSubListener();
 
