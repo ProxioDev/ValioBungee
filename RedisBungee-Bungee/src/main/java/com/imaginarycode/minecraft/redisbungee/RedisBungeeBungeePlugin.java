@@ -32,6 +32,7 @@ import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import redis.clients.jedis.*;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
@@ -878,7 +879,9 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
 
         if (redisServer != null && !redisServer.isEmpty()) {
             if (yamlConfiguration.getBoolean("cluster-mode-enabled", false)) {
-                this.jedisSummoner = new ClusterJedisSummoner(new JedisCluster(new HostAndPort("192.168.0.150", 7000)));
+                GenericObjectPoolConfig<Connection> poolConfig = new GenericObjectPoolConfig<>();
+                poolConfig.setMaxTotal(yamlConfiguration.getInt("max-redis-connections", 8));
+                this.jedisSummoner = new ClusterJedisSummoner(new JedisCluster(new HostAndPort(redisServer, redisPort), 5000, 5000, 60, serverId, redisPassword, poolConfig, useSSL));
                 this.redisBungeeMode = RedisBungeeMode.CLUSTER;
                 getLogger().log(Level.INFO, "RedisBungee MODE: CLUSTER");
             } else {
