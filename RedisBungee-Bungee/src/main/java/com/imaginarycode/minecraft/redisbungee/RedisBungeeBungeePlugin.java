@@ -35,6 +35,7 @@ import net.md_5.bungee.config.YamlConfiguration;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import redis.clients.jedis.*;
 import redis.clients.jedis.exceptions.JedisConnectionException;
+import redis.clients.jedis.exceptions.JedisException;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -486,11 +487,58 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
         UUIDFetcher.setHttpClient(httpClient);
         // init lua manager
         LuaManager luaManager = new LuaManager(this);
-        if (getRedisBungeeMode() == RedisBungeeMode.CLUSTER) {
-            this.getRedisClusterTimeScript = luaManager.createScript(IOUtil.readInputStreamAsString(getResourceAsStream("lua/get_cluster_time.lua")));
-        }
+        new RedisTask<Void>(this) {
+            @Override
+            public Void jedisTask(Jedis jedis) {
+                // This is more portable than INFO <section>
+                String info = jedis.info();
+                for (String s : info.split("\r\n")) {
+                    if (s.startsWith("redis_version:")) {
+                        String version = s.split(":")[1];
+                        getLogger().info(version + " <- redis version");
+                        if (!RedisUtil.isRedisVersionRight(version)) {
+                            getLogger().severe("Your version of Redis (" + version + ") is not at least version 3.0 RedisBungee requires a newer version of Redis.");
+                            throw new RuntimeException("Unsupported Redis version detected");
+                        }
+                        long uuidCacheSize = jedis.hlen("uuid-cache");
+                        if (uuidCacheSize > 750000) {
+                            getLogger().info("Looks like you have a really big UUID cache! Run https://www.spigotmc.org/resources/redisbungeecleaner.8505/ as soon as possible.");
+                        }
+                        break;
+                    }
+                }
+                return null;
+            }
+
+            @Override
+            public Void clusterJedisTask(JedisCluster jedisCluster) {
+                // This is more portable than INFO <section>
+                try {
+                    getRedisClusterTimeScript = luaManager.createScript(IOUtil.readInputStreamAsString(getResourceAsStream("lua/get_cluster_time.lua")));
+                } catch (JedisException e) {
+                    throw new RuntimeException("possible not supported redis version", e);
+                }
+                String info = (String) luaManager.createScript(IOUtil.readInputStreamAsString(getResourceAsStream("lua/get_cluster_info.lua"))).eval(Collections.singletonList("0"), Collections.emptyList());
+                for (String s : info.split("\r\n")) {
+                    if (s.startsWith("redis_version:")) {
+                        String version = s.split(":")[1];
+                        getLogger().info(version + " <- redis version");
+                        if (!RedisUtil.isRedisVersionRight(version)) {
+                            getLogger().severe("Your version of Redis (" + version + ") is not at least version 3.0 RedisBungee requires a newer version of Redis.");
+                            throw new RuntimeException("Unsupported Redis version detected");
+                        }
+                        long uuidCacheSize = jedisCluster.hlen("uuid-cache");
+                        if (uuidCacheSize > 750000) {
+                            getLogger().info("Looks like you have a really big UUID cache! Run https://www.spigotmc.org/resources/redisbungeecleaner.8505/ as soon as possible.");
+                        }
+                        break;
+                    }
+                }
+                return null;
+            }
+        }.execute();
         getLogger().info("lua manager was loaded");
-        // check if this proxy is recovering from a crash
+        // check if this proxy is recovering from a crash and start heart the beat.
         new RedisTask<Void>(api) {
             @Override
             public Void jedisTask(Jedis jedis) {
@@ -509,6 +557,8 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
                         }
                     } catch (NumberFormatException ignored) {
                     }
+                } else {
+                    jedis.hset("heartbeats", configuration.getServerId(), jedis.time().get(0));
                 }
 
                 return null;
@@ -523,6 +573,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
                     try {
                         long value = Long.parseLong(jedisCluster.hget("heartbeats", configuration.getServerId()));
                         long redisTime = getRedisClusterTime();
+
                         if (redisTime < value + 20) {
                             getLogger().severe("You have launched a possible impostor Velocity / Bungeecord instance. Another instance is already running.");
                             getLogger().severe("For data consistency reasons, RedisBungee will now disable itself.");
@@ -531,55 +582,8 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
                         }
                     } catch (NumberFormatException ignored) {
                     }
-                }
-                return null;
-            }
-        }.execute();
-
-
-        new RedisTask<Void>(this) {
-            @Override
-            public Void jedisTask(Jedis jedis) {
-                // This is more portable than INFO <section>
-                String info = jedis.info();
-                for (String s : info.split("\r\n")) {
-                    if (s.startsWith("redis_version:")) {
-                        String version = s.split(":")[1];
-                        getLogger().info(version + " <- redis version");
-                        if (!RedisUtil.isRedisVersionRight(version)) {
-                            getLogger().severe("Your version of Redis (" + version + ") is not at least version 3.0 RedisBungee requires a newer version of Redis.");
-                            throw new RuntimeException("Unsupported Redis version detected");
-                        }
-                        break;
-                    }
-                }
-                jedis.hset("heartbeats", configuration.getServerId(), jedis.time().get(0));
-                long uuidCacheSize = jedis.hlen("uuid-cache");
-                if (uuidCacheSize > 750000) {
-                    getLogger().info("Looks like you have a really big UUID cache! Run https://www.spigotmc.org/resources/redisbungeecleaner.8505/ as soon as possible.");
-                }
-                return null;
-            }
-
-            @Override
-            public Void clusterJedisTask(JedisCluster jedisCluster) {
-                // This is more portable than INFO <section>
-                String info = (String) luaManager.createScript(IOUtil.readInputStreamAsString(getResourceAsStream("lua/get_cluster_info.lua"))).eval(Collections.singletonList("0"), Collections.emptyList());
-                for (String s : info.split("\r\n")) {
-                    if (s.startsWith("redis_version:")) {
-                        String version = s.split(":")[1];
-                        getLogger().info(version + " <- redis version");
-                        if (!RedisUtil.isRedisVersionRight(version)) {
-                            getLogger().severe("Your version of Redis (" + version + ") is not at least version 3.0 RedisBungee requires a newer version of Redis.");
-                            throw new RuntimeException("Unsupported Redis version detected");
-                        }
-                        break;
-                    }
-                }
-                jedisCluster.hset("heartbeats", configuration.getServerId(), String.valueOf(getRedisClusterTime()));
-                long uuidCacheSize = jedisCluster.hlen("uuid-cache");
-                if (uuidCacheSize > 750000) {
-                    getLogger().info("Looks like you have a really big UUID cache! Run https://www.spigotmc.org/resources/redisbungeecleaner.8505/ as soon as possible.");
+                } else {
+                    jedisCluster.hset("heartbeats", configuration.getServerId(), String.valueOf(getRedisClusterTime()));
                 }
                 return null;
             }
@@ -798,7 +802,6 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
 
         getProxy().getPluginManager().unregisterListeners(this);
 
-
         new RedisTask<Void>(api) {
             @Override
             public Void jedisTask(Jedis jedis) {
@@ -886,7 +889,8 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
                 } else {
                     this.jedisSummoner = new ClusterJedisSummoner(new JedisCluster(new HostAndPort(redisServer, redisPort), 5000, 5000, 60, poolConfig));
                     getLogger().warning("SSL option is ignored in Cluster mode if no PASSWORD is set");
-                }this.redisBungeeMode = RedisBungeeMode.CLUSTER;
+                }
+                this.redisBungeeMode = RedisBungeeMode.CLUSTER;
                 getLogger().log(Level.INFO, "RedisBungee MODE: CLUSTER");
             } else {
                 JedisPoolConfig config = new JedisPoolConfig();

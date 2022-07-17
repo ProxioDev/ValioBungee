@@ -18,6 +18,7 @@ max-redis-connections: 10
 
 # since redis can support ssl by version 6 you can use ssl in redis bungee too!
 # but there is more configuration needed to work see https://github.com/ProxioDev/RedisBungee/issues/18
+# in cluster mode using ssl without password is ignored due fact is not supported in Jedis lib
 useSSL: false
 
 # An identifier for this BungeeCord instance. Will randomly generate if leaving it blank.
