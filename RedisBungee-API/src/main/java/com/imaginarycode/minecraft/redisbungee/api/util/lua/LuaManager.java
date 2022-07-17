@@ -27,7 +27,7 @@ public class LuaManager {
 
             @Override
             public Script clusterJedisTask(JedisCluster jedisCluster) {
-                String hash = jedisCluster.scriptLoad(script,  null);
+                String hash = jedisCluster.scriptLoad(script,  "0");
                 return new Script(script, hash);
             }
         };
