@@ -6,7 +6,7 @@ import com.google.common.collect.Iterables;
 import com.google.gson.Gson;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 
-import com.imaginarycode.minecraft.redisbungee.api.util.RedisTask;
+import com.imaginarycode.minecraft.redisbungee.api.tasks.RedisTask;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
@@ -74,7 +74,7 @@ public final class UUIDTranslator {
         }
         RedisTask<UUID> redisTask = new RedisTask<UUID>(plugin.getApi()) {
             @Override
-            public UUID singleJedisTask(Jedis jedis) {
+            public UUID jedisTask(Jedis jedis) {
                 String stored = jedis.hget("uuid-cache", player.toLowerCase());
                 if (stored != null) {
                     // Found an entry value. Deserialize it.
@@ -178,7 +178,7 @@ public final class UUIDTranslator {
 
         RedisTask<String> redisTask = new RedisTask<String>(plugin.getApi()) {
             @Override
-            public String singleJedisTask(Jedis jedis) {
+            public String jedisTask(Jedis jedis) {
                 String stored = jedis.hget("uuid-cache", player.toString());
                 if (stored != null) {
                     // Found an entry value. Deserialize it.

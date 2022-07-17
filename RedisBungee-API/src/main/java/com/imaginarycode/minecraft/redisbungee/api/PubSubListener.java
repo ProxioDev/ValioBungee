@@ -1,6 +1,6 @@
 package com.imaginarycode.minecraft.redisbungee.api;
 
-import com.imaginarycode.minecraft.redisbungee.api.util.RedisTask;
+import com.imaginarycode.minecraft.redisbungee.api.tasks.RedisTask;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.exceptions.JedisConnectionException;
@@ -24,7 +24,7 @@ public class PubSubListener implements Runnable {
     public void run() {
         RedisTask<Void> subTask = new RedisTask<Void>(plugin.getApi()) {
             @Override
-            public Void singleJedisTask(Jedis jedis) {
+            public Void jedisTask(Jedis jedis) {
                 try {
                     jpsh = new JedisPubSubHandler(plugin);
                     addedChannels.add("redisbungee-" + plugin.getConfiguration().getServerId());

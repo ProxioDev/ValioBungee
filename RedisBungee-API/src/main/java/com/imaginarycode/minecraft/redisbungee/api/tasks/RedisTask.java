@@ -1,10 +1,11 @@
-package com.imaginarycode.minecraft.redisbungee.api.util;
+package com.imaginarycode.minecraft.redisbungee.api.tasks;
 
 import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.ClusterJedisSummoner;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisSummoner;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.Summoner;
+import com.imaginarycode.minecraft.redisbungee.api.RedisBungeeMode;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
 
@@ -14,7 +15,7 @@ public abstract class RedisTask<V> implements Runnable, Callable<V> {
 
     private final Summoner<?> summoner;
     private final RedisBungeeAPI api;
-
+    private Jedis jedis;
     private RedisBungeePlugin<?> plugin;
 
     @Override
@@ -33,7 +34,23 @@ public abstract class RedisTask<V> implements Runnable, Callable<V> {
         this.summoner = api.getSummoner();
     }
 
-    public abstract V singleJedisTask(Jedis jedis);
+    // way to reuse jedis inside another RedisTask object
+    public RedisTask(RedisBungeeAPI api, Jedis jedis) {
+        this.api = api;
+        this.summoner = api.getSummoner();
+        this.jedis = jedis;
+    }
+
+    // way to reuse jedis inside another RedisTask object
+    public RedisTask(RedisBungeePlugin<?> plugin, Jedis jedis) {
+        this.plugin = plugin;
+        this.api = plugin.getApi();
+        this.summoner = api.getSummoner();
+        this.jedis = jedis;
+    }
+
+
+    public abstract V jedisTask(Jedis jedis);
 
     public abstract V clusterJedisTask(JedisCluster jedisCluster);
 
@@ -44,12 +61,16 @@ public abstract class RedisTask<V> implements Runnable, Callable<V> {
 
     public V execute(){
         if (api.getMode() == RedisBungeeMode.SINGLE) {
+            if (this.jedis != null){
+                return this.jedisTask(this.jedis);
+            }
             JedisSummoner jedisSummoner = (JedisSummoner) summoner;
-            try (Jedis jedis = jedisSummoner.obtainResource()) {
-                return this.singleJedisTask(jedis);
+            try (Jedis newJedis = jedisSummoner.obtainResource()) {
+                return this.jedisTask(newJedis);
             }
 
         } else if (api.getMode() == RedisBungeeMode.CLUSTER) {
+            // Jedis cluster does not need new instance since its single instance anyways.
             ClusterJedisSummoner clusterJedisSummoner = (ClusterJedisSummoner) summoner;
             return this.clusterJedisTask(clusterJedisSummoner.obtainResource());
         }

@@ -7,7 +7,7 @@ import com.google.common.collect.Multimap;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisSummoner;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.Summoner;
-import com.imaginarycode.minecraft.redisbungee.api.util.RedisBungeeMode;
+import com.imaginarycode.minecraft.redisbungee.api.RedisBungeeMode;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -37,6 +37,7 @@ public class RedisBungeeAPI {
                 "redisbungee-" + plugin.getConfiguration().getServerId(),
                 "redisbungee-data"
         );
+        new RedisBungee(this);
     }
 
     /**

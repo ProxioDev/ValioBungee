@@ -1,6 +1,7 @@
-package com.imaginarycode.minecraft.redisbungee.api.util;
+package com.imaginarycode.minecraft.redisbungee.api.util.lua;
 
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
+import com.imaginarycode.minecraft.redisbungee.api.tasks.RedisTask;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.exceptions.JedisDataException;
@@ -19,7 +20,7 @@ public class LuaManager {
     public Script createScript(String script) {
         RedisTask<Script> scriptRedisTask = new RedisTask<Script>(plugin.getApi()) {
             @Override
-            public Script singleJedisTask(Jedis jedis) {
+            public Script jedisTask(Jedis jedis) {
                 String hash = jedis.scriptLoad(script);
                 return new Script(script, hash);
             }
@@ -53,7 +54,7 @@ public class LuaManager {
         public Object eval(List<String> keys, List<String> args) {
             RedisTask<Object> objectRedisTask = new RedisTask<Object>(plugin.getApi()) {
                 @Override
-                public Object singleJedisTask(Jedis jedis) {
+                public Object jedisTask(Jedis jedis) {
                     Object data;
                     try {
                         data = jedis.evalsha(hashed, keys, args);

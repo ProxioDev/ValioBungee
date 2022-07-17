@@ -3,7 +3,6 @@ package com.imaginarycode.minecraft.redisbungee.api;
 import com.google.common.collect.Multimap;
 import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.Summoner;
-import com.imaginarycode.minecraft.redisbungee.api.util.RedisBungeeMode;
 import com.imaginarycode.minecraft.redisbungee.api.util.uuid.UUIDTranslator;
 
 import java.net.InetAddress;
@@ -98,5 +97,7 @@ public interface RedisBungeePlugin<P> extends EventsPlatform{
     void loadConfig() throws Exception;
 
     RedisBungeeMode getRedisBungeeMode();
+
+    Long getRedisClusterTime();
 
 }

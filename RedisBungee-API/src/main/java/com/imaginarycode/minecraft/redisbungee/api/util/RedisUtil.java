@@ -1,8 +1,9 @@
-package com.imaginarycode.minecraft.redisbungee.api;
+package com.imaginarycode.minecraft.redisbungee.api.util;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.Gson;
 import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
+import com.imaginarycode.minecraft.redisbungee.api.AbstractDataManager;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.Pipeline;
@@ -43,19 +44,19 @@ public class RedisUtil {
     }
 
     public static boolean isRedisVersionRight(String redisVersion) {
-        // Need to use >=6.2 to use Lua optimizations.
         String[] args = redisVersion.split("\\.");
         if (args.length < 2) {
             return false;
         }
         int major = Integer.parseInt(args[0]);
         int minor = Integer.parseInt(args[1]);
-        return major >= 6 && minor >= 0;
+        return major >= 3 && minor >= 0;
     }
 
     // Ham1255: i am keeping this if some plugin uses this *IF*
     @Deprecated
     public static boolean canUseLua(String redisVersion) {
+        // Need to use >=3 to use Lua optimizations.
         return isRedisVersionRight(redisVersion);
     }
 }

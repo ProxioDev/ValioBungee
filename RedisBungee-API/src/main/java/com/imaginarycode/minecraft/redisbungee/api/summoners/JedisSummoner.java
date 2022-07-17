@@ -11,6 +11,10 @@ public class JedisSummoner implements Summoner<Jedis> {
 
     public JedisSummoner(JedisPool jedisPool) {
         this.jedisPool = jedisPool;
+        try (Jedis jedis = this.jedisPool.getResource()) {
+            // Test the connection to make sure configuration is right
+            jedis.ping();
+        }
     }
 
     @Override

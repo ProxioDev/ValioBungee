@@ -8,7 +8,7 @@ import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.imaginarycode.minecraft.redisbungee.api.util.RedisTask;
+import com.imaginarycode.minecraft.redisbungee.api.tasks.RedisTask;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
 
@@ -55,7 +55,7 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
         try {
             return serverCache.get(uuid, new RedisTask<String>(plugin.getApi()) {
                 @Override
-                public String singleJedisTask(Jedis jedis) {
+                public String jedisTask(Jedis jedis) {
                     return Objects.requireNonNull(jedis.hget("player:" + uuid, "server"), "user not found");
 
                 }
@@ -84,7 +84,7 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
         try {
             return proxyCache.get(uuid, new RedisTask<String>(plugin.getApi()) {
                 @Override
-                public String singleJedisTask(Jedis jedis) {
+                public String jedisTask(Jedis jedis) {
                     return Objects.requireNonNull(jedis.hget("player:" + uuid, "proxy"), "user not found");
                 }
 
@@ -110,7 +110,7 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
         try {
             return ipCache.get(uuid, new RedisTask<InetAddress>(plugin.getApi()) {
                 @Override
-                public InetAddress singleJedisTask(Jedis jedis) {
+                public InetAddress jedisTask(Jedis jedis) {
                     String result = jedis.hget("player:" + uuid, "ip");
                     if (result == null)
                         throw new NullPointerException("user not found");
@@ -142,7 +142,7 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
         try {
             return lastOnlineCache.get(uuid, new RedisTask<Long>(plugin.getApi()) {
                 @Override
-                public Long singleJedisTask(Jedis jedis) {
+                public Long jedisTask(Jedis jedis) {
                     String result = jedis.hget("player:" + uuid, "online");
                     return result == null ? -1 : Long.parseLong(result);
                 }
