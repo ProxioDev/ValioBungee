@@ -10,6 +10,9 @@ public class ClusterJedisSummoner implements Summoner<JedisCluster> {
 
     public ClusterJedisSummoner(JedisCluster jedisCluster) {
         this.jedisCluster = jedisCluster;
+        // test the connection
+        jedisCluster.set("random_data", "0");
+        jedisCluster.del("random_data");
     }
 
     @Override
