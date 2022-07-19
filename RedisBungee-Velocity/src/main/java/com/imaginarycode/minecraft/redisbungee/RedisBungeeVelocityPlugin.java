@@ -376,7 +376,11 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
                     for (String serverId : getProxiesIds()) {
                         Set<String> players = jedis.smembers("proxy:" + serverId + ":usersOnline");
                         for (String player : players) {
-                            builder.put(jedis.hget("player:" + player, "server"), UUID.fromString(player));
+                            String playerServer = jedis.hget("player:" + player, "server");
+                            if (playerServer == null) {
+                                continue;
+                            }
+                            builder.put(playerServer, UUID.fromString(player));
                         }
                     }
                     return builder.build();
@@ -388,7 +392,11 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
                     for (String serverId : getProxiesIds()) {
                         Set<String> players = jedisCluster.smembers("proxy:" + serverId + ":usersOnline");
                         for (String player : players) {
-                            builder.put(jedisCluster.hget("player:" + player, "server"), UUID.fromString(player));
+                            String playerServer = jedisCluster.hget("player:" + player, "server");
+                            if (playerServer == null) {
+                                continue;
+                            }
+                            builder.put(playerServer, UUID.fromString(player));
                         }
                     }
                     return builder.build();

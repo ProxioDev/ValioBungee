@@ -210,11 +210,14 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
                 @Override
                 public Multimap<String, UUID> jedisTask(Jedis jedis) {
                     ImmutableMultimap.Builder<String, UUID> builder = ImmutableMultimap.builder();
-                    for (String proxyId : getProxiesIds()) {
-                        Set<String> players = jedis.smembers("proxy:" + proxyId + ":usersOnline");
+                    for (String serverId : getProxiesIds()) {
+                        Set<String> players = jedis.smembers("proxy:" + serverId + ":usersOnline");
                         for (String player : players) {
-
-                            builder.put(jedis.hget("player:" + player, "server"), UUID.fromString(player));
+                            String playerServer = jedis.hget("player:" + player, "server");
+                            if (playerServer == null) {
+                                continue;
+                            }
+                            builder.put(playerServer, UUID.fromString(player));
                         }
                     }
                     return builder.build();
@@ -223,10 +226,14 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
                 @Override
                 public Multimap<String, UUID> clusterJedisTask(JedisCluster jedisCluster) {
                     ImmutableMultimap.Builder<String, UUID> builder = ImmutableMultimap.builder();
-                    for (String proxyId : getProxiesIds()) {
-                        Set<String> players = jedisCluster.smembers("proxy:" + proxyId + ":usersOnline");
+                    for (String serverId : getProxiesIds()) {
+                        Set<String> players = jedisCluster.smembers("proxy:" + serverId + ":usersOnline");
                         for (String player : players) {
-                            builder.put(jedisCluster.hget("player:" + player, "server"), UUID.fromString(player));
+                            String playerServer = jedisCluster.hget("player:" + player, "server");
+                            if (playerServer == null) {
+                                continue;
+                            }
+                            builder.put(playerServer, UUID.fromString(player));
                         }
                     }
                     return builder.build();
