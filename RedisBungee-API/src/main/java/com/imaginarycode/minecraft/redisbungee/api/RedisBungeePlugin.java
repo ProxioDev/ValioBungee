@@ -94,6 +94,10 @@ public interface RedisBungeePlugin<P> extends EventsPlatform {
 
     void loadConfig() throws Exception;
 
+    void kickPlayer(UUID playerUniqueId, String message);
+
+    void kickPlayer(String playerName, String message);
+
     RedisBungeeMode getRedisBungeeMode();
 
     Long getRedisClusterTime();

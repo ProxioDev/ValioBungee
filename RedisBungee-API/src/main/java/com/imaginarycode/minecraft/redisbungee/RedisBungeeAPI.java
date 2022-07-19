@@ -333,6 +333,30 @@ public class RedisBungeeAPI {
         return plugin.getUuidTranslator().getTranslatedUuid(name, expensiveLookups);
     }
 
+
+    /**
+     * Kicks a player from the network
+     *
+     * @param playerName player name
+     * @param message kick message that player will see on kick
+     * @since 0.8.0
+     */
+
+    public void kickPlayer(String playerName, String message) {
+        plugin.kickPlayer(playerName, message);
+    }
+
+    /**
+     * Kicks a player from the network
+     *
+     * @param playerUUID player name
+     * @param message kick message that player will see on kick
+     * @since 0.8.0
+     */
+    public void kickPlayer(UUID playerUUID, String message) {
+        plugin.kickPlayer(playerUUID, message);
+    }
+
     /**
      * This gives you instance of Jedis
      *

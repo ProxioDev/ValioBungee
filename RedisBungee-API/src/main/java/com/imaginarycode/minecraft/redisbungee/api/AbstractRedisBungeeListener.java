@@ -67,4 +67,6 @@ public abstract class AbstractRedisBungeeListener<LE, PLE, PD, SC, PP, PM, PS> {
     }
 
     public abstract void onPubSubMessage(PS event);
+
+
 }

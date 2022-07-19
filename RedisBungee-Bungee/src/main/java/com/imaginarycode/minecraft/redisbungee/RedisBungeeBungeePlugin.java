@@ -11,6 +11,7 @@ import com.imaginarycode.minecraft.redisbungee.api.summoners.ClusterJedisSummone
 import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisSummoner;
 import com.imaginarycode.minecraft.redisbungee.api.tasks.RedisTask;
 import com.imaginarycode.minecraft.redisbungee.api.util.RedisUtil;
+import com.imaginarycode.minecraft.redisbungee.api.util.payload.PayloadUtils;
 import com.imaginarycode.minecraft.redisbungee.commands.RedisBungeeCommands;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerChangedServerNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerJoinedNetworkEvent;
@@ -664,7 +665,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
                         if (!laggedPlayers.isEmpty()) {
                             getLogger().info("Cleaning up lagged proxy " + s + " (" + laggedPlayers.size() + " players)...");
                             for (String laggedPlayer : laggedPlayers) {
-                                RedisUtil.cleanUpPlayer(laggedPlayer, jedis);
+                                PayloadUtils.cleanUpPlayer(laggedPlayer, jedis);
                             }
                         }
                     }
@@ -685,7 +686,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
                             }
                         }
                         if (!found) {
-                            RedisUtil.cleanUpPlayer(member, jedis);
+                            PayloadUtils.cleanUpPlayer(member, jedis);
                             getLogger().warning("Player found in set that was not found locally and globally: " + member);
                         } else {
                             jedis.srem("proxy:" + configuration.getProxyId() + ":usersOnline", member);
@@ -727,7 +728,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
                         if (!laggedPlayers.isEmpty()) {
                             getLogger().info("Cleaning up lagged proxy " + s + " (" + laggedPlayers.size() + " players)...");
                             for (String laggedPlayer : laggedPlayers) {
-                                RedisUtil.cleanUpPlayer(laggedPlayer, jedisCluster);
+                                PayloadUtils.cleanUpPlayer(laggedPlayer, jedisCluster);
                             }
                         }
                     }
@@ -748,7 +749,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
                             }
                         }
                         if (!found) {
-                            RedisUtil.cleanUpPlayer(member, jedisCluster);
+                            PayloadUtils.cleanUpPlayer(member, jedisCluster);
                             getLogger().warning("Player found in set that was not found locally and globally: " + member);
                         } else {
                             jedisCluster.srem("proxy:" + configuration.getProxyId() + ":usersOnline", member);
@@ -817,7 +818,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
                 if (jedis.scard("proxy:" + configuration.getProxyId() + ":usersOnline") > 0) {
                     Set<String> players = jedis.smembers("proxy:" + configuration.getProxyId() + ":usersOnline");
                     for (String member : players)
-                        RedisUtil.cleanUpPlayer(member, jedis);
+                        PayloadUtils.cleanUpPlayer(member, jedis);
                 }
                 return null;
             }
@@ -828,7 +829,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
                 if (jedisCluster.scard("proxy:" + configuration.getProxyId() + ":usersOnline") > 0) {
                     Set<String> players = jedisCluster.smembers("proxy:" + configuration.getProxyId() + ":usersOnline");
                     for (String member : players)
-                        RedisUtil.cleanUpPlayer(member, jedisCluster);
+                        PayloadUtils.cleanUpPlayer(member, jedisCluster);
                 }
                 return null;
             }
@@ -913,6 +914,30 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
         } else {
             throw new RuntimeException("No redis server specified!");
         }
+    }
+
+    @Override
+    public void kickPlayer(UUID playerUniqueId, String message) {
+        new RedisTask<Void>(api) {
+            @Override
+            public Void jedisTask(Jedis jedis) {
+                PayloadUtils.kickPlayer(playerUniqueId, message, jedis);
+                return null;
+            }
+
+            @Override
+            public Void clusterJedisTask(JedisCluster jedisCluster) {
+                PayloadUtils.kickPlayer(playerUniqueId, message, jedisCluster);
+                return null;
+            }
+        }.execute();
+    }
+
+    @Override
+    public void kickPlayer(String playerName, String message) {
+        // fetch the uuid
+        UUID playerUUID = this.uuidTranslator.getTranslatedUuid(playerName,true);
+        kickPlayer(playerUUID, message);
     }
 
     @Override

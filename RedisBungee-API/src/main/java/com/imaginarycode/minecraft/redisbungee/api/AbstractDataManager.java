@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
  * @since 0.3.3
  */
 public abstract class AbstractDataManager<P, PL, PD, PS> {
-    private final RedisBungeePlugin<P> plugin;
+    protected final RedisBungeePlugin<P> plugin;
     private final Cache<UUID, String> serverCache = createCache();
     private final Cache<UUID, String> proxyCache = createCache();
     private final Cache<UUID, InetAddress> ipCache = createCache();
@@ -43,8 +43,6 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
                 .expireAfterWrite(1, TimeUnit.HOURS)
                 .build();
     }
-
-    private final JsonParser parser = new JsonParser();
 
     public String getServer(final UUID uuid) {
         P player = plugin.getPlayer(uuid);
@@ -174,14 +172,16 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
 
     public abstract void onPubSubMessage(PS event);
 
+    public abstract boolean handleKick(UUID target, String message);
+
     protected void handlePubSubMessage(String channel, String message) {
         if (!channel.equals("redisbungee-data"))
             return;
 
         // Partially deserialize the message so we can look at the action
-        JsonObject jsonObject = parser.parse(message).getAsJsonObject();
+        JsonObject jsonObject = JsonParser.parseString(message).getAsJsonObject();
 
-        String source = jsonObject.get("source").getAsString();
+        final String source = jsonObject.get("source").getAsString();
 
         if (source.equals(plugin.getConfiguration().getProxyId()))
             return;
@@ -190,24 +190,20 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
 
         switch (action) {
             case JOIN:
-                final DataManagerMessage<LoginPayload> message1 = gson.fromJson(jsonObject, new TypeToken<DataManagerMessage<LoginPayload>>() {
-                }.getType());
+                final DataManagerMessage<LoginPayload> message1 = gson.fromJson(jsonObject, new TypeToken<DataManagerMessage<LoginPayload>>() {}.getType());
                 proxyCache.put(message1.getTarget(), message1.getSource());
                 lastOnlineCache.put(message1.getTarget(), (long) 0);
                 ipCache.put(message1.getTarget(), message1.getPayload().getAddress());
-                plugin.executeAsync(new Runnable() {
-                    @Override
-                    public void run() {
-                        Object event;
-                        try {
-                            event = plugin.getNetworkJoinEventClass().getDeclaredConstructor(UUID.class).newInstance(message1.getTarget());
-                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
-                                 NoSuchMethodException e) {
-                            throw new RuntimeException("unable to dispatch an network join event", e);
-                        }
-                        plugin.callEvent(event);
-
+                plugin.executeAsync(() -> {
+                    Object event;
+                    try {
+                        event = plugin.getNetworkJoinEventClass().getDeclaredConstructor(UUID.class).newInstance(message1.getTarget());
+                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                             NoSuchMethodException e) {
+                        throw new RuntimeException("unable to dispatch an network join event", e);
                     }
+                    plugin.callEvent(event);
+
                 });
                 break;
             case LEAVE:
@@ -215,42 +211,40 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
                 }.getType());
                 invalidate(message2.getTarget());
                 lastOnlineCache.put(message2.getTarget(), message2.getPayload().getTimestamp());
-                plugin.executeAsync(new Runnable() {
-                    @Override
-                    public void run() {
-                        Object event;
-                        try {
-                            event = plugin.getNetworkQuitEventClass().getDeclaredConstructor(UUID.class).newInstance(message2.getTarget());
-                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
-                                 NoSuchMethodException e) {
-                            throw new RuntimeException("unable to dispatch an network quit event", e);
-                        }
-                        plugin.callEvent(event);
+                plugin.executeAsync(() -> {
+                    Object event;
+                    try {
+                        event = plugin.getNetworkQuitEventClass().getDeclaredConstructor(UUID.class).newInstance(message2.getTarget());
+                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                             NoSuchMethodException e) {
+                        throw new RuntimeException("unable to dispatch an network quit event", e);
                     }
+                    plugin.callEvent(event);
                 });
                 break;
             case SERVER_CHANGE:
-                final DataManagerMessage<ServerChangePayload> message3 = gson.fromJson(jsonObject, new TypeToken<DataManagerMessage<ServerChangePayload>>() {
-                }.getType());
+                final DataManagerMessage<ServerChangePayload> message3 = gson.fromJson(jsonObject, new TypeToken<DataManagerMessage<ServerChangePayload>>() {}.getType());
                 serverCache.put(message3.getTarget(), message3.getPayload().getServer());
-                plugin.executeAsync(new Runnable() {
-                    @Override
-                    public void run() {
-                        Object event;
-                        try {
-                            event = plugin.getServerChangeEventClass().getDeclaredConstructor(UUID.class, String.class, String.class).newInstance(message3.getTarget(), ((ServerChangePayload) message3.getPayload()).getOldServer(), ((ServerChangePayload) message3.getPayload()).getServer());
-                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
-                                 NoSuchMethodException e) {
-                            throw new RuntimeException("unable to dispatch an server change event", e);
-                        }
-                        plugin.callEvent(event);
+                plugin.executeAsync(() -> {
+                    Object event;
+                    try {
+                        event = plugin.getServerChangeEventClass().getDeclaredConstructor(UUID.class, String.class, String.class).newInstance(message3.getTarget(), ((ServerChangePayload) message3.getPayload()).getOldServer(), ((ServerChangePayload) message3.getPayload()).getServer());
+                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                             NoSuchMethodException e) {
+                        throw new RuntimeException("unable to dispatch an server change event", e);
                     }
+                    plugin.callEvent(event);
                 });
                 break;
+            case KICK:
+                final DataManagerMessage<KickPayload> kickPayload = gson.fromJson(jsonObject, new TypeToken<DataManagerMessage<KickPayload>>() {}.getType());
+                plugin.executeAsync(() -> handleKick(kickPayload.target, kickPayload.payload.message));
+                break;
+
         }
     }
 
-    public static class DataManagerMessage<T> {
+    public static class DataManagerMessage<T extends Payload> {
         private final UUID target;
         private final String source;
         private final Action action; // for future use!
@@ -282,11 +276,27 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
         public enum Action {
             JOIN,
             LEAVE,
+            KICK,
             SERVER_CHANGE
         }
     }
 
-    public static class LoginPayload {
+    public static abstract class Payload {}
+
+    public static class KickPayload extends Payload {
+
+        private final String message;
+
+        public KickPayload(String message) {
+            this.message = message;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+    }
+
+    public static class LoginPayload extends Payload{
         private final InetAddress address;
 
         public LoginPayload(InetAddress address) {
@@ -298,7 +308,7 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
         }
     }
 
-    public static class ServerChangePayload {
+    public static class ServerChangePayload extends Payload{
         private final String server;
         private final String oldServer;
 
@@ -317,7 +327,7 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
     }
 
 
-    public static class LogoutPayload {
+    public static class LogoutPayload extends Payload{
         private final long timestamp;
 
         public LogoutPayload(long timestamp) {
