@@ -776,7 +776,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
             }
         };
 
-        integrityCheck = service.scheduleAtFixedRate(integrityCheckRedisTask::execute, 0, 1, TimeUnit.MINUTES);
+        integrityCheck = service.scheduleAtFixedRate(integrityCheckRedisTask::execute, 0, 30, TimeUnit.SECONDS);
 
         // register plugin messages channel.
         getProxy().registerChannel("legacy:redisbungee");

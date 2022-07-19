@@ -801,7 +801,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
                 return null;
             }
         };
-        integrityCheck = getProxy().getScheduler().buildTask(this, integrityCheckRedisTask::execute).repeat(1, TimeUnit.MINUTES).schedule();
+        integrityCheck = getProxy().getScheduler().buildTask(this, integrityCheckRedisTask::execute).repeat(30, TimeUnit.SECONDS).schedule();
 
         // register plugin messages
         IDENTIFIERS.forEach(getProxy().getChannelRegistrar()::register);
