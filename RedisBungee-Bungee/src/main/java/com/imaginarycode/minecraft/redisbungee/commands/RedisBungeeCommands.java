@@ -60,7 +60,9 @@ public class RedisBungeeCommands {
                         Multimap<String, UUID> serverToPlayers = plugin.getApi().getServerToPlayers();
                         Multimap<String, String> human = HashMultimap.create();
                         for (Map.Entry<String, UUID> entry : serverToPlayers.entries()) {
-                            human.put(entry.getKey(), plugin.getUuidTranslator().getNameFromUuid(entry.getValue(), false));
+                            // if for any reason UUID translation fails just return the uuid as name, to make command finish executing.
+                            String playerName = plugin.getUuidTranslator().getNameFromUuid(entry.getValue(), false);
+                            human.put(entry.getKey(), playerName != null ? playerName : entry.getValue().toString());
                         }
                         for (String server : new TreeSet<>(serverToPlayers.keySet())) {
                             TextComponent serverName = new TextComponent();

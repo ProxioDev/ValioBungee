@@ -30,7 +30,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
  * @since 0.2.3
  */
 public class RedisBungeeCommands {
-    
+
     private static final Component NO_PLAYER_SPECIFIED =
             Component.text("You must specify a player name.", NamedTextColor.RED);
     private static final Component PLAYER_NOT_FOUND =
@@ -58,7 +58,11 @@ public class RedisBungeeCommands {
                 if (invocation.arguments().length > 0 && invocation.arguments()[0].equals("showall")) {
                     Multimap<String, UUID> serverToPlayers = plugin.getApi().getServerToPlayers();
                     Multimap<String, String> human = HashMultimap.create();
-                    serverToPlayers.forEach((key, value) -> human.put(key, plugin.getUuidTranslator().getNameFromUuid(value, false)));
+                    serverToPlayers.forEach((key, value) -> {
+                        // if for any reason UUID translation fails just return the uuid as name, to make command finish executing.
+                        String playerName = plugin.getUuidTranslator().getNameFromUuid(value, false);
+                        human.put(key, playerName != null ? playerName : value.toString());
+                    });
                     for (String server : new TreeSet<>(serverToPlayers.keySet())) {
                         Component serverName = Component.text("[" + server + "] ", NamedTextColor.GREEN);
                         Component serverCount = Component.text("(" + serverToPlayers.get(server).size() + "): ", NamedTextColor.YELLOW);
@@ -281,14 +285,15 @@ public class RedisBungeeCommands {
 
     public static class ServerIds implements SimpleCommand {
         private final RedisBungeeVelocityPlugin plugin;
+
         public ServerIds(RedisBungeeVelocityPlugin plugin) {
-            this.plugin =plugin;
+            this.plugin = plugin;
         }
 
         @Override
         public void execute(Invocation invocation) {
             invocation.source().sendMessage(
-                Component.text("All server IDs: " + Joiner.on(", ").join(plugin.getApi().getAllProxies()), NamedTextColor.YELLOW));
+                    Component.text("All server IDs: " + Joiner.on(", ").join(plugin.getApi().getAllProxies()), NamedTextColor.YELLOW));
         }
 
         @Override
@@ -306,7 +311,7 @@ public class RedisBungeeCommands {
 
         @Override
         public void execute(Invocation invocation) {
-            CommandSource sender= invocation.source();
+            CommandSource sender = invocation.source();
             String[] args = invocation.arguments();
             plugin.getProxy().getScheduler().buildTask(plugin, () -> {
                 String proxy = args.length >= 1 ? args[0] : plugin.getConfiguration().getProxyId();
