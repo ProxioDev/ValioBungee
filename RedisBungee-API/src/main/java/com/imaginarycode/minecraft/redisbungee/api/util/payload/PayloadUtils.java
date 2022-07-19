@@ -43,21 +43,18 @@ public class PayloadUtils {
     }
 
     public static void kickPlayer(UUID uuid, String message, Pipeline pipeline) {
-        System.out.println(uuid);
         pipeline.publish("redisbungee-data", gson.toJson(new AbstractDataManager.DataManagerMessage<>(
                 uuid, RedisBungeeAPI.getRedisBungeeApi().getProxyId(), AbstractDataManager.DataManagerMessage.Action.KICK,
                 new AbstractDataManager.KickPayload(message))));
     }
 
     public static void kickPlayer(UUID uuid, String message, Jedis jedis) {
-        System.out.println(uuid);
         jedis.publish("redisbungee-data", gson.toJson(new AbstractDataManager.DataManagerMessage<>(
                 uuid, RedisBungeeAPI.getRedisBungeeApi().getProxyId(), AbstractDataManager.DataManagerMessage.Action.KICK,
                 new AbstractDataManager.KickPayload(message))));
     }
 
     public static void kickPlayer(UUID uuid, String message, JedisCluster jedisCluster) {
-        System.out.println(uuid);
         jedisCluster.publish("redisbungee-data", gson.toJson(new AbstractDataManager.DataManagerMessage<>(
                 uuid, RedisBungeeAPI.getRedisBungeeApi().getProxyId(), AbstractDataManager.DataManagerMessage.Action.KICK,
                 new AbstractDataManager.KickPayload(message))));

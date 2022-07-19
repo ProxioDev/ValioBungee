@@ -820,7 +820,6 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
         getProxy().getCommandManager().register("lastseen", new RedisBungeeCommands.LastSeenCommand(this), "rlastseen");
         getProxy().getCommandManager().register("ip", new RedisBungeeCommands.IpCommand(this), "playerip", "rip", "rplayerip");
         getProxy().getCommandManager().register("find", new RedisBungeeCommands.FindCommand(this), "rfind");
-        getProxy().getCommandManager().register("networkkick", new RedisBungeeCommands.KickCommand(this));
     }
 
     @Override
