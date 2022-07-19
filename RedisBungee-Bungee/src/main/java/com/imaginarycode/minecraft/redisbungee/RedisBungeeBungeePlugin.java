@@ -918,25 +918,28 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
 
     @Override
     public void kickPlayer(UUID playerUniqueId, String message) {
-        new RedisTask<Void>(api) {
-            @Override
-            public Void jedisTask(Jedis jedis) {
-                PayloadUtils.kickPlayer(playerUniqueId, message, jedis);
-                return null;
-            }
+        // first handle on origin proxy if player not found publish the payload
+        if (!dataManager.handleKick(playerUniqueId, message)) {
+            new RedisTask<Void>(api) {
+                @Override
+                public Void jedisTask(Jedis jedis) {
+                    PayloadUtils.kickPlayer(playerUniqueId, message, jedis);
+                    return null;
+                }
 
-            @Override
-            public Void clusterJedisTask(JedisCluster jedisCluster) {
-                PayloadUtils.kickPlayer(playerUniqueId, message, jedisCluster);
-                return null;
-            }
-        }.execute();
+                @Override
+                public Void clusterJedisTask(JedisCluster jedisCluster) {
+                    PayloadUtils.kickPlayer(playerUniqueId, message, jedisCluster);
+                    return null;
+                }
+            }.execute();
+        }
     }
 
     @Override
     public void kickPlayer(String playerName, String message) {
         // fetch the uuid
-        UUID playerUUID = this.uuidTranslator.getTranslatedUuid(playerName,true);
+        UUID playerUUID = this.uuidTranslator.getTranslatedUuid(playerName, true);
         kickPlayer(playerUUID, message);
     }
 
