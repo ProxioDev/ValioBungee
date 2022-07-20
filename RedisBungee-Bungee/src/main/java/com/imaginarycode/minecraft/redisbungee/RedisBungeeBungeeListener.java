@@ -165,7 +165,7 @@ public class RedisBungeeBungeeListener extends AbstractRedisBungeeListener<Login
     @Override
     @EventHandler
     public void onServerChange(ServerConnectedEvent event) {
-        final String currentServer = event.getPlayer().getServer() == null ? null : event.getPlayer().getServer().getInfo().getName();
+        final String currentServer = event.getServer().getInfo().getName();
         final String oldServer = event.getPlayer().getServer() == null ? null : event.getPlayer().getServer().getInfo().getName();
         plugin.executeAsync(new RedisTask<Void>(plugin) {
             @Override

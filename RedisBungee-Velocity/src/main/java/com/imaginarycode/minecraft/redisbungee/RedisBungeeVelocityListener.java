@@ -157,8 +157,7 @@ public class RedisBungeeVelocityListener extends AbstractRedisBungeeListener<Log
     @Override
     @Subscribe
     public void onServerChange(ServerConnectedEvent event) {
-        Optional<ServerConnection> optionalServerConnection = event.getPlayer().getCurrentServer();
-        final String currentServer = optionalServerConnection.map(serverConnection -> serverConnection.getServerInfo().getName()).orElse(null);
+        final String currentServer = event.getServer().getServerInfo().getName();
         final String oldServer = event.getPreviousServer().map(serverConnection -> serverConnection.getServerInfo().getName()).orElse(null);
         plugin.executeAsync(new RedisTask<Void>(plugin) {
 
