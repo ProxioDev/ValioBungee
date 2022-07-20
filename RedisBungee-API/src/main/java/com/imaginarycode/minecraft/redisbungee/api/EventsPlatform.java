@@ -1,5 +1,7 @@
 package com.imaginarycode.minecraft.redisbungee.api;
 
+import java.util.UUID;
+
 /**
  * Since each platform have their own events' implementation for example Bungeecord events extends Event while velocity don't
  *
@@ -9,12 +11,13 @@ package com.imaginarycode.minecraft.redisbungee.api;
  */
 public interface EventsPlatform {
 
-    Class<?> getPubSubEventClass();
+    Object createPlayerChangedNetworkEvent(UUID uuid, String previousServer, String server);
 
-    Class<?> getNetworkJoinEventClass();
+    Object createPlayerJoinedNetworkEvent(UUID uuid);
 
-    Class<?> getServerChangeEventClass();
+    Object createPlayerLeftNetworkEvent(UUID uuid);
 
-    Class<?> getNetworkQuitEventClass();
+    Object createPubSubEvent(String channel, String message);
+
 
 }

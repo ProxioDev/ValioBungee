@@ -1,7 +1,5 @@
 package com.imaginarycode.minecraft.redisbungee;
 
-import com.google.gson.Gson;
-import com.imaginarycode.minecraft.redisbungee.api.AbstractDataManager;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ServerConnection;
 import redis.clients.jedis.JedisCluster;
@@ -11,8 +9,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class PlayerUtils {
-    private static final Gson gson = new Gson();
+import static com.imaginarycode.minecraft.redisbungee.api.util.payload.PayloadUtils.playerJoinPayload;
+
+public class VelocityPlayerUtils {
 
     protected static void createPlayer(Player player, Pipeline pipeline, boolean fireEvent) {
         Optional<ServerConnection> server = player.getCurrentServer();
@@ -27,9 +26,7 @@ public class PlayerUtils {
         pipeline.hmset("player:" + player.getUniqueId().toString(), playerData);
 
         if (fireEvent) {
-            pipeline.publish("redisbungee-data", gson.toJson(new AbstractDataManager.DataManagerMessage<>(
-                    player.getUniqueId(), RedisBungeeAPI.getRedisBungeeApi().getProxyId(), AbstractDataManager.DataManagerMessage.Action.JOIN,
-                    new AbstractDataManager.LoginPayload(player.getRemoteAddress().getAddress()))));
+            playerJoinPayload(player.getUniqueId(), pipeline, player.getRemoteAddress().getAddress());
         }
     }
 
@@ -46,9 +43,7 @@ public class PlayerUtils {
         jedisCluster.hmset("player:" + player.getUniqueId().toString(), playerData);
 
         if (fireEvent) {
-            jedisCluster.publish("redisbungee-data", gson.toJson(new AbstractDataManager.DataManagerMessage<>(
-                    player.getUniqueId(), RedisBungeeAPI.getRedisBungeeApi().getProxyId(), AbstractDataManager.DataManagerMessage.Action.JOIN,
-                    new AbstractDataManager.LoginPayload(player.getRemoteAddress().getAddress()))));
+            playerJoinPayload(player.getUniqueId(), jedisCluster, player.getRemoteAddress().getAddress());
         }
     }
 }

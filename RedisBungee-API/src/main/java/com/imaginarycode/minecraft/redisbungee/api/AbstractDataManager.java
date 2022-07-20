@@ -190,20 +190,14 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
 
         switch (action) {
             case JOIN:
-                final DataManagerMessage<LoginPayload> message1 = gson.fromJson(jsonObject, new TypeToken<DataManagerMessage<LoginPayload>>() {}.getType());
+                final DataManagerMessage<LoginPayload> message1 = gson.fromJson(jsonObject, new TypeToken<DataManagerMessage<LoginPayload>>() {
+                }.getType());
                 proxyCache.put(message1.getTarget(), message1.getSource());
                 lastOnlineCache.put(message1.getTarget(), (long) 0);
                 ipCache.put(message1.getTarget(), message1.getPayload().getAddress());
                 plugin.executeAsync(() -> {
-                    Object event;
-                    try {
-                        event = plugin.getNetworkJoinEventClass().getDeclaredConstructor(UUID.class).newInstance(message1.getTarget());
-                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
-                             NoSuchMethodException e) {
-                        throw new RuntimeException("unable to dispatch an network join event", e);
-                    }
+                    Object event = plugin.createPlayerJoinedNetworkEvent(message1.getTarget());
                     plugin.callEvent(event);
-
                 });
                 break;
             case LEAVE:
@@ -212,32 +206,22 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
                 invalidate(message2.getTarget());
                 lastOnlineCache.put(message2.getTarget(), message2.getPayload().getTimestamp());
                 plugin.executeAsync(() -> {
-                    Object event;
-                    try {
-                        event = plugin.getNetworkQuitEventClass().getDeclaredConstructor(UUID.class).newInstance(message2.getTarget());
-                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
-                             NoSuchMethodException e) {
-                        throw new RuntimeException("unable to dispatch an network quit event", e);
-                    }
+                    Object event = plugin.createPlayerLeftNetworkEvent(message2.getTarget());
                     plugin.callEvent(event);
                 });
                 break;
             case SERVER_CHANGE:
-                final DataManagerMessage<ServerChangePayload> message3 = gson.fromJson(jsonObject, new TypeToken<DataManagerMessage<ServerChangePayload>>() {}.getType());
+                final DataManagerMessage<ServerChangePayload> message3 = gson.fromJson(jsonObject, new TypeToken<DataManagerMessage<ServerChangePayload>>() {
+                }.getType());
                 serverCache.put(message3.getTarget(), message3.getPayload().getServer());
                 plugin.executeAsync(() -> {
-                    Object event;
-                    try {
-                        event = plugin.getServerChangeEventClass().getDeclaredConstructor(UUID.class, String.class, String.class).newInstance(message3.getTarget(), ((ServerChangePayload) message3.getPayload()).getOldServer(), ((ServerChangePayload) message3.getPayload()).getServer());
-                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
-                             NoSuchMethodException e) {
-                        throw new RuntimeException("unable to dispatch an server change event", e);
-                    }
+                    Object event = plugin.createPlayerChangedNetworkEvent(message3.getTarget(), message3.getPayload().getOldServer(), message3.getPayload().getServer());
                     plugin.callEvent(event);
                 });
                 break;
             case KICK:
-                final DataManagerMessage<KickPayload> kickPayload = gson.fromJson(jsonObject, new TypeToken<DataManagerMessage<KickPayload>>() {}.getType());
+                final DataManagerMessage<KickPayload> kickPayload = gson.fromJson(jsonObject, new TypeToken<DataManagerMessage<KickPayload>>() {
+                }.getType());
                 plugin.executeAsync(() -> handleKick(kickPayload.target, kickPayload.payload.message));
                 break;
 
@@ -281,7 +265,8 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
         }
     }
 
-    public static abstract class Payload {}
+    public static abstract class Payload {
+    }
 
     public static class KickPayload extends Payload {
 
@@ -296,7 +281,7 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
         }
     }
 
-    public static class LoginPayload extends Payload{
+    public static class LoginPayload extends Payload {
         private final InetAddress address;
 
         public LoginPayload(InetAddress address) {
@@ -308,7 +293,7 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
         }
     }
 
-    public static class ServerChangePayload extends Payload{
+    public static class ServerChangePayload extends Payload {
         private final String server;
         private final String oldServer;
 
@@ -327,7 +312,7 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
     }
 
 
-    public static class LogoutPayload extends Payload{
+    public static class LogoutPayload extends Payload {
         private final long timestamp;
 
         public LogoutPayload(long timestamp) {

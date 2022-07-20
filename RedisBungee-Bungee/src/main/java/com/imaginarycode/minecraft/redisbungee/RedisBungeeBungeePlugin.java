@@ -15,6 +15,7 @@ import com.imaginarycode.minecraft.redisbungee.api.util.payload.PayloadUtils;
 import com.imaginarycode.minecraft.redisbungee.commands.RedisBungeeCommands;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerChangedServerNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerJoinedNetworkEvent;
+import com.imaginarycode.minecraft.redisbungee.events.PlayerLeftNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import com.imaginarycode.minecraft.redisbungee.api.*;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.Summoner;
@@ -665,7 +666,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
                         if (!laggedPlayers.isEmpty()) {
                             getLogger().info("Cleaning up lagged proxy " + s + " (" + laggedPlayers.size() + " players)...");
                             for (String laggedPlayer : laggedPlayers) {
-                                PayloadUtils.cleanUpPlayer(laggedPlayer, jedis);
+                                GenericPlayerUtils.cleanUpPlayer(laggedPlayer, jedis);
                             }
                         }
                     }
@@ -686,7 +687,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
                             }
                         }
                         if (!found) {
-                            PayloadUtils.cleanUpPlayer(member, jedis);
+                            GenericPlayerUtils.cleanUpPlayer(member, jedis);
                             getLogger().warning("Player found in set that was not found locally and globally: " + member);
                         } else {
                             jedis.srem("proxy:" + configuration.getProxyId() + ":usersOnline", member);
@@ -704,7 +705,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
                         if (proxiedPlayer == null)
                             continue; // We'll deal with it later.
 
-                        PlayerUtils.createPlayer(proxiedPlayer, pipeline, true);
+                        BungeePlayerUtils.createPlayer(proxiedPlayer, pipeline, true);
                     }
 
                     pipeline.sync();
@@ -728,7 +729,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
                         if (!laggedPlayers.isEmpty()) {
                             getLogger().info("Cleaning up lagged proxy " + s + " (" + laggedPlayers.size() + " players)...");
                             for (String laggedPlayer : laggedPlayers) {
-                                PayloadUtils.cleanUpPlayer(laggedPlayer, jedisCluster);
+                                GenericPlayerUtils.cleanUpPlayer(laggedPlayer, jedisCluster);
                             }
                         }
                     }
@@ -749,7 +750,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
                             }
                         }
                         if (!found) {
-                            PayloadUtils.cleanUpPlayer(member, jedisCluster);
+                            GenericPlayerUtils.cleanUpPlayer(member, jedisCluster);
                             getLogger().warning("Player found in set that was not found locally and globally: " + member);
                         } else {
                             jedisCluster.srem("proxy:" + configuration.getProxyId() + ":usersOnline", member);
@@ -767,7 +768,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
                         if (proxiedPlayer == null)
                             continue; // We'll deal with it later.
 
-                        PlayerUtils.createPlayer(proxiedPlayer, jedisCluster, true);
+                        BungeePlayerUtils.createPlayer(proxiedPlayer, jedisCluster, true);
                     }
 
                 } catch (Throwable e) {
@@ -818,7 +819,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
                 if (jedis.scard("proxy:" + configuration.getProxyId() + ":usersOnline") > 0) {
                     Set<String> players = jedis.smembers("proxy:" + configuration.getProxyId() + ":usersOnline");
                     for (String member : players)
-                        PayloadUtils.cleanUpPlayer(member, jedis);
+                        GenericPlayerUtils.cleanUpPlayer(member, jedis);
                 }
                 return null;
             }
@@ -829,7 +830,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
                 if (jedisCluster.scard("proxy:" + configuration.getProxyId() + ":usersOnline") > 0) {
                     Set<String> players = jedisCluster.smembers("proxy:" + configuration.getProxyId() + ":usersOnline");
                     for (String member : players)
-                        PayloadUtils.cleanUpPlayer(member, jedisCluster);
+                        GenericPlayerUtils.cleanUpPlayer(member, jedisCluster);
                 }
                 return null;
             }
@@ -923,13 +924,13 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
             new RedisTask<Void>(api) {
                 @Override
                 public Void jedisTask(Jedis jedis) {
-                    PayloadUtils.kickPlayer(playerUniqueId, message, jedis);
+                    PayloadUtils.kickPlayerPayload(playerUniqueId, message, jedis);
                     return null;
                 }
 
                 @Override
                 public Void clusterJedisTask(JedisCluster jedisCluster) {
-                    PayloadUtils.kickPlayer(playerUniqueId, message, jedisCluster);
+                    PayloadUtils.kickPlayerPayload(playerUniqueId, message, jedisCluster);
                     return null;
                 }
             }.execute();
@@ -964,24 +965,22 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
     }
 
     @Override
-    public Class<?> getPubSubEventClass() {
-        return PubSubMessageEvent.class;
+    public Object createPlayerChangedNetworkEvent(UUID uuid, String previousServer, String server) {
+        return new PlayerChangedServerNetworkEvent(uuid, previousServer, server);
     }
 
     @Override
-    public Class<?> getNetworkJoinEventClass() {
-        return PlayerJoinedNetworkEvent.class;
+    public Object createPlayerJoinedNetworkEvent(UUID uuid) {
+        return new PlayerJoinedNetworkEvent(uuid);
     }
 
     @Override
-    public Class<?> getServerChangeEventClass() {
-        return PlayerChangedServerNetworkEvent.class;
+    public Object createPlayerLeftNetworkEvent(UUID uuid) {
+        return new PlayerLeftNetworkEvent(uuid);
     }
 
     @Override
-    public Class<?> getNetworkQuitEventClass() {
-        return PlayerJoinedNetworkEvent.class;
+    public Object createPubSubEvent(String channel, String message) {
+        return new PubSubMessageEvent(channel, message);
     }
-
-
 }

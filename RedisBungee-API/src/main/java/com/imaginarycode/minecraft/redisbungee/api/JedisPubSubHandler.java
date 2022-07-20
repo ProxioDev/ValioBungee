@@ -9,10 +9,9 @@ import java.lang.reflect.InvocationTargetException;
 public class JedisPubSubHandler extends JedisPubSub {
 
     private final RedisBungeePlugin<?> plugin;
-    private final Class<?> eventClass;
+
     public JedisPubSubHandler(RedisBungeePlugin<?> plugin) {
         this.plugin = plugin;
-        this.eventClass = plugin.getPubSubEventClass();
     }
 
     @Override
@@ -21,12 +20,7 @@ public class JedisPubSubHandler extends JedisPubSub {
         plugin.executeAsync(new Runnable() {
             @Override
             public void run() {
-                Object event;
-                try {
-                    event = eventClass.getDeclaredConstructor(String.class, String.class).newInstance(s, s2);
-                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                  throw new RuntimeException("unable to dispatch an pubsub event", e);
-                }
+                Object event = plugin.createPubSubEvent(s, s2);
                 plugin.callEvent(event);
             }
         });
