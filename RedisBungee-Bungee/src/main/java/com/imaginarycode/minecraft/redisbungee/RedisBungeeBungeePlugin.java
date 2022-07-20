@@ -9,6 +9,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.io.ByteStreams;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.ClusterJedisSummoner;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisSummoner;
+import com.imaginarycode.minecraft.redisbungee.api.tasks.HeartbeatTask;
 import com.imaginarycode.minecraft.redisbungee.api.tasks.RedisTask;
 import com.imaginarycode.minecraft.redisbungee.api.util.RedisUtil;
 import com.imaginarycode.minecraft.redisbungee.api.util.payload.PayloadUtils;
@@ -567,8 +568,6 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
                         }
                     } catch (NumberFormatException ignored) {
                     }
-                } else {
-                    jedis.hset("heartbeats", configuration.getProxyId(), jedis.time().get(0));
                 }
 
                 return null;
@@ -592,58 +591,17 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
                         }
                     } catch (NumberFormatException ignored) {
                     }
-                } else {
-                    jedisCluster.hset("heartbeats", configuration.getProxyId(), String.valueOf(getRedisClusterTime()));
                 }
                 return null;
             }
         }.execute();
 
-        proxiesIds = getCurrentProxiesIds(true, false);
+        updateProxyIds();
 
         uuidTranslator = new UUIDTranslator(this);
 
-        RedisTask<Void> heartBeatRedisTask = new RedisTask<Void>(api) {
-            @Override
-            public Void jedisTask(Jedis jedis) {
-                try {
-                    long redisTime = getRedisTime(jedis.time());
-                    jedis.hset("heartbeats", configuration.getProxyId(), String.valueOf(redisTime));
-                } catch (JedisConnectionException e) {
-                    // Redis server has disappeared!
-                    getLogger().log(Level.SEVERE, "Unable to update heartbeat - did your Redis server go away?", e);
-                    return null;
-                }
-                try {
-                    proxiesIds = getCurrentProxiesIds(true, false);
-                    globalPlayerCount.set(getCurrentCount());
-                } catch (Throwable e) {
-                    getLogger().log(Level.SEVERE, "Unable to update data - did your Redis server go away?", e);
-                }
-                return null;
-            }
 
-            @Override
-            public Void clusterJedisTask(JedisCluster jedisCluster) {
-                try {
-                    long redisTime = getRedisClusterTime();
-                    jedisCluster.hset("heartbeats", configuration.getProxyId(), String.valueOf(redisTime));
-                } catch (JedisConnectionException e) {
-                    // Redis server has disappeared!
-                    getLogger().log(Level.SEVERE, "Unable to update heartbeat - did your Redis server go away?", e);
-                    return null;
-                }
-                try {
-                    proxiesIds = getCurrentProxiesIds(true, false);
-                    globalPlayerCount.set(getCurrentCount());
-                } catch (Throwable e) {
-                    getLogger().log(Level.SEVERE, "Unable to update data - did your Redis server go away?", e);
-                }
-                return null;
-            }
-        };
-
-        heartbeatTask = service.scheduleAtFixedRate(heartBeatRedisTask::execute, 0, 3, TimeUnit.SECONDS);
+        heartbeatTask = service.scheduleAtFixedRate(new HeartbeatTask(this, this.globalPlayerCount), 0, HeartbeatTask.INTERVAL, HeartbeatTask.REPEAT_INTERVAL_TIME_UNIT);
 
         dataManager = new BungeeDataManager(this);
         getProxy().getPluginManager().registerListener(this, new RedisBungeeBungeeListener(this, configuration.getExemptAddresses()));
@@ -952,6 +910,11 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
     @Override
     public Long getRedisClusterTime() {
         return getRedisTime((List<String>) this.getRedisClusterTimeScript.eval(Collections.singletonList("0"), Collections.emptyList()));
+    }
+
+    @Override
+    public void updateProxyIds() {
+        proxiesIds = getCurrentProxiesIds(true, false);
     }
 
     @Override

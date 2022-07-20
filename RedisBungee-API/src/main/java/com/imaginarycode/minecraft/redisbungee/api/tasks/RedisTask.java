@@ -13,10 +13,10 @@ import java.util.concurrent.Callable;
 
 public abstract class RedisTask<V> implements Runnable, Callable<V> {
 
-    private final Summoner<?> summoner;
-    private final RedisBungeeAPI api;
-    private Jedis jedis;
-    private RedisBungeePlugin<?> plugin;
+    protected final Summoner<?> summoner;
+    protected final RedisBungeeAPI api;
+    protected Jedis jedis;
+    protected RedisBungeePlugin<?> plugin;
 
     @Override
     public V call() throws Exception {

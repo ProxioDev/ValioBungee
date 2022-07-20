@@ -102,4 +102,6 @@ public interface RedisBungeePlugin<P> extends EventsPlatform {
 
     Long getRedisClusterTime();
 
+    void updateProxyIds();
+
 }
