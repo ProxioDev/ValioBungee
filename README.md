@@ -124,7 +124,7 @@ This project is distributed under Eclipse Public License 1.0
 
 You can find it [here](https://github.com/proxiodev/RedisBungee/blob/master/LICENSE)
 
-You can find the original RedisBungee by Tux [here](https://github.com/minecrafter/RedisBungee) or spigot page [here](https://www.spigotmc.org/resources/redisbungee.13494/) "**NO LONGER WORKS**"
+You can find the original RedisBungee is by [astei](https://github.com/astei) and project can be found [here](https://github.com/minecrafter/RedisBungee) or spigot page [here, but its no longer available](https://www.spigotmc.org/resources/redisbungee.13494/) 
 
 ## Support
 
