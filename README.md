@@ -8,7 +8,7 @@ Velocity*: *version 3.1.2 or above is only supported, any version below that mig
 
 If you are looking to use Original RedisBungee without a change to internals,
 with critical bugs fixed, please use version [0.6.5](https://github.com/ProxioDev/RedisBungee/releases/tag/0.6.5) and java docs For legacy Version [0.6.5](https://proxiodev.github.io/RedisBungee-JavaDocs/0.6.5-SNAPSHOT/)
-as its last version before internal changes. please note that you will not get support for any old builds unless critical bugs effecting both effect his version and 0.7.0 or above.
+as its last version before internal changes. please note that you will not get support for any old builds unless critical bugs effecting both  0.6.5 and 0.7.0 or above.
 
 *if you are here for transferring players to another proxy when the first proxy crashes or whatever this plugin won't do it, tell mojang to implement transfer packet* 
 [Click here, for more information about transfer packet](https://hypixel.net/threads/why-do-we-need-transfer-packets.1390307/)
