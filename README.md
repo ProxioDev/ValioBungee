@@ -1,20 +1,19 @@
 # RedisBungee fork By Limework
+The original project of RedisBungee is no longer maintained, so we have forked the plugin.
 
-Spigot link: [click](https://www.spigotmc.org/resources/redisbungee.87700/)
-
-The main project of RedisBungee is no longer maintained, so we have forked the plugin.
-
-*if you are here for transferring players to another proxy when the first proxy crashes or whatever this plugin won't do it, tell mojang to implement transfer packet*
-
-RedisBungee uses [Redis](https://redis.io) to Synchronize players data between [BungeeCord](https://github.com/SpigotMC/BungeeCord) or [Velocity*](https://github.com/PaperMC/Velocity) proxies
+RedisBungee uses [Redis](https://redis.io) with Java client [Jedis](https://github.com/redis/jedis/) 
+to Synchronize players data between [BungeeCord](https://github.com/SpigotMC/BungeeCord) or [Velocity*](https://github.com/PaperMC/Velocity) proxies
 
 Velocity*: *version 3.1.2 or above is only supported, any version below that might work but might be unstable* [#40](https://github.com/ProxioDev/RedisBungee/pull/40)
 
 If you are looking to use Original RedisBungee without a change to internals,
-with critical bugs fixed, please use version [0.6.5](https://github.com/ProxioDev/RedisBungee/releases/tag/0.6.5) 
-as its last version before internal changes.
+with critical bugs fixed, please use version [0.6.5](https://github.com/ProxioDev/RedisBungee/releases/tag/0.6.5) and java docs For legacy Version [0.6.5](https://proxiodev.github.io/RedisBungee-JavaDocs/0.6.5-SNAPSHOT/)
+as its last version before internal changes. please note that you will not get support for any old builds unless critical bugs effecting both effect his version and 0.7.0 or above.
 
+*if you are here for transferring players to another proxy when the first proxy crashes or whatever this plugin won't do it, tell mojang to implement transfer packet* 
+[Click here, for more information about transfer packet](https://hypixel.net/threads/why-do-we-need-transfer-packets.1390307/)
 
+SpigotMC resource page: [click](https://www.spigotmc.org/resources/redisbungee.87700/)
 ## Supported Redis versions
 | Redis version | Supported |
 |:-------------:|:---------:|
@@ -114,10 +113,6 @@ then use any of these in your project.
 ## Javadocs
 
 For current version [0.8.0](https://proxiodev.github.io/RedisBungee-JavaDocs/0.8.0-SNAPSHOT/) 
-
-For legacy Version [0.6.5](https://proxiodev.github.io/RedisBungee-JavaDocs/0.6.5-SNAPSHOT/)
-
-
 
 ## Configuration
 
