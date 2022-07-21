@@ -652,7 +652,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
                         if (!laggedPlayers.isEmpty()) {
                             getLogger().info("Cleaning up lagged proxy {} ({} players)...", s, laggedPlayers.size());
                             for (String laggedPlayer : laggedPlayers) {
-                                GenericPlayerUtils.cleanUpPlayer(laggedPlayer, jedis);
+                                GenericPlayerUtils.cleanUpPlayer(laggedPlayer, jedis, true);
                             }
                         }
                     }
@@ -673,7 +673,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
                             }
                         }
                         if (!found) {
-                            GenericPlayerUtils.cleanUpPlayer(member, jedis);
+                            GenericPlayerUtils.cleanUpPlayer(member, jedis, false);
                             getLogger().warn("Player found in set that was not found locally and globally: {}", member);
                         } else {
                             jedis.srem("proxy:" + configuration.getProxyId() + ":usersOnline", member);
@@ -715,7 +715,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
                         if (!laggedPlayers.isEmpty()) {
                             getLogger().info("Cleaning up lagged proxy {} ({} players)...", s, laggedPlayers.size());
                             for (String laggedPlayer : laggedPlayers) {
-                                GenericPlayerUtils.cleanUpPlayer(laggedPlayer, jedisCluster);
+                                GenericPlayerUtils.cleanUpPlayer(laggedPlayer, jedisCluster, true);
                             }
                         }
                     }
@@ -736,7 +736,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
                             }
                         }
                         if (!found) {
-                            GenericPlayerUtils.cleanUpPlayer(member, jedisCluster);
+                            GenericPlayerUtils.cleanUpPlayer(member, jedisCluster, false);
                             getLogger().warn("Player found in set that was not found locally and globally: {}", member);
                         } else {
                             jedisCluster.srem("proxy:" + configuration.getProxyId() + ":usersOnline", member);
@@ -799,7 +799,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
                 if (jedis.scard("proxy:" + configuration.getProxyId() + ":usersOnline") > 0) {
                     Set<String> players = jedis.smembers("proxy:" + configuration.getProxyId() + ":usersOnline");
                     for (String member : players)
-                        GenericPlayerUtils.cleanUpPlayer(member, jedis);
+                        GenericPlayerUtils.cleanUpPlayer(member, jedis, true);
                 }
                 return null;
             }
@@ -810,7 +810,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
                 if (jedisCluster.scard("proxy:" + configuration.getProxyId() + ":usersOnline") > 0) {
                     Set<String> players = jedisCluster.smembers("proxy:" + configuration.getProxyId() + ":usersOnline");
                     for (String member : players)
-                        GenericPlayerUtils.cleanUpPlayer(member, jedisCluster);
+                        GenericPlayerUtils.cleanUpPlayer(member, jedisCluster, true);
                 }
                 return null;
             }

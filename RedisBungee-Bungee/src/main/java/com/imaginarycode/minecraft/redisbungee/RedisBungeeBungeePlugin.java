@@ -624,7 +624,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
                         if (!laggedPlayers.isEmpty()) {
                             getLogger().info("Cleaning up lagged proxy " + s + " (" + laggedPlayers.size() + " players)...");
                             for (String laggedPlayer : laggedPlayers) {
-                                GenericPlayerUtils.cleanUpPlayer(laggedPlayer, jedis);
+                                GenericPlayerUtils.cleanUpPlayer(laggedPlayer, jedis, true);
                             }
                         }
                     }
@@ -645,7 +645,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
                             }
                         }
                         if (!found) {
-                            GenericPlayerUtils.cleanUpPlayer(member, jedis);
+                            GenericPlayerUtils.cleanUpPlayer(member, jedis, false);
                             getLogger().warning("Player found in set that was not found locally and globally: " + member);
                         } else {
                             jedis.srem("proxy:" + configuration.getProxyId() + ":usersOnline", member);
@@ -663,7 +663,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
                         if (proxiedPlayer == null)
                             continue; // We'll deal with it later.
 
-                        BungeePlayerUtils.createPlayer(proxiedPlayer, pipeline, true);
+                        BungeePlayerUtils.createPlayer(proxiedPlayer, pipeline, false);
                     }
 
                     pipeline.sync();
@@ -687,7 +687,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
                         if (!laggedPlayers.isEmpty()) {
                             getLogger().info("Cleaning up lagged proxy " + s + " (" + laggedPlayers.size() + " players)...");
                             for (String laggedPlayer : laggedPlayers) {
-                                GenericPlayerUtils.cleanUpPlayer(laggedPlayer, jedisCluster);
+                                GenericPlayerUtils.cleanUpPlayer(laggedPlayer, jedisCluster, true);
                             }
                         }
                     }
@@ -708,7 +708,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
                             }
                         }
                         if (!found) {
-                            GenericPlayerUtils.cleanUpPlayer(member, jedisCluster);
+                            GenericPlayerUtils.cleanUpPlayer(member, jedisCluster, false);
                             getLogger().warning("Player found in set that was not found locally and globally: " + member);
                         } else {
                             jedisCluster.srem("proxy:" + configuration.getProxyId() + ":usersOnline", member);
@@ -777,7 +777,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
                 if (jedis.scard("proxy:" + configuration.getProxyId() + ":usersOnline") > 0) {
                     Set<String> players = jedis.smembers("proxy:" + configuration.getProxyId() + ":usersOnline");
                     for (String member : players)
-                        GenericPlayerUtils.cleanUpPlayer(member, jedis);
+                        GenericPlayerUtils.cleanUpPlayer(member, jedis, true);
                 }
                 return null;
             }
@@ -788,7 +788,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
                 if (jedisCluster.scard("proxy:" + configuration.getProxyId() + ":usersOnline") > 0) {
                     Set<String> players = jedisCluster.smembers("proxy:" + configuration.getProxyId() + ":usersOnline");
                     for (String member : players)
-                        GenericPlayerUtils.cleanUpPlayer(member, jedisCluster);
+                        GenericPlayerUtils.cleanUpPlayer(member, jedisCluster, true);
                 }
                 return null;
             }

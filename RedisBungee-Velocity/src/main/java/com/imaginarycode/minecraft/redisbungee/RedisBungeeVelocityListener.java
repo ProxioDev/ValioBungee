@@ -139,14 +139,14 @@ public class RedisBungeeVelocityListener extends AbstractRedisBungeeListener<Log
             @Override
             public Void jedisTask(Jedis jedis) {
                 Pipeline pipeline = jedis.pipelined();
-                GenericPlayerUtils.cleanUpPlayer(event.getPlayer().getUniqueId().toString(), pipeline);
+                GenericPlayerUtils.cleanUpPlayer(event.getPlayer().getUniqueId().toString(), pipeline, true);
                 pipeline.sync();
                 return null;
             }
 
             @Override
             public Void clusterJedisTask(JedisCluster jedisCluster) {
-                GenericPlayerUtils.cleanUpPlayer(event.getPlayer().getUniqueId().toString(), jedisCluster);
+                GenericPlayerUtils.cleanUpPlayer(event.getPlayer().getUniqueId().toString(), jedisCluster, true);
                 return null;
             }
 
