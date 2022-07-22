@@ -845,7 +845,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
         final boolean registerLegacyCommands = node.getNode("register-legacy-commands").getBoolean(false);
         String redisPassword = node.getNode("redis-password").getString(null);
         String proxyId = node.getNode("proxy-id").getString("test-1");
-        final int maxConnections = node.getNode("max-redis-connections").getInt(8);
+        final int maxConnections = node.getNode("max-redis-connections").getInt(10);
         List<String> exemptAddresses;
         try {
             exemptAddresses = node.getNode("exempt-ip-addresses").getList(TypeToken.of(String.class));
