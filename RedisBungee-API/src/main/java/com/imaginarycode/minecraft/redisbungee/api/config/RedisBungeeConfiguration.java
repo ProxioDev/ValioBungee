@@ -1,4 +1,4 @@
-package com.imaginarycode.minecraft.redisbungee.api;
+package com.imaginarycode.minecraft.redisbungee.api.config;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.net.InetAddresses;
@@ -7,12 +7,15 @@ import java.net.InetAddress;
 import java.util.List;
 
 public class RedisBungeeConfiguration {
+    public static final int CONFIG_VERSION = 1;
     private final String proxyId;
     private final List<InetAddress> exemptAddresses;
-    private final boolean overrideBungeeCommands;
-    private static RedisBungeeConfiguration config;
 
-    public RedisBungeeConfiguration(String proxyId, List<String> exemptAddresses, boolean overrideBungeeCommands) {
+    private final boolean registerLegacyCommands;
+
+    private final boolean overrideBungeeCommands;
+
+    public RedisBungeeConfiguration(String proxyId, List<String> exemptAddresses, boolean registerLegacyCommands, boolean overrideBungeeCommands) {
         this.proxyId = proxyId;
 
         ImmutableList.Builder<InetAddress> addressBuilder = ImmutableList.builder();
@@ -20,7 +23,7 @@ public class RedisBungeeConfiguration {
             addressBuilder.add(InetAddresses.forString(s));
         }
         this.exemptAddresses = addressBuilder.build();
-        config = this;
+        this.registerLegacyCommands = registerLegacyCommands;
         this.overrideBungeeCommands = overrideBungeeCommands;
     }
 
@@ -32,11 +35,11 @@ public class RedisBungeeConfiguration {
         return exemptAddresses;
     }
 
-    public boolean doOverrideBungeeCommands() {
-        return overrideBungeeCommands;
+    public boolean doRegisterLegacyCommands() {
+        return registerLegacyCommands;
     }
 
-    public static RedisBungeeConfiguration getConfig() {
-        return config;
+    public boolean doOverrideBungeeCommands() {
+        return overrideBungeeCommands;
     }
 }

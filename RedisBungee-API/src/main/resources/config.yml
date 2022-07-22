@@ -1,3 +1,6 @@
+# Config version DO NOT CHANGE!!!!
+config-version: 1
+
 # RedisBungee configuration file.
 # PLEASE READ THE WIKI: https://github.com/ProxioDev/RedisBungee/wiki
 
@@ -5,10 +8,27 @@
 # enabling this option will enable cluster mode.
 cluster-mode-enabled: false
 
-# The Redis server you use.
+# FORMAT:
+# redis-cluster-servers:
+# - host: 127.0.0.1
+#   port: 2020
+# - host: 127.0.0.1
+#   port: 2021
+# - host: 127.0.0.1
+#   port: 2021
+
+# you can set single server and Jedis will automatically discover cluster nodes,
+# but might fail if this single redis node is down when Proxy startup, its recommended put the all the nodes
+redis-cluster-servers:
+  - host: 127.0.0.1
+    port: 6379
+
 # Get Redis from http://redis.io/
+# The Redis server you use.
+# these settings are ignored when cluster mode is enabled.
 redis-server: 127.0.0.1
 redis-port: 6379
+
 # OPTIONAL but recommended: If your Redis server uses AUTH, set the password required.
 redis-password: ""
 # Maximum connections that will be maintained to the Redis server.
@@ -21,8 +41,12 @@ max-redis-connections: 10
 # in cluster mode using ssl without password is ignored due fact is not supported in Jedis lib
 useSSL: false
 
-# An identifier for this BungeeCord instance. Will randomly generate if leaving it blank.
-server-id: "test1"
+# An identifier for this BungeeCord / Velocity instance. Will randomly generate if leaving it blank.
+proxy-id: "test-1"
+
+# Register redis bungee legacy commands
+# if this disabled override-bungee-commands will be ignored
+register-legacy-commands: false
 
 # Whether or not RedisBungee should install its version of regular BungeeCord commands.
 # Often, the RedisBungee commands are desired, but in some cases someone may wish to
@@ -33,7 +57,7 @@ server-id: "test1"
 #
 # Please note that with build 787+, most commands overridden by RedisBungee were moved to
 # modules, and these must be disabled or overridden yourself.
-register-bungee-commands: true
+override-bungee-commands: false
 
 # A list of IP addresses for which RedisBungee will not modify the response for, useful for automatic
 # restart scripts.

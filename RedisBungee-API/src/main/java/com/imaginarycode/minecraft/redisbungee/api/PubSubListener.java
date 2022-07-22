@@ -22,59 +22,31 @@ public class PubSubListener implements Runnable {
 
     @Override
     public void run() {
-        RedisTask<Void> subTask = new RedisTask<Void>(plugin.getApi()) {
+        RedisTask<Void> subTask = new RedisTask<Void>(plugin) {
             @Override
             public Void jedisTask(Jedis jedis) {
-                try {
-                    jpsh = new JedisPubSubHandler(plugin);
-                    addedChannels.add("redisbungee-" + plugin.getConfiguration().getProxyId());
-                    addedChannels.add("redisbungee-allservers");
-                    addedChannels.add("redisbungee-data");
-                    jedis.subscribe(jpsh, addedChannels.toArray(new String[0]));
-                } catch (Exception e) {
-                    // FIXME: Extremely ugly hack
-                    // Attempt to unsubscribe this instance and try again.
-                    plugin.logWarn("PubSub error, attempting to recover.");
-                    try {
-                        jpsh.unsubscribe();
-                    } catch (Exception e1) {
-                        /* This may fail with
-                        - java.net.SocketException: Broken pipe
-                        - redis.clients.jedis.exceptions.JedisConnectionException: JedisPubSub was not subscribed to a Jedis instance
-                        */
-                    }
-                }
+                jpsh = new JedisPubSubHandler(plugin);
+                addedChannels.add("redisbungee-" + plugin.getConfiguration().getProxyId());
+                addedChannels.add("redisbungee-allservers");
+                addedChannels.add("redisbungee-data");
+                jedis.subscribe(jpsh, addedChannels.toArray(new String[0]));
                 return null;
             }
 
             @Override
             public Void clusterJedisTask(JedisCluster jedisCluster) {
-                try {
-                    jpsh = new JedisPubSubHandler(plugin);
-                    addedChannels.add("redisbungee-" + plugin.getConfiguration().getProxyId());
-                    addedChannels.add("redisbungee-allservers");
-                    addedChannels.add("redisbungee-data");
-                    jedisCluster.subscribe(jpsh, addedChannels.toArray(new String[0]));
-                } catch (Exception e) {
-                    // FIXME: Extremely ugly hack
-                    // Attempt to unsubscribe this instance and try again.
-                    plugin.logWarn("PubSub error, attempting to recover.");
-                    try {
-                        jpsh.unsubscribe();
-                    } catch (Exception e1) {
-                        /* This may fail with
-                        - java.net.SocketException: Broken pipe
-                        - redis.clients.jedis.exceptions.JedisConnectionException: JedisPubSub was not subscribed to a Jedis instance
-                        */
-                    }
-                }
+                jpsh = new JedisPubSubHandler(plugin);
+                addedChannels.add("redisbungee-" + plugin.getConfiguration().getProxyId());
+                addedChannels.add("redisbungee-allservers");
+                addedChannels.add("redisbungee-data");
+                jedisCluster.subscribe(jpsh, addedChannels.toArray(new String[0]));
                 return null;
             }
         };
 
-        try  {
+        try {
             subTask.execute();
-        } catch (JedisConnectionException e) {
+        } catch (Exception e) {
             plugin.logWarn("PubSub error, attempting to recover in 5 secs.");
             plugin.executeAsyncAfter(this, TimeUnit.SECONDS, 5);
         }

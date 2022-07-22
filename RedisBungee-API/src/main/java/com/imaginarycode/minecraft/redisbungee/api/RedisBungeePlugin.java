@@ -2,6 +2,8 @@ package com.imaginarycode.minecraft.redisbungee.api;
 
 import com.google.common.collect.Multimap;
 import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
+import com.imaginarycode.minecraft.redisbungee.api.config.ConfigLoader;
+import com.imaginarycode.minecraft.redisbungee.api.config.RedisBungeeConfiguration;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.Summoner;
 import com.imaginarycode.minecraft.redisbungee.api.util.uuid.UUIDTranslator;
 
@@ -18,7 +20,7 @@ import java.util.concurrent.TimeUnit;
  * @author Ham1255
  * @since 0.7.0
  */
-public interface RedisBungeePlugin<P> extends EventsPlatform {
+public interface RedisBungeePlugin<P> extends EventsPlatform, ConfigLoader {
 
     default void initialize() {
 
@@ -91,8 +93,6 @@ public interface RedisBungeePlugin<P> extends EventsPlatform {
     void sendProxyCommand(String cmd);
 
     long getRedisTime(List<String> timeRes);
-
-    void loadConfig() throws Exception;
 
     void kickPlayer(UUID playerUniqueId, String message);
 
