@@ -116,7 +116,7 @@ For current version [0.8.0](https://proxiodev.github.io/RedisBungee-JavaDocs/0.8
 
 ## Configuration
 
-**REDISBUNGEE REQUIRES A REDIS SERVER**, preferably with reasonably low latency. The default [config](https://github.com/ProxioDev/RedisBungee/blob/develop/RedisBungee-API/src/main/resources/example_config.yml) is saved when the plugin first starts.
+**REDISBUNGEE REQUIRES A REDIS SERVER**, preferably with reasonably low latency. The default [config](https://github.com/ProxioDev/RedisBungee/blob/develop/RedisBungee-API/src/main/resources/config.yml) is saved when the plugin first starts.
 
 ## License!
 

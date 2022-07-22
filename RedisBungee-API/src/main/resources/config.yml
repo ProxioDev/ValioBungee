@@ -1,8 +1,4 @@
-# Config version DO NOT CHANGE!!!!
-config-version: 1
-
 # RedisBungee configuration file.
-# PLEASE READ THE WIKI: https://github.com/ProxioDev/RedisBungee/wiki
 
 # Cluster Mode
 # enabling this option will enable cluster mode.
@@ -62,3 +58,6 @@ override-bungee-commands: false
 # A list of IP addresses for which RedisBungee will not modify the response for, useful for automatic
 # restart scripts.
 exempt-ip-addresses: []
+
+# Config version DO NOT CHANGE!!!!
+config-version: 1
