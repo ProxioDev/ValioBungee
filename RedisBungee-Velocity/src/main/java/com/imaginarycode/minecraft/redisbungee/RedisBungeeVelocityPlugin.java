@@ -83,7 +83,9 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
     private static final Object SERVER_TO_PLAYERS_KEY = new Object();
     public static final List<ChannelIdentifier> IDENTIFIERS = List.of(
             MinecraftChannelIdentifier.create("legacy", "redisbungee"),
-            new LegacyChannelIdentifier("RedisBungee")
+            new LegacyChannelIdentifier("RedisBungee"),
+            // This is needed for clients before 1.13
+            new LegacyChannelIdentifier("legacy:redisbungee")
     );
     private final Cache<Object, Multimap<String, UUID>> serverToPlayersCache = CacheBuilder.newBuilder()
             .expireAfterWrite(5, TimeUnit.SECONDS)
