@@ -765,19 +765,21 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
         // register plugin messages
         IDENTIFIERS.forEach(getProxy().getChannelRegistrar()::register);
 
-        // register commands
-        // Override Velocity commands
-        if (configuration.doOverrideBungeeCommands()) {
-            getProxy().getCommandManager().register("glist", new RedisBungeeCommands.GlistCommand(this), "redisbungee", "rglist");
+        // register legacy commands
+        if (configuration.doRegisterLegacyCommands()) {
+            // Override Velocity commands
+            if (configuration.doOverrideBungeeCommands()) {
+                getProxy().getCommandManager().register("glist", new RedisBungeeCommands.GlistCommand(this), "redisbungee", "rglist");
+            }
+            getProxy().getCommandManager().register("sendtoall", new RedisBungeeCommands.SendToAll(this), "rsendtoall");
+            getProxy().getCommandManager().register("serverid", new RedisBungeeCommands.ServerId(this), "rserverid");
+            getProxy().getCommandManager().register("serverids", new RedisBungeeCommands.ServerIds(this));
+            getProxy().getCommandManager().register("pproxy", new RedisBungeeCommands.PlayerProxyCommand(this));
+            getProxy().getCommandManager().register("plist", new RedisBungeeCommands.PlistCommand(this), "rplist");
+            getProxy().getCommandManager().register("lastseen", new RedisBungeeCommands.LastSeenCommand(this), "rlastseen");
+            getProxy().getCommandManager().register("ip", new RedisBungeeCommands.IpCommand(this), "playerip", "rip", "rplayerip");
+            getProxy().getCommandManager().register("find", new RedisBungeeCommands.FindCommand(this), "rfind");
         }
-        getProxy().getCommandManager().register("sendtoall", new RedisBungeeCommands.SendToAll(this), "rsendtoall");
-        getProxy().getCommandManager().register("serverid", new RedisBungeeCommands.ServerId(this), "rserverid");
-        getProxy().getCommandManager().register("serverids", new RedisBungeeCommands.ServerIds(this));
-        getProxy().getCommandManager().register("pproxy", new RedisBungeeCommands.PlayerProxyCommand(this));
-        getProxy().getCommandManager().register("plist", new RedisBungeeCommands.PlistCommand(this), "rplist");
-        getProxy().getCommandManager().register("lastseen", new RedisBungeeCommands.LastSeenCommand(this), "rlastseen");
-        getProxy().getCommandManager().register("ip", new RedisBungeeCommands.IpCommand(this), "playerip", "rip", "rplayerip");
-        getProxy().getCommandManager().register("find", new RedisBungeeCommands.FindCommand(this), "rfind");
     }
 
     @Override

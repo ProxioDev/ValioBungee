@@ -742,18 +742,20 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
         // register plugin messages channel.
         getProxy().registerChannel("legacy:redisbungee");
         getProxy().registerChannel("RedisBungee");
-        // register commands
-        if (configuration.doOverrideBungeeCommands()) {
-            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.GlistCommand(this));
-            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.FindCommand(this));
-            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.LastSeenCommand(this));
-            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.IpCommand(this));
+        if (configuration.doRegisterLegacyCommands()) {
+            // register commands
+            if (configuration.doOverrideBungeeCommands()) {
+                getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.GlistCommand(this));
+                getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.FindCommand(this));
+                getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.LastSeenCommand(this));
+                getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.IpCommand(this));
+            }
+            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.SendToAll(this));
+            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.ServerId(this));
+            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.ServerIds(this));
+            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.PlayerProxyCommand(this));
+            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.PlistCommand(this));
         }
-        getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.SendToAll(this));
-        getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.ServerId(this));
-        getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.ServerIds(this));
-        getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.PlayerProxyCommand(this));
-        getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.PlistCommand(this));
     }
 
     @Override

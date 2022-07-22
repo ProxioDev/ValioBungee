@@ -7,7 +7,6 @@ import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.imaginarycode.minecraft.redisbungee.api.AbstractRedisBungeeListener;
-import com.imaginarycode.minecraft.redisbungee.api.AbstractDataManager;
 import com.imaginarycode.minecraft.redisbungee.api.GenericPlayerUtils;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 import com.imaginarycode.minecraft.redisbungee.api.tasks.RedisTask;
@@ -142,8 +141,6 @@ public class RedisBungeeBungeeListener extends AbstractRedisBungeeListener<Login
     @EventHandler
     public void onPlayerDisconnect(PlayerDisconnectEvent event) {
         plugin.executeAsync(new RedisTask<Void>(plugin) {
-
-
             @Override
             public Void jedisTask(Jedis jedis) {
                 Pipeline pipeline = jedis.pipelined();
