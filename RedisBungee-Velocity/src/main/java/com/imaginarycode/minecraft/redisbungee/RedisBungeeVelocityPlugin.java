@@ -9,6 +9,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.imaginarycode.minecraft.redisbungee.api.*;
+import com.imaginarycode.minecraft.redisbungee.api.config.RedisBungeeConfiguration;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.ClusterJedisSummoner;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisSummoner;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.Summoner;
@@ -54,7 +55,6 @@ import java.io.*;
 import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -831,86 +831,86 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
 
     @Override
     public void loadConfig() throws IOException {
-        if (Files.notExists(getDataFolder())) {
-            try {
-                Files.createDirectory(getDataFolder());
-                getLogger().info("data folder was created");
-            } catch (IOException e) {
-                getLogger().error("Cannot create data folder", e);
-            }
-
+        Path configFile = createConfigFile(getDataFolder());
+        final YAMLConfigurationLoader yamlConfigurationFileLoader = YAMLConfigurationLoader.builder().setPath(configFile).build();
+        ConfigurationNode node = yamlConfigurationFileLoader.load();
+        if (node.getNode("config-version").getInt(0) != RedisBungeeConfiguration.CONFIG_VERSION) {
+            handleOldConfig(getDataFolder());
+            node = yamlConfigurationFileLoader.load();
         }
-        Path file = getDataFolder().resolve("config.yml");
-        if (Files.notExists(file)) {
-            try (InputStream in = getResourceAsStream("example_config.yml")) {
-                Files.createFile(file);
-                Files.copy(in, file, StandardCopyOption.REPLACE_EXISTING);
-                getLogger().info("config file was created");
-            } catch (IOException e) {
-                getLogger().error("Cannot create configuration", e);
-            }
-        }
-        final YAMLConfigurationLoader yamlConfiguration = YAMLConfigurationLoader.builder().setPath(file).build();
-        ConfigurationNode node = yamlConfiguration.load();
-        final String redisServer = node.getNode("redis-server").getString("127.0.0.1");
-        final int redisPort = node.getNode("redis-port").getInt(6379);
         final boolean useSSL = node.getNode("useSSL").getBoolean(false);
+        final boolean overrideBungeeCommands = node.getNode("override-bungee-commands").getBoolean(false);
+        final boolean registerLegacyCommands = node.getNode("register-legacy-commands").getBoolean(false);
         String redisPassword = node.getNode("redis-password").getString(null);
-        String serverId = node.getNode("server-id").getString("test-1");
+        String proxyId = node.getNode("proxy-id").getString("test-1");
+        final int maxConnections = node.getNode("max-redis-connections").getInt(8);
+        List<String> exemptAddresses;
+        try {
+            exemptAddresses = node.getNode("exempt-ip-addresses").getList(TypeToken.of(String.class));
+        } catch (ObjectMappingException e) {
+            exemptAddresses = Collections.emptyList();
+        }
 
         // check redis password
         if (redisPassword != null && (redisPassword.isEmpty() || redisPassword.equals("none"))) {
             redisPassword = null;
+            getLogger().warn("INSECURE setup was detected Please set password for your redis instance.");
+        } else if (redisPassword == null) {
             getLogger().warn("INSECURE setup was detected Please set password for your redis instance.");
         }
         if (!useSSL) {
             getLogger().warn("INSECURE setup was detected Please setup ssl for your redis instance.");
         }
         // Configuration sanity checks.
-        if (serverId == null || serverId.isEmpty()) {
-            /*
-             *  this check causes the config comments to disappear somehow
-             *  I think due snake yaml limitations so as todo: write our own yaml parser?
-             */
+        if (proxyId == null || proxyId.isEmpty()) {
             String genId = UUID.randomUUID().toString();
-            getLogger().info("Generated server id {} and saving it to config.", genId);
-            node.getNode("server-id").setValue(genId);
-            yamlConfiguration.save(node);
-            getLogger().info("Server id was generated: {}", serverId);
+            getLogger().info("Generated proxy id {} and saving it to config.", genId);
+            node.getNode("proxy-id").setValue(genId);
+            yamlConfigurationFileLoader.save(node);
+            proxyId = genId;
+            getLogger().info("proxy id was generated: {}", proxyId);
         } else {
-            getLogger().info("Loaded server id {}.", serverId);
+            getLogger().info("Loaded proxy id {}.", proxyId);
         }
-        try {
-            this.configuration = new RedisBungeeConfiguration(serverId, node.getNode("exempt-ip-addresses").getList(TypeToken.of(String.class)), node.getNode("register-bungee-commands").getBoolean(true));
-        } catch (ObjectMappingException e) {
-            throw new RuntimeException(e);
-        }
+        this.configuration = new RedisBungeeConfiguration(proxyId, exemptAddresses, registerLegacyCommands, overrideBungeeCommands);
 
-        if (redisServer != null && !redisServer.isEmpty()) {
-            if (node.getNode("cluster-mode-enabled").getBoolean(false)) {
-                GenericObjectPoolConfig<Connection> poolConfig = new GenericObjectPoolConfig<>();
-                poolConfig.setMaxTotal(node.getNode("max-redis-connections").getInt(8));
-                if (redisPassword != null) {
-                    this.jedisSummoner = new ClusterJedisSummoner(new JedisCluster(new HostAndPort(redisServer, redisPort), 5000, 5000, 60, serverId, redisPassword, poolConfig, useSSL));
-                } else {
-                    getLogger().warn("SSL option is ignored in Cluster mode if no PASSWORD is set");
-                    this.jedisSummoner = new ClusterJedisSummoner(new JedisCluster(new HostAndPort(redisServer, redisPort), 5000, 5000, 60, poolConfig));
-                }
-                this.redisBungeeMode = RedisBungeeMode.CLUSTER;
-                getLogger().info("RedisBungee MODE: CLUSTER");
-            } else {
-                JedisPoolConfig config = new JedisPoolConfig();
-                config.setMaxTotal(node.getNode("max-redis-connections").getInt(8));
-                this.jedisSummoner = new JedisSummoner(new JedisPool(config, redisServer, redisPort, 0, redisPassword, useSSL));
-                this.redisBungeeMode = RedisBungeeMode.SINGLE;
-                getLogger().info("RedisBungee MODE: SINGLE");
+        if (node.getNode("cluster-mode-enabled").getBoolean(false)) {
+            getLogger().info("RedisBungee MODE: CLUSTER");
+            Set<HostAndPort> hostAndPortSet = new HashSet<>();
+            GenericObjectPoolConfig<Connection> poolConfig = new GenericObjectPoolConfig<>();
+            poolConfig.setMaxTotal(maxConnections);
+            node.getNode("redis-cluster-servers").getChildrenList().forEach((childNode) -> {
+                Map<Object, ? extends ConfigurationNode> hostAndPort = childNode.getChildrenMap();
+                String host = hostAndPort.get("host").getString();
+                int port = hostAndPort.get("port").getInt();
+                hostAndPortSet.add(new HostAndPort(host, port));
+            });
+            getLogger().info(hostAndPortSet.size() + " cluster nodes were specified");
+            if (hostAndPortSet.isEmpty()) {
+                throw new RuntimeException("No redis cluster servers specified");
             }
-            getLogger().info("Successfully connected to Redis.");
-
+            if (redisPassword != null) {
+                this.jedisSummoner = new ClusterJedisSummoner(new JedisCluster(hostAndPortSet, 5000, 5000, 60, proxyId, redisPassword, poolConfig, useSSL));
+            } else {
+                getLogger().warn("SSL option is ignored in Cluster mode if no PASSWORD is set");
+                this.jedisSummoner = new ClusterJedisSummoner(new JedisCluster(hostAndPortSet, 5000, 5000, 60, poolConfig));
+            }
+            this.redisBungeeMode = RedisBungeeMode.CLUSTER;
         } else {
-            throw new RuntimeException("No redis server specified!");
+            getLogger().info("RedisBungee MODE: SINGLE");
+            final String redisServer = node.getNode("redis-server").getString("127.0.0.1");
+            final int redisPort = node.getNode("redis-port").getInt(6379);
+            if (redisServer != null && redisServer.isEmpty()) {
+                throw new RuntimeException("No redis server specified");
+            }
+            JedisPoolConfig config = new JedisPoolConfig();
+            config.setMaxTotal(maxConnections);
+            this.jedisSummoner = new JedisSummoner(new JedisPool(config, redisServer, redisPort, 0, redisPassword, useSSL));
+            this.redisBungeeMode = RedisBungeeMode.SINGLE;
         }
+        getLogger().info("Successfully connected to Redis.");
     }
+
 
     @Override
     public void kickPlayer(UUID playerUniqueId, String message) {
@@ -935,7 +935,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
     @Override
     public void kickPlayer(String playerName, String message) {
         // fetch the uuid
-        UUID playerUUID = this.uuidTranslator.getTranslatedUuid(playerName,true);
+        UUID playerUUID = this.uuidTranslator.getTranslatedUuid(playerName, true);
         kickPlayer(playerUUID, message);
     }
 
@@ -997,7 +997,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
         return this.dataFolder;
     }
 
-    public final InputStream getResourceAsStream(String name) {
-        return getClass().getClassLoader().getResourceAsStream(name);
+    public InputStream getResourceAsStream(String name) {
+        return this.getClass().getClassLoader().getResourceAsStream(name);
     }
 }

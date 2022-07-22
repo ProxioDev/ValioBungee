@@ -61,43 +61,39 @@
                             <relocations>
                                 <relocation>
                                     <pattern>redis.clients.jedis</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.jedis
-                                    </shadedPattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.jedis</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>redis.clients.util</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.jedisutil
-                                    </shadedPattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.jedisutil</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.apache.commons.pool</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.commonspool
-                                    </shadedPattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.commonspool</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.squareup.okhttp</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.okhttp
-                                    </shadedPattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.okhttp</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>okio</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.okio
-                                    </shadedPattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.okio</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.google</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.google
-                                    </shadedPattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.google</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.json</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.json
-                                    </shadedPattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.json</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.checkerframework</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.checkframework
-                                    </shadedPattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.checkframework</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>ninja.leaping.configurate</pattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.configurate</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
@@ -119,6 +115,11 @@
             <version>1.17-R0.1-SNAPSHOT</version>
             <type>jar</type>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.spongepowered</groupId>
+            <artifactId>configurate-yaml</artifactId>
+            <version>3.7.2</version>
         </dependency>
     </dependencies>
 
