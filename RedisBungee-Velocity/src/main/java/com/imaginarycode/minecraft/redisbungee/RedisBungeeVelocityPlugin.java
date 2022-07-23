@@ -693,7 +693,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
                         if (playerProxied == null)
                             continue; // We'll deal with it later.
 
-                        VelocityPlayerUtils.createPlayer(playerProxied, pipeline, true);
+                        VelocityPlayerUtils.createPlayer(playerProxied, pipeline, false);
                     }
 
                     pipeline.sync();
@@ -754,7 +754,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
                         if (playerProxied == null)
                             continue; // We'll deal with it later.
 
-                        VelocityPlayerUtils.createPlayer(playerProxied, jedisCluster, true);
+                        VelocityPlayerUtils.createPlayer(playerProxied, jedisCluster, false);
                     }
                 } catch (Throwable e) {
                     getLogger().error("Unable to fix up stored player data", e);
