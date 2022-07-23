@@ -362,12 +362,13 @@ public class RedisBungeeAPI {
      *
      * @return {@link Jedis}
      * @since 0.7.0
+     * @throws IllegalStateException if the #getMode is not equal to {@link RedisBungeeMode#SINGLE}
      */
     public Jedis requestJedis() {
         if (getMode() == RedisBungeeMode.SINGLE) {
             return ((JedisSummoner) this.plugin.getSummoner()).obtainResource();
         } else {
-            throw new RuntimeException("RedisBungee is on Cluster MODE!");
+            throw new IllegalStateException("Mode is not " + RedisBungeeMode.SINGLE);
         }
     }
 
@@ -376,12 +377,28 @@ public class RedisBungeeAPI {
      *
      * @return {@link JedisPool}
      * @since 0.6.5
+     * @throws IllegalStateException if the #getMode is not equal to {@link RedisBungeeMode#SINGLE}
      */
     public JedisPool getJedisPool() {
         if (getMode() == RedisBungeeMode.SINGLE) {
             return ((JedisSummoner) this.plugin.getSummoner()).getJedisPool();
         } else {
-            throw new RuntimeException("RedisBungee is on Cluster MODE!");
+            throw new IllegalStateException("Mode is not " + RedisBungeeMode.SINGLE);
+        }
+    }
+
+    /**
+     * This gives you instance of Jedis Cluster
+     *
+     * @return {@link redis.clients.jedis.JedisCluster}
+     * @since 0.8.0
+     * @throws IllegalStateException if the #getMode is not equal to {@link RedisBungeeMode#CLUSTER}
+     */
+    public Jedis requestClusterJedis() {
+        if (getMode() == RedisBungeeMode.CLUSTER) {
+            return ((JedisSummoner) this.plugin.getSummoner()).obtainResource();
+        } else {
+            throw new IllegalStateException("Mode is not " + RedisBungeeMode.CLUSTER);
         }
     }
 
@@ -395,19 +412,6 @@ public class RedisBungeeAPI {
         return this.plugin.getSummoner();
     }
 
-    /**
-     * This gives you instance of Jedis Cluster
-     *
-     * @return {@link redis.clients.jedis.JedisCluster}
-     * @since 0.8.0
-     */
-    public Jedis requestClusterJedis() {
-        if (getMode() == RedisBungeeMode.CLUSTER) {
-            return ((JedisSummoner) this.plugin.getSummoner()).obtainResource();
-        } else {
-            throw new RuntimeException("RedisBungee is on single MODE!");
-        }
-    }
 
     /**
      * shows what mode is RedisBungee is on
