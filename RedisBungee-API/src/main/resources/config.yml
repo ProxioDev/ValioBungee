@@ -40,6 +40,13 @@ useSSL: false
 # An identifier for this BungeeCord / Velocity instance. Will randomly generate if leaving it blank.
 proxy-id: "test-1"
 
+# In version 0.8.0 Internally now uses JedisPooled instead of Jedis, JedisPool.
+# which will break compatibility with old plugins that uses RedisBungee JedisPool
+# so to mitigate this issue, we will instruct RedisBungee to init an JedisPool for compatibility reasons.
+# enabled by default
+# ignored when cluster mode is enabled
+enable-jedis-pool-compatibility: true
+
 # Register redis bungee legacy commands
 # if this disabled override-bungee-commands will be ignored
 register-legacy-commands: false
