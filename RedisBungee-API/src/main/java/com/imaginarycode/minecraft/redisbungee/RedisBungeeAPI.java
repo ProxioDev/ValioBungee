@@ -362,7 +362,7 @@ public class RedisBungeeAPI {
      *
      * @return {@link Jedis}
      * @since 0.7.0
-     * @throws IllegalStateException if the #getMode() is not equal to {@link RedisBungeeMode#SINGLE}
+     * @throws IllegalStateException if the {@link #getMode()} is not equal to {@link RedisBungeeMode#SINGLE}
      */
     public Jedis requestJedis() {
         if (getMode() == RedisBungeeMode.SINGLE) {
@@ -377,7 +377,7 @@ public class RedisBungeeAPI {
      *
      * @return {@link JedisPool}
      * @since 0.6.5
-     * @throws IllegalStateException if the #getMode() is not equal to {@link RedisBungeeMode#SINGLE}
+     * @throws IllegalStateException if the {@link #getMode()} is not equal to {@link RedisBungeeMode#SINGLE}
      */
     public JedisPool getJedisPool() {
         if (getMode() == RedisBungeeMode.SINGLE) {
@@ -392,7 +392,7 @@ public class RedisBungeeAPI {
      *
      * @return {@link redis.clients.jedis.JedisCluster}
      * @since 0.8.0
-     * @throws IllegalStateException if the #getMode() is not equal to {@link RedisBungeeMode#CLUSTER}
+     * @throws IllegalStateException if the {@link #getMode()} is not equal to {@link RedisBungeeMode#CLUSTER}
      */
     public Jedis requestClusterJedis() {
         if (getMode() == RedisBungeeMode.CLUSTER) {
