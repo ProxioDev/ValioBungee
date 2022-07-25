@@ -69,24 +69,30 @@
                 <executions>
                     <execution>
                         <phase>package</phase>
-                        <goals><goal>shade</goal></goals>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
                         <configuration>
                             <relocations>
                                 <relocation>
                                     <pattern>redis.clients.jedis</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.jedis</shadedPattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.jedis
+                                    </shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>redis.clients.util</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.jedisutil</shadedPattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.jedisutil
+                                    </shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.apache.commons.pool</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.commonspool</shadedPattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.commonspool
+                                    </shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.squareup.okhttp</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.okhttp</shadedPattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.okhttp
+                                    </shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>okio</pattern>
@@ -98,7 +104,8 @@
                                 </relocation>
                                 <relocation>
                                     <pattern>org.checkerframework</pattern>
-                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.checkframework</shadedPattern>
+                                    <shadedPattern>com.imaginarycode.minecraft.redisbungee.internal.checkframework
+                                    </shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
@@ -117,6 +124,10 @@
                 <exclusion>
                     <groupId>com.google.guava</groupId>
                     <artifactId>guava</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.spongepowered</groupId>
+                    <artifactId>configurate-yaml</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

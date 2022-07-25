@@ -98,7 +98,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
         this.logger = logger;
         this.dataFolder = dataDirectory;
         try {
-            loadConfig();
+            loadConfig(this, dataDirectory);
         } catch (IOException e) {
             throw new RuntimeException("Unable to load/save config", e);
         } catch (JedisConnectionException e) {
@@ -834,87 +834,11 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
     }
 
     @Override
-    public void loadConfig() throws IOException {
-        Path configFile = createConfigFile(getDataFolder());
-        final YAMLConfigurationLoader yamlConfigurationFileLoader = YAMLConfigurationLoader.builder().setPath(configFile).build();
-        ConfigurationNode node = yamlConfigurationFileLoader.load();
-        if (node.getNode("config-version").getInt(0) != RedisBungeeConfiguration.CONFIG_VERSION) {
-            handleOldConfig(getDataFolder());
-            node = yamlConfigurationFileLoader.load();
-        }
-        final boolean useSSL = node.getNode("useSSL").getBoolean(false);
-        final boolean overrideBungeeCommands = node.getNode("override-bungee-commands").getBoolean(false);
-        final boolean registerLegacyCommands = node.getNode("register-legacy-commands").getBoolean(false);
-        String redisPassword = node.getNode("redis-password").getString(null);
-        String proxyId = node.getNode("proxy-id").getString("test-1");
-        final int maxConnections = node.getNode("max-redis-connections").getInt(10);
-        List<String> exemptAddresses;
-        try {
-            exemptAddresses = node.getNode("exempt-ip-addresses").getList(TypeToken.of(String.class));
-        } catch (ObjectMappingException e) {
-            exemptAddresses = Collections.emptyList();
-        }
-
-        // check redis password
-        if (redisPassword != null && (redisPassword.isEmpty() || redisPassword.equals("none"))) {
-            redisPassword = null;
-            getLogger().warn("INSECURE setup was detected Please set password for your redis instance.");
-        } else if (redisPassword == null) {
-            getLogger().warn("INSECURE setup was detected Please set password for your redis instance.");
-        }
-        if (!useSSL) {
-            getLogger().warn("INSECURE setup was detected Please setup ssl for your redis instance.");
-        }
-        // Configuration sanity checks.
-        if (proxyId == null || proxyId.isEmpty()) {
-            String genId = UUID.randomUUID().toString();
-            getLogger().info("Generated proxy id {} and saving it to config.", genId);
-            node.getNode("proxy-id").setValue(genId);
-            yamlConfigurationFileLoader.save(node);
-            proxyId = genId;
-            getLogger().info("proxy id was generated: {}", proxyId);
-        } else {
-            getLogger().info("Loaded proxy id {}.", proxyId);
-        }
-        this.configuration = new RedisBungeeConfiguration(proxyId, exemptAddresses, registerLegacyCommands, overrideBungeeCommands);
-
-        if (node.getNode("cluster-mode-enabled").getBoolean(false)) {
-            getLogger().info("RedisBungee MODE: CLUSTER");
-            Set<HostAndPort> hostAndPortSet = new HashSet<>();
-            GenericObjectPoolConfig<Connection> poolConfig = new GenericObjectPoolConfig<>();
-            poolConfig.setMaxTotal(maxConnections);
-            node.getNode("redis-cluster-servers").getChildrenList().forEach((childNode) -> {
-                Map<Object, ? extends ConfigurationNode> hostAndPort = childNode.getChildrenMap();
-                String host = hostAndPort.get("host").getString();
-                int port = hostAndPort.get("port").getInt();
-                hostAndPortSet.add(new HostAndPort(host, port));
-            });
-            getLogger().info(hostAndPortSet.size() + " cluster nodes were specified");
-            if (hostAndPortSet.isEmpty()) {
-                throw new RuntimeException("No redis cluster servers specified");
-            }
-            if (redisPassword != null) {
-                this.jedisSummoner = new ClusterJedisSummoner(new JedisCluster(hostAndPortSet, 5000, 5000, 60, proxyId, redisPassword, poolConfig, useSSL));
-            } else {
-                getLogger().warn("SSL option is ignored in Cluster mode if no PASSWORD is set");
-                this.jedisSummoner = new ClusterJedisSummoner(new JedisCluster(hostAndPortSet, 5000, 5000, 60, poolConfig));
-            }
-            this.redisBungeeMode = RedisBungeeMode.CLUSTER;
-        } else {
-            getLogger().info("RedisBungee MODE: SINGLE");
-            final String redisServer = node.getNode("redis-server").getString("127.0.0.1");
-            final int redisPort = node.getNode("redis-port").getInt(6379);
-            if (redisServer != null && redisServer.isEmpty()) {
-                throw new RuntimeException("No redis server specified");
-            }
-            JedisPoolConfig config = new JedisPoolConfig();
-            config.setMaxTotal(maxConnections);
-            this.jedisSummoner = new JedisSummoner(new JedisPool(config, redisServer, redisPort, 0, redisPassword, useSSL));
-            this.redisBungeeMode = RedisBungeeMode.SINGLE;
-        }
-        getLogger().info("Successfully connected to Redis.");
+    public void onConfigLoad(RedisBungeeConfiguration configuration, Summoner<?> summoner, RedisBungeeMode mode) {
+        this.jedisSummoner = summoner;
+        this.configuration = configuration;
+        this.redisBungeeMode = mode;
     }
-
 
     @Override
     public void kickPlayer(UUID playerUniqueId, String message) {

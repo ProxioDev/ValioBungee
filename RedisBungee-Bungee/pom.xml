@@ -116,11 +116,6 @@
             <type>jar</type>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.spongepowered</groupId>
-            <artifactId>configurate-yaml</artifactId>
-            <version>3.7.2</version>
-        </dependency>
     </dependencies>
 
 </project>

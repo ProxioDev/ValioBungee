@@ -61,6 +61,11 @@
             <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.spongepowered</groupId>
+            <artifactId>configurate-yaml</artifactId>
+            <version>3.7.2</version>
+        </dependency>
     </dependencies>
 
 </project>
