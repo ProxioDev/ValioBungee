@@ -4,7 +4,7 @@ package com.imaginarycode.minecraft.redisbungee.api.config;
 import com.google.common.reflect.TypeToken;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeeMode;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
-import com.imaginarycode.minecraft.redisbungee.api.summoners.ClusterJedisSummoner;
+import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisClusterSummoner;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisSummoner;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.Summoner;
 import ninja.leaping.configurate.ConfigurationNode;
@@ -88,10 +88,10 @@ public interface ConfigLoader {
                 throw new RuntimeException("No redis cluster servers specified");
             }
             if (redisPassword != null) {
-                summoner = new ClusterJedisSummoner(new JedisCluster(hostAndPortSet, 5000, 5000, 60, proxyId, redisPassword, poolConfig, useSSL));
+                summoner = new JedisClusterSummoner(new JedisCluster(hostAndPortSet, 5000, 5000, 60, proxyId, redisPassword, poolConfig, useSSL));
             } else {
                 plugin.logWarn("SSL option is ignored in Cluster mode if no PASSWORD is set");
-                summoner = new ClusterJedisSummoner(new JedisCluster(hostAndPortSet, 5000, 5000, 60, poolConfig));
+                summoner = new JedisClusterSummoner(new JedisCluster(hostAndPortSet, 5000, 5000, 60, poolConfig));
             }
             redisBungeeMode = RedisBungeeMode.CLUSTER;
         } else {

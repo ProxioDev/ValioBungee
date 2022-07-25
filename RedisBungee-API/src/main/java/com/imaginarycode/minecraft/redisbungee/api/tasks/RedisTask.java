@@ -2,7 +2,7 @@ package com.imaginarycode.minecraft.redisbungee.api.tasks;
 
 import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
-import com.imaginarycode.minecraft.redisbungee.api.summoners.ClusterJedisSummoner;
+import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisClusterSummoner;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisSummoner;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.Summoner;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeeMode;
@@ -71,8 +71,8 @@ public abstract class RedisTask<V> implements Runnable, Callable<V> {
 
         } else if (api.getMode() == RedisBungeeMode.CLUSTER) {
             // Jedis cluster does not need new instance since its single instance anyways.
-            ClusterJedisSummoner clusterJedisSummoner = (ClusterJedisSummoner) summoner;
-            return this.clusterJedisTask(clusterJedisSummoner.obtainResource());
+            JedisClusterSummoner jedisClusterSummoner = (JedisClusterSummoner) summoner;
+            return this.clusterJedisTask(jedisClusterSummoner.obtainResource());
         }
         return null;
     }

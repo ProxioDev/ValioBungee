@@ -4,11 +4,11 @@ import redis.clients.jedis.JedisCluster;
 
 import java.io.IOException;
 
-public class ClusterJedisSummoner implements Summoner<JedisCluster> {
+public class JedisClusterSummoner implements Summoner<JedisCluster> {
     public final JedisCluster jedisCluster;
     private boolean closed = false;
 
-    public ClusterJedisSummoner(JedisCluster jedisCluster) {
+    public JedisClusterSummoner(JedisCluster jedisCluster) {
         this.jedisCluster = jedisCluster;
         // test the connection
         jedisCluster.set("random_data", "0");

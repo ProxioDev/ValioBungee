@@ -5,11 +5,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
+import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisClusterSummoner;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisSummoner;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.Summoner;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeeMode;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.JedisPool;
 
 import java.net.InetAddress;
@@ -389,14 +391,15 @@ public class RedisBungeeAPI {
 
     /**
      * This gives you instance of Jedis Cluster
+     * WARNING DO NOT USE {@link JedisCluster#close()} it will break the functionally
      *
      * @return {@link redis.clients.jedis.JedisCluster}
      * @since 0.8.0
      * @throws IllegalStateException if the {@link #getMode()} is not equal to {@link RedisBungeeMode#CLUSTER}
      */
-    public Jedis requestClusterJedis() {
+    public JedisCluster requestClusterJedis() {
         if (getMode() == RedisBungeeMode.CLUSTER) {
-            return ((JedisSummoner) this.plugin.getSummoner()).obtainResource();
+            return ((JedisClusterSummoner) this.plugin.getSummoner()).obtainResource();
         } else {
             throw new IllegalStateException("Mode is not " + RedisBungeeMode.CLUSTER);
         }
