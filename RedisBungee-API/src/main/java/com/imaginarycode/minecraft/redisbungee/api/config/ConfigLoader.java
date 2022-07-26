@@ -52,7 +52,8 @@ public interface ConfigLoader {
         if (redisPassword != null && (redisPassword.isEmpty() || redisPassword.equals("none"))) {
             redisPassword = null;
             plugin.logWarn("INSECURE setup was detected Please set password for your redis instance.");
-        } else if (redisPassword == null) {
+        }
+        if (redisPassword == null) {
             plugin.logWarn("INSECURE setup was detected Please set password for your redis instance.");
         }
         if (!useSSL) {
