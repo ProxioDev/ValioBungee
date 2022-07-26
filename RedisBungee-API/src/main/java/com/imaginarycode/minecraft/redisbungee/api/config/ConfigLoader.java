@@ -78,6 +78,7 @@ public interface ConfigLoader {
             Set<HostAndPort> hostAndPortSet = new HashSet<>();
             GenericObjectPoolConfig<Connection> poolConfig = new GenericObjectPoolConfig<>();
             poolConfig.setMaxTotal(maxConnections);
+            poolConfig.setBlockWhenExhausted(true);
             node.getNode("redis-cluster-servers").getChildrenList().forEach((childNode) -> {
                 Map<Object, ? extends ConfigurationNode> hostAndPort = childNode.getChildrenMap();
                 String host = hostAndPort.get("host").getString();
@@ -105,11 +106,13 @@ public interface ConfigLoader {
             JedisPool jedisPool = null;
             if (node.getNode("enable-jedis-pool-compatibility").getBoolean(true)) {
                 JedisPoolConfig config = new JedisPoolConfig();
-                config.setMaxTotal(maxConnections);
+                config.setMaxTotal(node.getNode("compatibility-max-connections").getInt(3));
+                config.setBlockWhenExhausted(true);
                 jedisPool = new JedisPool(config, redisServer, redisPort, 0, redisPassword, useSSL);
             }
             GenericObjectPoolConfig<Connection> poolConfig = new GenericObjectPoolConfig<>();
             poolConfig.setMaxTotal(maxConnections);
+            poolConfig.setBlockWhenExhausted(true);
             summoner = new JedisPooledSummoner(new JedisPooled(poolConfig, redisServer, redisPort, 0, redisPassword, useSSL), jedisPool);
             redisBungeeMode = RedisBungeeMode.SINGLE;
         }

@@ -46,6 +46,8 @@ proxy-id: "test-1"
 # enabled by default
 # ignored when cluster mode is enabled
 enable-jedis-pool-compatibility: true
+# max connections for the compatibility pool
+compatibility-max-connections: 3
 
 # Register redis bungee legacy commands
 # if this disabled override-bungee-commands will be ignored
