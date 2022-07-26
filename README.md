@@ -1,6 +1,23 @@
 # RedisBungee fork By Limework
 The original project of RedisBungee is no longer maintained, so we have forked the plugin.
 
+
+## compiability with original RedisBungee
+This fork ensures compiability with old plugins, so it should work as drop replacement,
+but since Api has been split from the platform there some changes that have to be done, so your plugin might not work if:
+
+* your plugin has used Internal classes of RedisBungee like getting the `JedisPool` or something else. 
+because RedisBungee is no longer an Plugin for example:
+```java
+// this will be broken
+RedisBungee plugin = ...;
+JedisPool jedisPool = plugin.getPool();
+
+```
+* your plugin have used the Method `RedisBungeeAPI#getServerFor(UUID player)` as it was returning `net.md_5.bungee.api.config.ServerInfo`
+now it returns `String`.
+
+## information
 RedisBungee uses [Redis](https://redis.io) with Java client [Jedis](https://github.com/redis/jedis/) 
 to Synchronize players data between [BungeeCord](https://github.com/SpigotMC/BungeeCord) or [Velocity*](https://github.com/PaperMC/Velocity) proxies
 
@@ -33,7 +50,7 @@ RedisBungee is distributed as a [maven](https://maven.apache.org) project.
 By using jitpack [![](https://jitpack.io/v/limework/redisbungee.svg)](https://jitpack.io/#limework/redisbungee)
 
 ## Setup jitpack repository
-```
+```xml
 	<repositories>
 		<repository>
 		    <id>jitpack.io</id>
@@ -43,7 +60,7 @@ By using jitpack [![](https://jitpack.io/v/limework/redisbungee.svg)](https://ji
 ```
 ## [BungeeCord](https://github.com/SpigotMC/BungeeCord)
 add this in your project dependencies 
-```
+```xml
 	<dependency>
 	    <groupId>com.github.limework.redisbungee</groupId>
 	    <artifactId>RedisBungee-Bungee</artifactId>
@@ -53,7 +70,7 @@ add this in your project dependencies
 	
 ```
 then in your project plugin.yml add `RedisBungee` to `depends` like this
-```
+```yaml
 name: "yourplugin"
 main: your.main.class
 version: 1.0.0-SNAPSHOT
@@ -63,7 +80,7 @@ depends: [ RedisBungee ]
 
 
 ## [Velocity](https://github.com/PaperMC/Velocity)
-```
+```xml
 	<dependency>
 	    <groupId>com.github.limework.redisbungee</groupId>
 	    <artifactId>RedisBungee-Velocity</artifactId>
@@ -72,7 +89,7 @@ depends: [ RedisBungee ]
 	</dependency>
 ```
 then to make your plugin depends on RedisBungee, make sure your plugin class Annotation have `@Dependency(id = "redisbungee")` like this
-```
+```java
 @Plugin(
   id = "myplugin",
   name = "My Plugin",
@@ -88,13 +105,13 @@ public class PluginMainClass {
 ## Getting the latest commits to your code
 If you want to use the latest commits without waiting for releases.
 first, install it to your maven local repo
-```
+```bash
 git clone https://github.com/ProxioDev/RedisBungee.git
 cd RedisBungee
 mvn clean install
 ```
 then use any of these in your project.
-```
+```xml
 <dependency>
         <groupId>com.imaginarycode.minecraft</groupId>
         <artifactId>RedisBungee-Bungee</artifactId>
@@ -102,7 +119,7 @@ then use any of these in your project.
         <scope>provided</scope>
 </dependency>
 ```
-```
+```xml
 <dependency>
         <groupId>com.imaginarycode.minecraft</groupId>
         <artifactId>RedisBungee-Velocity</artifactId>
