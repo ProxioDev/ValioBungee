@@ -13,6 +13,10 @@ but since Api has been split from the platform there some changes that have to b
 * your plugin have used the Method `RedisBungeeAPI#getServerFor(UUID player)` as it was returning `net.md_5.bungee.api.config.ServerInfo`
 now it returns `String`.
 
+as of 0.8.0+ If you are using static method `RedisBungee#getPool()` it might fail in:
+* if Cluster due fact its Uses different classes
+* JedisPool compatibility mode is disabled in the config due fact project internally switched to JedisPooled than Jedis
+
 ## notes
 If you are looking to use Original RedisBungee without a change to internals,
 with critical bugs fixed, please use version [0.6.5](https://github.com/ProxioDev/RedisBungee/releases/tag/0.6.5) and java docs For legacy Version [0.6.5](https://proxiodev.github.io/RedisBungee-JavaDocs/0.6.5-SNAPSHOT/)
