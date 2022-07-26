@@ -221,21 +221,12 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
 
         IntegrityCheckTask integrityCheckTask = new IntegrityCheckTask(this) {
             @Override
-            public void handlePlatformPlayer(String player, JedisCluster jedis) {
+            public void handlePlatformPlayer(String player, UnifiedJedis unifiedJedis) {
                 ProxiedPlayer proxiedPlayer = ProxyServer.getInstance().getPlayer(UUID.fromString(player));
                 if (proxiedPlayer == null)
                     return; // We'll deal with it later.
 
-                BungeePlayerUtils.createPlayer(proxiedPlayer, jedis, false);
-            }
-
-            @Override
-            public void handlePlatformPlayer(String player, Pipeline pipeline) {
-                ProxiedPlayer proxiedPlayer = ProxyServer.getInstance().getPlayer(UUID.fromString(player));
-                if (proxiedPlayer == null)
-                    return; // We'll deal with it later.
-
-                BungeePlayerUtils.createPlayer(proxiedPlayer, pipeline, false);
+                BungeePlayerUtils.createPlayer(proxiedPlayer, unifiedJedis, false);
             }
         };
 

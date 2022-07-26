@@ -6,7 +6,6 @@ import java.io.IOException;
 
 public class JedisClusterSummoner implements Summoner<JedisCluster> {
     public final JedisCluster jedisCluster;
-    private boolean closed = false;
 
     public JedisClusterSummoner(JedisCluster jedisCluster) {
         this.jedisCluster = jedisCluster;
@@ -15,19 +14,14 @@ public class JedisClusterSummoner implements Summoner<JedisCluster> {
         jedisCluster.del("random_data");
     }
 
-    @Override
-    public JedisCluster obtainResource() {
-        return jedisCluster;
-    }
-
-    @Override
-    public boolean isAvailable() {
-        return !closed;
-    }
 
     @Override
     public void close() throws IOException {
-        this.closed = true;
         jedisCluster.close();
+    }
+
+    @Override
+    public JedisCluster obtainResource() {
+        return this.jedisCluster;
     }
 }

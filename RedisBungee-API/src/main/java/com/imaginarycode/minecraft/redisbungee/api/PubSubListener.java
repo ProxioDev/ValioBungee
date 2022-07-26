@@ -3,6 +3,7 @@ package com.imaginarycode.minecraft.redisbungee.api;
 import com.imaginarycode.minecraft.redisbungee.api.tasks.RedisTask;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
+import redis.clients.jedis.UnifiedJedis;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
 import java.util.Arrays;
@@ -24,22 +25,12 @@ public class PubSubListener implements Runnable {
     public void run() {
         RedisTask<Void> subTask = new RedisTask<Void>(plugin) {
             @Override
-            public Void jedisTask(Jedis jedis) {
+            public Void unifiedJedisTask(UnifiedJedis unifiedJedis) {
                 jpsh = new JedisPubSubHandler(plugin);
                 addedChannels.add("redisbungee-" + plugin.getConfiguration().getProxyId());
                 addedChannels.add("redisbungee-allservers");
                 addedChannels.add("redisbungee-data");
-                jedis.subscribe(jpsh, addedChannels.toArray(new String[0]));
-                return null;
-            }
-
-            @Override
-            public Void clusterJedisTask(JedisCluster jedisCluster) {
-                jpsh = new JedisPubSubHandler(plugin);
-                addedChannels.add("redisbungee-" + plugin.getConfiguration().getProxyId());
-                addedChannels.add("redisbungee-allservers");
-                addedChannels.add("redisbungee-data");
-                jedisCluster.subscribe(jpsh, addedChannels.toArray(new String[0]));
+                unifiedJedis.subscribe(jpsh, addedChannels.toArray(new String[0]));
                 return null;
             }
         };

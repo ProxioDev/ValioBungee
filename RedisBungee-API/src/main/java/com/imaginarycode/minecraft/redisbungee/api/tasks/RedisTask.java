@@ -3,11 +3,11 @@ package com.imaginarycode.minecraft.redisbungee.api.tasks;
 import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisClusterSummoner;
-import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisSummoner;
+import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisPooledSummoner;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.Summoner;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeeMode;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisCluster;
+import redis.clients.jedis.UnifiedJedis;
 
 import java.util.concurrent.Callable;
 
@@ -15,7 +15,6 @@ public abstract class RedisTask<V> implements Runnable, Callable<V> {
 
     protected final Summoner<?> summoner;
     protected final RedisBungeeAPI api;
-    protected Jedis jedis;
     protected RedisBungeePlugin<?> plugin;
 
     @Override
@@ -34,25 +33,7 @@ public abstract class RedisTask<V> implements Runnable, Callable<V> {
         this.summoner = api.getSummoner();
     }
 
-    // way to reuse jedis inside another RedisTask object
-    public RedisTask(RedisBungeeAPI api, Jedis jedis) {
-        this.api = api;
-        this.summoner = api.getSummoner();
-        this.jedis = jedis;
-    }
-
-    // way to reuse jedis inside another RedisTask object
-    public RedisTask(RedisBungeePlugin<?> plugin, Jedis jedis) {
-        this.plugin = plugin;
-        this.api = plugin.getApi();
-        this.summoner = api.getSummoner();
-        this.jedis = jedis;
-    }
-
-
-    public abstract V jedisTask(Jedis jedis);
-
-    public abstract V clusterJedisTask(JedisCluster jedisCluster);
+    public abstract V unifiedJedisTask(UnifiedJedis unifiedJedis);
 
     @Override
     public void run() {
@@ -60,19 +41,13 @@ public abstract class RedisTask<V> implements Runnable, Callable<V> {
     }
 
     public V execute(){
+        // JedisCluster, JedisPooled in fact is just UnifiedJedis does not need new instance since its single instance anyway.
         if (api.getMode() == RedisBungeeMode.SINGLE) {
-            if (this.jedis != null){
-                return this.jedisTask(this.jedis);
-            }
-            JedisSummoner jedisSummoner = (JedisSummoner) summoner;
-            try (Jedis newJedis = jedisSummoner.obtainResource()) {
-                return this.jedisTask(newJedis);
-            }
-
+            JedisPooledSummoner jedisSummoner = (JedisPooledSummoner) summoner;
+            return this.unifiedJedisTask(jedisSummoner.obtainResource());
         } else if (api.getMode() == RedisBungeeMode.CLUSTER) {
-            // Jedis cluster does not need new instance since its single instance anyways.
             JedisClusterSummoner jedisClusterSummoner = (JedisClusterSummoner) summoner;
-            return this.clusterJedisTask(jedisClusterSummoner.obtainResource());
+            return this.unifiedJedisTask(jedisClusterSummoner.obtainResource());
         }
         return null;
     }

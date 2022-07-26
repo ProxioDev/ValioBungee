@@ -3,6 +3,7 @@ package com.imaginarycode.minecraft.redisbungee.api.tasks;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
+import redis.clients.jedis.UnifiedJedis;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
 import java.util.concurrent.TimeUnit;
@@ -19,32 +20,12 @@ public class HeartbeatTask extends RedisTask<Void>{
         this.globalPlayerCount = globalPlayerCount;
     }
 
-    @Override
-    public Void jedisTask(Jedis jedis) {
-        try {
-            long redisTime = plugin.getRedisTime(jedis.time());
-            jedis.hset("heartbeats", plugin.getConfiguration().getProxyId(), String.valueOf(redisTime));
-        } catch (JedisConnectionException e) {
-            // Redis server has disappeared!
-            plugin.logFatal("Unable to update heartbeat - did your Redis server go away?");
-            e.printStackTrace();
-            return null;
-        }
-        try {
-            plugin.updateProxiesIds();
-            globalPlayerCount.set(plugin.getCurrentCount());
-        } catch (Throwable e) {
-            plugin.logFatal("Unable to update data - did your Redis server go away?");
-            e.printStackTrace();
-        }
-        return null;
-    }
 
     @Override
-    public Void clusterJedisTask(JedisCluster jedisCluster) {
+    public Void unifiedJedisTask(UnifiedJedis unifiedJedis) {
         try {
-            long redisTime = plugin.getRedisTime(jedisCluster);
-            jedisCluster.hset("heartbeats", plugin.getConfiguration().getProxyId(), String.valueOf(redisTime));
+            long redisTime = plugin.getRedisTime(unifiedJedis);
+            unifiedJedis.hset("heartbeats", plugin.getConfiguration().getProxyId(), String.valueOf(redisTime));
         } catch (JedisConnectionException e) {
             // Redis server has disappeared!
            plugin.logFatal("Unable to update heartbeat - did your Redis server go away?");

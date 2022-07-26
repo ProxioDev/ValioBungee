@@ -2,14 +2,17 @@ package com.imaginarycode.minecraft.redisbungee.api.summoners;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPooled;
 
 import java.io.IOException;
 
-public class JedisSummoner implements Summoner<Jedis> {
+public class JedisPooledSummoner implements Summoner<JedisPooled> {
 
+    private final JedisPooled jedisPooled;
     private final JedisPool jedisPool;
 
-    public JedisSummoner(JedisPool jedisPool) {
+    public JedisPooledSummoner(JedisPooled jedisPooled, JedisPool jedisPool) {
+        this.jedisPooled = jedisPooled;
         this.jedisPool = jedisPool;
         try (Jedis jedis = this.jedisPool.getResource()) {
             // Test the connection to make sure configuration is right
@@ -18,22 +21,18 @@ public class JedisSummoner implements Summoner<Jedis> {
     }
 
     @Override
-    public Jedis obtainResource() {
-        return jedisPool.getResource();
+    public JedisPooled obtainResource() {
+        return this.jedisPooled;
     }
 
-    public JedisPool getJedisPool() {
+    public JedisPool getCompatibilityJedisPool() {
         return this.jedisPool;
-    }
-
-    @Override
-    public boolean isAvailable() {
-        return !jedisPool.isClosed();
     }
 
     @Override
     public void close() throws IOException {
         this.jedisPool.close();
+        this.jedisPooled.close();
 
     }
 }

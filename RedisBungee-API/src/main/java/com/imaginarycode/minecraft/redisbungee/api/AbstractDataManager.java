@@ -9,8 +9,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.imaginarycode.minecraft.redisbungee.api.tasks.RedisTask;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisCluster;
+import redis.clients.jedis.UnifiedJedis;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
@@ -53,14 +52,8 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
         try {
             return serverCache.get(uuid, new RedisTask<String>(plugin.getApi()) {
                 @Override
-                public String jedisTask(Jedis jedis) {
-                    return Objects.requireNonNull(jedis.hget("player:" + uuid, "server"), "user not found");
-
-                }
-
-                @Override
-                public String clusterJedisTask(JedisCluster jedisCluster) {
-                    return Objects.requireNonNull(jedisCluster.hget("player:" + uuid, "server"), "user not found");
+                public String unifiedJedisTask(UnifiedJedis unifiedJedis) {
+                    return Objects.requireNonNull(unifiedJedis.hget("player:" + uuid, "server"), "user not found");
 
                 }
             });
@@ -82,13 +75,8 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
         try {
             return proxyCache.get(uuid, new RedisTask<String>(plugin.getApi()) {
                 @Override
-                public String jedisTask(Jedis jedis) {
-                    return Objects.requireNonNull(jedis.hget("player:" + uuid, "proxy"), "user not found");
-                }
-
-                @Override
-                public String clusterJedisTask(JedisCluster jedisCluster) {
-                    return Objects.requireNonNull(jedisCluster.hget("player:" + uuid, "proxy"), "user not found");
+                public String unifiedJedisTask(UnifiedJedis unifiedJedis) {
+                    return Objects.requireNonNull(unifiedJedis.hget("player:" + uuid, "proxy"), "user not found");
                 }
             });
         } catch (ExecutionException | UncheckedExecutionException e) {
@@ -108,16 +96,8 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
         try {
             return ipCache.get(uuid, new RedisTask<InetAddress>(plugin.getApi()) {
                 @Override
-                public InetAddress jedisTask(Jedis jedis) {
-                    String result = jedis.hget("player:" + uuid, "ip");
-                    if (result == null)
-                        throw new NullPointerException("user not found");
-                    return InetAddresses.forString(result);
-                }
-
-                @Override
-                public InetAddress clusterJedisTask(JedisCluster jedisCluster) {
-                    String result = jedisCluster.hget("player:" + uuid, "ip");
+                public InetAddress unifiedJedisTask(UnifiedJedis unifiedJedis) {
+                    String result = unifiedJedis.hget("player:" + uuid, "ip");
                     if (result == null)
                         throw new NullPointerException("user not found");
                     return InetAddresses.forString(result);
@@ -139,15 +119,10 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
 
         try {
             return lastOnlineCache.get(uuid, new RedisTask<Long>(plugin.getApi()) {
-                @Override
-                public Long jedisTask(Jedis jedis) {
-                    String result = jedis.hget("player:" + uuid, "online");
-                    return result == null ? -1 : Long.parseLong(result);
-                }
 
                 @Override
-                public Long clusterJedisTask(JedisCluster jedisCluster) {
-                    String result = jedisCluster.hget("player:" + uuid, "online");
+                public Long unifiedJedisTask(UnifiedJedis unifiedJedis) {
+                    String result = unifiedJedis.hget("player:" + uuid, "online");
                     return result == null ? -1 : Long.parseLong(result);
                 }
             });

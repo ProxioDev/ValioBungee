@@ -14,7 +14,5 @@ public interface Summoner<P> extends Closeable {
 
     P obtainResource();
 
-    boolean isAvailable();
-
 
 }

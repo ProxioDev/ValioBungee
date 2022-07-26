@@ -244,19 +244,11 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
 
         IntegrityCheckTask integrityCheckTask = new IntegrityCheckTask(this) {
             @Override
-            public void handlePlatformPlayer(String player, JedisCluster jedisCluster) {
+            public void handlePlatformPlayer(String player, UnifiedJedis unifiedJedis) {
                 Player playerProxied = getProxy().getPlayer(UUID.fromString(player)).orElse(null);
                 if (playerProxied == null)
                     return; // We'll deal with it later.
-                VelocityPlayerUtils.createPlayer(playerProxied, jedisCluster, false);
-            }
-
-            @Override
-            public void handlePlatformPlayer(String player, Pipeline pipeline) {
-                Player playerProxied = getProxy().getPlayer(UUID.fromString(player)).orElse(null);
-                if (playerProxied == null)
-                    return; // We'll deal with it later.
-                VelocityPlayerUtils.createPlayer(playerProxied, pipeline, false);
+                VelocityPlayerUtils.createPlayer(playerProxied, unifiedJedis, false);
             }
         };
         integrityCheck = getProxy().getScheduler().buildTask(this, integrityCheckTask::execute).repeat(30, TimeUnit.SECONDS).schedule();

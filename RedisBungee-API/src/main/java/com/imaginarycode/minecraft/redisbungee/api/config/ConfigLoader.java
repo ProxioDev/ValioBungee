@@ -5,7 +5,7 @@ import com.google.common.reflect.TypeToken;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeeMode;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisClusterSummoner;
-import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisSummoner;
+import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisPooledSummoner;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.Summoner;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
@@ -102,9 +102,15 @@ public interface ConfigLoader {
             if (redisServer != null && redisServer.isEmpty()) {
                 throw new RuntimeException("No redis server specified");
             }
-            JedisPoolConfig config = new JedisPoolConfig();
-            config.setMaxTotal(maxConnections);
-            summoner = new JedisSummoner(new JedisPool(config, redisServer, redisPort, 0, redisPassword, useSSL));
+            JedisPool jedisPool = null;
+            if (node.getNode("enable-jedis-pool-compatibility").getBoolean(true)) {
+                JedisPoolConfig config = new JedisPoolConfig();
+                config.setMaxTotal(maxConnections);
+                jedisPool = new JedisPool(config, redisServer, redisPort, 0, redisPassword, useSSL);
+            }
+            GenericObjectPoolConfig<Connection> poolConfig = new GenericObjectPoolConfig<>();
+            poolConfig.setMaxTotal(maxConnections);
+            summoner = new JedisPooledSummoner(new JedisPooled(poolConfig, redisServer, redisPort, 0, redisPassword, useSSL), jedisPool);
             redisBungeeMode = RedisBungeeMode.SINGLE;
         }
         plugin.logInfo("Successfully connected to Redis.");

@@ -30,6 +30,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.UnifiedJedis;
 
 import java.net.InetAddress;
 import java.util.*;
@@ -47,7 +48,7 @@ public class RedisBungeeVelocityListener extends AbstractRedisBungeeListener<Log
     public void onLogin(LoginEvent event, Continuation continuation) {
         plugin.executeAsync(new RedisTask<Void>(plugin) {
             @Override
-            public Void jedisTask(Jedis jedis) {
+            public Void unifiedJedisTask(UnifiedJedis unifiedJedis) {
                 try {
                     if (!event.getResult().isAllowed()) {
                         return null;
@@ -65,37 +66,7 @@ public class RedisBungeeVelocityListener extends AbstractRedisBungeeListener<Log
                     }
 
                     for (String s : plugin.getProxiesIds()) {
-                        if (jedis.sismember("proxy:" + s + ":usersOnline", event.getPlayer().getUniqueId().toString())) {
-                            event.setResult(ResultedEvent.ComponentResult.denied(serializer.deserialize(ALREADY_LOGGED_IN)));
-                            return null;
-                        }
-                    }
-                    return null;
-                } finally {
-                    continuation.resume();
-                }
-            }
-
-            @Override
-            public Void clusterJedisTask(JedisCluster jedisCluster) {
-                try {
-                    if (!event.getResult().isAllowed()) {
-                        return null;
-                    }
-
-                    // We make sure they aren't trying to use an existing player's name.
-                    // This is problematic for online-mode servers as they always disconnect old clients.
-                    if (plugin.isOnlineMode()) {
-                        Player player = (Player) plugin.getPlayer(event.getPlayer().getUsername());
-
-                        if (player != null) {
-                            event.setResult(ResultedEvent.ComponentResult.denied(serializer.deserialize(ONLINE_MODE_RECONNECT)));
-                            return null;
-                        }
-                    }
-
-                    for (String s : plugin.getProxiesIds()) {
-                        if (jedisCluster.sismember("proxy:" + s + ":usersOnline", event.getPlayer().getUniqueId().toString())) {
+                        if (unifiedJedis.sismember("proxy:" + s + ":usersOnline", event.getPlayer().getUniqueId().toString())) {
                             event.setResult(ResultedEvent.ComponentResult.denied(serializer.deserialize(ALREADY_LOGGED_IN)));
                             return null;
                         }
@@ -114,18 +85,9 @@ public class RedisBungeeVelocityListener extends AbstractRedisBungeeListener<Log
     public void onPostLogin(PostLoginEvent event) {
         plugin.executeAsync(new RedisTask<Void>(plugin) {
             @Override
-            public Void jedisTask(Jedis jedis) {
-                Pipeline pipeline = jedis.pipelined();
-                plugin.getUuidTranslator().persistInfo(event.getPlayer().getUsername(), event.getPlayer().getUniqueId(), pipeline);
-                VelocityPlayerUtils.createPlayer(event.getPlayer(), pipeline, true);
-                pipeline.sync();
-                return null;
-            }
-
-            @Override
-            public Void clusterJedisTask(JedisCluster jedisCluster) {
-                plugin.getUuidTranslator().persistInfo(event.getPlayer().getUsername(), event.getPlayer().getUniqueId(), jedisCluster);
-                VelocityPlayerUtils.createPlayer(event.getPlayer(), jedisCluster, true);
+            public Void unifiedJedisTask(UnifiedJedis unifiedJedis) {
+                plugin.getUuidTranslator().persistInfo(event.getPlayer().getUsername(), event.getPlayer().getUniqueId(), unifiedJedis);
+                VelocityPlayerUtils.createPlayer(event.getPlayer(), unifiedJedis, true);
                 return null;
             }
         });
@@ -136,16 +98,8 @@ public class RedisBungeeVelocityListener extends AbstractRedisBungeeListener<Log
     public void onPlayerDisconnect(DisconnectEvent event) {
         plugin.executeAsync(new RedisTask<Void>(plugin) {
             @Override
-            public Void jedisTask(Jedis jedis) {
-                Pipeline pipeline = jedis.pipelined();
-                PlayerUtils.cleanUpPlayer(event.getPlayer().getUniqueId().toString(), pipeline, true);
-                pipeline.sync();
-                return null;
-            }
-
-            @Override
-            public Void clusterJedisTask(JedisCluster jedisCluster) {
-                PlayerUtils.cleanUpPlayer(event.getPlayer().getUniqueId().toString(), jedisCluster, true);
+            public Void unifiedJedisTask(UnifiedJedis unifiedJedis) {
+                PlayerUtils.cleanUpPlayer(event.getPlayer().getUniqueId().toString(), unifiedJedis, true);
                 return null;
             }
 
@@ -159,18 +113,10 @@ public class RedisBungeeVelocityListener extends AbstractRedisBungeeListener<Log
         final String currentServer = event.getServer().getServerInfo().getName();
         final String oldServer = event.getPreviousServer().map(serverConnection -> serverConnection.getServerInfo().getName()).orElse(null);
         plugin.executeAsync(new RedisTask<Void>(plugin) {
-
             @Override
-            public Void jedisTask(Jedis jedis) {
-                jedis.hset("player:" + event.getPlayer().getUniqueId().toString(), "server", currentServer);
-                PayloadUtils.playerServerChangePayload(event.getPlayer().getUniqueId(), jedis, currentServer, oldServer);
-                return null;
-            }
-
-            @Override
-            public Void clusterJedisTask(JedisCluster jedisCluster) {
-                jedisCluster.hset("player:" + event.getPlayer().getUniqueId().toString(), "server", currentServer);
-                PayloadUtils.playerServerChangePayload(event.getPlayer().getUniqueId(), jedisCluster, currentServer, oldServer);
+            public Void unifiedJedisTask(UnifiedJedis unifiedJedis) {
+                unifiedJedis.hset("player:" + event.getPlayer().getUniqueId().toString(), "server", currentServer);
+                PayloadUtils.playerServerChangePayload(event.getPlayer().getUniqueId(), unifiedJedis, currentServer, oldServer);
                 return null;
             }
         });

@@ -12,8 +12,6 @@ import com.imaginarycode.minecraft.redisbungee.api.tasks.RedisTask;
 import com.imaginarycode.minecraft.redisbungee.api.util.RedisUtil;
 import com.imaginarycode.minecraft.redisbungee.api.util.payload.PayloadUtils;
 import com.imaginarycode.minecraft.redisbungee.api.util.uuid.UUIDTranslator;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.Protocol;
 import redis.clients.jedis.UnifiedJedis;
 import redis.clients.jedis.exceptions.JedisConnectionException;
@@ -50,34 +48,17 @@ public interface RedisBungeePlugin<P> extends EventsPlatform, ConfigLoader {
     default int getCurrentCount() {
         return new RedisTask<Long>(this) {
             @Override
-            public Long jedisTask(Jedis jedis) {
+            public Long unifiedJedisTask(UnifiedJedis unifiedJedis) {
                 long total = 0;
-                long redisTime = getRedisTime(jedis.time());
-                Map<String, String> heartBeats = jedis.hgetAll("heartbeats");
+                long redisTime = getRedisTime(unifiedJedis);
+                Map<String, String> heartBeats = unifiedJedis.hgetAll("heartbeats");
                 for (Map.Entry<String, String> stringStringEntry : heartBeats.entrySet()) {
                     String k = stringStringEntry.getKey();
                     String v = stringStringEntry.getValue();
 
                     long heartbeatTime = Long.parseLong(v);
                     if (heartbeatTime + 30 >= redisTime) {
-                        total = total + jedis.scard("proxy:" + k + ":usersOnline");
-                    }
-                }
-                return total;
-            }
-
-            @Override
-            public Long clusterJedisTask(JedisCluster jedisCluster) {
-                long total = 0;
-                long redisTime = getRedisTime(jedisCluster);
-                Map<String, String> heartBeats = jedisCluster.hgetAll("heartbeats");
-                for (Map.Entry<String, String> stringStringEntry : heartBeats.entrySet()) {
-                    String k = stringStringEntry.getKey();
-                    String v = stringStringEntry.getValue();
-
-                    long heartbeatTime = Long.parseLong(v);
-                    if (heartbeatTime + 30 >= redisTime) {
-                        total = total + jedisCluster.scard("proxy:" + k + ":usersOnline");
+                        total = total + unifiedJedis.scard("proxy:" + k + ":usersOnline");
                     }
                 }
                 return total;
@@ -92,7 +73,7 @@ public interface RedisBungeePlugin<P> extends EventsPlatform, ConfigLoader {
     default Set<UUID> getPlayers() {
         return new RedisTask<Set<UUID>>(this) {
             @Override
-            public Set<UUID> jedisTask(Jedis jedis) {
+            public Set<UUID> unifiedJedisTask(UnifiedJedis unifiedJedis) {
                 ImmutableSet.Builder<UUID> setBuilder = ImmutableSet.builder();
                 try {
                     List<String> keys = new ArrayList<>();
@@ -100,34 +81,7 @@ public interface RedisBungeePlugin<P> extends EventsPlatform, ConfigLoader {
                         keys.add("proxy:" + i + ":usersOnline");
                     }
                     if (!keys.isEmpty()) {
-                        Set<String> users = jedis.sunion(keys.toArray(new String[0]));
-                        if (users != null && !users.isEmpty()) {
-                            for (String user : users) {
-                                try {
-                                    setBuilder = setBuilder.add(UUID.fromString(user));
-                                } catch (IllegalArgumentException ignored) {
-                                }
-                            }
-                        }
-                    }
-                } catch (JedisConnectionException e) {
-                    // Redis server has disappeared!
-                    logFatal("Unable to get connection from pool - did your Redis server go away?");
-                    throw new RuntimeException("Unable to get all players online", e);
-                }
-                return setBuilder.build();
-            }
-
-            @Override
-            public Set<UUID> clusterJedisTask(JedisCluster jedisCluster) {
-                ImmutableSet.Builder<UUID> setBuilder = ImmutableSet.builder();
-                try {
-                    List<String> keys = new ArrayList<>();
-                    for (String i : getProxiesIds()) {
-                        keys.add("proxy:" + i + ":usersOnline");
-                    }
-                    if (!keys.isEmpty()) {
-                        Set<String> users = jedisCluster.sunion(keys.toArray(new String[0]));
+                        Set<String> users = unifiedJedis.sunion(keys.toArray(new String[0]));
                         if (users != null && !users.isEmpty()) {
                             for (String user : users) {
                                 try {
@@ -156,28 +110,12 @@ public interface RedisBungeePlugin<P> extends EventsPlatform, ConfigLoader {
     default Multimap<String, UUID> serversToPlayers() {
         return new RedisTask<Multimap<String, UUID>>(this) {
             @Override
-            public Multimap<String, UUID> jedisTask(Jedis jedis) {
+            public Multimap<String, UUID> unifiedJedisTask(UnifiedJedis unifiedJedis) {
                 ImmutableMultimap.Builder<String, UUID> builder = ImmutableMultimap.builder();
                 for (String serverId : getProxiesIds()) {
-                    Set<String> players = jedis.smembers("proxy:" + serverId + ":usersOnline");
+                    Set<String> players = unifiedJedis.smembers("proxy:" + serverId + ":usersOnline");
                     for (String player : players) {
-                        String playerServer = jedis.hget("player:" + player, "server");
-                        if (playerServer == null) {
-                            continue;
-                        }
-                        builder.put(playerServer, UUID.fromString(player));
-                    }
-                }
-                return builder.build();
-            }
-
-            @Override
-            public Multimap<String, UUID> clusterJedisTask(JedisCluster jedisCluster) {
-                ImmutableMultimap.Builder<String, UUID> builder = ImmutableMultimap.builder();
-                for (String serverId : getProxiesIds()) {
-                    Set<String> players = jedisCluster.smembers("proxy:" + serverId + ":usersOnline");
-                    for (String player : players) {
-                        String playerServer = jedisCluster.hget("player:" + player, "server");
+                        String playerServer = unifiedJedis.hget("player:" + player, "server");
                         if (playerServer == null) {
                             continue;
                         }
@@ -193,18 +131,8 @@ public interface RedisBungeePlugin<P> extends EventsPlatform, ConfigLoader {
         checkArgument(getProxiesIds().contains(proxyId), proxyId + " is not a valid proxy ID");
         return new RedisTask<Set<UUID>>(this) {
             @Override
-            public Set<UUID> jedisTask(Jedis jedis) {
-                Set<String> users = jedis.smembers("proxy:" + proxyId + ":usersOnline");
-                ImmutableSet.Builder<UUID> builder = ImmutableSet.builder();
-                for (String user : users) {
-                    builder.add(UUID.fromString(user));
-                }
-                return builder.build();
-            }
-
-            @Override
-            public Set<UUID> clusterJedisTask(JedisCluster jedisCluster) {
-                Set<String> users = jedisCluster.smembers("proxy:" + proxyId + ":usersOnline");
+            public Set<UUID> unifiedJedisTask(UnifiedJedis unifiedJedis) {
+                Set<String> users = unifiedJedis.smembers("proxy:" + proxyId + ":usersOnline");
                 ImmutableSet.Builder<UUID> builder = ImmutableSet.builder();
                 for (String user : users) {
                     builder.add(UUID.fromString(user));
@@ -224,11 +152,11 @@ public interface RedisBungeePlugin<P> extends EventsPlatform, ConfigLoader {
     default List<String> getCurrentProxiesIds(boolean lagged) {
         return new RedisTask<List<String>>(this) {
             @Override
-            public List<String> jedisTask(Jedis jedis) {
+            public List<String> unifiedJedisTask(UnifiedJedis unifiedJedis) {
                 try {
-                    long time = getRedisTime(jedis.time());
+                    long time = getRedisTime(unifiedJedis);
                     ImmutableList.Builder<String> servers = ImmutableList.builder();
-                    Map<String, String> heartbeats = jedis.hgetAll("heartbeats");
+                    Map<String, String> heartbeats = unifiedJedis.hgetAll("heartbeats");
                     for (Map.Entry<String, String> entry : heartbeats.entrySet()) {
                         try {
                             long stamp = Long.parseLong(entry.getValue());
@@ -236,33 +164,7 @@ public interface RedisBungeePlugin<P> extends EventsPlatform, ConfigLoader {
                                 servers.add(entry.getKey());
                             } else if (time > stamp + RedisUtil.PROXY_TIMEOUT) {
                                 logWarn(entry.getKey() + " is " + (time - stamp) + " seconds behind! (Time not synchronized or server down?) and was removed from heartbeat.");
-                                jedis.hdel("heartbeats", entry.getKey());
-                            }
-                        } catch (NumberFormatException ignored) {
-                        }
-                    }
-                    return servers.build();
-                } catch (JedisConnectionException e) {
-                    logFatal("Unable to fetch server IDs");
-                    e.printStackTrace();
-                    return Collections.singletonList(getConfiguration().getProxyId());
-                }
-            }
-
-            @Override
-            public List<String> clusterJedisTask(JedisCluster jedisCluster) {
-                try {
-                    long time = getRedisTime(jedisCluster);
-                    ImmutableList.Builder<String> servers = ImmutableList.builder();
-                    Map<String, String> heartbeats = jedisCluster.hgetAll("heartbeats");
-                    for (Map.Entry<String, String> entry : heartbeats.entrySet()) {
-                        try {
-                            long stamp = Long.parseLong(entry.getValue());
-                            if (lagged ? time >= stamp + RedisUtil.PROXY_TIMEOUT : time <= stamp + RedisUtil.PROXY_TIMEOUT) {
-                                servers.add(entry.getKey());
-                            } else if (time > stamp + RedisUtil.PROXY_TIMEOUT) {
-                                logWarn(entry.getKey() + " is " + (time - stamp) + " seconds behind! (Time not synchronized or server down?) and was removed from heartbeat.");
-                                jedisCluster.hdel("heartbeats", entry.getKey());
+                                unifiedJedis.hdel("heartbeats", entry.getKey());
                             }
                         } catch (NumberFormatException ignored) {
                         }
@@ -282,21 +184,9 @@ public interface RedisBungeePlugin<P> extends EventsPlatform, ConfigLoader {
     default void sendChannelMessage(String channel, String message) {
         new RedisTask<Void>(this) {
             @Override
-            public Void jedisTask(Jedis jedis) {
+            public Void unifiedJedisTask(UnifiedJedis unifiedJedis) {
                 try {
-                    jedis.publish(channel, message);
-                } catch (JedisConnectionException e) {
-                    // Redis server has disappeared!
-                    logFatal("Unable to get connection from pool - did your Redis server go away?");
-                    throw new RuntimeException("Unable to publish channel message", e);
-                }
-                return null;
-            }
-
-            @Override
-            public Void clusterJedisTask(JedisCluster jedisCluster) {
-                try {
-                    jedisCluster.publish(channel, message);
+                    unifiedJedis.publish(channel, message);
                 } catch (JedisConnectionException e) {
                     // Redis server has disappeared!
                     logFatal("Unable to get connection from pool - did your Redis server go away?");
@@ -354,14 +244,8 @@ public interface RedisBungeePlugin<P> extends EventsPlatform, ConfigLoader {
         if (!getDataManager().handleKick(playerUniqueId, message)) {
             new RedisTask<Void>(this) {
                 @Override
-                public Void jedisTask(Jedis jedis) {
-                    PayloadUtils.kickPlayerPayload(playerUniqueId, message, jedis);
-                    return null;
-                }
-
-                @Override
-                public Void clusterJedisTask(JedisCluster jedisCluster) {
-                    PayloadUtils.kickPlayerPayload(playerUniqueId, message, jedisCluster);
+                public Void unifiedJedisTask(UnifiedJedis unifiedJedis) {
+                    PayloadUtils.kickPlayerPayload(playerUniqueId, message, unifiedJedis);
                     return null;
                 }
             }.execute();

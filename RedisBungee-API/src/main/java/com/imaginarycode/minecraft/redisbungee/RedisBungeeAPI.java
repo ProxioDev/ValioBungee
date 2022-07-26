@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisClusterSummoner;
-import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisSummoner;
+import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisPooledSummoner;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.Summoner;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeeMode;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -365,10 +365,11 @@ public class RedisBungeeAPI {
      * @return {@link Jedis}
      * @since 0.7.0
      * @throws IllegalStateException if the {@link #getMode()} is not equal to {@link RedisBungeeMode#SINGLE}
+     * @see #getJedisPool()
      */
     public Jedis requestJedis() {
         if (getMode() == RedisBungeeMode.SINGLE) {
-            return ((JedisSummoner) this.plugin.getSummoner()).obtainResource();
+            return getJedisPool().getResource();
         } else {
             throw new IllegalStateException("Mode is not " + RedisBungeeMode.SINGLE);
         }
@@ -380,17 +381,22 @@ public class RedisBungeeAPI {
      * @return {@link JedisPool}
      * @since 0.6.5
      * @throws IllegalStateException if the {@link #getMode()} is not equal to {@link RedisBungeeMode#SINGLE}
+     * @throws IllegalStateException if JedisPool compatibility mode is disabled in the config
      */
     public JedisPool getJedisPool() {
         if (getMode() == RedisBungeeMode.SINGLE) {
-            return ((JedisSummoner) this.plugin.getSummoner()).getJedisPool();
+            JedisPool jedisPool = ((JedisPooledSummoner) this.plugin.getSummoner()).getCompatibilityJedisPool();
+            if (jedisPool == null) {
+                throw new IllegalStateException("JedisPool compatibility mode is disabled");
+            }
+            return jedisPool;
         } else {
             throw new IllegalStateException("Mode is not " + RedisBungeeMode.SINGLE);
         }
     }
 
     /**
-     * This gives you instance of Jedis Cluster
+     * This gives you instance of JedisCluster
      * WARNING DO NOT USE {@link JedisCluster#close()} it will break the functionally
      *
      * @return {@link redis.clients.jedis.JedisCluster}
@@ -406,7 +412,23 @@ public class RedisBungeeAPI {
     }
 
     /**
-     * returns Summoner class responsible for Single Jedis {@link Jedis}, Cluster Jedis {@link redis.clients.jedis.JedisCluster} handling
+     * This gives you instance of JedisPooled
+     * WARNING: DO NOT USE {@link redis.clients.jedis.JedisPooled#close()} it will break the functionally
+     *
+     * @return {@link redis.clients.jedis.JedisPooled}
+     * @since 0.8.0
+     * @throws IllegalStateException if the {@link #getMode()} is not equal to {@link RedisBungeeMode#SINGLE}
+     */
+    public JedisCluster requestJedisPooled() {
+        if (getMode() == RedisBungeeMode.SINGLE) {
+            return ((JedisClusterSummoner) this.plugin.getSummoner()).obtainResource();
+        } else {
+            throw new IllegalStateException("Mode is not " + RedisBungeeMode.SINGLE);
+        }
+    }
+
+    /**
+     * returns Summoner class responsible for Single Jedis {@link redis.clients.jedis.JedisPooled} with {@link JedisPool}, Cluster Jedis {@link redis.clients.jedis.JedisCluster} handling
      *
      * @return {@link Summoner}
      * @since 0.8.0
