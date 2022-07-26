@@ -7,7 +7,7 @@ This fork ensures compiability with old plugins, so it should work as drop repla
 but since Api has been split from the platform there some changes that have to be done, so your plugin might not work if:
 
 * your plugin has used Internal classes of RedisBungee like getting the `JedisPool` or something else. 
-because RedisBungee is no longer an Plugin for example:
+because `RedisBungee.java` is no longer an Plugin for example:
 ```java
 // this will be broken
 RedisBungee plugin = ...;
