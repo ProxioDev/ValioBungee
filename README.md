@@ -6,7 +6,7 @@ to Synchronize players data between [BungeeCord](https://github.com/SpigotMC/Bun
 
 Velocity*: *version 3.1.2 or above is only supported, any version below that might work but might be unstable* [#40](https://github.com/ProxioDev/RedisBungee/pull/40)
 
-## compatibility with original RedisBungee
+## compatibility with original RedisBungee in Bungeecord ecosystem
 This fork ensures compatibility with old plugins, so it should work as drop replacement,
 but since Api has been split from the platform there some changes that have to be done, so your plugin might not work if:
 
