@@ -101,7 +101,7 @@ public interface RedisBungeePlugin<P> extends EventsPlatform, ConfigLoader {
         }.execute();
     }
 
-    RedisBungeeAPI getApi();
+    RedisBungeeAPI getRedisBungeeApi();
 
     UUIDTranslator getUuidTranslator();
 

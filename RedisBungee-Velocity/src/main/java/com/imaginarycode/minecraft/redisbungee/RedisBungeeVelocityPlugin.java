@@ -96,10 +96,6 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
         this.httpClient.setDispatcher(dispatcher);
         NameFetcher.setHttpClient(httpClient);
         UUIDFetcher.setHttpClient(httpClient);
-        // keeping this lol
-        new RedisBungee(api);
-
-
     }
 
 
@@ -134,7 +130,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
     }
 
     @Override
-    public RedisBungeeAPI getApi() {
+    public RedisBungeeAPI getRedisBungeeApi() {
         return this.api;
     }
 

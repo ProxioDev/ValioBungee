@@ -11,7 +11,6 @@ import com.google.gson.JsonParser;
 import com.imaginarycode.minecraft.redisbungee.api.tasks.RedisTask;
 import redis.clients.jedis.UnifiedJedis;
 
-import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.util.Objects;
 import java.util.UUID;
@@ -50,7 +49,7 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
             return plugin.isPlayerOnAServer(player) ? plugin.getPlayerServerName(player) : null;
 
         try {
-            return serverCache.get(uuid, new RedisTask<String>(plugin.getApi()) {
+            return serverCache.get(uuid, new RedisTask<String>(plugin.getRedisBungeeApi()) {
                 @Override
                 public String unifiedJedisTask(UnifiedJedis unifiedJedis) {
                     return Objects.requireNonNull(unifiedJedis.hget("player:" + uuid, "server"), "user not found");
@@ -73,7 +72,7 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
             return plugin.getConfiguration().getProxyId();
 
         try {
-            return proxyCache.get(uuid, new RedisTask<String>(plugin.getApi()) {
+            return proxyCache.get(uuid, new RedisTask<String>(plugin.getRedisBungeeApi()) {
                 @Override
                 public String unifiedJedisTask(UnifiedJedis unifiedJedis) {
                     return Objects.requireNonNull(unifiedJedis.hget("player:" + uuid, "proxy"), "user not found");
@@ -94,7 +93,7 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
             return plugin.getPlayerIp(player);
 
         try {
-            return ipCache.get(uuid, new RedisTask<InetAddress>(plugin.getApi()) {
+            return ipCache.get(uuid, new RedisTask<InetAddress>(plugin.getRedisBungeeApi()) {
                 @Override
                 public InetAddress unifiedJedisTask(UnifiedJedis unifiedJedis) {
                     String result = unifiedJedis.hget("player:" + uuid, "ip");
@@ -118,7 +117,7 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
             return 0;
 
         try {
-            return lastOnlineCache.get(uuid, new RedisTask<Long>(plugin.getApi()) {
+            return lastOnlineCache.get(uuid, new RedisTask<Long>(plugin.getRedisBungeeApi()) {
 
                 @Override
                 public Long unifiedJedisTask(UnifiedJedis unifiedJedis) {

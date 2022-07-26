@@ -33,9 +33,10 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
-import static com.google.common.base.Preconditions.checkArgument;
 
-public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin<ProxiedPlayer> {
+public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlayer> {
+
+    private static RedisBungeeAPI apiStatic;
 
     private RedisBungeeAPI api;
     private RedisBungeeMode redisBungeeMode;
@@ -81,7 +82,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
 
 
     @Override
-    public RedisBungeeAPI getApi() {
+    public RedisBungeeAPI getRedisBungeeApi() {
         return this.api;
     }
 
@@ -201,6 +202,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
         }
         // init the api class
         this.api = new RedisBungeeAPI(this);
+        apiStatic = this.api;
         // init the http lib
         httpClient = new OkHttpClient();
         Dispatcher dispatcher = new Dispatcher(getExecutorService());
@@ -324,5 +326,22 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
         this.configuration = configuration;
         this.redisBungeeMode = mode;
         this.summoner = summoner;
+    }
+
+    /**
+     * This returns an instance of {@link RedisBungeeAPI}
+     *
+     * @deprecated Please use {@link RedisBungeeAPI#getRedisBungeeApi()} this class intended to for old plugins that no longer updated.
+     *
+     * @return the {@link RedisBungeeAPI} object instance.
+     */
+    @Deprecated
+    public static RedisBungeeAPI getApi() {
+        return apiStatic;
+    }
+
+    @Deprecated
+    public JedisPool getPool() {
+        return api.getJedisPool();
     }
 }

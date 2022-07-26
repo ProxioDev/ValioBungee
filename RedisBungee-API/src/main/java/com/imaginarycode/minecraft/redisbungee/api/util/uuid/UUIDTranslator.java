@@ -8,9 +8,6 @@ import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 
 import com.imaginarycode.minecraft.redisbungee.api.tasks.RedisTask;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisCluster;
-import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.UnifiedJedis;
 import redis.clients.jedis.exceptions.JedisException;
 
@@ -73,7 +70,7 @@ public final class UUIDTranslator {
         if (!plugin.isOnlineMode()) {
             return UUID.nameUUIDFromBytes(("OfflinePlayer:" + player).getBytes(Charsets.UTF_8));
         }
-        RedisTask<UUID> redisTask = new RedisTask<UUID>(plugin.getApi()) {
+        RedisTask<UUID> redisTask = new RedisTask<UUID>(plugin.getRedisBungeeApi()) {
             @Override
             public UUID unifiedJedisTask(UnifiedJedis unifiedJedis) {
                 String stored = unifiedJedis.hget("uuid-cache", player.toLowerCase());
@@ -138,7 +135,7 @@ public final class UUIDTranslator {
                 uuidToNameMap.remove(player);
         }
 
-        RedisTask<String> redisTask = new RedisTask<String>(plugin.getApi()) {
+        RedisTask<String> redisTask = new RedisTask<String>(plugin.getRedisBungeeApi()) {
             @Override
             public String unifiedJedisTask(UnifiedJedis unifiedJedis) {
                 String stored = unifiedJedis.hget("uuid-cache", player.toString());

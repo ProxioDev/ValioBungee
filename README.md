@@ -10,14 +10,6 @@ Velocity*: *version 3.1.2 or above is only supported, any version below that mig
 This fork ensures compatibility with old plugins, so it should work as drop replacement,
 but since Api has been split from the platform there some changes that have to be done, so your plugin might not work if:
 
-* your plugin has used Internal classes of RedisBungee like getting the `JedisPool` or something else. 
-because `RedisBungee.java` is no longer an Plugin for example:
-```java
-// this will be broken
-RedisBungee plugin = (RedisBungee) ProxyServer.getInstance().getPluginManager().getPlugin("RedisBungee");
-JedisPool jedisPool = plugin.getPool();
-
-```
 * your plugin have used the Method `RedisBungeeAPI#getServerFor(UUID player)` as it was returning `net.md_5.bungee.api.config.ServerInfo`
 now it returns `String`.
 

@@ -3,8 +3,8 @@ package com.imaginarycode.minecraft.redisbungee.commands;
 import com.google.common.base.Joiner;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.imaginarycode.minecraft.redisbungee.RedisBungee;
 import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
-import com.imaginarycode.minecraft.redisbungee.RedisBungeeBungeePlugin;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -41,9 +41,9 @@ public class RedisBungeeCommands {
     }
 
     public static class GlistCommand extends Command {
-        private final RedisBungeeBungeePlugin plugin;
+        private final RedisBungee plugin;
 
-        public GlistCommand(RedisBungeeBungeePlugin plugin) {
+        public GlistCommand(RedisBungee plugin) {
             super("glist", "bungeecord.command.list", "redisbungee", "rglist");
             this.plugin = plugin;
         }
@@ -53,11 +53,11 @@ public class RedisBungeeCommands {
             plugin.getProxy().getScheduler().runAsync(plugin, new Runnable() {
                 @Override
                 public void run() {
-                    int count = plugin.getApi().getPlayerCount();
+                    int count = plugin.getRedisBungeeApi().getPlayerCount();
                     BaseComponent[] playersOnline = new ComponentBuilder("").color(ChatColor.YELLOW)
                             .append(playerPlural(count) + " currently online.").create();
                     if (args.length > 0 && args[0].equals("showall")) {
-                        Multimap<String, UUID> serverToPlayers = plugin.getApi().getServerToPlayers();
+                        Multimap<String, UUID> serverToPlayers = plugin.getRedisBungeeApi().getServerToPlayers();
                         Multimap<String, String> human = HashMultimap.create();
                         for (Map.Entry<String, UUID> entry : serverToPlayers.entries()) {
                             // if for any reason UUID translation fails just return the uuid as name, to make command finish executing.
@@ -87,9 +87,9 @@ public class RedisBungeeCommands {
     }
 
     public static class FindCommand extends Command {
-        private final RedisBungeeBungeePlugin plugin;
+        private final RedisBungee plugin;
 
-        public FindCommand(RedisBungeeBungeePlugin plugin) {
+        public FindCommand(RedisBungee plugin) {
             super("find", "bungeecord.command.find", "rfind");
             this.plugin = plugin;
         }
@@ -105,7 +105,7 @@ public class RedisBungeeCommands {
                             sender.sendMessage(PLAYER_NOT_FOUND);
                             return;
                         }
-                        ServerInfo si = plugin.getProxy().getServerInfo(plugin.getApi().getServerFor(uuid));
+                        ServerInfo si = plugin.getProxy().getServerInfo(plugin.getRedisBungeeApi().getServerFor(uuid));
                         if (si != null) {
                             TextComponent message = new TextComponent();
                             message.setColor(ChatColor.BLUE);
@@ -123,9 +123,9 @@ public class RedisBungeeCommands {
     }
 
     public static class LastSeenCommand extends Command {
-        private final RedisBungeeBungeePlugin plugin;
+        private final RedisBungee plugin;
 
-        public LastSeenCommand(RedisBungeeBungeePlugin plugin) {
+        public LastSeenCommand(RedisBungee plugin) {
             super("lastseen", "redisbungee.command.lastseen", "rlastseen");
             this.plugin = plugin;
         }
@@ -141,7 +141,7 @@ public class RedisBungeeCommands {
                             sender.sendMessage(PLAYER_NOT_FOUND);
                             return;
                         }
-                        long secs = plugin.getApi().getLastOnline(uuid);
+                        long secs = plugin.getRedisBungeeApi().getLastOnline(uuid);
                         TextComponent message = new TextComponent();
                         if (secs == 0) {
                             message.setColor(ChatColor.GREEN);
@@ -163,9 +163,9 @@ public class RedisBungeeCommands {
     }
 
     public static class IpCommand extends Command {
-        private final RedisBungeeBungeePlugin plugin;
+        private final RedisBungee plugin;
 
-        public IpCommand(RedisBungeeBungeePlugin plugin) {
+        public IpCommand(RedisBungee plugin) {
             super("ip", "redisbungee.command.ip", "playerip", "rip", "rplayerip");
             this.plugin = plugin;
         }
@@ -181,7 +181,7 @@ public class RedisBungeeCommands {
                             sender.sendMessage(PLAYER_NOT_FOUND);
                             return;
                         }
-                        InetAddress ia = plugin.getApi().getPlayerIp(uuid);
+                        InetAddress ia = plugin.getRedisBungeeApi().getPlayerIp(uuid);
                         if (ia != null) {
                             TextComponent message = new TextComponent();
                             message.setColor(ChatColor.GREEN);
@@ -199,9 +199,9 @@ public class RedisBungeeCommands {
     }
 
     public static class PlayerProxyCommand extends Command {
-        private final RedisBungeeBungeePlugin plugin;
+        private final RedisBungee plugin;
 
-        public PlayerProxyCommand(RedisBungeeBungeePlugin plugin) {
+        public PlayerProxyCommand(RedisBungee plugin) {
             super("pproxy", "redisbungee.command.pproxy");
             this.plugin = plugin;
         }
@@ -217,7 +217,7 @@ public class RedisBungeeCommands {
                             sender.sendMessage(PLAYER_NOT_FOUND);
                             return;
                         }
-                        String proxy = plugin.getApi().getProxy(uuid);
+                        String proxy = plugin.getRedisBungeeApi().getProxy(uuid);
                         if (proxy != null) {
                             TextComponent message = new TextComponent();
                             message.setColor(ChatColor.GREEN);
@@ -235,9 +235,9 @@ public class RedisBungeeCommands {
     }
 
     public static class SendToAll extends Command {
-        private final RedisBungeeBungeePlugin plugin;
+        private final RedisBungee plugin;
 
-        public SendToAll(RedisBungeeBungeePlugin plugin) {
+        public SendToAll(RedisBungee plugin) {
             super("sendtoall", "redisbungee.command.sendtoall", "rsendtoall");
             this.plugin = plugin;
         }
@@ -246,7 +246,7 @@ public class RedisBungeeCommands {
         public void execute(CommandSender sender, String[] args) {
             if (args.length > 0) {
                 String command = Joiner.on(" ").skipNulls().join(args);
-                plugin.getApi().sendProxyCommand(command);
+                plugin.getRedisBungeeApi().sendProxyCommand(command);
                 TextComponent message = new TextComponent();
                 message.setColor(ChatColor.GREEN);
                 message.setText("Sent the command /" + command + " to all proxies.");
@@ -258,9 +258,9 @@ public class RedisBungeeCommands {
     }
 
     public static class ServerId extends Command {
-        private final RedisBungeeBungeePlugin plugin;
+        private final RedisBungee plugin;
 
-        public ServerId(RedisBungeeBungeePlugin plugin) {
+        public ServerId(RedisBungee plugin) {
             super("serverid", "redisbungee.command.serverid", "rserverid");
             this.plugin = plugin;
         }
@@ -268,15 +268,15 @@ public class RedisBungeeCommands {
         @Override
         public void execute(CommandSender sender, String[] args) {
             TextComponent textComponent = new TextComponent();
-            textComponent.setText("You are on " + plugin.getApi().getProxyId() + ".");
+            textComponent.setText("You are on " + plugin.getRedisBungeeApi().getProxyId() + ".");
             textComponent.setColor(ChatColor.YELLOW);
             sender.sendMessage(textComponent);
         }
     }
 
     public static class ServerIds extends Command {
-        private final RedisBungeeBungeePlugin plugin;
-        public ServerIds(RedisBungeeBungeePlugin plugin) {
+        private final RedisBungee plugin;
+        public ServerIds(RedisBungee plugin) {
             super("serverids", "redisbungee.command.serverids");
             this.plugin =plugin;
         }
@@ -284,16 +284,16 @@ public class RedisBungeeCommands {
         @Override
         public void execute(CommandSender sender, String[] strings) {
             TextComponent textComponent = new TextComponent();
-            textComponent.setText("All server IDs: " + Joiner.on(", ").join(plugin.getApi().getAllProxies()));
+            textComponent.setText("All server IDs: " + Joiner.on(", ").join(plugin.getRedisBungeeApi().getAllProxies()));
             textComponent.setColor(ChatColor.YELLOW);
             sender.sendMessage(textComponent);
         }
     }
 
     public static class PlistCommand extends Command {
-        private final RedisBungeeBungeePlugin plugin;
+        private final RedisBungee plugin;
 
-        public PlistCommand(RedisBungeeBungeePlugin plugin) {
+        public PlistCommand(RedisBungee plugin) {
             super("plist", "redisbungee.command.plist", "rplist");
             this.plugin = plugin;
         }
@@ -308,11 +308,11 @@ public class RedisBungeeCommands {
                         sender.sendMessage(new ComponentBuilder(proxy + " is not a valid proxy. See /serverids for valid proxies.").color(ChatColor.RED).create());
                         return;
                     }
-                    Set<UUID> players = plugin.getApi().getPlayersOnProxy(proxy);
+                    Set<UUID> players = plugin.getRedisBungeeApi().getPlayersOnProxy(proxy);
                     BaseComponent[] playersOnline = new ComponentBuilder("").color(ChatColor.YELLOW)
                             .append(playerPlural(players.size()) + " currently on proxy " + proxy + ".").create();
                     if (args.length >= 2 && args[1].equals("showall")) {
-                        Multimap<String, UUID> serverToPlayers = plugin.getApi().getServerToPlayers();
+                        Multimap<String, UUID> serverToPlayers = plugin.getRedisBungeeApi().getServerToPlayers();
                         Multimap<String, String> human = HashMultimap.create();
                         for (Map.Entry<String, UUID> entry : serverToPlayers.entries()) {
                             if (players.contains(entry.getValue())) {

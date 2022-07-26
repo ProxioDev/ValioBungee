@@ -19,7 +19,7 @@ import java.util.*;
 
 /**
  * This class exposes some internal RedisBungee functions. You obtain an instance of this object by invoking {@link RedisBungeeAPI#getRedisBungeeApi()}
- * or somehow you got the Plugin instance by you can call the api using {@link RedisBungeePlugin#getApi()}.
+ * or somehow you got the Plugin instance by you can call the api using {@link RedisBungeePlugin#getRedisBungeeApi()}.
  *
  * @author tuxed
  * @since 0.2.3 | updated 0.7.0
@@ -38,7 +38,6 @@ public class RedisBungeeAPI {
                 "redisbungee-" + plugin.getConfiguration().getProxyId(),
                 "redisbungee-data"
         );
-        new RedisBungee(this);
     }
 
     /**

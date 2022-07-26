@@ -6,7 +6,6 @@ import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisClusterSummone
 import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisPooledSummoner;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.Summoner;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeeMode;
-import redis.clients.jedis.Jedis;
 import redis.clients.jedis.UnifiedJedis;
 
 import java.util.concurrent.Callable;
@@ -29,7 +28,7 @@ public abstract class RedisTask<V> implements Runnable, Callable<V> {
 
     public RedisTask(RedisBungeePlugin<?> plugin) {
         this.plugin = plugin;
-        this.api = plugin.getApi();
+        this.api = plugin.getRedisBungeeApi();
         this.summoner = api.getSummoner();
     }
 

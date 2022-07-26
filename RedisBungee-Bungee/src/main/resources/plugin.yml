@@ -1,5 +1,5 @@
 name: RedisBungee
-main: com.imaginarycode.minecraft.redisbungee.RedisBungeeBungeePlugin
+main: com.imaginarycode.minecraft.redisbungee.RedisBungee
 version: ${project.parent.version}-${git.commit.id.abbrev}
 author: "astei, ProxioDev"
 # This is used so that we can automatically override default BungeeCord behavior.

@@ -20,9 +20,6 @@ import net.md_5.bungee.api.event.*;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.event.EventHandler;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisCluster;
-import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.UnifiedJedis;
 
 import java.net.InetAddress;
@@ -155,7 +152,7 @@ public class RedisBungeeBungeeListener extends AbstractRedisBungeeListener<Login
                             original = plugin.getPlayers();
                         } else {
                             try {
-                                original = plugin.getApi().getPlayersOnServer(type);
+                                original = plugin.getRedisBungeeApi().getPlayersOnServer(type);
                             } catch (IllegalArgumentException ignored) {
                             }
                         }
@@ -173,7 +170,7 @@ public class RedisBungeeBungeeListener extends AbstractRedisBungeeListener<Login
                         } else {
                             out.writeUTF(type);
                             try {
-                                out.writeInt(plugin.getApi().getPlayersOnServer(type).size());
+                                out.writeInt(plugin.getRedisBungeeApi().getPlayersOnServer(type).size());
                             } catch (IllegalArgumentException e) {
                                 out.writeInt(0);
                             }
@@ -183,12 +180,12 @@ public class RedisBungeeBungeeListener extends AbstractRedisBungeeListener<Login
                         String user = in.readUTF();
                         out.writeUTF("LastOnline");
                         out.writeUTF(user);
-                        out.writeLong(plugin.getApi().getLastOnline(Objects.requireNonNull(plugin.getUuidTranslator().getTranslatedUuid(user, true))));
+                        out.writeLong(plugin.getRedisBungeeApi().getLastOnline(Objects.requireNonNull(plugin.getUuidTranslator().getTranslatedUuid(user, true))));
                         break;
                     case "ServerPlayers":
                         String type1 = in.readUTF();
                         out.writeUTF("ServerPlayers");
-                        Multimap<String, UUID> multimap = plugin.getApi().getServerToPlayers();
+                        Multimap<String, UUID> multimap = plugin.getRedisBungeeApi().getServerToPlayers();
 
                         boolean includesUsers;
 
@@ -224,7 +221,7 @@ public class RedisBungeeBungeeListener extends AbstractRedisBungeeListener<Login
                         String username = in.readUTF();
                         out.writeUTF("PlayerProxy");
                         out.writeUTF(username);
-                        out.writeUTF(plugin.getApi().getProxy(Objects.requireNonNull(plugin.getUuidTranslator().getTranslatedUuid(username, true))));
+                        out.writeUTF(plugin.getRedisBungeeApi().getProxy(Objects.requireNonNull(plugin.getUuidTranslator().getTranslatedUuid(username, true))));
                         break;
                     default:
                         return;
@@ -238,7 +235,7 @@ public class RedisBungeeBungeeListener extends AbstractRedisBungeeListener<Login
     @Override
     @EventHandler
     public void onPubSubMessage(PubSubMessageEvent event) {
-        if (event.getChannel().equals("redisbungee-allservers") || event.getChannel().equals("redisbungee-" + plugin.getApi().getProxyId())) {
+        if (event.getChannel().equals("redisbungee-allservers") || event.getChannel().equals("redisbungee-" + plugin.getRedisBungeeApi().getProxyId())) {
             String message = event.getMessage();
             if (message.startsWith("/"))
                 message = message.substring(1);
