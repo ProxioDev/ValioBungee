@@ -109,6 +109,7 @@ public interface ConfigLoader {
                 config.setMaxTotal(node.getNode("compatibility-max-connections").getInt(3));
                 config.setBlockWhenExhausted(true);
                 jedisPool = new JedisPool(config, redisServer, redisPort, 0, redisPassword, useSSL);
+                plugin.logInfo("Compatibility JedisPool was created");
             }
             GenericObjectPoolConfig<Connection> poolConfig = new GenericObjectPoolConfig<>();
             poolConfig.setMaxTotal(maxConnections);

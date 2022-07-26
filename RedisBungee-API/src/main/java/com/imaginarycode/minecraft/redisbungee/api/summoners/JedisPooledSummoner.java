@@ -14,10 +14,16 @@ public class JedisPooledSummoner implements Summoner<JedisPooled> {
     public JedisPooledSummoner(JedisPooled jedisPooled, JedisPool jedisPool) {
         this.jedisPooled = jedisPooled;
         this.jedisPool = jedisPool;
-        try (Jedis jedis = this.jedisPool.getResource()) {
-            // Test the connection to make sure configuration is right
-            jedis.ping();
+        // test connections
+        if (jedisPool != null) {
+            try (Jedis jedis = this.jedisPool.getResource()) {
+                // Test the connection to make sure configuration is right
+                jedis.ping();
+            }
         }
+        jedisPooled.set("random_data", "0");
+        jedisPooled.del("random_data");
+
     }
 
     @Override
