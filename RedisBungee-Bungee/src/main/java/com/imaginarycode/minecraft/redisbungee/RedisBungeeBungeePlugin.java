@@ -13,7 +13,6 @@ import com.imaginarycode.minecraft.redisbungee.events.PlayerLeftNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import com.imaginarycode.minecraft.redisbungee.api.*;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.Summoner;
-import com.imaginarycode.minecraft.redisbungee.api.util.lua.LuaManager;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeeMode;
 import com.imaginarycode.minecraft.redisbungee.api.util.uuid.NameFetcher;
 import com.imaginarycode.minecraft.redisbungee.api.util.uuid.UUIDFetcher;
@@ -50,7 +49,6 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
     private final AtomicInteger globalPlayerCount = new AtomicInteger();
     private Future<?> integrityCheck;
     private Future<?> heartbeatTask;
-    private LuaManager.Script getRedisClusterTimeScript;
     private static final Object SERVER_TO_PLAYERS_KEY = new Object();
     private final Cache<Object, Multimap<String, UUID>> serverToPlayersCache = CacheBuilder.newBuilder()
             .expireAfterWrite(5, TimeUnit.SECONDS)
@@ -209,10 +207,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
         httpClient.setDispatcher(dispatcher);
         NameFetcher.setHttpClient(httpClient);
         UUIDFetcher.setHttpClient(httpClient);
-        // init lua manager
-        LuaManager luaManager = new LuaManager(this);
-        this.getRedisClusterTimeScript = InitialUtils.getTimeScript(this, luaManager);
-        getLogger().info("lua manager was loaded");
+        InitialUtils.checkRedisVersion(this);
         // check if this proxy is recovering from a crash and start heart the beat.
         InitialUtils.checkIfRecovering(this, getDataFolder().toPath());
         updateProxyIds();
@@ -297,10 +292,6 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
         return this.redisBungeeMode;
     }
 
-    @Override
-    public Long getRedisTime() {
-        return getRedisTime((List<String>) this.getRedisClusterTimeScript.eval(Collections.singletonList("0"), Collections.emptyList()));
-    }
 
     @Override
     public void updateProxyIds() {

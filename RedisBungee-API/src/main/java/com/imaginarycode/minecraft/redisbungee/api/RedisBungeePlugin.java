@@ -12,8 +12,11 @@ import com.imaginarycode.minecraft.redisbungee.api.tasks.RedisTask;
 import com.imaginarycode.minecraft.redisbungee.api.util.RedisUtil;
 import com.imaginarycode.minecraft.redisbungee.api.util.payload.PayloadUtils;
 import com.imaginarycode.minecraft.redisbungee.api.util.uuid.UUIDTranslator;
+import org.checkerframework.checker.units.qual.A;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
+import redis.clients.jedis.Protocol;
+import redis.clients.jedis.UnifiedJedis;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
 import java.net.InetAddress;
@@ -67,7 +70,7 @@ public interface RedisBungeePlugin<P> extends EventsPlatform, ConfigLoader {
             @Override
             public Long clusterJedisTask(JedisCluster jedisCluster) {
                 long total = 0;
-                long redisTime = getRedisTime();
+                long redisTime = getRedisTime(jedisCluster);
                 Map<String, String> heartBeats = jedisCluster.hgetAll("heartbeats");
                 for (Map.Entry<String, String> stringStringEntry : heartBeats.entrySet()) {
                     String k = stringStringEntry.getKey();
@@ -250,7 +253,7 @@ public interface RedisBungeePlugin<P> extends EventsPlatform, ConfigLoader {
             @Override
             public List<String> clusterJedisTask(JedisCluster jedisCluster) {
                 try {
-                    long time = getRedisTime();
+                    long time = getRedisTime(jedisCluster);
                     ImmutableList.Builder<String> servers = ImmutableList.builder();
                     Map<String, String> heartbeats = jedisCluster.hgetAll("heartbeats");
                     for (Map.Entry<String, String> entry : heartbeats.entrySet()) {
@@ -337,6 +340,12 @@ public interface RedisBungeePlugin<P> extends EventsPlatform, ConfigLoader {
         sendProxyCommand(getConfiguration().getProxyId(), cmd);
     }
 
+    default Long getRedisTime(UnifiedJedis unifiedJedis) {
+        List<Object> data = (List<Object>) unifiedJedis.sendCommand(Protocol.Command.TIME);
+        List<String> times = new ArrayList<>();
+        data.forEach((o) -> times.add(new String((byte[])o)));
+        return getRedisTime(times);
+    }
     default long getRedisTime(List<String> timeRes) {
         return Long.parseLong(timeRes.get(0));
     }
@@ -367,8 +376,6 @@ public interface RedisBungeePlugin<P> extends EventsPlatform, ConfigLoader {
     }
 
     RedisBungeeMode getRedisBungeeMode();
-
-    Long getRedisTime();
 
     void updateProxyIds();
 

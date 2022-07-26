@@ -9,7 +9,6 @@ import com.imaginarycode.minecraft.redisbungee.api.*;
 import com.imaginarycode.minecraft.redisbungee.api.config.RedisBungeeConfiguration;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.Summoner;
 import com.imaginarycode.minecraft.redisbungee.api.tasks.*;
-import com.imaginarycode.minecraft.redisbungee.api.util.lua.LuaManager;
 import com.imaginarycode.minecraft.redisbungee.api.util.uuid.NameFetcher;
 import com.imaginarycode.minecraft.redisbungee.api.util.uuid.UUIDFetcher;
 import com.imaginarycode.minecraft.redisbungee.api.util.uuid.UUIDTranslator;
@@ -61,8 +60,6 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
     private ScheduledTask integrityCheck;
     private ScheduledTask heartbeatTask;
 
-    private final LuaManager.Script getRedisTimeScript;
-
     private static final Object SERVER_TO_PLAYERS_KEY = new Object();
     public static final List<ChannelIdentifier> IDENTIFIERS = List.of(
             MinecraftChannelIdentifier.create("legacy", "redisbungee"),
@@ -88,9 +85,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
             throw new RuntimeException("Unable to connect to your Redis server!", e);
         }
         this.api = new RedisBungeeAPI(this);
-        LuaManager luaManager = new LuaManager(this);
-        this.getRedisTimeScript = InitialUtils.getTimeScript(this, luaManager);
-        getLogger().info("lua manager was loaded");
+        InitialUtils.checkRedisVersion(this);
         // check if this proxy is recovering from a crash and start heart the beat.
         InitialUtils.checkIfRecovering(this, getDataFolder());
         uuidTranslator = new UUIDTranslator(this);
@@ -325,11 +320,6 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
     @Override
     public RedisBungeeMode getRedisBungeeMode() {
         return this.redisBungeeMode;
-    }
-
-    @Override
-    public Long getRedisTime() {
-        return getRedisTime((List<String>) this.getRedisTimeScript.eval(Collections.singletonList("0"), Collections.emptyList()));
     }
 
     @Override
