@@ -1,6 +1,6 @@
 package com.imaginarycode.minecraft.redisbungee.api.tasks;
 
-import com.imaginarycode.minecraft.redisbungee.api.GenericPlayerUtils;
+import com.imaginarycode.minecraft.redisbungee.api.util.player.PlayerUtils;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
@@ -17,7 +17,7 @@ public class ShutdownUtils {
                 if (jedis.scard("proxy:" + plugin.getConfiguration().getProxyId() + ":usersOnline") > 0) {
                     Set<String> players = jedis.smembers("proxy:" + plugin.getConfiguration().getProxyId() + ":usersOnline");
                     for (String member : players)
-                        GenericPlayerUtils.cleanUpPlayer(member, jedis, true);
+                        PlayerUtils.cleanUpPlayer(member, jedis, true);
                 }
                 return null;
             }
@@ -28,7 +28,7 @@ public class ShutdownUtils {
                 if (jedisCluster.scard("proxy:" + plugin.getConfiguration().getProxyId() + ":usersOnline") > 0) {
                     Set<String> players = jedisCluster.smembers("proxy:" + plugin.getConfiguration().getProxyId() + ":usersOnline");
                     for (String member : players)
-                        GenericPlayerUtils.cleanUpPlayer(member, jedisCluster, true);
+                        PlayerUtils.cleanUpPlayer(member, jedisCluster, true);
                 }
                 return null;
             }

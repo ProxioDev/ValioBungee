@@ -1,4 +1,4 @@
-package com.imaginarycode.minecraft.redisbungee.api;
+package com.imaginarycode.minecraft.redisbungee.api.util.player;
 
 import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
 import redis.clients.jedis.Jedis;
@@ -7,7 +7,7 @@ import redis.clients.jedis.Pipeline;
 
 import static com.imaginarycode.minecraft.redisbungee.api.util.payload.PayloadUtils.playerQuitPayload;
 
-public class GenericPlayerUtils {
+public class PlayerUtils {
 
 
     public static void cleanUpPlayer(String uuid, Jedis rsc, boolean firePayload) {

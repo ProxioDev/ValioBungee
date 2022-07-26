@@ -7,7 +7,7 @@ import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.imaginarycode.minecraft.redisbungee.api.AbstractRedisBungeeListener;
-import com.imaginarycode.minecraft.redisbungee.api.GenericPlayerUtils;
+import com.imaginarycode.minecraft.redisbungee.api.util.player.PlayerUtils;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 import com.imaginarycode.minecraft.redisbungee.api.tasks.RedisTask;
 import com.imaginarycode.minecraft.redisbungee.api.util.payload.PayloadUtils;
@@ -144,7 +144,7 @@ public class RedisBungeeBungeeListener extends AbstractRedisBungeeListener<Login
             @Override
             public Void jedisTask(Jedis jedis) {
                 Pipeline pipeline = jedis.pipelined();
-                GenericPlayerUtils.cleanUpPlayer(event.getPlayer().getUniqueId().toString(), pipeline, true);
+                PlayerUtils.cleanUpPlayer(event.getPlayer().getUniqueId().toString(), pipeline, true);
                 pipeline.sync();
                 return null;
             }
@@ -152,7 +152,7 @@ public class RedisBungeeBungeeListener extends AbstractRedisBungeeListener<Login
             @Override
             public Void clusterJedisTask(JedisCluster jedisCluster) {
                 // Due some reason JedisCluster does not support pipeline, use instance instead
-                GenericPlayerUtils.cleanUpPlayer(event.getPlayer().getUniqueId().toString(), jedisCluster, true);
+                PlayerUtils.cleanUpPlayer(event.getPlayer().getUniqueId().toString(), jedisCluster, true);
                 return null;
             }
         });

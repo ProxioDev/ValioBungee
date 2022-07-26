@@ -1,6 +1,6 @@
 package com.imaginarycode.minecraft.redisbungee.api.tasks;
 
-import com.imaginarycode.minecraft.redisbungee.api.GenericPlayerUtils;
+import com.imaginarycode.minecraft.redisbungee.api.util.player.PlayerUtils;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
@@ -9,9 +9,7 @@ import redis.clients.jedis.Pipeline;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 
 public abstract class IntegrityCheckTask extends RedisTask<Void> {
 
@@ -37,7 +35,7 @@ public abstract class IntegrityCheckTask extends RedisTask<Void> {
                 if (!laggedPlayers.isEmpty()) {
                     plugin.logInfo("Cleaning up lagged proxy " + s + " (" + laggedPlayers.size() + " players)...");
                     for (String laggedPlayer : laggedPlayers) {
-                        GenericPlayerUtils.cleanUpPlayer(laggedPlayer, jedis, true);
+                        PlayerUtils.cleanUpPlayer(laggedPlayer, jedis, true);
                     }
                 }
             }
@@ -58,7 +56,7 @@ public abstract class IntegrityCheckTask extends RedisTask<Void> {
                     }
                 }
                 if (!found) {
-                    GenericPlayerUtils.cleanUpPlayer(member, jedis, false);
+                    PlayerUtils.cleanUpPlayer(member, jedis, false);
                    plugin.logWarn("Player found in set that was not found locally and globally: " + member);
                 } else {
                     jedis.srem("proxy:" + plugin.getConfiguration().getProxyId() + ":usersOnline", member);
@@ -96,7 +94,7 @@ public abstract class IntegrityCheckTask extends RedisTask<Void> {
                 if (!laggedPlayers.isEmpty()) {
                     plugin.logInfo("Cleaning up lagged proxy " + s + " (" + laggedPlayers.size() + " players)...");
                     for (String laggedPlayer : laggedPlayers) {
-                        GenericPlayerUtils.cleanUpPlayer(laggedPlayer, jedisCluster, true);
+                        PlayerUtils.cleanUpPlayer(laggedPlayer, jedisCluster, true);
                     }
                 }
             }
@@ -117,7 +115,7 @@ public abstract class IntegrityCheckTask extends RedisTask<Void> {
                     }
                 }
                 if (!found) {
-                    GenericPlayerUtils.cleanUpPlayer(member, jedisCluster, false);
+                    PlayerUtils.cleanUpPlayer(member, jedisCluster, false);
                     plugin.logWarn("Player found in set that was not found locally and globally: " + member);
                 } else {
                     jedisCluster.srem("proxy:" + plugin.getConfiguration().getProxyId() + ":usersOnline", member);
