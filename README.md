@@ -1,9 +1,13 @@
 # RedisBungee fork By Limework
 The original project of RedisBungee is no longer maintained, so we have forked the plugin.
 
+RedisBungee uses [Redis](https://redis.io) with Java client [Jedis](https://github.com/redis/jedis/) 
+to Synchronize players data between [BungeeCord](https://github.com/SpigotMC/BungeeCord) or [Velocity*](https://github.com/PaperMC/Velocity) proxies
 
-## compiability with original RedisBungee
-This fork ensures compiability with old plugins, so it should work as drop replacement,
+Velocity*: *version 3.1.2 or above is only supported, any version below that might work but might be unstable* [#40](https://github.com/ProxioDev/RedisBungee/pull/40)
+
+## compatibility with original RedisBungee
+This fork ensures compatibility with old plugins, so it should work as drop replacement,
 but since Api has been split from the platform there some changes that have to be done, so your plugin might not work if:
 
 * your plugin has used Internal classes of RedisBungee like getting the `JedisPool` or something else. 
@@ -17,12 +21,7 @@ JedisPool jedisPool = plugin.getPool();
 * your plugin have used the Method `RedisBungeeAPI#getServerFor(UUID player)` as it was returning `net.md_5.bungee.api.config.ServerInfo`
 now it returns `String`.
 
-## information
-RedisBungee uses [Redis](https://redis.io) with Java client [Jedis](https://github.com/redis/jedis/) 
-to Synchronize players data between [BungeeCord](https://github.com/SpigotMC/BungeeCord) or [Velocity*](https://github.com/PaperMC/Velocity) proxies
-
-Velocity*: *version 3.1.2 or above is only supported, any version below that might work but might be unstable* [#40](https://github.com/ProxioDev/RedisBungee/pull/40)
-
+## notes
 If you are looking to use Original RedisBungee without a change to internals,
 with critical bugs fixed, please use version [0.6.5](https://github.com/ProxioDev/RedisBungee/releases/tag/0.6.5) and java docs For legacy Version [0.6.5](https://proxiodev.github.io/RedisBungee-JavaDocs/0.6.5-SNAPSHOT/)
 as its last version before internal changes. please note that you will not get support for any old builds unless critical bugs effecting both  0.6.5 and 0.7.0 or above.
