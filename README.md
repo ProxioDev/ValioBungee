@@ -14,7 +14,7 @@ but since Api has been split from the platform there some changes that have to b
 because `RedisBungee.java` is no longer an Plugin for example:
 ```java
 // this will be broken
-RedisBungee plugin = ...;
+RedisBungee plugin = (RedisBungee) ProxyServer.getInstance().getPluginManager().getPlugin("RedisBungee");
 JedisPool jedisPool = plugin.getPool();
 
 ```
