@@ -12,7 +12,6 @@ import com.imaginarycode.minecraft.redisbungee.api.tasks.RedisTask;
 import com.imaginarycode.minecraft.redisbungee.api.util.RedisUtil;
 import com.imaginarycode.minecraft.redisbungee.api.util.payload.PayloadUtils;
 import com.imaginarycode.minecraft.redisbungee.api.util.uuid.UUIDTranslator;
-import org.checkerframework.checker.units.qual.A;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.Protocol;
@@ -377,6 +376,6 @@ public interface RedisBungeePlugin<P> extends EventsPlatform, ConfigLoader {
 
     RedisBungeeMode getRedisBungeeMode();
 
-    void updateProxyIds();
+    void updateProxiesIds();
 
 }

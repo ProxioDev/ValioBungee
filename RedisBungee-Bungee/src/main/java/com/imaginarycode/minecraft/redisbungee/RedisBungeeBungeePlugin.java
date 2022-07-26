@@ -210,7 +210,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
         InitialUtils.checkRedisVersion(this);
         // check if this proxy is recovering from a crash and start heart the beat.
         InitialUtils.checkIfRecovering(this, getDataFolder().toPath());
-        updateProxyIds();
+        updateProxiesIds();
         uuidTranslator = new UUIDTranslator(this);
         heartbeatTask = service.scheduleAtFixedRate(new HeartbeatTask(this, this.globalPlayerCount), 0, HeartbeatTask.INTERVAL, HeartbeatTask.REPEAT_INTERVAL_TIME_UNIT);
         dataManager = new BungeeDataManager(this);
@@ -294,7 +294,7 @@ public class RedisBungeeBungeePlugin extends Plugin implements RedisBungeePlugin
 
 
     @Override
-    public void updateProxyIds() {
+    public void updateProxiesIds() {
         proxiesIds = getCurrentProxiesIds(false);
     }
 

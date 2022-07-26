@@ -31,7 +31,7 @@ public class HeartbeatTask extends RedisTask<Void>{
             return null;
         }
         try {
-            plugin.updateProxyIds();
+            plugin.updateProxiesIds();
             globalPlayerCount.set(plugin.getCurrentCount());
         } catch (Throwable e) {
             plugin.logFatal("Unable to update data - did your Redis server go away?");
@@ -52,7 +52,7 @@ public class HeartbeatTask extends RedisTask<Void>{
             return null;
         }
         try {
-            plugin.updateProxyIds();
+            plugin.updateProxiesIds();
             globalPlayerCount.set(plugin.getCurrentCount());
         } catch (Throwable e) {
             plugin.logFatal("Unable to update data - did your Redis server go away?");

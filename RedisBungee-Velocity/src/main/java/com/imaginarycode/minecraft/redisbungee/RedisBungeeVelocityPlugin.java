@@ -234,7 +234,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
 
     @Override
     public void initialize() {
-        updateProxyIds();
+        updateProxiesIds();
         // start heartbeat task
         heartbeatTask = getProxy().getScheduler().buildTask(this, new HeartbeatTask(this, this.globalPlayerCount)).repeat(HeartbeatTask.INTERVAL, HeartbeatTask.REPEAT_INTERVAL_TIME_UNIT).schedule();
 
@@ -323,7 +323,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
     }
 
     @Override
-    public void updateProxyIds() {
+    public void updateProxiesIds() {
         this.proxiesIds = this.getCurrentProxiesIds(false);
     }
 
