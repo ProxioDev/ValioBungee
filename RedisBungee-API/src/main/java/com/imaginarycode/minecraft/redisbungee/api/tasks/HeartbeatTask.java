@@ -43,7 +43,7 @@ public class HeartbeatTask extends RedisTask<Void>{
     @Override
     public Void clusterJedisTask(JedisCluster jedisCluster) {
         try {
-            long redisTime = plugin.getRedisClusterTime();
+            long redisTime = plugin.getRedisTime();
             jedisCluster.hset("heartbeats", plugin.getConfiguration().getProxyId(), String.valueOf(redisTime));
         } catch (JedisConnectionException e) {
             // Redis server has disappeared!

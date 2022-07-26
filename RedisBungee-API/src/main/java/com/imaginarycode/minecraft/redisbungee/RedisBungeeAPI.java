@@ -105,7 +105,7 @@ public class RedisBungeeAPI {
      * @since 0.2.5
      */
     public final Multimap<String, UUID> getServerToPlayers() {
-        return plugin.serversToPlayers();
+        return plugin.serverToPlayersCache();
     }
 
     /**
