@@ -28,11 +28,9 @@ public class RedisBungeeAPI extends AbstractRedisBungeeAPI {
      * as well, and will return local information on them.
      *
      * @param player a player uuid
-     * @return {@link ServerInfo}
-     * @deprecated This does return null even if player is on a server if the server is not on the proxy
+     * @return {@link ServerInfo} Can be null if proxy can't find it.
      * @see #getServerNameFor(UUID) 
      */
-    @Deprecated
     public final ServerInfo getServerFor(@NonNull UUID player) {
         return ((Plugin) this.plugin).getProxy().getServerInfo(this.getServerNameFor(player));
     }
