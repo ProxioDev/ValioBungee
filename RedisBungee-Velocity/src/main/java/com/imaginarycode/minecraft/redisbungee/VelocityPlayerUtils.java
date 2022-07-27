@@ -2,8 +2,6 @@ package com.imaginarycode.minecraft.redisbungee;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ServerConnection;
-import redis.clients.jedis.JedisCluster;
-import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.UnifiedJedis;
 
 import java.util.HashMap;
@@ -20,9 +18,9 @@ public class VelocityPlayerUtils {
         Map<String, String> playerData = new HashMap<>(4);
         playerData.put("online", "0");
         playerData.put("ip", player.getRemoteAddress().getHostName());
-        playerData.put("proxy", RedisBungeeAPI.getRedisBungeeApi().getProxyId());
+        playerData.put("proxy", AbstractRedisBungeeAPI.getAbstractRedisBungeeAPI().getProxyId());
 
-        unifiedJedis.sadd("proxy:" + RedisBungeeAPI.getRedisBungeeApi().getProxyId() + ":usersOnline", player.getUniqueId().toString());
+        unifiedJedis.sadd("proxy:" + AbstractRedisBungeeAPI.getAbstractRedisBungeeAPI().getProxyId() + ":usersOnline", player.getUniqueId().toString());
         unifiedJedis.hmset("player:" + player.getUniqueId().toString(), playerData);
 
         if (fireEvent) {

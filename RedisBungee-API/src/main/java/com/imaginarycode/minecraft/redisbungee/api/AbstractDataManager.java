@@ -49,7 +49,7 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
             return plugin.isPlayerOnAServer(player) ? plugin.getPlayerServerName(player) : null;
 
         try {
-            return serverCache.get(uuid, new RedisTask<String>(plugin.getRedisBungeeApi()) {
+            return serverCache.get(uuid, new RedisTask<String>(plugin.getAbstractRedisBungeeApi()) {
                 @Override
                 public String unifiedJedisTask(UnifiedJedis unifiedJedis) {
                     return Objects.requireNonNull(unifiedJedis.hget("player:" + uuid, "server"), "user not found");
@@ -72,7 +72,7 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
             return plugin.getConfiguration().getProxyId();
 
         try {
-            return proxyCache.get(uuid, new RedisTask<String>(plugin.getRedisBungeeApi()) {
+            return proxyCache.get(uuid, new RedisTask<String>(plugin.getAbstractRedisBungeeApi()) {
                 @Override
                 public String unifiedJedisTask(UnifiedJedis unifiedJedis) {
                     return Objects.requireNonNull(unifiedJedis.hget("player:" + uuid, "proxy"), "user not found");
@@ -93,7 +93,7 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
             return plugin.getPlayerIp(player);
 
         try {
-            return ipCache.get(uuid, new RedisTask<InetAddress>(plugin.getRedisBungeeApi()) {
+            return ipCache.get(uuid, new RedisTask<InetAddress>(plugin.getAbstractRedisBungeeApi()) {
                 @Override
                 public InetAddress unifiedJedisTask(UnifiedJedis unifiedJedis) {
                     String result = unifiedJedis.hget("player:" + uuid, "ip");
@@ -117,7 +117,7 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
             return 0;
 
         try {
-            return lastOnlineCache.get(uuid, new RedisTask<Long>(plugin.getRedisBungeeApi()) {
+            return lastOnlineCache.get(uuid, new RedisTask<Long>(plugin.getAbstractRedisBungeeApi()) {
 
                 @Override
                 public Long unifiedJedisTask(UnifiedJedis unifiedJedis) {

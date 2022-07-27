@@ -1,10 +1,7 @@
 package com.imaginarycode.minecraft.redisbungee;
 
-import com.google.gson.Gson;
 import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
-import redis.clients.jedis.JedisCluster;
-import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.UnifiedJedis;
 
 import java.util.HashMap;

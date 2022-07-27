@@ -1,6 +1,6 @@
 package com.imaginarycode.minecraft.redisbungee.api.tasks;
 
-import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
+import com.imaginarycode.minecraft.redisbungee.AbstractRedisBungeeAPI;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisClusterSummoner;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisPooledSummoner;
@@ -13,7 +13,7 @@ import java.util.concurrent.Callable;
 public abstract class RedisTask<V> implements Runnable, Callable<V> {
 
     protected final Summoner<?> summoner;
-    protected final RedisBungeeAPI api;
+    protected final AbstractRedisBungeeAPI api;
     protected RedisBungeePlugin<?> plugin;
 
     @Override
@@ -21,14 +21,14 @@ public abstract class RedisTask<V> implements Runnable, Callable<V> {
         return execute();
     }
 
-    public RedisTask(RedisBungeeAPI api) {
+    public RedisTask(AbstractRedisBungeeAPI api) {
         this.api = api;
         this.summoner = api.getSummoner();
     }
 
     public RedisTask(RedisBungeePlugin<?> plugin) {
         this.plugin = plugin;
-        this.api = plugin.getRedisBungeeApi();
+        this.api = plugin.getAbstractRedisBungeeApi();
         this.summoner = api.getSummoner();
     }
 

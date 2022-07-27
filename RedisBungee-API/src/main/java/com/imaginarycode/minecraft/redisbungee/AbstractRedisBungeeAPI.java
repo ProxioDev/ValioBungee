@@ -4,11 +4,11 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
+import com.imaginarycode.minecraft.redisbungee.api.RedisBungeeMode;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisClusterSummoner;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisPooledSummoner;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.Summoner;
-import com.imaginarycode.minecraft.redisbungee.api.RedisBungeeMode;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
@@ -18,21 +18,21 @@ import java.net.InetAddress;
 import java.util.*;
 
 /**
- * This class exposes some internal RedisBungee functions. You obtain an instance of this object by invoking {@link RedisBungeeAPI#getRedisBungeeApi()}
- * or somehow you got the Plugin instance by you can call the api using {@link RedisBungeePlugin#getRedisBungeeApi()}.
+ * This abstract class is extended by platform plugin to provide some platform specific methods.
+ * overall its general contains all methods needed by external usage.
  *
- * @author tuxed
- * @since 0.2.3 | updated 0.7.0
+ * @author Ham1255
+ * @since 0.8.0
  */
 @SuppressWarnings("unused")
-public class RedisBungeeAPI {
-    private final RedisBungeePlugin<?> plugin;
-    private final List<String> reservedChannels;
-    private static RedisBungeeAPI redisBungeeApi;
+public abstract class AbstractRedisBungeeAPI {
+    protected final RedisBungeePlugin<?> plugin;
+    private static AbstractRedisBungeeAPI abstractRedisBungeeAPI;
+    protected final List<String> reservedChannels;
 
-    RedisBungeeAPI(RedisBungeePlugin<?> plugin) {
+    AbstractRedisBungeeAPI(RedisBungeePlugin<?> plugin) {
+        abstractRedisBungeeAPI = this;
         this.plugin = plugin;
-        redisBungeeApi = this;
         this.reservedChannels = ImmutableList.of(
                 "redisbungee-allservers",
                 "redisbungee-" + plugin.getConfiguration().getProxyId(),
@@ -59,15 +59,14 @@ public class RedisBungeeAPI {
     public final long getLastOnline(@NonNull UUID player) {
         return plugin.getDataManager().getLastOnline(player);
     }
-
     /**
      * Get the server where the specified player is playing. This function also deals with the case of local players
      * as well, and will return local information on them.
      *
-     * @param player a player name
+     * @param player a player uuid
      * @return a String name for the server the player is on.
      */
-    public final String getServerFor(@NonNull UUID player) {
+    public final String getServerNameFor(@NonNull UUID player) {
         return plugin.getDataManager().getServer(player);
     }
 
@@ -447,15 +446,7 @@ public class RedisBungeeAPI {
         return this.plugin.getRedisBungeeMode();
     }
 
-
-    /**
-     * Api instance
-     *
-     * @return the API instance.
-     * @since 0.6.5
-     */
-    public static RedisBungeeAPI getRedisBungeeApi() {
-        return redisBungeeApi;
+    public static AbstractRedisBungeeAPI getAbstractRedisBungeeAPI() {
+        return abstractRedisBungeeAPI;
     }
-
 }

@@ -38,7 +38,7 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
 
     private static RedisBungeeAPI apiStatic;
 
-    private RedisBungeeAPI api;
+    private AbstractRedisBungeeAPI api;
     private RedisBungeeMode redisBungeeMode;
     private PubSubListener psl = null;
     private Summoner<?> summoner;
@@ -82,7 +82,7 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
 
 
     @Override
-    public RedisBungeeAPI getRedisBungeeApi() {
+    public AbstractRedisBungeeAPI getAbstractRedisBungeeApi() {
         return this.api;
     }
 
@@ -202,7 +202,7 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
         }
         // init the api class
         this.api = new RedisBungeeAPI(this);
-        apiStatic = this.api;
+        apiStatic = (RedisBungeeAPI) this.api;
         // init the http lib
         httpClient = new OkHttpClient();
         Dispatcher dispatcher = new Dispatcher(getExecutorService());
@@ -333,7 +333,7 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
      *
      * @deprecated Please use {@link RedisBungeeAPI#getRedisBungeeApi()} this class intended to for old plugins that no longer updated.
      *
-     * @return the {@link RedisBungeeAPI} object instance.
+     * @return the {@link AbstractRedisBungeeAPI} object instance.
      */
     @Deprecated
     public static RedisBungeeAPI getApi() {

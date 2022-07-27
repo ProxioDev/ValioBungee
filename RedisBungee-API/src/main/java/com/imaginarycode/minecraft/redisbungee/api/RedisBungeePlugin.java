@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
-import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
+import com.imaginarycode.minecraft.redisbungee.AbstractRedisBungeeAPI;
 import com.imaginarycode.minecraft.redisbungee.api.config.ConfigLoader;
 import com.imaginarycode.minecraft.redisbungee.api.config.RedisBungeeConfiguration;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.Summoner;
@@ -101,7 +101,7 @@ public interface RedisBungeePlugin<P> extends EventsPlatform, ConfigLoader {
         }.execute();
     }
 
-    RedisBungeeAPI getRedisBungeeApi();
+    AbstractRedisBungeeAPI getAbstractRedisBungeeApi();
 
     UUIDTranslator getUuidTranslator();
 

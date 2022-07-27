@@ -47,7 +47,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
     private final ProxyServer server;
     private final Logger logger;
     private final Path dataFolder;
-    private final RedisBungeeAPI api;
+    private final AbstractRedisBungeeAPI api;
     private final PubSubListener psl;
     private Summoner<?> jedisSummoner;
     private RedisBungeeMode redisBungeeMode;
@@ -130,7 +130,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
     }
 
     @Override
-    public RedisBungeeAPI getRedisBungeeApi() {
+    public AbstractRedisBungeeAPI getAbstractRedisBungeeApi() {
         return this.api;
     }
 
