@@ -18,9 +18,12 @@ public class RedisBungeeAPI extends AbstractRedisBungeeAPI {
 
     private static RedisBungeeAPI redisBungeeApi;
 
-    RedisBungeeAPI(RedisBungeePlugin<?> plugin) {
+    public RedisBungeeAPI(RedisBungeePlugin<?> plugin) {
         super(plugin);
-        redisBungeeApi = this;
+        if (redisBungeeApi == null) {
+            redisBungeeApi = this;
+        }
+
     }
 
     /**

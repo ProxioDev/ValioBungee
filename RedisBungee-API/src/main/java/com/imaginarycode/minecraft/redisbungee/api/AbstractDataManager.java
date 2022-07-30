@@ -171,7 +171,7 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
                 ipCache.put(message1.getTarget(), message1.getPayload().getAddress());
                 plugin.executeAsync(() -> {
                     Object event = plugin.createPlayerJoinedNetworkEvent(message1.getTarget());
-                    plugin.callEvent(event);
+                    plugin.fireEvent(event);
                 });
                 break;
             case LEAVE:
@@ -181,7 +181,7 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
                 lastOnlineCache.put(message2.getTarget(), message2.getPayload().getTimestamp());
                 plugin.executeAsync(() -> {
                     Object event = plugin.createPlayerLeftNetworkEvent(message2.getTarget());
-                    plugin.callEvent(event);
+                    plugin.fireEvent(event);
                 });
                 break;
             case SERVER_CHANGE:
@@ -189,8 +189,8 @@ public abstract class AbstractDataManager<P, PL, PD, PS> {
                 }.getType());
                 serverCache.put(message3.getTarget(), message3.getPayload().getServer());
                 plugin.executeAsync(() -> {
-                    Object event = plugin.createPlayerChangedNetworkEvent(message3.getTarget(), message3.getPayload().getOldServer(), message3.getPayload().getServer());
-                    plugin.callEvent(event);
+                    Object event = plugin.createPlayerChangedServerNetworkEvent(message3.getTarget(), message3.getPayload().getOldServer(), message3.getPayload().getServer());
+                    plugin.fireEvent(event);
                 });
                 break;
             case KICK:

@@ -5,8 +5,8 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.imaginarycode.minecraft.redisbungee.AbstractRedisBungeeAPI;
-import com.imaginarycode.minecraft.redisbungee.api.config.ConfigLoader;
 import com.imaginarycode.minecraft.redisbungee.api.config.RedisBungeeConfiguration;
+import com.imaginarycode.minecraft.redisbungee.api.events.EventsPlatform;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.Summoner;
 import com.imaginarycode.minecraft.redisbungee.api.tasks.RedisTask;
 import com.imaginarycode.minecraft.redisbungee.api.util.RedisUtil;
@@ -24,12 +24,12 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 
 /**
- * This Class has all internal methods needed by every redis bungee plugin, and it can be used to implement another platforms than bungeecord
+ * This Class has all internal methods needed by every redis bungee plugin, and it can be used to implement another platforms than bungeecord or another forks of RedisBungee
  *
  * @author Ham1255
  * @since 0.7.0
  */
-public interface RedisBungeePlugin<P> extends EventsPlatform, ConfigLoader {
+public interface RedisBungeePlugin<P> extends EventsPlatform {
 
     default void initialize() {
 
@@ -200,8 +200,6 @@ public interface RedisBungeePlugin<P> extends EventsPlatform, ConfigLoader {
     void executeAsync(Runnable runnable);
 
     void executeAsyncAfter(Runnable runnable, TimeUnit timeUnit, int time);
-
-    void callEvent(Object event);
 
     boolean isOnlineMode();
 

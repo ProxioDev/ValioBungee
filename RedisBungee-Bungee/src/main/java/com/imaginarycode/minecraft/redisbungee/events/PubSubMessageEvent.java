@@ -1,5 +1,6 @@
 package com.imaginarycode.minecraft.redisbungee.events;
 
+import com.imaginarycode.minecraft.redisbungee.api.events.IPubSubMessageEvent;
 import net.md_5.bungee.api.plugin.Event;
 
 /**
@@ -10,7 +11,7 @@ import net.md_5.bungee.api.plugin.Event;
  * @since 0.2.6
  */
 
-public class PubSubMessageEvent extends Event {
+public class PubSubMessageEvent extends Event implements IPubSubMessageEvent {
     private final String channel;
     private final String message;
 
@@ -19,10 +20,12 @@ public class PubSubMessageEvent extends Event {
         this.message = message;
     }
 
+    @Override
     public String getChannel() {
         return channel;
     }
 
+    @Override
     public String getMessage() {
         return message;
     }

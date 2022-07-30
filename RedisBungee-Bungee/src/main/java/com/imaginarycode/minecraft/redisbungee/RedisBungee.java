@@ -4,7 +4,12 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
+import com.imaginarycode.minecraft.redisbungee.api.config.ConfigLoader;
 import com.imaginarycode.minecraft.redisbungee.api.config.RedisBungeeConfiguration;
+import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerChangedServerNetworkEvent;
+import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerJoinedNetworkEvent;
+import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerLeftNetworkEvent;
+import com.imaginarycode.minecraft.redisbungee.api.events.IPubSubMessageEvent;
 import com.imaginarycode.minecraft.redisbungee.api.tasks.*;
 import com.imaginarycode.minecraft.redisbungee.commands.RedisBungeeCommands;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerChangedServerNetworkEvent;
@@ -34,7 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
 
-public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlayer> {
+public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlayer>, ConfigLoader {
 
     private static RedisBungeeAPI apiStatic;
 
@@ -121,7 +126,7 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
     }
 
     @Override
-    public void callEvent(Object event) {
+    public void fireEvent(Object event) {
         this.getProxy().getPluginManager().callEvent((Event) event);
     }
 
@@ -302,22 +307,22 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
     }
 
     @Override
-    public Object createPlayerChangedNetworkEvent(UUID uuid, String previousServer, String server) {
+    public IPlayerChangedServerNetworkEvent createPlayerChangedServerNetworkEvent(UUID uuid, String previousServer, String server) {
         return new PlayerChangedServerNetworkEvent(uuid, previousServer, server);
     }
 
     @Override
-    public Object createPlayerJoinedNetworkEvent(UUID uuid) {
+    public IPlayerJoinedNetworkEvent createPlayerJoinedNetworkEvent(UUID uuid) {
         return new PlayerJoinedNetworkEvent(uuid);
     }
 
     @Override
-    public Object createPlayerLeftNetworkEvent(UUID uuid) {
+    public IPlayerLeftNetworkEvent createPlayerLeftNetworkEvent(UUID uuid) {
         return new PlayerLeftNetworkEvent(uuid);
     }
 
     @Override
-    public Object createPubSubEvent(String channel, String message) {
+    public IPubSubMessageEvent createPubSubEvent(String channel, String message) {
         return new PubSubMessageEvent(channel, message);
     }
 

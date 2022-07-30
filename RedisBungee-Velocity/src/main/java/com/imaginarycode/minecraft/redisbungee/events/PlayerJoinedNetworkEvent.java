@@ -1,6 +1,8 @@
 package com.imaginarycode.minecraft.redisbungee.events;
 
 
+import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerJoinedNetworkEvent;
+
 import java.util.UUID;
 
 /**
@@ -12,13 +14,14 @@ import java.util.UUID;
  *
  * @since 0.3.4
  */
-public class PlayerJoinedNetworkEvent {
+public class PlayerJoinedNetworkEvent implements IPlayerJoinedNetworkEvent {
     private final UUID uuid;
 
     public PlayerJoinedNetworkEvent(UUID uuid) {
         this.uuid = uuid;
     }
 
+    @Override
     public UUID getUuid() {
         return uuid;
     }

@@ -18,9 +18,11 @@ public class RedisBungeeAPI extends AbstractRedisBungeeAPI {
 
     private static RedisBungeeAPI redisBungeeApi;
 
-    RedisBungeeAPI(RedisBungeePlugin<?> plugin) {
+    public RedisBungeeAPI(RedisBungeePlugin<?> plugin) {
         super(plugin);
-        redisBungeeApi = this;
+        if (redisBungeeApi == null) {
+            redisBungeeApi = this;
+        }
     }
 
     /**
@@ -29,7 +31,7 @@ public class RedisBungeeAPI extends AbstractRedisBungeeAPI {
      *
      * @param player a player uuid
      * @return {@link ServerInfo} Can be null if proxy can't find it.
-     * @see #getServerNameFor(UUID) 
+     * @see #getServerNameFor(UUID)
      */
     public final ServerInfo getServerFor(@NonNull UUID player) {
         return ((Plugin) this.plugin).getProxy().getServerInfo(this.getServerNameFor(player));

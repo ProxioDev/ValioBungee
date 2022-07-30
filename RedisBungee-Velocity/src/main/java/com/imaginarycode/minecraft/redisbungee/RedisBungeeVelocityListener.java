@@ -33,6 +33,9 @@ import java.net.InetAddress;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.imaginarycode.minecraft.redisbungee.api.util.serialize.Serializations.serializeMultimap;
+import static com.imaginarycode.minecraft.redisbungee.api.util.serialize.Serializations.serializeMultiset;
+
 public class RedisBungeeVelocityListener extends AbstractRedisBungeeListener<LoginEvent, PostLoginEvent, DisconnectEvent, ServerConnectedEvent, ProxyPingEvent, PluginMessageEvent, PubSubMessageEvent> {
     // Some messages are using legacy characters
     private final LegacyComponentSerializer serializer = LegacyComponentSerializer.legacySection();

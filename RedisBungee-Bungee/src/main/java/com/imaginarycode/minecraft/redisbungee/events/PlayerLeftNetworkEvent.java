@@ -1,5 +1,6 @@
 package com.imaginarycode.minecraft.redisbungee.events;
 
+import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerLeftNetworkEvent;
 import net.md_5.bungee.api.plugin.Event;
 
 import java.util.UUID;
@@ -13,13 +14,14 @@ import java.util.UUID;
  *
  * @since 0.3.4
  */
-public class PlayerLeftNetworkEvent extends Event {
+public class PlayerLeftNetworkEvent extends Event implements IPlayerLeftNetworkEvent {
     private final UUID uuid;
 
     public PlayerLeftNetworkEvent(UUID uuid) {
         this.uuid = uuid;
     }
 
+    @Override
     public UUID getUuid() {
         return uuid;
     }

@@ -1,6 +1,8 @@
 package com.imaginarycode.minecraft.redisbungee.events;
 
 
+import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerChangedServerNetworkEvent;
+
 import java.util.UUID;
 
 /**
@@ -12,7 +14,7 @@ import java.util.UUID;
  *
  * @since 0.3.4
  */
-public class PlayerChangedServerNetworkEvent {
+public class PlayerChangedServerNetworkEvent implements IPlayerChangedServerNetworkEvent {
     private final UUID uuid;
     private final String previousServer;
     private final String server;
@@ -23,14 +25,17 @@ public class PlayerChangedServerNetworkEvent {
         this.server = server;
     }
 
+    @Override
     public UUID getUuid() {
         return uuid;
     }
 
+    @Override
     public String getServer() {
         return server;
     }
 
+    @Override
     public String getPreviousServer() {
         return previousServer;
     }

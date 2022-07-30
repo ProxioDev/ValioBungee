@@ -31,13 +31,18 @@ public abstract class AbstractRedisBungeeAPI {
     protected final List<String> reservedChannels;
 
     AbstractRedisBungeeAPI(RedisBungeePlugin<?> plugin) {
-        abstractRedisBungeeAPI = this;
-        this.plugin = plugin;
+        // this does make sure that no one can place first initiated API class.
+        if (abstractRedisBungeeAPI == null) {
+            abstractRedisBungeeAPI = this;
+        }
         this.reservedChannels = ImmutableList.of(
                 "redisbungee-allservers",
                 "redisbungee-" + plugin.getConfiguration().getProxyId(),
                 "redisbungee-data"
         );
+
+        this.plugin = plugin;
+
     }
 
     /**
@@ -59,6 +64,7 @@ public abstract class AbstractRedisBungeeAPI {
     public final long getLastOnline(@NonNull UUID player) {
         return plugin.getDataManager().getLastOnline(player);
     }
+
     /**
      * Get the server where the specified player is playing. This function also deals with the case of local players
      * as well, and will return local information on them.
@@ -338,7 +344,7 @@ public abstract class AbstractRedisBungeeAPI {
      * Kicks a player from the network
      *
      * @param playerName player name
-     * @param message kick message that player will see on kick
+     * @param message    kick message that player will see on kick
      * @since 0.8.0
      */
 
@@ -350,7 +356,7 @@ public abstract class AbstractRedisBungeeAPI {
      * Kicks a player from the network
      *
      * @param playerUUID player name
-     * @param message kick message that player will see on kick
+     * @param message    kick message that player will see on kick
      * @since 0.8.0
      */
     public void kickPlayer(UUID playerUUID, String message) {
@@ -361,9 +367,9 @@ public abstract class AbstractRedisBungeeAPI {
      * This gives you instance of Jedis
      *
      * @return {@link Jedis}
-     * @since 0.7.0
      * @throws IllegalStateException if the {@link #getMode()} is not equal to {@link RedisBungeeMode#SINGLE}
      * @see #getJedisPool()
+     * @since 0.7.0
      */
     public Jedis requestJedis() {
         if (getMode() == RedisBungeeMode.SINGLE) {
@@ -377,9 +383,9 @@ public abstract class AbstractRedisBungeeAPI {
      * This gets Redis Bungee {@link JedisPool}
      *
      * @return {@link JedisPool}
-     * @since 0.6.5
      * @throws IllegalStateException if the {@link #getMode()} is not equal to {@link RedisBungeeMode#SINGLE}
      * @throws IllegalStateException if JedisPool compatibility mode is disabled in the config
+     * @since 0.6.5
      */
     public JedisPool getJedisPool() {
         if (getMode() == RedisBungeeMode.SINGLE) {
@@ -398,8 +404,8 @@ public abstract class AbstractRedisBungeeAPI {
      * WARNING DO NOT USE {@link JedisCluster#close()} it will break the functionally
      *
      * @return {@link redis.clients.jedis.JedisCluster}
-     * @since 0.8.0
      * @throws IllegalStateException if the {@link #getMode()} is not equal to {@link RedisBungeeMode#CLUSTER}
+     * @since 0.8.0
      */
     public JedisCluster requestClusterJedis() {
         if (getMode() == RedisBungeeMode.CLUSTER) {
@@ -414,8 +420,8 @@ public abstract class AbstractRedisBungeeAPI {
      * WARNING: DO NOT USE {@link redis.clients.jedis.JedisPooled#close()} it will break the functionally
      *
      * @return {@link redis.clients.jedis.JedisPooled}
-     * @since 0.8.0
      * @throws IllegalStateException if the {@link #getMode()} is not equal to {@link RedisBungeeMode#SINGLE}
+     * @since 0.8.0
      */
     public JedisCluster requestJedisPooled() {
         if (getMode() == RedisBungeeMode.SINGLE) {

@@ -3,8 +3,6 @@ package com.imaginarycode.minecraft.redisbungee.api;
 
 import redis.clients.jedis.JedisPubSub;
 
-import java.lang.reflect.InvocationTargetException;
-
 
 public class JedisPubSubHandler extends JedisPubSub {
 
@@ -21,7 +19,7 @@ public class JedisPubSubHandler extends JedisPubSub {
             @Override
             public void run() {
                 Object event = plugin.createPubSubEvent(s, s2);
-                plugin.callEvent(event);
+                plugin.fireEvent(event);
             }
         });
     }

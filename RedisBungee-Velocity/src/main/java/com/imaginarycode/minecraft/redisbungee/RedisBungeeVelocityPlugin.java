@@ -6,7 +6,12 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import com.imaginarycode.minecraft.redisbungee.api.*;
+import com.imaginarycode.minecraft.redisbungee.api.config.ConfigLoader;
 import com.imaginarycode.minecraft.redisbungee.api.config.RedisBungeeConfiguration;
+import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerChangedServerNetworkEvent;
+import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerJoinedNetworkEvent;
+import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerLeftNetworkEvent;
+import com.imaginarycode.minecraft.redisbungee.api.events.IPubSubMessageEvent;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.Summoner;
 import com.imaginarycode.minecraft.redisbungee.api.tasks.*;
 import com.imaginarycode.minecraft.redisbungee.api.util.uuid.NameFetcher;
@@ -43,7 +48,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Plugin(id = "redisbungee", name = "RedisBungee", version = PomData.VERSION, url = "https://github.com/ProxioDev/RedisBungee", authors = {"astei", "ProxioDev"})
-public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
+public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, ConfigLoader {
     private final ProxyServer server;
     private final Logger logger;
     private final Path dataFolder;
@@ -169,7 +174,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
     }
 
     @Override
-    public void callEvent(Object event) {
+    public void fireEvent(Object event) {
         this.getProxy().getEventManager().fireAndForget(event);
     }
 
@@ -327,22 +332,22 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player> {
 
 
     @Override
-    public Object createPlayerChangedNetworkEvent(UUID uuid, String previousServer, String server) {
+    public IPlayerChangedServerNetworkEvent createPlayerChangedServerNetworkEvent(UUID uuid, String previousServer, String server) {
         return new PlayerChangedServerNetworkEvent(uuid, previousServer, server);
     }
 
     @Override
-    public Object createPlayerJoinedNetworkEvent(UUID uuid) {
+    public IPlayerJoinedNetworkEvent createPlayerJoinedNetworkEvent(UUID uuid) {
         return new PlayerJoinedNetworkEvent(uuid);
     }
 
     @Override
-    public Object createPlayerLeftNetworkEvent(UUID uuid) {
+    public IPlayerLeftNetworkEvent createPlayerLeftNetworkEvent(UUID uuid) {
         return new PlayerLeftNetworkEvent(uuid);
     }
 
     @Override
-    public Object createPubSubEvent(String channel, String message) {
+    public IPubSubMessageEvent createPubSubEvent(String channel, String message) {
         return new PubSubMessageEvent(channel, message);
     }
 

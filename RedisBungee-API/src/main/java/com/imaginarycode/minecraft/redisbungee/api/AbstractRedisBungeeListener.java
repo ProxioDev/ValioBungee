@@ -38,34 +38,6 @@ public abstract class AbstractRedisBungeeListener<LE, PLE, PD, SC, PP, PM, PS> {
 
     public abstract void onPluginMessage(PM event);
 
-    protected void serializeMultiset(Multiset<String> collection, ByteArrayDataOutput output) {
-        output.writeInt(collection.elementSet().size());
-        for (Multiset.Entry<String> entry : collection.entrySet()) {
-            output.writeUTF(entry.getElement());
-            output.writeInt(entry.getCount());
-        }
-    }
-
-    @SuppressWarnings("SameParameterValue")
-    protected void serializeMultimap(Multimap<String, String> collection, boolean includeNames, ByteArrayDataOutput output) {
-        output.writeInt(collection.keySet().size());
-        for (Map.Entry<String, Collection<String>> entry : collection.asMap().entrySet()) {
-            output.writeUTF(entry.getKey());
-            if (includeNames) {
-                serializeCollection(entry.getValue(), output);
-            } else {
-                output.writeInt(entry.getValue().size());
-            }
-        }
-    }
-
-    private void serializeCollection(Collection<?> collection, ByteArrayDataOutput output) {
-        output.writeInt(collection.size());
-        for (Object o : collection) {
-            output.writeUTF(o.toString());
-        }
-    }
-
     public abstract void onPubSubMessage(PS event);
 
 

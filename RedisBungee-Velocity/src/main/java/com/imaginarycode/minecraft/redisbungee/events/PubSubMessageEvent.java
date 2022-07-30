@@ -1,6 +1,7 @@
 package com.imaginarycode.minecraft.redisbungee.events;
 
 
+import com.imaginarycode.minecraft.redisbungee.api.events.IPubSubMessageEvent;
 
 /**
  * This event is posted when a PubSub message is received.
@@ -10,7 +11,7 @@ package com.imaginarycode.minecraft.redisbungee.events;
  * @since 0.2.6
  */
 
-public class PubSubMessageEvent {
+public class PubSubMessageEvent implements IPubSubMessageEvent {
     private final String channel;
     private final String message;
 
@@ -19,10 +20,12 @@ public class PubSubMessageEvent {
         this.message = message;
     }
 
+    @Override
     public String getChannel() {
         return channel;
     }
 
+    @Override
     public String getMessage() {
         return message;
     }

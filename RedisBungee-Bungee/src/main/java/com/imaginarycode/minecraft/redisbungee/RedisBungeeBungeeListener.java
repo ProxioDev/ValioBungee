@@ -25,6 +25,9 @@ import redis.clients.jedis.UnifiedJedis;
 import java.net.InetAddress;
 import java.util.*;
 
+import static com.imaginarycode.minecraft.redisbungee.api.util.serialize.Serializations.serializeMultimap;
+import static com.imaginarycode.minecraft.redisbungee.api.util.serialize.Serializations.serializeMultiset;
+
 public class RedisBungeeBungeeListener extends AbstractRedisBungeeListener<LoginEvent, PostLoginEvent, PlayerDisconnectEvent, ServerConnectedEvent, ProxyPingEvent, PluginMessageEvent, PubSubMessageEvent> implements Listener {
 
 
