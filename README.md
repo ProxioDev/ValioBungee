@@ -17,6 +17,14 @@ Cluster mode compatibility in version 0.8.0:
 If you are using static legacy method `RedisBungee#getPool()` it might fail in:
 * if Cluster mode is enabled, due fact its Uses different classes
 * if JedisPool compatibility mode is disabled in the config due fact project internally switched to JedisPooled than Jedis
+* 
+## License
+
+This project is distributed under Eclipse Public License 1.0
+
+You can find it [here](https://github.com/proxiodev/RedisBungee/blob/master/LICENSE)
+
+You can find the original RedisBungee is by [astei](https://github.com/astei) and project can be found [here](https://github.com/minecrafter/RedisBungee) or spigot page [here, but its no longer available](https://www.spigotmc.org/resources/redisbungee.13494/)
 
 ## notes
 If you are looking to use Original RedisBungee without a change to internals,
@@ -130,14 +138,6 @@ For current version [0.8.0](https://proxiodev.github.io/RedisBungee-JavaDocs/0.8
 ## Configuration
 
 **REDISBUNGEE REQUIRES A REDIS SERVER**, preferably with reasonably low latency. The default [config](https://github.com/ProxioDev/RedisBungee/blob/develop/RedisBungee-API/src/main/resources/config.yml) is saved when the plugin first starts.
-
-## License!
-
-This project is distributed under Eclipse Public License 1.0
-
-You can find it [here](https://github.com/proxiodev/RedisBungee/blob/master/LICENSE)
-
-You can find the original RedisBungee is by [astei](https://github.com/astei) and project can be found [here](https://github.com/minecrafter/RedisBungee) or spigot page [here, but its no longer available](https://www.spigotmc.org/resources/redisbungee.13494/) 
 
 ## Support
 
