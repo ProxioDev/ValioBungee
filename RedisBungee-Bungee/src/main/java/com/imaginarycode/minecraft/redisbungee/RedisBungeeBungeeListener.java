@@ -27,6 +27,7 @@ import java.util.*;
 
 import static com.imaginarycode.minecraft.redisbungee.api.util.serialize.Serializations.serializeMultimap;
 import static com.imaginarycode.minecraft.redisbungee.api.util.serialize.Serializations.serializeMultiset;
+import static net.md_5.bungee.event.EventPriority.HIGHEST;
 
 public class RedisBungeeBungeeListener extends AbstractRedisBungeeListener<LoginEvent, PostLoginEvent, PlayerDisconnectEvent, ServerConnectedEvent, ProxyPingEvent, PluginMessageEvent, PubSubMessageEvent> implements Listener {
 
@@ -36,7 +37,7 @@ public class RedisBungeeBungeeListener extends AbstractRedisBungeeListener<Login
     }
 
     @Override
-    @EventHandler
+    @EventHandler (priority = HIGHEST)
     public void onLogin(LoginEvent event) {
         event.registerIntent((Plugin) plugin);
         plugin.executeAsync(new RedisTask<Void>(plugin) {

@@ -44,7 +44,7 @@ public class RedisBungeeVelocityListener extends AbstractRedisBungeeListener<Log
         super(plugin, exemptAddresses);
     }
 
-    @Subscribe
+    @Subscribe (order = PostOrder.LAST)
     public void onLogin(LoginEvent event, Continuation continuation) {
         plugin.executeAsync(new RedisTask<Void>(plugin) {
             @Override
