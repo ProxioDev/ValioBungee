@@ -37,7 +37,9 @@ public class JedisPooledSummoner implements Summoner<JedisPooled> {
 
     @Override
     public void close() throws IOException {
-        this.jedisPool.close();
+        if (this.jedisPool != null) {
+            this.jedisPool.close();
+        }
         this.jedisPooled.close();
 
     }
