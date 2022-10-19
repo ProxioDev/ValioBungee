@@ -27,6 +27,11 @@ public interface ConfigLoader {
         loadConfig(plugin, dataFolder.toPath());
     }
 
+    // There currently a problem with the SSL/TLS connections
+    // looking into the Jedis source code you can pass some form of
+    // Domain Validation, SSL factory from javax packages
+    // todo: create Domain valdiation
+    // todo: add new config options for ssl certs locations
     default void loadConfig(RedisBungeePlugin<?> plugin, Path dataFolder) throws IOException {
         Path configFile = createConfigFile(dataFolder);
         final YAMLConfigurationLoader yamlConfigurationFileLoader = YAMLConfigurationLoader.builder().setPath(configFile).build();
