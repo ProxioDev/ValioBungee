@@ -18,22 +18,6 @@
                     <target>8</target>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>pl.project13.maven</groupId>
-                <artifactId>git-commit-id-plugin</artifactId>
-                <version>4.9.10</version>
-                <configuration>
-                    <failOnNoGitDirectory>false</failOnNoGitDirectory>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>get-the-git-infos</id>
-                        <goals>
-                            <goal>revision</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
     <modules>
