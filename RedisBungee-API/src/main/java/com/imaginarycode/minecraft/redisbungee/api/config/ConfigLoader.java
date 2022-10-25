@@ -12,6 +12,7 @@ import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import redis.clients.jedis.*;
+import redis.clients.jedis.providers.PooledConnectionProvider;
 
 import java.io.File;
 import java.io.IOException;
@@ -113,13 +114,13 @@ public interface ConfigLoader {
                 JedisPoolConfig config = new JedisPoolConfig();
                 config.setMaxTotal(node.getNode("compatibility-max-connections").getInt(3));
                 config.setBlockWhenExhausted(true);
-                jedisPool = new JedisPool(config, redisServer, redisPort, 0, redisPassword, useSSL);
+                jedisPool = new JedisPool(config, redisServer, redisPort, 5000, redisPassword, useSSL);
                 plugin.logInfo("Compatibility JedisPool was created");
             }
             GenericObjectPoolConfig<Connection> poolConfig = new GenericObjectPoolConfig<>();
             poolConfig.setMaxTotal(maxConnections);
             poolConfig.setBlockWhenExhausted(true);
-            summoner = new JedisPooledSummoner(new JedisPooled(poolConfig, redisServer, redisPort, 0, redisPassword, useSSL), jedisPool);
+            summoner = new JedisPooledSummoner(new PooledConnectionProvider(new ConnectionFactory(new HostAndPort(redisServer, redisPort), DefaultJedisClientConfig.builder().timeoutMillis(5000).password(redisPassword).build()), poolConfig), jedisPool);
             redisBungeeMode = RedisBungeeMode.SINGLE;
         }
         plugin.logInfo("Successfully connected to Redis.");
