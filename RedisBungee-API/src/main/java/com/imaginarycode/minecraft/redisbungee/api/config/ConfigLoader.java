@@ -12,6 +12,7 @@ import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import redis.clients.jedis.*;
+import redis.clients.jedis.providers.ClusterConnectionProvider;
 import redis.clients.jedis.providers.PooledConnectionProvider;
 
 import java.io.File;
@@ -95,12 +96,7 @@ public interface ConfigLoader {
             if (hostAndPortSet.isEmpty()) {
                 throw new RuntimeException("No redis cluster servers specified");
             }
-            if (redisPassword != null) {
-                summoner = new JedisClusterSummoner(new JedisCluster(hostAndPortSet, 5000, 5000, 60, proxyId, redisPassword, poolConfig, useSSL));
-            } else {
-                plugin.logWarn("SSL option is ignored in Cluster mode if no PASSWORD is set");
-                summoner = new JedisClusterSummoner(new JedisCluster(hostAndPortSet, 5000, 5000, 60, poolConfig));
-            }
+            summoner = new JedisClusterSummoner(new ClusterConnectionProvider(hostAndPortSet, DefaultJedisClientConfig.builder().password(redisPassword).ssl(useSSL).socketTimeoutMillis(5000).timeoutMillis(10000).build(), poolConfig));
             redisBungeeMode = RedisBungeeMode.CLUSTER;
         } else {
             plugin.logInfo("RedisBungee MODE: SINGLE");
