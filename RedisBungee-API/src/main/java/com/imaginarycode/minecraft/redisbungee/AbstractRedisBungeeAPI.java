@@ -410,8 +410,8 @@ public abstract class AbstractRedisBungeeAPI {
     }
 
     /**
-     * This gives you instance of JedisCluster
-     * WARNING DO NOT USE {@link JedisCluster#close()} it will break the functionally
+     * This gives you an instance of JedisCluster that can't be closed
+     * see {@link com.imaginarycode.minecraft.redisbungee.api.summoners.NotClosableJedisCluster}
      *
      * @return {@link redis.clients.jedis.JedisCluster}
      * @throws IllegalStateException if the {@link #getMode()} is not equal to {@link RedisBungeeMode#CLUSTER}
@@ -426,8 +426,8 @@ public abstract class AbstractRedisBungeeAPI {
     }
 
     /**
-     * This gives you instance of JedisPooled
-     * WARNING: DO NOT USE {@link redis.clients.jedis.JedisPooled#close()} it will break the functionally
+     * This gives you an instance of JedisPooled that can't be closed
+     * see {@link com.imaginarycode.minecraft.redisbungee.api.summoners.NotClosableJedisPooled}
      *
      * @return {@link redis.clients.jedis.JedisPooled}
      * @throws IllegalStateException if the {@link #getMode()} is not equal to {@link RedisBungeeMode#SINGLE}
