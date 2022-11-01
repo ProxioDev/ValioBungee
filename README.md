@@ -47,11 +47,11 @@ SpigotMC resource page: [click](https://www.spigotmc.org/resources/redisbungee.8
 |     7.x.x     | &#x2714;  |
 
 
-## Implementing RedisBungee in your plugin: [![RedisBungee Build](https://github.com/proxiodev/RedisBungee/actions/workflows/maven.yml/badge.svg)](https://github.com/Limework/RedisBungee/actions/workflows/maven.yml) [![](https://jitpack.io/v/limework/redisbungee.svg)](https://jitpack.io/#limework/redisbungee)
+## Implementing RedisBungee in your plugin: [![RedisBungee Build](https://github.com/proxiodev/RedisBungee/actions/workflows/maven.yml/badge.svg)](https://github.com/Limework/RedisBungee/actions/workflows/maven.yml) [![](https://jitpack.io/v/ProxioDev/redisbungee.svg)](https://jitpack.io/#ProxioDev/redisbungee)
 
 RedisBungee is distributed as a [maven](https://maven.apache.org) project.
 
-By using jitpack [![](https://jitpack.io/v/limework/redisbungee.svg)](https://jitpack.io/#limework/redisbungee)
+By using jitpack [![](https://jitpack.io/v/ProxioDev/redisbungee.svg)](https://jitpack.io/#ProxioDev/redisbungee)
 
 ## Setup jitpack repository
 ```xml
@@ -66,7 +66,7 @@ By using jitpack [![](https://jitpack.io/v/limework/redisbungee.svg)](https://ji
 add this in your project dependencies 
 ```xml
 	<dependency>
-	    <groupId>com.github.limework.redisbungee</groupId>
+	    <groupId>com.github.proxiodev.redisbungee</groupId>
 	    <artifactId>RedisBungee-Bungee</artifactId>
 	    <version>VERSION</version>
 	    <scope>provided</scope>
@@ -86,7 +86,7 @@ depends: [ RedisBungee ]
 ## [Velocity](https://github.com/PaperMC/Velocity)
 ```xml
 	<dependency>
-	    <groupId>com.github.limework.redisbungee</groupId>
+	    <groupId>com.github.proxiodev.redisbungee</groupId>
 	    <artifactId>RedisBungee-Velocity</artifactId>
 	    <version>VERSION</version>
 	    <scope>provided</scope>
