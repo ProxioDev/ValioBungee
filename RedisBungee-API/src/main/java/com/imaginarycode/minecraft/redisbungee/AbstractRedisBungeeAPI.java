@@ -23,6 +23,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPooled;
 
 import java.net.InetAddress;
 import java.util.*;
@@ -433,9 +434,9 @@ public abstract class AbstractRedisBungeeAPI {
      * @throws IllegalStateException if the {@link #getMode()} is not equal to {@link RedisBungeeMode#SINGLE}
      * @since 0.8.0
      */
-    public JedisCluster requestJedisPooled() {
+    public JedisPooled requestJedisPooled() {
         if (getMode() == RedisBungeeMode.SINGLE) {
-            return ((JedisClusterSummoner) this.plugin.getSummoner()).obtainResource();
+            return ((JedisPooledSummoner) this.plugin.getSummoner()).obtainResource();
         } else {
             throw new IllegalStateException("Mode is not " + RedisBungeeMode.SINGLE);
         }
