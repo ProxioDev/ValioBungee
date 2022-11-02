@@ -10,31 +10,22 @@
 
 package com.imaginarycode.minecraft.redisbungee;
 
+import com.imaginarycode.minecraft.redisbungee.api.util.player.PlayerUtils;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ServerConnection;
 import redis.clients.jedis.UnifiedJedis;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
-import static com.imaginarycode.minecraft.redisbungee.api.util.payload.PayloadUtils.playerJoinPayload;
-
 public class VelocityPlayerUtils {
-    protected static void createPlayer(Player player, UnifiedJedis unifiedJedis, boolean fireEvent) {
-        Optional<ServerConnection> server = player.getCurrentServer();
-        server.ifPresent(serverConnection -> unifiedJedis.hset("player:" + player.getUniqueId().toString(), "server", serverConnection.getServerInfo().getName()));
-
-        Map<String, String> playerData = new HashMap<>(4);
-        playerData.put("online", "0");
-        playerData.put("ip", player.getRemoteAddress().getHostName());
-        playerData.put("proxy", AbstractRedisBungeeAPI.getAbstractRedisBungeeAPI().getProxyId());
-
-        unifiedJedis.sadd("proxy:" + AbstractRedisBungeeAPI.getAbstractRedisBungeeAPI().getProxyId() + ":usersOnline", player.getUniqueId().toString());
-        unifiedJedis.hmset("player:" + player.getUniqueId().toString(), playerData);
-
-        if (fireEvent) {
-            playerJoinPayload(player.getUniqueId(), unifiedJedis, player.getRemoteAddress().getAddress());
+    protected static void createVelocityPlayer(Player player, UnifiedJedis unifiedJedis, boolean fireEvent) {
+        Optional<ServerConnection> optionalServerConnection = player.getCurrentServer();
+        String serverName = null;
+        if (optionalServerConnection.isPresent()) {
+            serverName = optionalServerConnection.get().getServerInfo().getName();
         }
+        PlayerUtils.createPlayer(player.getUniqueId(), unifiedJedis, serverName, player.getRemoteAddress().getAddress(), fireEvent);
     }
+
+
 }

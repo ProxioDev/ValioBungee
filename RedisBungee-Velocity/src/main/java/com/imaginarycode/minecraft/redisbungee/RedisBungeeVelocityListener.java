@@ -97,7 +97,7 @@ public class RedisBungeeVelocityListener extends AbstractRedisBungeeListener<Log
             @Override
             public Void unifiedJedisTask(UnifiedJedis unifiedJedis) {
                 plugin.getUuidTranslator().persistInfo(event.getPlayer().getUsername(), event.getPlayer().getUniqueId(), unifiedJedis);
-                VelocityPlayerUtils.createPlayer(event.getPlayer(), unifiedJedis, true);
+                VelocityPlayerUtils.createVelocityPlayer(event.getPlayer(), unifiedJedis, true);
                 return null;
             }
         });

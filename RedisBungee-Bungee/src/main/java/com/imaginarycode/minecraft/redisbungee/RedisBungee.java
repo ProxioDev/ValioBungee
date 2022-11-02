@@ -243,7 +243,7 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
                 if (proxiedPlayer == null)
                     return; // We'll deal with it later.
 
-                BungeePlayerUtils.createPlayer(proxiedPlayer, unifiedJedis, false);
+                BungeePlayerUtils.createBungeePlayer(proxiedPlayer, unifiedJedis, false);
             }
         };
 

@@ -259,7 +259,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, Con
                 Player playerProxied = getProxy().getPlayer(UUID.fromString(player)).orElse(null);
                 if (playerProxied == null)
                     return; // We'll deal with it later.
-                VelocityPlayerUtils.createPlayer(playerProxied, unifiedJedis, false);
+                VelocityPlayerUtils.createVelocityPlayer(playerProxied, unifiedJedis, false);
             }
         };
         integrityCheck = getProxy().getScheduler().buildTask(this, integrityCheckTask::execute).repeat(30, TimeUnit.SECONDS).schedule();

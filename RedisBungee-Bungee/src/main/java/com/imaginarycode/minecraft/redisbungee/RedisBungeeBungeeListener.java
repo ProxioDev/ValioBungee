@@ -94,7 +94,7 @@ public class RedisBungeeBungeeListener extends AbstractRedisBungeeListener<Login
             @Override
             public Void unifiedJedisTask(UnifiedJedis unifiedJedis) {
                 plugin.getUuidTranslator().persistInfo(event.getPlayer().getName(), event.getPlayer().getUniqueId(), unifiedJedis);
-                BungeePlayerUtils.createPlayer(event.getPlayer(), unifiedJedis, true);
+                BungeePlayerUtils.createBungeePlayer(event.getPlayer(), unifiedJedis, true);
                 return null;
             }
         });
