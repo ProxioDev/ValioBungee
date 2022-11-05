@@ -32,15 +32,15 @@ redis-password: ""
 # inefficient plugins or a lot of players.
 max-redis-connections: 10
 
-# since redis can support ssl by version 6 you can use ssl in redis bungee too!
+# since redis can support ssl by version 6 you can use ssl / tls in redis bungee too!
 # but there is more configuration needed to work see https://github.com/ProxioDev/RedisBungee/issues/18
-# in cluster mode using ssl without password is ignored due fact is not supported in Jedis lib
+# Keep note that SSL/TLS connections will decrease redis performance so use it when needed.
 useSSL: false
 
 # An identifier for this BungeeCord / Velocity instance. Will randomly generate if leaving it blank.
 proxy-id: "test-1"
 
-# In version 0.8.0 Internally now uses JedisPooled instead of Jedis, JedisPool.
+# since version 0.8.0 Internally now uses JedisPooled instead of Jedis, JedisPool.
 # which will break compatibility with old plugins that uses RedisBungee JedisPool
 # so to mitigate this issue, we will instruct RedisBungee to init an JedisPool for compatibility reasons.
 # enabled by default
