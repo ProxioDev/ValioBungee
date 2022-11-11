@@ -23,10 +23,6 @@ import java.util.Map;
 
 public abstract class AbstractRedisBungeeListener<LE, PLE, PD, SC, PP, PM, PS> {
 
-    protected static final String ALREADY_LOGGED_IN = "§cYou are already logged on to this server. \n\nIt may help to try logging in again in a few minutes.\nIf this does not resolve your issue, please contact staff.";
-
-    protected static final String ONLINE_MODE_RECONNECT = "§cWhoops! You need to reconnect\n\nWe found someone online using your username. They were kicked and you may reconnect.\nIf this does not work, please contact staff.";
-
     protected final RedisBungeePlugin<?> plugin;
     protected final List<InetAddress> exemptAddresses;
     protected final Gson gson = new Gson();

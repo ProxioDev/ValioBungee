@@ -17,6 +17,7 @@ import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.imaginarycode.minecraft.redisbungee.api.AbstractRedisBungeeListener;
+import com.imaginarycode.minecraft.redisbungee.api.config.RedisBungeeConfiguration;
 import com.imaginarycode.minecraft.redisbungee.api.util.player.PlayerUtils;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 import com.imaginarycode.minecraft.redisbungee.api.tasks.RedisTask;
@@ -36,6 +37,7 @@ import com.velocitypowered.api.event.proxy.ProxyPingEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.ServerPing;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import redis.clients.jedis.UnifiedJedis;
 
@@ -54,7 +56,7 @@ public class RedisBungeeVelocityListener extends AbstractRedisBungeeListener<Log
         super(plugin, exemptAddresses);
     }
 
-    @Subscribe (order = PostOrder.LAST)
+    @Subscribe(order = PostOrder.LAST)
     public void onLogin(LoginEvent event, Continuation continuation) {
         plugin.executeAsync(new RedisTask<Void>(plugin) {
             @Override
@@ -63,23 +65,9 @@ public class RedisBungeeVelocityListener extends AbstractRedisBungeeListener<Log
                     if (!event.getResult().isAllowed()) {
                         return null;
                     }
-
-                    // We make sure they aren't trying to use an existing player's name.
-                    // This is problematic for online-mode servers as they always disconnect old clients.
-                    if (plugin.isOnlineMode()) {
-                        Player player = (Player) plugin.getPlayer(event.getPlayer().getUsername());
-
-                        if (player != null) {
-                            event.setResult(ResultedEvent.ComponentResult.denied(serializer.deserialize(ONLINE_MODE_RECONNECT)));
-                            return null;
-                        }
-                    }
-
-                    for (String s : plugin.getProxiesIds()) {
-                        if (unifiedJedis.sismember("proxy:" + s + ":usersOnline", event.getPlayer().getUniqueId().toString())) {
-                            event.setResult(ResultedEvent.ComponentResult.denied(serializer.deserialize(ALREADY_LOGGED_IN)));
-                            return null;
-                        }
+                    if (api.isPlayerOnline(event.getPlayer().getUniqueId())) {
+                        PlayerUtils.setKickedOtherLocation(event.getPlayer().getUniqueId().toString(), unifiedJedis);
+                        api.kickPlayer(event.getPlayer().getUniqueId(), plugin.getConfiguration().getMessages().get(RedisBungeeConfiguration.MessageType.LOGGED_IN_OTHER_LOCATION));
                     }
                     return null;
                 } finally {
@@ -146,7 +134,7 @@ public class RedisBungeeVelocityListener extends AbstractRedisBungeeListener<Log
     @Override
     @Subscribe
     public void onPluginMessage(PluginMessageEvent event) {
-        if(!(event.getSource() instanceof ServerConnection) || !RedisBungeeVelocityPlugin.IDENTIFIERS.contains(event.getIdentifier())) {
+        if (!(event.getSource() instanceof ServerConnection) || !RedisBungeeVelocityPlugin.IDENTIFIERS.contains(event.getIdentifier())) {
             return;
         }
 
@@ -174,8 +162,8 @@ public class RedisBungeeVelocityListener extends AbstractRedisBungeeListener<Log
                         }
                     }
                     Set<String> players = original.stream()
-                        .map(uuid -> plugin.getUuidTranslator().getNameFromUuid(uuid, false))
-                        .collect(Collectors.toSet());
+                            .map(uuid -> plugin.getUuidTranslator().getNameFromUuid(uuid, false))
+                            .collect(Collectors.toSet());
                     out.writeUTF(Joiner.on(',').join(players));
                     break;
                 case "PlayerCount":
@@ -246,7 +234,7 @@ public class RedisBungeeVelocityListener extends AbstractRedisBungeeListener<Log
 
             ((ServerConnection) event.getSource()).sendPluginMessage(event.getIdentifier(), out.toByteArray());
         });
-        
+
     }
 
 
@@ -258,7 +246,7 @@ public class RedisBungeeVelocityListener extends AbstractRedisBungeeListener<Log
             if (message.startsWith("/"))
                 message = message.substring(1);
             plugin.logInfo("Invoking command via PubSub: /" + message);
-            ((RedisBungeeVelocityPlugin)plugin).getProxy().getCommandManager().executeAsync(RedisBungeeCommandSource.getSingleton(), message);
+            ((RedisBungeeVelocityPlugin) plugin).getProxy().getCommandManager().executeAsync(RedisBungeeCommandSource.getSingleton(), message);
 
         }
     }

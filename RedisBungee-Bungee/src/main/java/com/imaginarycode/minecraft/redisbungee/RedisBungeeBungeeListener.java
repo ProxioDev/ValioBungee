@@ -17,6 +17,7 @@ import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.imaginarycode.minecraft.redisbungee.api.AbstractRedisBungeeListener;
+import com.imaginarycode.minecraft.redisbungee.api.config.RedisBungeeConfiguration;
 import com.imaginarycode.minecraft.redisbungee.api.util.player.PlayerUtils;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 import com.imaginarycode.minecraft.redisbungee.api.tasks.RedisTask;
@@ -47,7 +48,7 @@ public class RedisBungeeBungeeListener extends AbstractRedisBungeeListener<Login
     }
 
     @Override
-    @EventHandler (priority = HIGHEST)
+    @EventHandler(priority = HIGHEST)
     public void onLogin(LoginEvent event) {
         event.registerIntent((Plugin) plugin);
         plugin.executeAsync(new RedisTask<Void>(plugin) {
@@ -57,27 +58,9 @@ public class RedisBungeeBungeeListener extends AbstractRedisBungeeListener<Login
                     if (event.isCancelled()) {
                         return null;
                     }
-
-                    // We make sure they aren't trying to use an existing player's name.
-                    // This is problematic for online-mode servers as they always disconnect old clients.
-                    if (plugin.isOnlineMode()) {
-                        ProxiedPlayer player = (ProxiedPlayer) plugin.getPlayer(event.getConnection().getName());
-
-                        if (player != null) {
-                            event.setCancelled(true);
-                            // TODO: Make it accept a BaseComponent[] like everything else.
-                            event.setCancelReason(ONLINE_MODE_RECONNECT);
-                            return null;
-                        }
-                    }
-
-                    for (String s : plugin.getProxiesIds()) {
-                        if (unifiedJedis.sismember("proxy:" + s + ":usersOnline", event.getConnection().getUniqueId().toString())) {
-                            event.setCancelled(true);
-                            // TODO: Make it accept a BaseComponent[] like everything else.
-                            event.setCancelReason(ALREADY_LOGGED_IN);
-                            return null;
-                        }
+                    if (api.isPlayerOnline(event.getConnection().getUniqueId())) {
+                        PlayerUtils.setKickedOtherLocation(event.getConnection().getUniqueId().toString(), unifiedJedis);
+                        api.kickPlayer(event.getConnection().getUniqueId(), plugin.getConfiguration().getMessages().get(RedisBungeeConfiguration.MessageType.LOGGED_IN_OTHER_LOCATION));
                     }
                     return null;
                 } finally {

@@ -14,30 +14,46 @@ import static com.imaginarycode.minecraft.redisbungee.api.util.payload.PayloadUt
 public class PlayerUtils {
 
     public static void cleanUpPlayer(String uuid, UnifiedJedis rsc, boolean firePayload) {
+        final long timestamp = System.currentTimeMillis();
+        final boolean isKickedFromOtherLocation = isKickedOtherLocation(uuid, rsc);
         rsc.srem("proxy:" + AbstractRedisBungeeAPI.getAbstractRedisBungeeAPI().getProxyId() + ":usersOnline", uuid);
-        rsc.hdel("player:" + uuid, "server", "ip", "proxy");
-        long timestamp = System.currentTimeMillis();
-        rsc.hset("player:" + uuid, "online", String.valueOf(timestamp));
-        if (firePayload) {
+        if (!isKickedFromOtherLocation) {
+            rsc.hdel("player:" + uuid, "server", "ip", "proxy");
+            rsc.hset("player:" + uuid, "online", String.valueOf(timestamp));
+        }
+        if (firePayload && !isKickedFromOtherLocation) {
             playerQuitPayload(uuid, rsc, timestamp);
         }
     }
+
+    public static void setKickedOtherLocation(String uuid, UnifiedJedis unifiedJedis) {
+        // set anything for sake of exists check. then expire it after 2 seconds in case proxy fails to unset it.
+        unifiedJedis.set("kicked-other-location::" + uuid, "0");
+        unifiedJedis.expire("kicked-other-location::" + uuid, 2);
+    }
+
+    public static boolean isKickedOtherLocation(String uuid, UnifiedJedis unifiedJedis) {
+        return unifiedJedis.exists("kicked-other-location::" + uuid);
+    }
+
 
     public static void createPlayer(UUID uuid, UnifiedJedis unifiedJedis, String currentServer, InetAddress hostname, boolean fireEvent) {
         if (currentServer != null) {
             unifiedJedis.hset("player:" + uuid, "server", currentServer);
         }
+        final boolean isKickedFromOtherLocation = isKickedOtherLocation(uuid.toString(), unifiedJedis);
         Map<String, String> playerData = new HashMap<>(4);
         playerData.put("online", "0");
         playerData.put("ip", hostname.getHostName());
         playerData.put("proxy", AbstractRedisBungeeAPI.getAbstractRedisBungeeAPI().getProxyId());
 
         unifiedJedis.sadd("proxy:" + AbstractRedisBungeeAPI.getAbstractRedisBungeeAPI().getProxyId() + ":usersOnline", uuid.toString());
-        unifiedJedis.hmset("player:" + uuid, playerData);
+        unifiedJedis.hset("player:" + uuid, playerData);
 
-        if (fireEvent) {
+        if (fireEvent && !isKickedFromOtherLocation) {
             playerJoinPayload(uuid, unifiedJedis, hostname);
         }
+
     }
 
 
