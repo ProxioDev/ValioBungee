@@ -27,7 +27,7 @@ public class PlayerUtils {
     }
 
     public static void setKickedOtherLocation(String uuid, UnifiedJedis unifiedJedis) {
-        // set anything for sake of exists check. then expire it after 2 seconds in case proxy fails to unset it.
+        // set anything for sake of exists check. then expire it after 2 seconds. should be great?
         unifiedJedis.set("kicked-other-location::" + uuid, "0");
         unifiedJedis.expire("kicked-other-location::" + uuid, 2);
     }
