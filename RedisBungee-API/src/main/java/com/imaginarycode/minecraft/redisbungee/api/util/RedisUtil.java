@@ -4,7 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 
 @VisibleForTesting
 public class RedisUtil {
-    public static int PROXY_TIMEOUT = 30;
+    public final static int PROXY_TIMEOUT = 30;
     public static boolean isRedisVersionRight(String redisVersion) {
         String[] args = redisVersion.split("\\.");
         if (args.length < 2) {
