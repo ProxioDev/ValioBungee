@@ -52,7 +52,7 @@ public interface ConfigLoader {
         final boolean useSSL = node.getNode("useSSL").getBoolean(false);
         final boolean overrideBungeeCommands = node.getNode("override-bungee-commands").getBoolean(false);
         final boolean registerLegacyCommands = node.getNode("register-legacy-commands").getBoolean(false);
-        String redisPassword = node.getNode("redis-password").getString(null);
+        String redisPassword = node.getNode("redis-password").getString("");
         String proxyId = node.getNode("proxy-id").getString("test-1");
         final int maxConnections = node.getNode("max-redis-connections").getInt(10);
         List<String> exemptAddresses;
@@ -63,15 +63,12 @@ public interface ConfigLoader {
         }
 
         // check redis password
-        if (redisPassword != null && (redisPassword.isEmpty() || redisPassword.equals("none"))) {
+        if ((redisPassword.isEmpty() || redisPassword.equals("none"))) {
             redisPassword = null;
-            plugin.logWarn("INSECURE setup was detected Please set password for your redis instance.");
+            plugin.logWarn("password is empty");
         }
-        if (redisPassword == null) {
-            plugin.logWarn("INSECURE setup was detected Please set password for your redis instance.");
-        }
-        if (!useSSL) {
-            plugin.logWarn("INSECURE setup was detected Please setup ssl for your redis instance.");
+        if (useSSL) {
+            plugin.logInfo("Using ssl");
         }
         // Configuration sanity checks.
         if (proxyId == null || proxyId.isEmpty()) {
@@ -178,8 +175,6 @@ public interface ConfigLoader {
         Path oldConfigPath = dataFolder.resolve("config.yml");
         Files.move(oldConfigPath, oldConfigFolder.resolve(UUID.randomUUID() + "_config.yml"));
         createConfigFile(dataFolder);
-
     }
-
 
 }
