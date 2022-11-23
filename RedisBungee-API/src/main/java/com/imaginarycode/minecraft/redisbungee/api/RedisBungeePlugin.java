@@ -67,7 +67,7 @@ public interface RedisBungeePlugin<P> extends EventsPlatform {
                     String v = stringStringEntry.getValue();
 
                     long heartbeatTime = Long.parseLong(v);
-                    if (heartbeatTime + 30 >= redisTime) {
+                    if (heartbeatTime + RedisUtil.PROXY_TIMEOUT >= redisTime) {
                         total = total + unifiedJedis.scard("proxy:" + k + ":usersOnline");
                     }
                 }
