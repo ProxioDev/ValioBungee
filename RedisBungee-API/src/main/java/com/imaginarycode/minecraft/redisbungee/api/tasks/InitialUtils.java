@@ -40,7 +40,7 @@ public class InitialUtils {
                         }
                         long uuidCacheSize = unifiedJedis.hlen("uuid-cache");
                         if (uuidCacheSize > 750000) {
-                            plugin.logInfo("Looks like you have a really big UUID cache! Run https://www.spigotmc.org/resources/redisbungeecleaner.8505/ as soon as possible.");
+                            plugin.logInfo("Looks like you have a really big UUID cache! Run https://github.com/ProxioDev/Brains");
                         }
                         break;
                     }
