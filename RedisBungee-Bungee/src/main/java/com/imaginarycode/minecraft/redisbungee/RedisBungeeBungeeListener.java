@@ -58,7 +58,15 @@ public class RedisBungeeBungeeListener extends AbstractRedisBungeeListener<Login
                     if (event.isCancelled()) {
                         return null;
                     }
-                    if (api.isPlayerOnline(event.getConnection().getUniqueId())) {
+                    if (plugin.getConfiguration().restoreOldKickBehavior()) {
+                        for (String s : plugin.getProxiesIds()) {
+                            if (unifiedJedis.sismember("proxy:" + s + ":usersOnline", event.getConnection().getUniqueId().toString())) {
+                                event.setCancelled(true);
+                                event.setCancelReason(plugin.getConfiguration().getMessages().get(RedisBungeeConfiguration.MessageType.ALREADY_LOGGED_IN));
+                                return null;
+                            }
+                        }
+                    } else if (api.isPlayerOnline(event.getConnection().getUniqueId())) {
                         PlayerUtils.setKickedOtherLocation(event.getConnection().getUniqueId().toString(), unifiedJedis);
                         api.kickPlayer(event.getConnection().getUniqueId(), plugin.getConfiguration().getMessages().get(RedisBungeeConfiguration.MessageType.LOGGED_IN_OTHER_LOCATION));
                     }

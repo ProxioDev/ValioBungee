@@ -22,19 +22,20 @@ import java.util.List;
 public class RedisBungeeConfiguration {
 
     public enum MessageType {
-        LOGGED_IN_OTHER_LOCATION
+        LOGGED_IN_OTHER_LOCATION,
+        ALREADY_LOGGED_IN
     }
 
     private final ImmutableMap<MessageType, String> messages;
     public static final int CONFIG_VERSION = 1;
     private final String proxyId;
     private final List<InetAddress> exemptAddresses;
-
     private final boolean registerLegacyCommands;
-
     private final boolean overrideBungeeCommands;
 
-    public RedisBungeeConfiguration(String proxyId, List<String> exemptAddresses, boolean registerLegacyCommands, boolean overrideBungeeCommands, ImmutableMap<MessageType, String> messages) {
+    private final boolean restoreOldKickBehavior;
+
+    public RedisBungeeConfiguration(String proxyId, List<String> exemptAddresses, boolean registerLegacyCommands, boolean overrideBungeeCommands, ImmutableMap<MessageType, String> messages, boolean restoreOldKickBehavior) {
         this.proxyId = proxyId;
         this.messages = messages;
         ImmutableList.Builder<InetAddress> addressBuilder = ImmutableList.builder();
@@ -44,8 +45,8 @@ public class RedisBungeeConfiguration {
         this.exemptAddresses = addressBuilder.build();
         this.registerLegacyCommands = registerLegacyCommands;
         this.overrideBungeeCommands = overrideBungeeCommands;
+        this.restoreOldKickBehavior = restoreOldKickBehavior;
     }
-
     public String getProxyId() {
         return proxyId;
     }
@@ -64,5 +65,9 @@ public class RedisBungeeConfiguration {
 
     public ImmutableMap<MessageType, String> getMessages() {
         return messages;
+    }
+
+    public boolean restoreOldKickBehavior() {
+        return restoreOldKickBehavior;
     }
 }

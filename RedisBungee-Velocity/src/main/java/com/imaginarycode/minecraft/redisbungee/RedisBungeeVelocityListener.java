@@ -65,7 +65,16 @@ public class RedisBungeeVelocityListener extends AbstractRedisBungeeListener<Log
                     if (!event.getResult().isAllowed()) {
                         return null;
                     }
-                    if (api.isPlayerOnline(event.getPlayer().getUniqueId())) {
+                    if (plugin.getConfiguration().restoreOldKickBehavior()) {
+
+                        for (String s : plugin.getProxiesIds()) {
+                            if (unifiedJedis.sismember("proxy:" + s + ":usersOnline", event.getPlayer().getUniqueId().toString())) {
+                                event.setResult(ResultedEvent.ComponentResult.denied(serializer.deserialize(plugin.getConfiguration().getMessages().get(RedisBungeeConfiguration.MessageType.ALREADY_LOGGED_IN))));
+                                return null;
+                            }
+                        }
+
+                    } else if (api.isPlayerOnline(event.getPlayer().getUniqueId())) {
                         PlayerUtils.setKickedOtherLocation(event.getPlayer().getUniqueId().toString(), unifiedJedis);
                         api.kickPlayer(event.getPlayer().getUniqueId(), plugin.getConfiguration().getMessages().get(RedisBungeeConfiguration.MessageType.LOGGED_IN_OTHER_LOCATION));
                     }

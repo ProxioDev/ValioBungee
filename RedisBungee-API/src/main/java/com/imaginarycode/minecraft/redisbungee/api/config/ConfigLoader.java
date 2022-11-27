@@ -52,6 +52,7 @@ public interface ConfigLoader {
         final boolean useSSL = node.getNode("useSSL").getBoolean(false);
         final boolean overrideBungeeCommands = node.getNode("override-bungee-commands").getBoolean(false);
         final boolean registerLegacyCommands = node.getNode("register-legacy-commands").getBoolean(false);
+        final boolean restoreOldKickBehavior = node.getNode("disable-kick-when-online").getBoolean(false);
         String redisPassword = node.getNode("redis-password").getString("");
         String proxyId = node.getNode("proxy-id").getString("test-1");
         final int maxConnections = node.getNode("max-redis-connections").getInt(10);
@@ -81,7 +82,7 @@ public interface ConfigLoader {
         } else {
             plugin.logInfo("Loaded proxy id " + proxyId);
         }
-        RedisBungeeConfiguration configuration = new RedisBungeeConfiguration(proxyId, exemptAddresses, registerLegacyCommands, overrideBungeeCommands, getMessagesFromPath(createMessagesFile(dataFolder)));
+        RedisBungeeConfiguration configuration = new RedisBungeeConfiguration(proxyId, exemptAddresses, registerLegacyCommands, overrideBungeeCommands, getMessagesFromPath(createMessagesFile(dataFolder)), restoreOldKickBehavior);
         Summoner<?> summoner;
         RedisBungeeMode redisBungeeMode;
         if (node.getNode("cluster-mode-enabled").getBoolean(false)) {
@@ -134,6 +135,7 @@ public interface ConfigLoader {
         ConfigurationNode node = yamlConfigurationFileLoader.load();
         HashMap<RedisBungeeConfiguration.MessageType, String> messages = new HashMap<>();
         messages.put(RedisBungeeConfiguration.MessageType.LOGGED_IN_OTHER_LOCATION, node.getNode("logged-in-other-location").getString("§cLogged in from another location."));
+        messages.put(RedisBungeeConfiguration.MessageType.ALREADY_LOGGED_IN, node.getNode("already-logged-in").getString("§cYou are already logged in!"));
         return ImmutableMap.copyOf(messages);
     }
 
