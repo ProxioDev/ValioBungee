@@ -70,7 +70,7 @@ public final class UUIDTranslator {
         if (!plugin.isOnlineMode()) {
             return UUID.nameUUIDFromBytes(("OfflinePlayer:" + player).getBytes(Charsets.UTF_8));
         }
-        RedisTask<UUID> redisTask = new RedisTask<UUID>(plugin.getAbstractRedisBungeeApi()) {
+        RedisTask<UUID> redisTask = new RedisTask<UUID>(plugin) {
             @Override
             public UUID unifiedJedisTask(UnifiedJedis unifiedJedis) {
                 String stored = unifiedJedis.hget("uuid-cache", player.toLowerCase());
@@ -135,7 +135,7 @@ public final class UUIDTranslator {
                 uuidToNameMap.remove(player);
         }
 
-        RedisTask<String> redisTask = new RedisTask<String>(plugin.getAbstractRedisBungeeApi()) {
+        RedisTask<String> redisTask = new RedisTask<String>(plugin) {
             @Override
             public String unifiedJedisTask(UnifiedJedis unifiedJedis) {
                 String stored = unifiedJedis.hget("uuid-cache", player.toString());
