@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2013-present RedisBungee contributors
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ *
+ *  http://www.eclipse.org/legal/epl-v10.html
+ */
+
 package com.imaginarycode.minecraft.redisbungee.api.util.uuid;
 
 import com.google.common.base.Charsets;
@@ -160,10 +170,14 @@ public final class UUIDTranslator {
                     return null;
 
                 // That didn't work. Let's ask Mojang. This call may fail, because Mojang is insane.
+                //
+                // UPDATE: Mojang has removed the API somewhere in september/2022 due privacy issues
+                // this is expected to fail now, so we will keep logging it until we figure out something or remove name fetching completely
+                // Name fetching class was deprecated as result
                 String name;
                 try {
-                    List<String> nameHist = NameFetcher.nameHistoryFromUuid(player);
-                    name = Iterables.getLast(nameHist, null);
+                    plugin.logFatal("Due Mojang removing the naming API, we were unable to fetch player names.");
+                    name = Iterables.getLast(NameFetcher.nameHistoryFromUuid(player));
                 } catch (Exception e) {
                     plugin.logFatal("Unable to fetch name from Mojang for " + player);
                     return null;
