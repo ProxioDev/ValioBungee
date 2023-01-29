@@ -165,6 +165,7 @@ public class RedisBungeeVelocityListener extends AbstractRedisBungeeListener<Log
                         out.writeUTF("ALL");
                         original = plugin.getPlayers();
                     } else {
+                        out.writeUTF(type);
                         try {
                             original = plugin.getAbstractRedisBungeeApi().getPlayersOnServer(type);
                         } catch (IllegalArgumentException ignored) {
