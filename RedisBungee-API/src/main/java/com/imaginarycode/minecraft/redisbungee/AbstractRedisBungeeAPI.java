@@ -20,6 +20,7 @@ import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisClusterSummone
 import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisPooledSummoner;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.Summoner;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.JedisPool;
@@ -81,8 +82,9 @@ public abstract class AbstractRedisBungeeAPI {
      * as well, and will return local information on them.
      *
      * @param player a player uuid
-     * @return a String name for the server the player is on.
+     * @return a String name for the server the player is on. Can be Null if plugins is doing weird stuff to the proxy internals
      */
+    @Nullable
     public final String getServerNameFor(@NonNull UUID player) {
         return plugin.getDataManager().getServer(player);
     }

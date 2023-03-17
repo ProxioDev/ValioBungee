@@ -14,6 +14,7 @@ import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.UUID;
 
@@ -43,8 +44,11 @@ public class RedisBungeeAPI extends AbstractRedisBungeeAPI {
      * @return {@link ServerInfo} Can be null if proxy can't find it.
      * @see #getServerNameFor(UUID)
      */
+    @Nullable
     public final ServerInfo getServerFor(@NonNull UUID player) {
-        return ((Plugin) this.plugin).getProxy().getServerInfo(this.getServerNameFor(player));
+        String serverName = this.getServerNameFor(player);
+        if (serverName == null) return null;
+        return ((Plugin) this.plugin).getProxy().getServerInfo(serverName);
     }
 
     /**
