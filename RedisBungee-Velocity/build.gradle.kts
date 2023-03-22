@@ -24,6 +24,9 @@ java {
 }
 
 tasks {
+    withType<Javadoc> {
+
+    }
     runVelocity {
         velocityVersion("3.2.0-SNAPSHOT")
     }

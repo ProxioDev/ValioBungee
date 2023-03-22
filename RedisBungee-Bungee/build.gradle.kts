@@ -27,6 +27,9 @@ java {
 }
 
 tasks {
+    withType<Javadoc> {
+
+    }
     runWaterfall {
         waterfallVersion("1.19")
     }
