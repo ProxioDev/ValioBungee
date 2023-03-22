@@ -6,6 +6,11 @@ plugins {
     id("net.kyori.blossom") version "1.2.0"
 }
 
+repositories {
+    mavenCentral()
+    maven { url = uri("https://repo.papermc.io/repository/maven-public/") }
+}
+
 dependencies {
     api(project(":RedisBungee-API")) {
         // Since velocity already includes guava / configurate exlude them
@@ -30,7 +35,12 @@ blossom {
 
 tasks {
     withType<Javadoc> {
-
+        val options = options as StandardJavadocDocletOptions
+        options.use()
+        options.isDocFilesSubDirs = true
+        options.links(
+            "https://jd.papermc.io/velocity/3.0.0/", // bungeecord api
+        )
     }
     runVelocity {
         velocityVersion("3.2.0-SNAPSHOT")
@@ -56,8 +66,10 @@ tasks {
 
 }
 
-
-repositories {
-    mavenCentral()
-    maven { url = uri("https://repo.papermc.io/repository/maven-public/") }
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+        }
+    }
 }

@@ -10,13 +10,13 @@ repositories {
     mavenCentral()
     maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots") } // bungeecord
 }
-
+val bungeecordApiVersion = "1.19-R0.1-SNAPSHOT"
 dependencies {
-    implementation(project(":RedisBungee-API")) {
+    api(project(":RedisBungee-API")) {
         exclude("com.google.guava", "guava")
         exclude("com.google.code.gson", "gson")
     }
-    compileOnly("net.md-5:bungeecord-api:1.19-R0.1-SNAPSHOT")
+    compileOnly("net.md-5:bungeecord-api:$bungeecordApiVersion")
 }
 
 description = "RedisBungee Bungeecord implementation"
@@ -26,9 +26,15 @@ java {
     withSourcesJar()
 }
 
+
 tasks {
     withType<Javadoc> {
-
+        val options = options as StandardJavadocDocletOptions
+        options.use()
+        options.isDocFilesSubDirs = true
+        options.links(
+            "https://ci.md-5.net/job/BungeeCord/ws/api/target/apidocs/", // bungeecord api
+        )
     }
     runWaterfall {
         waterfallVersion("1.19")
@@ -60,5 +66,14 @@ tasks {
         // configurate shade
         relocate("ninja.leaping.configurate", "com.imaginarycode.minecraft.redisbungee.internal.configurate")
         relocate("org.yaml", "com.imaginarycode.minecraft.redisbungee.internal.yml")
+    }
+
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+        }
     }
 }
