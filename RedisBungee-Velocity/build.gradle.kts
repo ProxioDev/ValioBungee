@@ -3,6 +3,7 @@ plugins {
     `maven-publish`
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("xyz.jpenilla.run-velocity") version "2.0.0"
+    id("net.kyori.blossom") version "1.2.0"
 }
 
 dependencies {
@@ -21,6 +22,10 @@ description = "RedisBungee Velocity implementation"
 java {
     withJavadocJar()
     withSourcesJar()
+}
+
+blossom {
+    replaceToken("@version@", "$version")
 }
 
 tasks {
