@@ -22,7 +22,7 @@ jobs:
         java-version: '11'
         distribution: 'adopt'
     - name: Build with gradle
-      run: ./gradlew shadowJar -Dbranch=${{ vars.GITHUB_REF_NAME }}
+      run: ./gradlew shadowJar
     - name: Upload Bungee
       uses: actions/upload-artifact@v2.2.3
       with:
