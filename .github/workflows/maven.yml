@@ -22,7 +22,7 @@ jobs:
         java-version: '11'
         distribution: 'adopt'
     - name: Build with gradle
-      run: ./gradlew build
+      run: ./gradlew build -Dbranch=${{ github.ref }}
     - name: shadowJar with gradle
       run: ./gradlew shadowJar
     - name: Upload Bungee

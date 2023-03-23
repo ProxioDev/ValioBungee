@@ -32,20 +32,31 @@ description = "RedisBungee interafaces"
 blossom {
     replaceToken("@version@", "$version")
     // GIT
-    val branchStdout = ByteArrayOutputStream()
-    rootProject.exec {
-        standardOutput = branchStdout
-        commandLine("git", "branch", "--show-current")
+    var branch: String = ""
+    var commit: String = ""
+    val branchProp = System.getProperty("branch")
+    if (branchProp != null) {
+        branch = branchProp;
+    } else {
+        val branchStdout = ByteArrayOutputStream()
+        rootProject.exec {
+            standardOutput = branchStdout
+            commandLine("git", "branch", "--show-current")
+        }
+        branch = branchStdout.toString().replace("\n", "")
+        branchStdout.close()
     }
     val commitStdout = ByteArrayOutputStream()
     rootProject.exec {
         standardOutput = commitStdout
         commandLine("git", "rev-parse", "HEAD")
     }
-    replaceToken("@git_branch@", "$branchStdout".replace("\n", ""))
-    replaceToken("@git_commit@", "$commitStdout".replace("\n", ""))
-    branchStdout.close()
+    commit = "$commitStdout".replace("\n", "");
     commitStdout.close()
+
+    replaceToken("@git_branch@", branch)
+    replaceToken("@git_commit@", commit)
+
 }
 
 java {
