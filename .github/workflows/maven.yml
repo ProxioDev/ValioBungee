@@ -21,22 +21,22 @@ jobs:
       with:
         java-version: '11'
         distribution: 'adopt'
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
+    - name: Build with gradle
+      run: ./gradlew shadowJar
     - name: Upload Bungee
       uses: actions/upload-artifact@v2.2.3
       with:
      # Artifact name
        name: RedisBungee-Bungee
      # Destination path
-       path: RedisBungee-Bungee/target/*
+       path: RedisBungee-Bungee/build/libs/*
     - name: Upload Velocity
       uses: actions/upload-artifact@v2.2.3
       with:
         name: RedisBungee-Velocity
-        path: RedisBungee-Velocity/target/*
+        path: RedisBungee-Velocity/build/libs/*
     - name: Upload API
       uses: actions/upload-artifact@v2.2.3
       with:
         name: RedisBungee-API
-        path: RedisBungee-API/target/*
+        path: RedisBungee-API/build/libs/*

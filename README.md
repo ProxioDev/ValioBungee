@@ -49,7 +49,7 @@ SpigotMC resource page: [click](https://www.spigotmc.org/resources/redisbungee.8
 
 ## Implementing RedisBungee in your plugin: [![RedisBungee Build](https://github.com/proxiodev/RedisBungee/actions/workflows/maven.yml/badge.svg)](https://github.com/Limework/RedisBungee/actions/workflows/maven.yml) [![](https://jitpack.io/v/ProxioDev/redisbungee.svg)](https://jitpack.io/#ProxioDev/redisbungee)
 
-RedisBungee is distributed as a [maven](https://maven.apache.org) project.
+RedisBungee is distributed as a [Gradle](https://gradle.org/) project.
 
 By using jitpack [![](https://jitpack.io/v/ProxioDev/redisbungee.svg)](https://jitpack.io/#ProxioDev/redisbungee)
 
@@ -112,7 +112,7 @@ first, install it to your maven local repo
 ```bash
 git clone https://github.com/ProxioDev/RedisBungee.git
 cd RedisBungee
-mvn clean install
+./gradlew shadowJar
 ```
 then use any of these in your project.
 ```xml
