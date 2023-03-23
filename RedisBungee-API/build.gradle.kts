@@ -1,7 +1,10 @@
+import java.io.ByteArrayOutputStream
+
 plugins {
     `java-library`
     `maven-publish`
     id("net.kyori.blossom") version "1.2.0"
+
 }
 
 repositories {
@@ -28,8 +31,21 @@ description = "RedisBungee interafaces"
 
 blossom {
     replaceToken("@version@", "$version")
-    // replaceToken("@git_branch@", "")
-    // replaceToken("@git_commit@", "")
+    // GIT
+    val branchStdout = ByteArrayOutputStream()
+    rootProject.exec {
+        standardOutput = branchStdout
+        commandLine("git", "branch", "--show-current")
+    }
+    val commitStdout = ByteArrayOutputStream()
+    rootProject.exec {
+        standardOutput = commitStdout
+        commandLine("git", "rev-parse", "HEAD")
+    }
+    replaceToken("@git_branch@", "$branchStdout".replace("\n", ""))
+    replaceToken("@git_commit@", "$commitStdout".replace("\n", ""))
+    branchStdout.close()
+    commitStdout.close()
 }
 
 java {
