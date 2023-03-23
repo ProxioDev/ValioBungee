@@ -3,7 +3,7 @@ plugins {
     `maven-publish`
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("xyz.jpenilla.run-velocity") version "2.0.0"
-    id("net.kyori.blossom") version "1.2.0"
+
 }
 
 repositories {
@@ -29,17 +29,13 @@ java {
     withSourcesJar()
 }
 
-blossom {
-    replaceToken("@version@", "$version")
-}
-
 tasks {
     withType<Javadoc> {
         val options = options as StandardJavadocDocletOptions
         options.use()
         options.isDocFilesSubDirs = true
         options.links(
-            "https://jd.papermc.io/velocity/3.0.0/", // bungeecord api
+            "https://jd.papermc.io/velocity/3.0.0/", // velocity api
         )
     }
     runVelocity {

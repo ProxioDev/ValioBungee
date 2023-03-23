@@ -1,6 +1,7 @@
 plugins {
     `java-library`
     `maven-publish`
+    id("net.kyori.blossom") version "1.2.0"
 }
 
 repositories {
@@ -24,6 +25,12 @@ dependencies {
 }
 
 description = "RedisBungee interafaces"
+
+blossom {
+    replaceToken("@version@", "$version")
+    // replaceToken("@git_branch@", "")
+    // replaceToken("@git_commit@", "")
+}
 
 java {
     withJavadocJar()
