@@ -17,7 +17,7 @@ Cluster mode compatibility in version 0.8.0:
 If you are using static legacy method `RedisBungee#getPool()` it might fail in:
 * if Cluster mode is enabled, due fact its Uses different classes
 * if JedisPool compatibility mode is disabled in the config due fact project internally switched to JedisPooled than Jedis
-* 
+
 ## License
 
 This project is distributed under Eclipse Public License 1.0
