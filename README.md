@@ -133,7 +133,9 @@ then use any of these in your project.
 ```
 ## Javadocs
 
-For current version [0.8.0](https://proxiodev.github.io/RedisBungee-JavaDocs/0.8.0-SNAPSHOT/) 
+* API: https://ci.limework.net/RedisBungee/RedisBungee-API/build/docs/javadoc/
+* Velocity: https://ci.limework.net/RedisBungee/RedisBungee-Velocity/build/docs/javadoc/
+* Bungeecord: https://ci.limework.net/RedisBungee/RedisBungee-Bungee/build/docs/javadoc/
 
 ## Configuration
 
