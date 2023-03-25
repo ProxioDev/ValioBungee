@@ -59,6 +59,7 @@ tasks {
             "https://javadoc.io/doc/redis.clients/jedis/$jedisVersion/", // jedis
             "https://guava.dev/releases/$guavaVersion/api/docs/" // guava
         )
+
     }
 
     test {

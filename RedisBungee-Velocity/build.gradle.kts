@@ -31,12 +31,15 @@ java {
 
 tasks {
     withType<Javadoc> {
+        dependsOn(project(":RedisBungee-API").getTasksByName("javadoc", false))
         val options = options as StandardJavadocDocletOptions
         options.use()
         options.isDocFilesSubDirs = true
         options.links(
             "https://jd.papermc.io/velocity/3.0.0/", // velocity api
         )
+        val apiDocs = File(rootProject.projectDir, "RedisBungee-API/build/docs/javadoc")
+        options.linksOffline("https://ci.limework.net/RedisBungee/RedisBungee-API/build/docs/javadoc",  apiDocs.path)
     }
     runVelocity {
         velocityVersion("3.2.0-SNAPSHOT")

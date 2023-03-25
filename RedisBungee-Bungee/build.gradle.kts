@@ -29,12 +29,15 @@ java {
 
 tasks {
     withType<Javadoc> {
+        dependsOn(project(":RedisBungee-API").getTasksByName("javadoc", false))
         val options = options as StandardJavadocDocletOptions
         options.use()
         options.isDocFilesSubDirs = true
         options.links(
             "https://ci.md-5.net/job/BungeeCord/ws/api/target/apidocs/", // bungeecord api
         )
+        val apiDocs = File(rootProject.projectDir, "RedisBungee-API/build/docs/javadoc")
+        options.linksOffline("https://ci.limework.net/RedisBungee/RedisBungee-API/build/docs/javadoc",  apiDocs.path)
     }
     runWaterfall {
         waterfallVersion("1.19")
