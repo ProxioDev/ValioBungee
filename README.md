@@ -17,7 +17,7 @@ Cluster mode compatibility in version 0.8.0:
 If you are using static legacy method `RedisBungee#getPool()` it might fail in:
 * if Cluster mode is enabled, due fact its Uses different classes
 * if JedisPool compatibility mode is disabled in the config due fact project internally switched to JedisPooled than Jedis
-* 
+
 ## License
 
 This project is distributed under Eclipse Public License 1.0
@@ -133,7 +133,9 @@ then use any of these in your project.
 ```
 ## Javadocs
 
-For current version [0.8.0](https://proxiodev.github.io/RedisBungee-JavaDocs/0.8.0-SNAPSHOT/) 
+* API: https://ci.limework.net/RedisBungee/RedisBungee-API/build/docs/javadoc/
+* Velocity: https://ci.limework.net/RedisBungee/RedisBungee-Velocity/build/docs/javadoc/
+* Bungeecord: https://ci.limework.net/RedisBungee/RedisBungee-Bungee/build/docs/javadoc/
 
 ## Configuration
 
