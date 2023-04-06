@@ -112,7 +112,7 @@ first, install it to your maven local repo
 ```bash
 git clone https://github.com/ProxioDev/RedisBungee.git
 cd RedisBungee
-./gradlew shadowJar
+./gradlew publishToMavenLocal
 ```
 then use any of these in your project.
 ```xml
