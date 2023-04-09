@@ -6,25 +6,12 @@ to Synchronize players data between [BungeeCord](https://github.com/SpigotMC/Bun
 
 Velocity*: *version 3.1.2 or above is only supported, any version below that might work but might be unstable* [#40](https://github.com/ProxioDev/RedisBungee/pull/40)
 
-## compatibility with original RedisBungee in Bungeecord ecosystem
-This fork ensures compatibility with old plugins, so it should work as drop replacement,
-but since Api has been split from the platform there some changes that have to be done, so your plugin might not work if:
+## Downloads 
+[![](https://raw.githubusercontent.com/Prospector/badges/master/modrinth-badge-72h-padded.png)](https://modrinth.com/plugin/redisbungee)
 
-* there is none at the moment, please report any findings at the issue page.
+or from github releases
 
-Cluster mode compatibility in version 0.8.0:
-
-If you are using static legacy method `RedisBungee#getPool()` it might fail in:
-* if Cluster mode is enabled, due fact its Uses different classes
-* if JedisPool compatibility mode is disabled in the config due fact project internally switched to JedisPooled than Jedis
-
-## License
-
-This project is distributed under Eclipse Public License 1.0
-
-You can find it [here](https://github.com/proxiodev/RedisBungee/blob/master/LICENSE)
-
-You can find the original RedisBungee is by [astei](https://github.com/astei) and project can be found [here](https://github.com/minecrafter/RedisBungee) or spigot page [here, but its no longer available](https://www.spigotmc.org/resources/redisbungee.13494/)
+https://github.com/ProxioDev/RedisBungee/releases
 
 ## notes
 If you are looking to use Original RedisBungee without a change to internals,
@@ -141,11 +128,33 @@ then use any of these in your project.
 
 **REDISBUNGEE REQUIRES A REDIS SERVER**, preferably with reasonably low latency. The default [config](https://github.com/ProxioDev/RedisBungee/blob/develop/RedisBungee-API/src/main/resources/config.yml) is saved when the plugin first starts.
 
+
+## compatibility with original RedisBungee in Bungeecord ecosystem
+This fork ensures compatibility with old plugins, so it should work as drop replacement,
+but since Api has been split from the platform there some changes that have to be done, so your plugin might not work if:
+
+* there is none at the moment, please report any findings at the issue page.
+
+Cluster mode compatibility in version 0.8.0:
+
+If you are using static legacy method `RedisBungee#getPool()` it might fail in:
+* if Cluster mode is enabled, due fact its Uses different classes
+* if JedisPool compatibility mode is disabled in the config due fact project internally switched to JedisPooled than Jedis
+
 ## Support
 
 You can join our matrix room [here](https://matrix.to/#/!zhedzmRNSZXfuOPZUB:govindas.net?via=govindas.net&via=matrix.org)
 
 ![icon](https://matrix.org/images/matrix-logo-white.svg)
+
+## License
+
+This project is distributed under Eclipse Public License 1.0
+
+You can find it [here](https://github.com/proxiodev/RedisBungee/blob/master/LICENSE)
+
+You can find the original RedisBungee is by [astei](https://github.com/astei) and project can be found [here](https://github.com/minecrafter/RedisBungee) or spigot page [here, but its no longer available](https://www.spigotmc.org/resources/redisbungee.13494/)
+
 
 
 ## YourKit
