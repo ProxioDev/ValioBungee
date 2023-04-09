@@ -130,7 +130,7 @@ public class RedisBungeeVelocityListener extends AbstractRedisBungeeListener<Log
     }
 
     @Override
-    @Subscribe(order = PostOrder.EARLY)
+    @Subscribe(order = PostOrder.LAST) // some plugins changes it online players so we need to be executed as last
     public void onPing(ProxyPingEvent event) {
         if (exemptAddresses.contains(event.getConnection().getRemoteAddress().getAddress())) {
             return;
