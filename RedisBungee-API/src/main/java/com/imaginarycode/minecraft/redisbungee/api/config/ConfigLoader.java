@@ -12,7 +12,6 @@ package com.imaginarycode.minecraft.redisbungee.api.config;
 
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.reflect.TypeToken;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeeMode;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
@@ -54,6 +53,7 @@ public interface ConfigLoader {
         final boolean registerLegacyCommands = node.getNode("register-legacy-commands").getBoolean(false);
         final boolean restoreOldKickBehavior = node.getNode("disable-kick-when-online").getBoolean(false);
         String redisPassword = node.getNode("redis-password").getString("");
+        String redisUsername = node.getNode("redis-username").getString("");
         String proxyId = node.getNode("proxy-id").getString("test-1");
         final int maxConnections = node.getNode("max-redis-connections").getInt(10);
         List<String> exemptAddresses;
@@ -68,6 +68,11 @@ public interface ConfigLoader {
             redisPassword = null;
             plugin.logWarn("password is empty");
         }
+        if ((redisUsername.isEmpty() || redisUsername.equals("none"))) {
+            redisUsername = null;
+            plugin.logWarn("password is empty");
+        }
+
         if (useSSL) {
             plugin.logInfo("Using ssl");
         }
@@ -101,7 +106,7 @@ public interface ConfigLoader {
             if (hostAndPortSet.isEmpty()) {
                 throw new RuntimeException("No redis cluster servers specified");
             }
-            summoner = new JedisClusterSummoner(new ClusterConnectionProvider(hostAndPortSet, DefaultJedisClientConfig.builder().password(redisPassword).ssl(useSSL).socketTimeoutMillis(5000).timeoutMillis(10000).build(), poolConfig));
+            summoner = new JedisClusterSummoner(new ClusterConnectionProvider(hostAndPortSet, DefaultJedisClientConfig.builder().user(redisUsername).password(redisPassword).ssl(useSSL).socketTimeoutMillis(5000).timeoutMillis(10000).build(), poolConfig));
             redisBungeeMode = RedisBungeeMode.CLUSTER;
         } else {
             plugin.logInfo("RedisBungee MODE: SINGLE");
@@ -115,13 +120,13 @@ public interface ConfigLoader {
                 JedisPoolConfig config = new JedisPoolConfig();
                 config.setMaxTotal(node.getNode("compatibility-max-connections").getInt(3));
                 config.setBlockWhenExhausted(true);
-                jedisPool = new JedisPool(config, redisServer, redisPort, 5000, redisPassword, useSSL);
+                jedisPool = new JedisPool(config, redisServer, redisPort, 5000, redisUsername, redisPassword, useSSL);
                 plugin.logInfo("Compatibility JedisPool was created");
             }
             GenericObjectPoolConfig<Connection> poolConfig = new GenericObjectPoolConfig<>();
             poolConfig.setMaxTotal(maxConnections);
             poolConfig.setBlockWhenExhausted(true);
-            summoner = new JedisPooledSummoner(new PooledConnectionProvider(new ConnectionFactory(new HostAndPort(redisServer, redisPort), DefaultJedisClientConfig.builder().timeoutMillis(5000).ssl(useSSL).password(redisPassword).build()), poolConfig), jedisPool);
+            summoner = new JedisPooledSummoner(new PooledConnectionProvider(new ConnectionFactory(new HostAndPort(redisServer, redisPort), DefaultJedisClientConfig.builder().user(redisUsername).timeoutMillis(5000).ssl(useSSL).password(redisPassword).build()), poolConfig), jedisPool);
             redisBungeeMode = RedisBungeeMode.SINGLE;
         }
         plugin.logInfo("Successfully connected to Redis.");
