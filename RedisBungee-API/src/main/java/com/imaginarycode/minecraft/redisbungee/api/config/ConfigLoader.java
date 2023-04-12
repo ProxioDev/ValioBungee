@@ -70,7 +70,6 @@ public interface ConfigLoader {
         }
         if ((redisUsername.isEmpty() || redisUsername.equals("none"))) {
             redisUsername = null;
-            plugin.logWarn("password is empty");
         }
 
         if (useSSL) {
