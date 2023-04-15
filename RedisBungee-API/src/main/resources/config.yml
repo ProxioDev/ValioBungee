@@ -1,6 +1,11 @@
 # RedisBungee configuration file.
 # Get Redis from http://redis.io/
 
+# The Redis server you use.
+# these settings are ignored when cluster mode is enabled.
+redis-server: 127.0.0.1
+redis-port: 6379
+
 # Cluster Mode
 # enabling this option will enable cluster mode.
 cluster-mode-enabled: false
@@ -19,11 +24,6 @@ cluster-mode-enabled: false
 redis-cluster-servers:
   - host: 127.0.0.1
     port: 6379
-
-# The Redis server you use.
-# these settings are ignored when cluster mode is enabled.
-redis-server: 127.0.0.1
-redis-port: 6379
 
 # THIS FEATURE IS REDIS V6+
 # OPTIONAL: if your redis uses acl usernames set the username here. leave empty for no username.
