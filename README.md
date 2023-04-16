@@ -52,7 +52,9 @@ By using jitpack [![](https://jitpack.io/v/ProxioDev/redisbungee.svg)](https://j
 ```
 ## gradle (kotlin dsl)
 ```kotlin
-maven("https://jitpack.io/")
+repositories {
+    maven("https://jitpack.io/")
+}
 ```
 
 # [BungeeCord](https://github.com/SpigotMC/BungeeCord)
