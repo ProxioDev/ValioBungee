@@ -40,7 +40,8 @@ RedisBungee is distributed as a [Gradle](https://gradle.org/) project.
 
 By using jitpack [![](https://jitpack.io/v/ProxioDev/redisbungee.svg)](https://jitpack.io/#ProxioDev/redisbungee)
 
-## Setup jitpack repository
+# Setup jitpack repository
+## maven
 ```xml
 	<repositories>
 		<repository>
@@ -49,16 +50,32 @@ By using jitpack [![](https://jitpack.io/v/ProxioDev/redisbungee.svg)](https://j
 		</repository>
 	</repositories>
 ```
-## [BungeeCord](https://github.com/SpigotMC/BungeeCord)
+## gradle (kotlin dsl)
+```kotlin
+maven("https://jitpack.io/")
+```
+
+# [BungeeCord](https://github.com/SpigotMC/BungeeCord)
 add this in your project dependencies 
+## maven
 ```xml
 	<dependency>
 	    <groupId>com.github.proxiodev.redisbungee</groupId>
 	    <artifactId>RedisBungee-Bungee</artifactId>
 	    <version>VERSION</version>
 	    <scope>provided</scope>
+	    <!-- <classifier>all</classifier>  USE THIS IF YOU WANT TO USE INCLUDED JEDIS LIB BECAUSE OF RELOCATION -->
 	</dependency>
 	
+```
+## gradle (kotlin dsl)
+```
+implementation("com.github.ProxioDev.redisbungee:RedisBungee-Bungee:0.11.0")
+
+// USE THIS IF YOU WANT TO USE INCLUDED JEDIS LIB BECAUSE OF RELOACTION AND REMOVE THE ABOVE STATEMENT
+implementation("com.github.ProxioDev.redisbungee:RedisBungee-Bungee:0.11.0:all") {
+        exclude("redis.clients", "jedis")
+}
 ```
 then in your project plugin.yml add `RedisBungee` to `depends` like this
 ```yaml
@@ -71,14 +88,26 @@ depends: [ RedisBungee ]
 
 
 ## [Velocity](https://github.com/PaperMC/Velocity)
+## maven
 ```xml
 	<dependency>
 	    <groupId>com.github.proxiodev.redisbungee</groupId>
 	    <artifactId>RedisBungee-Velocity</artifactId>
 	    <version>VERSION</version>
 	    <scope>provided</scope>
+	    <!-- <classifier>all</classifier>  USE THIS IF YOU WANT TO USE INCLUDED JEDIS LIB BECAUSE OF RELOCATION -->
 	</dependency>
 ```
+## gradle (kotlin dsl)
+```
+implementation("com.github.ProxioDev.redisbungee:RedisBungee-Velocity:0.11.0")
+
+// USE THIS IF YOU WANT TO USE INCLUDED JEDIS LIB BECAUSE OF RELOACTION AND REMOVE THE ABOVE STATEMENT
+implementation("com.github.ProxioDev.redisbungee:RedisBungee-Velocity:0.11.0:all") {
+        exclude("redis.clients", "jedis")
+}
+```
+
 then to make your plugin depends on RedisBungee, make sure your plugin class Annotation have `@Dependency(id = "redisbungee")` like this
 ```java
 @Plugin(
@@ -108,6 +137,7 @@ then use any of these in your project.
         <artifactId>RedisBungee-Bungee</artifactId>
         <version>VERSION</version>
         <scope>provided</scope>
+	<!-- <classifier>all</classifier>  USE THIS IF YOU WANT TO USE INCLUDED JEDIS LIB BECAUSE OF RELOCATION -->
 </dependency>
 ```
 ```xml
@@ -116,6 +146,7 @@ then use any of these in your project.
         <artifactId>RedisBungee-Velocity</artifactId>
         <version>VERSION</version>
         <scope>provided</scope>
+	<!-- <classifier>all</classifier>  USE THIS IF YOU WANT TO USE INCLUDED JEDIS LIB BECAUSE OF RELOCATION -->
 </dependency>
 ```
 ## Javadocs
