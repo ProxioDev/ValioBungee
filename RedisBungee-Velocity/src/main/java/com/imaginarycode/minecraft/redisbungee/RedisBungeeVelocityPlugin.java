@@ -34,6 +34,7 @@ import com.imaginarycode.minecraft.redisbungee.events.PlayerLeftNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import com.squareup.okhttp.Dispatcher;
 import com.squareup.okhttp.OkHttpClient;
+import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
@@ -245,6 +246,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, Con
 
     @Override
     public void initialize() {
+        logInfo("Initializing RedisBungee.....");
         updateProxiesIds();
         // start heartbeat task
         heartbeatTask = getProxy().getScheduler().buildTask(this, new HeartbeatTask(this, this.globalPlayerCount)).repeat(HeartbeatTask.INTERVAL, HeartbeatTask.REPEAT_INTERVAL_TIME_UNIT).schedule();
@@ -283,10 +285,12 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, Con
             getProxy().getCommandManager().register("ip", new RedisBungeeCommands.IpCommand(this), "playerip", "rip", "rplayerip");
             getProxy().getCommandManager().register("find", new RedisBungeeCommands.FindCommand(this), "rfind");
         }
+        logInfo("RedisBungee initialized successfully ");
     }
 
     @Override
     public void stop() {
+        logInfo("Turning off redis connections.....");
         // Poison the PubSub listener
         if (psl != null) {
             psl.poison();
@@ -306,10 +310,12 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, Con
 
         this.httpClient.getDispatcher().getExecutorService().shutdown();
         try {
+            logInfo("waiting for httpclient thread-pool termination.....");
             this.httpClient.getDispatcher().getExecutorService().awaitTermination(20, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+        logInfo("RedisBungee shutdown complete");
     }
 
     @Override
@@ -330,13 +336,13 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, Con
         this.proxiesIds = this.getCurrentProxiesIds(false);
     }
 
-    @Subscribe
-    public void proxyInit(ProxyInitializeEvent event) {
+    @Subscribe(order = PostOrder.FIRST)
+    public void onProxyInitializeEvent(ProxyInitializeEvent event) {
         initialize();
     }
 
-    @Subscribe
-    public void proxyShutdownEvent(ProxyShutdownEvent event) {
+    @Subscribe(order = PostOrder.LAST)
+    public void onProxyShutdownEvent(ProxyShutdownEvent event) {
         stop();
     }
 

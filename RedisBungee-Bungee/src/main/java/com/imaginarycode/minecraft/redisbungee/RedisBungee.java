@@ -198,6 +198,7 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
 
     @Override
     public void initialize() {
+        logInfo("Initializing RedisBungee.....");
         ThreadFactory factory = ((ThreadPoolExecutor) getExecutorService()).getThreadFactory();
         ScheduledExecutorService service = Executors.newScheduledThreadPool(24, factory);
         try {
@@ -266,10 +267,12 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
             getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.PlayerProxyCommand(this));
             getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.PlistCommand(this));
         }
+        logInfo("RedisBungee initialized successfully ");
     }
 
     @Override
     public void stop() {
+        logInfo("Turning off redis connections.....");
         // Poison the PubSub listener
         if (psl != null) {
             psl.poison();
@@ -287,7 +290,7 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
+        logInfo("RedisBungee shutdown");
     }
 
     @Override

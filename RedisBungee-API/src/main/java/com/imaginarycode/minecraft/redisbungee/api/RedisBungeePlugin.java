@@ -35,6 +35,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * This Class has all internal methods needed by every redis bungee plugin, and it can be used to implement another platforms than bungeecord or another forks of RedisBungee
+ * <p>
+ * Reason this is interface because some proxies implementations require the user to extend class for plugins for example bungeecord.
  *
  * @author Ham1255
  * @since 0.7.0
