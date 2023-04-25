@@ -34,6 +34,7 @@ import com.imaginarycode.minecraft.redisbungee.events.PlayerLeftNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import com.squareup.okhttp.Dispatcher;
 import com.squareup.okhttp.OkHttpClient;
+import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
@@ -335,13 +336,13 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, Con
         this.proxiesIds = this.getCurrentProxiesIds(false);
     }
 
-    @Subscribe
-    public void proxyInit(ProxyInitializeEvent event) {
+    @Subscribe(order = PostOrder.FIRST)
+    public void onProxyInitializeEvent(ProxyInitializeEvent event) {
         initialize();
     }
 
-    @Subscribe
-    public void proxyShutdownEvent(ProxyShutdownEvent event) {
+    @Subscribe(order = PostOrder.LAST)
+    public void onProxyShutdownEvent(ProxyShutdownEvent event) {
         stop();
     }
 
