@@ -245,6 +245,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, Con
 
     @Override
     public void initialize() {
+        logInfo("Initializing RedisBungee.....");
         updateProxiesIds();
         // start heartbeat task
         heartbeatTask = getProxy().getScheduler().buildTask(this, new HeartbeatTask(this, this.globalPlayerCount)).repeat(HeartbeatTask.INTERVAL, HeartbeatTask.REPEAT_INTERVAL_TIME_UNIT).schedule();
@@ -283,10 +284,12 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, Con
             getProxy().getCommandManager().register("ip", new RedisBungeeCommands.IpCommand(this), "playerip", "rip", "rplayerip");
             getProxy().getCommandManager().register("find", new RedisBungeeCommands.FindCommand(this), "rfind");
         }
+        logInfo("RedisBungee initialized successfully ");
     }
 
     @Override
     public void stop() {
+        logInfo("Turning off redis connections.....");
         // Poison the PubSub listener
         if (psl != null) {
             psl.poison();
@@ -306,10 +309,12 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, Con
 
         this.httpClient.getDispatcher().getExecutorService().shutdown();
         try {
+            logInfo("waiting for httpclient thread-pool termination.....");
             this.httpClient.getDispatcher().getExecutorService().awaitTermination(20, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+        logInfo("RedisBungee shutdown complete");
     }
 
     @Override
