@@ -20,6 +20,10 @@ import redis.clients.jedis.UnifiedJedis;
 
 import java.util.concurrent.Callable;
 
+/**
+ * Since Jedis now have UnifiedJedis which basically extended by cluster / single connections classes
+ * can help us to have shared code.
+ */
 public abstract class RedisTask<V> implements Runnable, Callable<V> {
 
     protected final Summoner<?> summoner;
