@@ -74,9 +74,7 @@ override-bungee-commands: false
 exempt-ip-addresses: []
 
 # restore old login when online behavior before 0.9.0 update
-# uncomment to enable it
-
-# disable-kick-when-online: true
+disable-kick-when-online: false
 
 # Config version DO NOT CHANGE!!!!
 config-version: 1
