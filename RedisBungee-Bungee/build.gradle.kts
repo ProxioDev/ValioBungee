@@ -12,11 +12,11 @@ repositories {
 }
 val bungeecordApiVersion = "1.19-R0.1-SNAPSHOT"
 dependencies {
-    api(project(":RedisBungee-API")) {
+    api(project(":RedisBungee-API"))
+    compileOnly("net.md-5:bungeecord-api:$bungeecordApiVersion") {
         exclude("com.google.guava", "guava")
         exclude("com.google.code.gson", "gson")
     }
-    compileOnly("net.md-5:bungeecord-api:$bungeecordApiVersion")
 }
 
 description = "RedisBungee Bungeecord implementation"
@@ -37,7 +37,7 @@ tasks {
             "https://ci.md-5.net/job/BungeeCord/ws/api/target/apidocs/", // bungeecord api
         )
         val apiDocs = File(rootProject.projectDir, "RedisBungee-API/build/docs/javadoc")
-        options.linksOffline("https://ci.limework.net/RedisBungee/RedisBungee-API/build/docs/javadoc",  apiDocs.path)
+        options.linksOffline("https://ci.limework.net/RedisBungee/RedisBungee-API/build/docs/javadoc", apiDocs.path)
     }
     runWaterfall {
         waterfallVersion("1.19")
@@ -65,10 +65,14 @@ tasks {
         relocate("com.squareup.okhttp", "com.imaginarycode.minecraft.redisbungee.internal.okhttp")
         relocate("okio", "com.imaginarycode.minecraft.redisbungee.internal.okio")
         relocate("org.json", "com.imaginarycode.minecraft.redisbungee.internal.json")
-
         // configurate shade
         relocate("ninja.leaping.configurate", "com.imaginarycode.minecraft.redisbungee.internal.configurate")
         relocate("org.yaml", "com.imaginarycode.minecraft.redisbungee.internal.yml")
+        relocate("com.google.common", "com.imaginarycode.minecraft.redisbungee.internal.com.google.common")
+        relocate("com.google.errorprone", "com.imaginarycode.minecraft.redisbungee.internal.com.google.errorprone")
+        relocate("com.google.gson", "com.imaginarycode.minecraft.redisbungee.internal.com.google.gson")
+        relocate("com.google.j2objc", "com.imaginarycode.minecraft.redisbungee.internal.com.google.j2objc")
+        relocate("com.google.thirdparty", "com.imaginarycode.minecraft.redisbungee.internal.com.google.thirdparty")
     }
 
 }
