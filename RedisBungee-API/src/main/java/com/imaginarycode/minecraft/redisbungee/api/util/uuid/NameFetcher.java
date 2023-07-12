@@ -11,50 +11,37 @@
 package com.imaginarycode.minecraft.redisbungee.api.util.uuid;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.google.gson.JsonObject;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.ResponseBody;
+
 import java.io.IOException;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
-@Deprecated
 public class NameFetcher {
     private static OkHttpClient httpClient;
     private static final Gson gson = new Gson();
 
-    @Deprecated
     public static void setHttpClient(OkHttpClient httpClient) {
-        throw new UnsupportedOperationException("Due mojang disabled the Names API NameFetcher no longer functions and has been disabled");
-        // NameFetcher.httpClient = httpClient;
+         NameFetcher.httpClient = httpClient;
     }
 
-    @Deprecated
-    public static List<String> nameHistoryFromUuid(UUID uuid) throws IOException {
-        throw new UnsupportedOperationException("Due mojang disabled the Names API NameFetcher no longer functions and has been disabled");
-//        String url = "https://api.mojang.com/user/profiles/" + uuid.toString().replace("-", "") + "/names";
-//        Request request = new Request.Builder().url(url).get().build();
-//        ResponseBody body = httpClient.newCall(request).execute().body();
-//        String response = body.string();
-//        body.close();
-//
-//        Type listType = new TypeToken<List<Name>>() {
-//        }.getType();
-//        List<Name> names = gson.fromJson(response, listType);
-//
-//        List<String> humanNames = new ArrayList<>();
-//        for (Name name : names) {
-//            humanNames.add(name.name);
-//        }
-//        return humanNames;
-    }
+    public static String getName(UUID uuid) throws IOException {
+        String url = "https://playerdb.co/api/player/minecraft/" + uuid.toString();
+        Request request = new Request.Builder().url(url).get().build();
+        ResponseBody body = httpClient.newCall(request).execute().body();
+        String response = body.string();
+        body.close();
 
-    @Deprecated
-    public static class Name {
-        private String name;
-        private long changedToAt;
+		JsonObject json = gson.fromJson(response, JsonObject.class);
+		if (!json.has("success") || !json.get("success").getAsBoolean()) return null;
+		if (!json.has("data")) return null;
+		JsonObject data = json.getAsJsonObject("data");
+		if (!data.has("player")) return null;
+		JsonObject player = data.getAsJsonObject("player");
+		if (!player.has("username")) return null;
+
+		return player.get("username").getAsString();
     }
 }

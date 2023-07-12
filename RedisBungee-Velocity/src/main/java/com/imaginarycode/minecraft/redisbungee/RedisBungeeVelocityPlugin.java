@@ -110,7 +110,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, Con
         this.httpClient = new OkHttpClient();
         Dispatcher dispatcher = new Dispatcher(Executors.newFixedThreadPool(6));
         this.httpClient.setDispatcher(dispatcher);
-        //NameFetcher.setHttpClient(httpClient);
+        NameFetcher.setHttpClient(httpClient);
         UUIDFetcher.setHttpClient(httpClient);
     }
 

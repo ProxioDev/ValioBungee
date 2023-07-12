@@ -223,7 +223,7 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
         httpClient = new OkHttpClient();
         Dispatcher dispatcher = new Dispatcher(getExecutorService());
         httpClient.setDispatcher(dispatcher);
-        //NameFetcher.setHttpClient(httpClient);
+        NameFetcher.setHttpClient(httpClient);
         UUIDFetcher.setHttpClient(httpClient);
         InitialUtils.checkRedisVersion(this);
         // check if this proxy is recovering from a crash and start heart the beat.

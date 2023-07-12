@@ -12,7 +12,6 @@ package com.imaginarycode.minecraft.redisbungee.api.util.uuid;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
 import com.google.gson.Gson;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 
@@ -169,17 +168,12 @@ public final class UUIDTranslator {
                 if (!expensiveLookups || !plugin.isOnlineMode())
                     return null;
 
-                // That didn't work. Let's ask Mojang. This call may fail, because Mojang is insane.
-                //
-                // UPDATE: Mojang has removed the API somewhere in september/2022 due privacy issues
-                // this is expected to fail now, so we will keep logging it until we figure out something or remove name fetching completely
-                // Name fetching class was deprecated as result
+                // That didn't work. Let's ask PlayerDB.
                 String name;
                 try {
-                    plugin.logFatal("Due Mojang removing the naming API, we were unable to fetch player names.");
-                    name = Iterables.getLast(NameFetcher.nameHistoryFromUuid(player));
+                    name = NameFetcher.getName(player);
                 } catch (Exception e) {
-                    plugin.logFatal("Unable to fetch name from Mojang for " + player);
+                    plugin.logFatal("Unable to fetch name from PlayerDB for " + player);
                     return null;
                 }
 
