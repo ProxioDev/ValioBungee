@@ -29,7 +29,11 @@ public class NameFetcher {
 
     public static String getName(UUID uuid) throws IOException {
         String url = "https://playerdb.co/api/player/minecraft/" + uuid.toString();
-        Request request = new Request.Builder().url(url).get().build();
+        Request request = new Request.Builder()
+				.addHeader("User-Agent", "RedisBungee-ProxioDev")
+				.url(url)
+				.get()
+				.build();
         ResponseBody body = httpClient.newCall(request).execute().body();
         String response = body.string();
         body.close();
