@@ -10,8 +10,6 @@
 
 package com.imaginarycode.minecraft.redisbungee;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeeMode;
@@ -40,21 +38,13 @@ import java.util.*;
 public abstract class AbstractRedisBungeeAPI {
     protected final RedisBungeePlugin<?> plugin;
     private static AbstractRedisBungeeAPI abstractRedisBungeeAPI;
-    protected final List<String> reservedChannels;
 
-    AbstractRedisBungeeAPI(RedisBungeePlugin<?> plugin) {
-        // this does make sure that no one can place first initiated API class.
+    public AbstractRedisBungeeAPI(RedisBungeePlugin<?> plugin) {
+        // this does make sure that no one can replace first initiated API class.
         if (abstractRedisBungeeAPI == null) {
             abstractRedisBungeeAPI = this;
         }
-        this.reservedChannels = ImmutableList.of(
-                "redisbungee-allservers",
-                "redisbungee-" + plugin.getConfiguration().getProxyId(),
-                "redisbungee-data"
-        );
-
         this.plugin = plugin;
-
     }
 
     /**
@@ -63,7 +53,7 @@ public abstract class AbstractRedisBungeeAPI {
      * @return a count of all players found
      */
     public final int getPlayerCount() {
-        return plugin.getCount();
+        return plugin.proxyDataManager().totalNetworkPlayers();
     }
 
     /**
@@ -74,7 +64,7 @@ public abstract class AbstractRedisBungeeAPI {
      * @return the last time a player was on, if online returns a 0
      */
     public final long getLastOnline(@NonNull UUID player) {
-        return plugin.getDataManager().getLastOnline(player);
+        return plugin.playerDataManager().getLastOnline(player);
     }
 
     /**
@@ -86,7 +76,7 @@ public abstract class AbstractRedisBungeeAPI {
      */
     @Nullable
     public final String getServerNameFor(@NonNull UUID player) {
-        return plugin.getDataManager().getServer(player);
+        return plugin.playerDataManager().getServerFor(player);
     }
 
     /**
@@ -97,7 +87,7 @@ public abstract class AbstractRedisBungeeAPI {
      * @return a Set with all players found
      */
     public final Set<UUID> getPlayersOnline() {
-        return plugin.getPlayers();
+        return plugin.proxyDataManager().networkPlayers();
     }
 
     /**
@@ -118,11 +108,11 @@ public abstract class AbstractRedisBungeeAPI {
     /**
      * Get a full list of players on all servers.
      *
-     * @return a immutable Multimap with all players found on this server
+     * @return a immutable Multimap with all players found on this network
      * @since 0.2.5
      */
     public final Multimap<String, UUID> getServerToPlayers() {
-        return plugin.serverToPlayersCache();
+        return plugin.playerDataManager().serversToPlayers();
     }
 
     /**
@@ -138,11 +128,11 @@ public abstract class AbstractRedisBungeeAPI {
     /**
      * Get a list of players on the specified proxy.
      *
-     * @param server a server name
+     * @param proxyID proxy id
      * @return a Set with all UUIDs found on this proxy
      */
-    public final Set<UUID> getPlayersOnProxy(@NonNull String server) {
-        return plugin.getPlayersOnProxy(server);
+    public final Set<UUID> getPlayersOnProxy(@NonNull String proxyID) {
+        return plugin.proxyDataManager().getPlayersOn(proxyID);
     }
 
     /**
@@ -163,7 +153,7 @@ public abstract class AbstractRedisBungeeAPI {
      * @since 0.2.4
      */
     public final InetAddress getPlayerIp(@NonNull UUID player) {
-        return plugin.getDataManager().getIp(player);
+        return plugin.playerDataManager().getIpFor(player);
     }
 
     /**
@@ -174,7 +164,7 @@ public abstract class AbstractRedisBungeeAPI {
      * @since 0.3.3
      */
     public final String getProxy(@NonNull UUID player) {
-        return plugin.getDataManager().getProxy(player);
+        return plugin.playerDataManager().getProxyFor(player);
     }
 
     /**
@@ -185,7 +175,7 @@ public abstract class AbstractRedisBungeeAPI {
      * @since 0.2.5
      */
     public final void sendProxyCommand(@NonNull String command) {
-        plugin.sendProxyCommand("allservers", command);
+        sendProxyCommand("allservers", command);
     }
 
     /**
@@ -198,19 +188,20 @@ public abstract class AbstractRedisBungeeAPI {
      * @since 0.2.5
      */
     public final void sendProxyCommand(@NonNull String proxyId, @NonNull String command) {
-        plugin.sendProxyCommand(proxyId, command);
+        plugin.proxyDataManager().sendCommandTo(proxyId, command);
     }
 
     /**
-     * Sends a message to a PubSub channel. The channel has to be subscribed to on this, or another redisbungee instance for
-     * PubSubMessageEvent to fire.
+     * Sends a message to a PubSub channel which makes PubSubMessageEvent fire.
+     * <p>
+     * Note: Since 0.12.0 registering a channel api is no longer required
      *
      * @param channel The PubSub channel
      * @param message the message body to send
      * @since 0.3.3
      */
     public final void sendChannelMessage(@NonNull String channel, @NonNull String message) {
-        plugin.sendChannelMessage(channel, message);
+        plugin.proxyDataManager().sendChannelMessage(channel, message);
     }
 
     /**
@@ -221,7 +212,7 @@ public abstract class AbstractRedisBungeeAPI {
      * @since 0.8.0
      */
     public final String getProxyId() {
-        return plugin.getConfiguration().getProxyId();
+        return plugin.proxyDataManager().proxyId();
     }
 
     /**
@@ -245,7 +236,7 @@ public abstract class AbstractRedisBungeeAPI {
      * @since 0.8.0
      */
     public final List<String> getAllProxies() {
-        return plugin.getProxiesIds();
+        return plugin.proxyDataManager().proxiesIds();
     }
 
     /**
@@ -266,9 +257,10 @@ public abstract class AbstractRedisBungeeAPI {
      *
      * @param channels the channels to register
      * @since 0.3
+     * @deprecated No longer required
      */
+    @Deprecated
     public final void registerPubSubChannels(String... channels) {
-        plugin.getPubSubListener().addChannel(channels);
     }
 
     /**
@@ -276,13 +268,10 @@ public abstract class AbstractRedisBungeeAPI {
      *
      * @param channels the channels to unregister
      * @since 0.3
+     * @deprecated No longer required
      */
+    @Deprecated
     public final void unregisterPubSubChannels(String... channels) {
-        for (String channel : channels) {
-            Preconditions.checkArgument(!reservedChannels.contains(channel), "attempting to unregister internal channel");
-        }
-
-        plugin.getPubSubListener().removeChannel(channels);
     }
 
     /**
@@ -355,6 +344,7 @@ public abstract class AbstractRedisBungeeAPI {
 
     /**
      * Kicks a player from the network
+     * calls {@link #getUuidFromName(String)} to get uuid
      *
      * @param playerName player name
      * @param message    kick message that player will see on kick
@@ -362,7 +352,7 @@ public abstract class AbstractRedisBungeeAPI {
      */
 
     public void kickPlayer(String playerName, String message) {
-        plugin.kickPlayer(playerName, message);
+        kickPlayer(getUuidFromName(playerName), message);
     }
 
     /**
@@ -373,7 +363,7 @@ public abstract class AbstractRedisBungeeAPI {
      * @since 0.8.0
      */
     public void kickPlayer(UUID playerUUID, String message) {
-        plugin.kickPlayer(playerUUID, message);
+        this.plugin.playerDataManager().kickPlayer(playerUUID, message);
     }
 
     /**
@@ -457,6 +447,7 @@ public abstract class AbstractRedisBungeeAPI {
 
     /**
      * shows what mode is RedisBungee is on
+     * Basically what every redis mode is used like cluster or single instance.
      *
      * @return {@link RedisBungeeMode}
      * @since 0.8.0

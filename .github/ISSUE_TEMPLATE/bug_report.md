@@ -9,9 +9,9 @@ assignees: ham1255
 
 **Describe the bug**
 
-
 **To Reproduce**
 Steps to reproduce the behavior:
+
 1. Go to '...'
 2. Click on '....'
 3. Scroll down to '....'
@@ -26,7 +26,6 @@ If applicable, add screenshots to help explain your problem.
 **Redis version? it should be at least 6 and above.**
 
 **Bungeecord version or (the bungee fork name eg: waterfall) and your plugins**
- 
 
 **console logs?**
 please provide any errors if there any.

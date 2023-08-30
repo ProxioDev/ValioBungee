@@ -10,12 +10,6 @@
 
 package com.imaginarycode.minecraft.redisbungee.commands;
 
-import java.net.InetAddress;
-import java.text.SimpleDateFormat;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.UUID;
-
 import com.google.common.base.Joiner;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -25,10 +19,15 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
-
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
+
+import java.net.InetAddress;
+import java.text.SimpleDateFormat;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.UUID;
 
 
 /**
@@ -324,8 +323,8 @@ public class RedisBungeeCommands {
             CommandSource sender = invocation.source();
             String[] args = invocation.arguments();
             plugin.getProxy().getScheduler().buildTask(plugin, () -> {
-                String proxy = args.length >= 1 ? args[0] : plugin.getConfiguration().getProxyId();
-                if (!plugin.getProxiesIds().contains(proxy)) {
+                String proxy = args.length >= 1 ? args[0] : plugin.configuration().getProxyId();
+                if (!plugin.proxyDataManager().proxiesIds().contains(proxy)) {
                     sender.sendMessage(Component.text(proxy + " is not a valid proxy. See /serverids for valid proxies.", NamedTextColor.RED));
                     return;
                 }

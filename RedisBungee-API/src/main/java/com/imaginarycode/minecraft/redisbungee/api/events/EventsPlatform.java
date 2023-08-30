@@ -17,7 +17,6 @@ import java.util.UUID;
  *
  * @author Ham1255
  * @since 0.7.0
- *
  */
 public interface EventsPlatform {
 

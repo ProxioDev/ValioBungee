@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.time.Duration;
 
 public class JedisClusterSummoner implements Summoner<JedisCluster> {
-    public final ClusterConnectionProvider clusterConnectionProvider;
+    private final ClusterConnectionProvider clusterConnectionProvider;
 
     public JedisClusterSummoner(ClusterConnectionProvider clusterConnectionProvider) {
         this.clusterConnectionProvider = clusterConnectionProvider;
@@ -35,6 +35,8 @@ public class JedisClusterSummoner implements Summoner<JedisCluster> {
 
     @Override
     public JedisCluster obtainResource() {
-        return new NotClosableJedisCluster(this.clusterConnectionProvider, 60, Duration.ofSeconds(30000));
+        return new NotClosableJedisCluster(this.clusterConnectionProvider, 60, Duration.ofSeconds(10));
     }
+
+
 }

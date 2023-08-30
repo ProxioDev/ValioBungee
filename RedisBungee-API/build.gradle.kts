@@ -22,7 +22,7 @@ dependencies {
     api("redis.clients:jedis:$jedisVersion")
     api("com.squareup.okhttp:okhttp:2.7.5")
     api("org.spongepowered:configurate-yaml:$configurateVersion")
-
+    api("com.github.ben-manes.caffeine:caffeine:3.1.8")
     // tests
     testImplementation("junit:junit:4.13.2")
 }
@@ -68,11 +68,10 @@ tasks {
 
     compileJava {
         options.encoding = Charsets.UTF_8.name()
-        options.release.set(8)
+        options.release.set(17)
     }
     javadoc {
         options.encoding = Charsets.UTF_8.name()
-
     }
     processResources {
         filteringCharset = Charsets.UTF_8.name()

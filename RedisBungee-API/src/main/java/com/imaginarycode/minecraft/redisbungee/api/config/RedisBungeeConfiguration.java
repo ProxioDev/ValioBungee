@@ -12,11 +12,9 @@ package com.imaginarycode.minecraft.redisbungee.api.config;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.net.InetAddresses;
 
 import java.net.InetAddress;
-import java.util.HashMap;
 import java.util.List;
 
 public class RedisBungeeConfiguration {
@@ -47,6 +45,7 @@ public class RedisBungeeConfiguration {
         this.overrideBungeeCommands = overrideBungeeCommands;
         this.restoreOldKickBehavior = restoreOldKickBehavior;
     }
+
     public String getProxyId() {
         return proxyId;
     }

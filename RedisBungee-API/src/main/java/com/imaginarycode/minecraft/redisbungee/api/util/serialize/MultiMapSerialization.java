@@ -7,7 +7,7 @@ import com.google.common.io.ByteArrayDataOutput;
 import java.util.Collection;
 import java.util.Map;
 
-public class Serializations {
+public class MultiMapSerialization {
 
     public static void serializeMultiset(Multiset<String> collection, ByteArrayDataOutput output) {
         output.writeInt(collection.elementSet().size());
@@ -36,4 +36,5 @@ public class Serializations {
             output.writeUTF(o.toString());
         }
     }
+
 }

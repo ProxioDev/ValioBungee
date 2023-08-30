@@ -39,14 +39,14 @@ tasks {
             "https://jd.papermc.io/velocity/3.0.0/", // velocity api
         )
         val apiDocs = File(rootProject.projectDir, "RedisBungee-API/build/docs/javadoc")
-        options.linksOffline("https://ci.limework.net/RedisBungee/RedisBungee-API/build/docs/javadoc",  apiDocs.path)
+        options.linksOffline("https://ci.limework.net/RedisBungee/RedisBungee-API/build/docs/javadoc", apiDocs.path)
     }
     runVelocity {
         velocityVersion("3.2.0-SNAPSHOT")
     }
     compileJava {
         options.encoding = Charsets.UTF_8.name()
-        options.release.set(11)
+        options.release.set(17)
     }
     javadoc {
         options.encoding = Charsets.UTF_8.name()
@@ -61,6 +61,7 @@ tasks {
         relocate("com.squareup.okhttp", "com.imaginarycode.minecraft.redisbungee.internal.okhttp")
         relocate("okio", "com.imaginarycode.minecraft.redisbungee.internal.okio")
         relocate("org.json", "com.imaginarycode.minecraft.redisbungee.internal.json")
+        relocate("com.github.benmanes.caffeine", "com.imaginarycode.minecraft.redisbungee.internal.caffeine")
     }
 
 }
