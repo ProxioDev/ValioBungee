@@ -51,7 +51,7 @@ public interface ConfigLoader {
         final boolean useSSL = node.getNode("useSSL").getBoolean(false);
         final boolean overrideBungeeCommands = node.getNode("override-bungee-commands").getBoolean(false);
         final boolean registerLegacyCommands = node.getNode("register-legacy-commands").getBoolean(false);
-        final boolean kickWhenOnline = node.getNode("kick-when-online").getBoolean(false);
+        final boolean kickWhenOnline = node.getNode("kick-when-online").getBoolean(true);
         String redisPassword = node.getNode("redis-password").getString("");
         String redisUsername = node.getNode("redis-username").getString("");
         String proxyId = node.getNode("proxy-id").getString("test-1");
