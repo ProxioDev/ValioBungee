@@ -71,7 +71,7 @@ public class VelocityPlayerDataManager extends PlayerDataManager<Player, PostLog
     public void onLoginEvent(LoginEvent event, Continuation continuation) {
         // check if online
         if (getLastOnline(event.getPlayer().getUniqueId()) == 0) {
-            if (!plugin.configuration().kickWhenOnline()) {
+            if (plugin.configuration().kickWhenOnline()) {
                 kickPlayer(event.getPlayer().getUniqueId(), plugin.configuration().getMessages().get(RedisBungeeConfiguration.MessageType.LOGGED_IN_OTHER_LOCATION));
                 // wait 3 seconds before releasing the event
                 plugin.executeAsyncAfter(continuation::resume, TimeUnit.SECONDS, 3);
