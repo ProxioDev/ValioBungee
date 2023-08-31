@@ -67,7 +67,7 @@ public class BungeePlayerDataManager extends PlayerDataManager<ProxiedPlayer, Po
         event.registerIntent((Plugin) plugin);
         // check if online
         if (getLastOnline(event.getConnection().getUniqueId()) == 0) {
-            if (!plugin.configuration().restoreOldKickBehavior()) {
+            if (!plugin.configuration().kickWhenOnline()) {
                 kickPlayer(event.getConnection().getUniqueId(), plugin.configuration().getMessages().get(RedisBungeeConfiguration.MessageType.LOGGED_IN_OTHER_LOCATION));
                 // wait 3 seconds before releasing the event
                 plugin.executeAsyncAfter(() -> event.completeIntent((Plugin) plugin), TimeUnit.SECONDS, 3);

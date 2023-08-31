@@ -41,9 +41,9 @@ public class RedisBungeeListener {
 
     @Subscribe(order = PostOrder.LAST) // some plugins changes it online players so we need to be executed as last
     public void onPing(ProxyPingEvent event) {
-        if (plugin.configuration().getExemptAddresses().contains(event.getConnection().getRemoteAddress().getAddress())) {
-            return;
-        }
+        if (!plugin.configuration().handleMotd()) return;
+        if (plugin.configuration().getExemptAddresses().contains(event.getConnection().getRemoteAddress().getAddress())) return;
+
         ServerPing.Builder ping = event.getPing().asBuilder();
         ping.onlinePlayers(plugin.proxyDataManager().totalNetworkPlayers());
         event.setPing(ping.build());

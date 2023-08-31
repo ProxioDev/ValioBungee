@@ -74,8 +74,20 @@ override-bungee-commands: false
 # restart scripts.
 exempt-ip-addresses: []
 
-# restore old login when online behavior before 0.9.0 update
-disable-kick-when-online: false
+# restore old login behavior before 0.9.0 update
+# enabled by default
+# when true: when player login and there is old player with same uuid it will get disconnected as result and new player will login
+# when false: when a player login but login will fail because old player is still connected.
+kick-when-online: true
+
+# enabled by default
+# this option tells redis-bungee handle motd and set online count, when motd is requested
+# you can disable this when you want to handle motd yourself, use RedisBungee api to get total players when needed :)
+handle-motd: true
+
+# disabled by default
+# Redis-bungee will attempt to connect player to last server that was stored.
+reconnect-to-last-server: false
 
 # Config version DO NOT CHANGE!!!!
-config-version: 1
+config-version: 2

@@ -25,15 +25,18 @@ public class RedisBungeeConfiguration {
     }
 
     private final ImmutableMap<MessageType, String> messages;
-    public static final int CONFIG_VERSION = 1;
+    public static final int CONFIG_VERSION = 2;
     private final String proxyId;
     private final List<InetAddress> exemptAddresses;
     private final boolean registerLegacyCommands;
     private final boolean overrideBungeeCommands;
+    private final boolean kickWhenOnline;
 
-    private final boolean restoreOldKickBehavior;
+    private final boolean handleReconnectToLastServer;
+    private final boolean handleMotd;
 
-    public RedisBungeeConfiguration(String proxyId, List<String> exemptAddresses, boolean registerLegacyCommands, boolean overrideBungeeCommands, ImmutableMap<MessageType, String> messages, boolean restoreOldKickBehavior) {
+
+    public RedisBungeeConfiguration(String proxyId, List<String> exemptAddresses, boolean registerLegacyCommands, boolean overrideBungeeCommands, ImmutableMap<MessageType, String> messages, boolean kickWhenOnline, boolean handleReconnectToLastServer, boolean handleMotd) {
         this.proxyId = proxyId;
         this.messages = messages;
         ImmutableList.Builder<InetAddress> addressBuilder = ImmutableList.builder();
@@ -43,7 +46,9 @@ public class RedisBungeeConfiguration {
         this.exemptAddresses = addressBuilder.build();
         this.registerLegacyCommands = registerLegacyCommands;
         this.overrideBungeeCommands = overrideBungeeCommands;
-        this.restoreOldKickBehavior = restoreOldKickBehavior;
+        this.kickWhenOnline = kickWhenOnline;
+        this.handleReconnectToLastServer = handleReconnectToLastServer;
+        this.handleMotd = handleMotd;
     }
 
     public String getProxyId() {
@@ -66,7 +71,17 @@ public class RedisBungeeConfiguration {
         return messages;
     }
 
-    public boolean restoreOldKickBehavior() {
-        return restoreOldKickBehavior;
+    public boolean kickWhenOnline() {
+        return kickWhenOnline;
     }
+
+    public boolean handleMotd() {
+        return this.handleMotd;
+    }
+
+    public boolean handleReconnectToLastServer() {
+        return this.handleReconnectToLastServer;
+    }
+
+
 }
