@@ -1,2 +1,5 @@
+# this config file is for messages for players and command messages
+# Note this uses legacy formating which § for color codes
+# this might get replaced soon with mini message for both, velocity and bungeecord
 logged-in-other-location: "§cYou logged in from another location!"
 already-logged-in: "§cYou are already logged in!"

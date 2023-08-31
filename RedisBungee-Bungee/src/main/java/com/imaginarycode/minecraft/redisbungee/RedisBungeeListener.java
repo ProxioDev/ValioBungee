@@ -28,8 +28,7 @@ import net.md_5.bungee.event.EventHandler;
 
 import java.util.*;
 
-import static com.imaginarycode.minecraft.redisbungee.api.util.serialize.MultiMapSerialization.serializeMultimap;
-import static com.imaginarycode.minecraft.redisbungee.api.util.serialize.MultiMapSerialization.serializeMultiset;
+import static com.imaginarycode.minecraft.redisbungee.api.util.serialize.MultiMapSerialization.*;
 
 public class RedisBungeeListener implements Listener {
 
@@ -41,14 +40,11 @@ public class RedisBungeeListener implements Listener {
 
     @EventHandler
     public void onPing(ProxyPingEvent event) {
-        if (plugin.configuration().getExemptAddresses().contains(event.getConnection().getAddress().getAddress())) {
-            return;
-        }
+        if (!plugin.configuration().handleMotd()) return;
+        if (plugin.configuration().getExemptAddresses().contains(event.getConnection().getAddress().getAddress())) return;
         ServerInfo forced = AbstractReconnectHandler.getForcedHost(event.getConnection());
 
-        if (forced != null && event.getConnection().getListener().isPingPassthrough()) {
-            return;
-        }
+        if (forced != null && event.getConnection().getListener().isPingPassthrough()) return;
         event.getResponse().getPlayers().setOnline(plugin.proxyDataManager().totalNetworkPlayers());
     }
 

@@ -51,7 +51,7 @@ public interface ConfigLoader {
         final boolean useSSL = node.getNode("useSSL").getBoolean(false);
         final boolean overrideBungeeCommands = node.getNode("override-bungee-commands").getBoolean(false);
         final boolean registerLegacyCommands = node.getNode("register-legacy-commands").getBoolean(false);
-        final boolean restoreOldKickBehavior = node.getNode("disable-kick-when-online").getBoolean(false);
+        final boolean kickWhenOnline = node.getNode("kick-when-online").getBoolean(false);
         String redisPassword = node.getNode("redis-password").getString("");
         String redisUsername = node.getNode("redis-username").getString("");
         String proxyId = node.getNode("proxy-id").getString("test-1");
@@ -86,7 +86,10 @@ public interface ConfigLoader {
         } else {
             plugin.logInfo("Loaded proxy id " + proxyId);
         }
-        RedisBungeeConfiguration configuration = new RedisBungeeConfiguration(proxyId, exemptAddresses, registerLegacyCommands, overrideBungeeCommands, getMessagesFromPath(createMessagesFile(dataFolder)), restoreOldKickBehavior);
+        boolean reconnectToLastServer = node.getNode("reconnect-to-last-server").getBoolean();
+        boolean handleMotd = node.getNode("handle-motd").getBoolean(true);
+
+        RedisBungeeConfiguration configuration = new RedisBungeeConfiguration(proxyId, exemptAddresses, registerLegacyCommands, overrideBungeeCommands, getMessagesFromPath(createMessagesFile(dataFolder)), kickWhenOnline, reconnectToLastServer, handleMotd);
         Summoner<?> summoner;
         RedisBungeeMode redisBungeeMode;
         if (node.getNode("cluster-mode-enabled").getBoolean(false)) {
