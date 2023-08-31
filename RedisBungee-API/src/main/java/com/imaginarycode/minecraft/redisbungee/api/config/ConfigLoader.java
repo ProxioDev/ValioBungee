@@ -115,7 +115,7 @@ public interface ConfigLoader {
                 throw new RuntimeException("No redis server specified");
             }
             JedisPool jedisPool = null;
-            if (node.getNode("enable-jedis-pool-compatibility").getBoolean(true)) {
+            if (node.getNode("enable-jedis-pool-compatibility").getBoolean(false)) {
                 JedisPoolConfig config = new JedisPoolConfig();
                 config.setMaxTotal(node.getNode("compatibility-max-connections").getInt(3));
                 config.setBlockWhenExhausted(true);
