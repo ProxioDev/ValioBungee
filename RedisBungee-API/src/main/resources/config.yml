@@ -1,7 +1,7 @@
 # RedisBungee configuration file.
-# Get Redis from http://redis.io/
+# you need Redis so get Redis from http://redis.io/ or install it from your package manager
 
-# The Redis server you use.
+# The Redis server you will use.
 # these settings are ignored when cluster mode is enabled.
 redis-server: 127.0.0.1
 redis-port: 6379
@@ -48,9 +48,10 @@ proxy-id: "test-1"
 # since version 0.8.0 Internally now uses JedisPooled instead of Jedis, JedisPool.
 # which will break compatibility with old plugins that uses RedisBungee JedisPool
 # so to mitigate this issue, we will instruct RedisBungee to init an JedisPool for compatibility reasons.
-# enabled by default
+# disabled by default
 # ignored when cluster mode is enabled
-enable-jedis-pool-compatibility: true
+enable-jedis-pool-compatibility: false
+
 # max connections for the compatibility pool
 compatibility-max-connections: 3
 
