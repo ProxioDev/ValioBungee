@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-public abstract class ProxyDataManager implements Runnable, AutoCloseable {
+public abstract class ProxyDataManager implements Runnable {
 
     private static final String STREAM_ID = "redisbungee-stream";
     private static final int MAX_ENTRIES = 10000;
@@ -360,8 +360,7 @@ public abstract class ProxyDataManager implements Runnable, AutoCloseable {
         }
     }
 
-    @Override
-    public void close() throws Exception {
+    public void close() {
         closed.set(true);
         this.publishDeath();
         this.heartbeats.clear();
