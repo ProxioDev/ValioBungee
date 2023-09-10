@@ -17,6 +17,7 @@ import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisClusterSummoner;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisPooledSummoner;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.Summoner;
+import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import redis.clients.jedis.Jedis;
@@ -347,8 +348,9 @@ public abstract class AbstractRedisBungeeAPI {
      * calls {@link #getUuidFromName(String)} to get uuid
      *
      * @param playerName player name
-     * @param message    kick message that player will see on kick
+     * @param message   kick message that player will see on kick
      * @since 0.8.0
+     * @deprecated
      */
 
     public void kickPlayer(String playerName, String message) {
@@ -361,10 +363,37 @@ public abstract class AbstractRedisBungeeAPI {
      * @param playerUUID player name
      * @param message    kick message that player will see on kick
      * @since 0.8.0
+     * @deprecated
      */
+    @Deprecated
     public void kickPlayer(UUID playerUUID, String message) {
+        kickPlayer(playerUUID, Component.text(message));
+    }
+
+    /**
+     * Kicks a player from the network
+     * calls {@link #getUuidFromName(String)} to get uuid
+     *
+     * @param playerName player name
+     * @param message   kick message that player will see on kick
+     * @since 0.12.0
+     */
+
+    public void kickPlayer(String playerName, Component message) {
+        kickPlayer(getUuidFromName(playerName), message);
+    }
+
+    /**
+     * Kicks a player from the network
+     *
+     * @param playerUUID player name
+     * @param message    kick message that player will see on kick
+     * @since 0.12.0
+     */
+    public void kickPlayer(UUID playerUUID, Component message) {
         this.plugin.playerDataManager().kickPlayer(playerUUID, message);
     }
+
 
     /**
      * This gives you instance of Jedis

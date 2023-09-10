@@ -45,6 +45,7 @@ import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.LegacyChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.scheduler.ScheduledTask;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.slf4j.Logger;
 import redis.clients.jedis.exceptions.JedisConnectionException;
@@ -225,13 +226,12 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, Con
         return this.getProxy().getPlayer(player).map(Player::getUsername).orElse(null);
     }
 
-    private final LegacyComponentSerializer serializer = LegacyComponentSerializer.legacySection();
 
     @Override
-    public boolean handlePlatformKick(UUID uuid, String message) {
+    public boolean handlePlatformKick(UUID uuid, Component message) {
         Player player = getPlayer(uuid);
         if (player == null) return false;
-        player.disconnect(serializer.deserialize(message));
+        player.disconnect(message);
         return true;
     }
 

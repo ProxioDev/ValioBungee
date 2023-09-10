@@ -32,6 +32,8 @@ import com.imaginarycode.minecraft.redisbungee.events.PlayerLeftNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import com.squareup.okhttp.Dispatcher;
 import com.squareup.okhttp.OkHttpClient;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -156,11 +158,11 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
     }
 
     @Override
-    public boolean handlePlatformKick(UUID uuid, String message) {
+    public boolean handlePlatformKick(UUID uuid, Component message) {
         ProxiedPlayer player = getPlayer(uuid);
         if (player == null) return false;
         if (!player.isConnected()) return false;
-        player.disconnect(TextComponent.fromLegacyText(message));
+        player.disconnect(BungeeComponentSerializer.get().serialize(message));
         return true;
     }
 

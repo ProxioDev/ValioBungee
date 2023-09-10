@@ -15,6 +15,7 @@ import com.imaginarycode.minecraft.redisbungee.api.config.RedisBungeeConfigurati
 import com.imaginarycode.minecraft.redisbungee.api.events.EventsPlatform;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.Summoner;
 import com.imaginarycode.minecraft.redisbungee.api.util.uuid.UUIDTranslator;
+import net.kyori.adventure.text.Component;
 
 import java.net.InetAddress;
 import java.util.UUID;
@@ -76,7 +77,7 @@ public interface RedisBungeePlugin<P> extends EventsPlatform {
 
     public String getPlayerName(UUID player);
 
-    boolean handlePlatformKick(UUID uuid, String message);
+    boolean handlePlatformKick(UUID uuid, Component message);
 
     public String getPlayerServerName(P player);
 

@@ -23,6 +23,13 @@ dependencies {
     api("com.squareup.okhttp:okhttp:2.7.5")
     api("org.spongepowered:configurate-yaml:$configurateVersion")
     api("com.github.ben-manes.caffeine:caffeine:3.1.8")
+
+    api("net.kyori:adventure-api:4.14.0")
+    api("net.kyori:adventure-text-serializer-gson:4.14.0")
+    api("net.kyori:adventure-text-serializer-legacy:4.14.0")
+    api("net.kyori:adventure-text-serializer-plain:4.14.0")
+    api("net.kyori:adventure-text-minimessage:4.14.0")
+
     // tests
     testImplementation("junit:junit:4.13.2")
 }
