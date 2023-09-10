@@ -20,10 +20,13 @@ import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
+import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.event.proxy.ProxyPingEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ServerConnection;
+import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerPing;
+import net.kyori.adventure.text.Component;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -65,7 +68,7 @@ public class RedisBungeeListener {
             String type;
 
             switch (subchannel) {
-                case "PlayerList":
+                case "PlayerList" -> {
                     out.writeUTF("PlayerList");
                     Set<UUID> original = Collections.emptySet();
                     type = in.readUTF();
@@ -83,8 +86,8 @@ public class RedisBungeeListener {
                             .map(uuid -> plugin.getUuidTranslator().getNameFromUuid(uuid, false))
                             .collect(Collectors.toSet());
                     out.writeUTF(Joiner.on(',').join(players));
-                    break;
-                case "PlayerCount":
+                }
+                case "PlayerCount" -> {
                     out.writeUTF("PlayerCount");
                     type = in.readUTF();
                     if (type.equals("ALL")) {
@@ -98,20 +101,18 @@ public class RedisBungeeListener {
                             out.writeInt(0);
                         }
                     }
-                    break;
-                case "LastOnline":
+                }
+                case "LastOnline" -> {
                     String user = in.readUTF();
                     out.writeUTF("LastOnline");
                     out.writeUTF(user);
                     out.writeLong(plugin.getAbstractRedisBungeeApi().getLastOnline(Objects.requireNonNull(plugin.getUuidTranslator().getTranslatedUuid(user, true))));
-                    break;
-                case "ServerPlayers":
+                }
+                case "ServerPlayers" -> {
                     String type1 = in.readUTF();
                     out.writeUTF("ServerPlayers");
                     Multimap<String, UUID> multimap = plugin.getAbstractRedisBungeeApi().getServerToPlayers();
-
                     boolean includesUsers;
-
                     switch (type1) {
                         case "COUNT" -> includesUsers = false;
                         case "PLAYERS" -> includesUsers = true;
@@ -120,9 +121,7 @@ public class RedisBungeeListener {
                             return;
                         }
                     }
-
                     out.writeUTF(type1);
-
                     if (includesUsers) {
                         Multimap<String, String> human = HashMultimap.create();
                         for (Map.Entry<String, UUID> entry : multimap.entries()) {
@@ -132,24 +131,41 @@ public class RedisBungeeListener {
                     } else {
                         serializeMultiset(multimap.keys(), out);
                     }
-                    break;
-                case "Proxy":
+                }
+                case "Proxy" -> {
                     out.writeUTF("Proxy");
                     out.writeUTF(plugin.configuration().getProxyId());
-                    break;
-                case "PlayerProxy":
+                }
+                case "PlayerProxy" -> {
                     String username = in.readUTF();
                     out.writeUTF("PlayerProxy");
                     out.writeUTF(username);
                     out.writeUTF(plugin.getAbstractRedisBungeeApi().getProxy(Objects.requireNonNull(plugin.getUuidTranslator().getTranslatedUuid(username, true))));
-                    break;
-                default:
+                }
+                default -> {
                     return;
+                }
             }
 
             ((ServerConnection) event.getSource()).sendPluginMessage(event.getIdentifier(), out.toByteArray());
         });
 
+    }
+
+    @Subscribe
+    public void onPlayerChooseInitialServerEvent(PlayerChooseInitialServerEvent event) {
+        if (plugin.configuration().handleReconnectToLastServer()) {
+            String lastServer = plugin.playerDataManager().getLastServerFor(event.getPlayer().getUniqueId());
+            if (lastServer == null) return;
+            // sending connect message, todo: IMPLEMENT once lang system is finalized
+            Optional<RegisteredServer> optionalRegisteredServer = ((RedisBungeeVelocityPlugin) plugin).getProxy().getServer(lastServer);
+            if (optionalRegisteredServer.isEmpty()) {
+                // sending failure message, todo: IMPLEMENT once lang system is finalized
+                return;
+            }
+            RegisteredServer server = optionalRegisteredServer.get();
+            event.setInitialServer(server);
+        }
     }
 
 

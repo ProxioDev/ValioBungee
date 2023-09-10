@@ -4,13 +4,12 @@
 
 
 # example:
-# Format:
-# message_id:
-#   <2 char language code>: "MiniMessage color and your text."
+
 # lets assume we want to add arabic language.
-#  logged-in-other-location:
-#    en: "<color:red>You logged in from another location!"
-#    ar: "<color:red>لقد اتصلت من مكان اخر"
+# errors:
+#    logged-in-other-location:
+#      en: "<color:red>You logged in from another location!"
+#      ar: "<color:red>لقد اتصلت من مكان اخر"
 
 
 # Prefix if ever used.
@@ -26,9 +25,15 @@ default-language: en
 # https://minecraft.fandom.com/wiki/Language
 use-client-language: true
 
+messages:
+  logged-in-other-location:
+    en: "<color:red>You logged in from another location!"
+  already-logged-in:
+    en: "<color:red>You are already logged in!"
+  server-not-found:
+    en: "<color:red>unable to connect you to the last server, because server %s was not found."
+  server-found:
+    en: "<color:green>Connecting you to %s..."
 
-logged-in-other-location:
-  en: "<color:red>You logged in from another location!"
 
-already-logged-in:
-  en: "<color:red>You are already logged in!"
+# commands:
