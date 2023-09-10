@@ -24,6 +24,7 @@ import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.event.player.ServerConnectedEvent;
 import com.velocitypowered.api.proxy.Player;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 import java.util.Objects;
@@ -65,18 +66,17 @@ public class VelocityPlayerDataManager extends PlayerDataManager<Player, PostLog
         super.playerChangedServer(event.getPlayer().getUniqueId(), oldServer, currentServer);
     }
 
-    private static final LegacyComponentSerializer LEGACY_COMPONENT_SERIALIZER = LegacyComponentSerializer.builder().build();
-
     @Subscribe
     public void onLoginEvent(LoginEvent event, Continuation continuation) {
         // check if online
         if (getLastOnline(event.getPlayer().getUniqueId()) == 0) {
             if (plugin.configuration().kickWhenOnline()) {
-                kickPlayer(event.getPlayer().getUniqueId(), plugin.configuration().getMessages().get(RedisBungeeConfiguration.MessageType.LOGGED_IN_OTHER_LOCATION));
+
+                kickPlayer(event.getPlayer().getUniqueId(), MiniMessage.miniMessage().deserialize(plugin.configuration().getMessage(RedisBungeeConfiguration.MessageType.LOGGED_IN_OTHER_LOCATION)));
                 // wait 3 seconds before releasing the event
                 plugin.executeAsyncAfter(continuation::resume, TimeUnit.SECONDS, 3);
             } else {
-                event.setResult(ResultedEvent.ComponentResult.denied(LEGACY_COMPONENT_SERIALIZER.deserialize(Objects.requireNonNull(plugin.configuration().getMessages().get(RedisBungeeConfiguration.MessageType.ALREADY_LOGGED_IN)))));
+                event.setResult(ResultedEvent.ComponentResult.denied( MiniMessage.miniMessage().deserialize(plugin.configuration().getMessage(RedisBungeeConfiguration.MessageType.ALREADY_LOGGED_IN))));
                 continuation.resume();
             }
         } else {

@@ -17,6 +17,13 @@ dependencies {
         exclude("com.google.guava", "guava")
         exclude("com.google.code.gson", "gson")
         exclude("org.spongepowered", "configurate-yaml")
+        // exclude also adventure api
+        exclude("net.kyori", "adventure-api")
+        exclude("net.kyori", "adventure-text-serializer-gson")
+        exclude("net.kyori", "adventure-text-serializer-legacy")
+        exclude("net.kyori", "adventure-text-serializer-plain")
+        exclude("net.kyori", "adventure-text-minimessage")
+
     }
     compileOnly("com.velocitypowered:velocity-api:3.2.0-SNAPSHOT")
     annotationProcessor("com.velocitypowered:velocity-api:3.2.0-SNAPSHOT")
@@ -37,6 +44,7 @@ tasks {
         options.isDocFilesSubDirs = true
         options.links(
             "https://jd.papermc.io/velocity/3.0.0/", // velocity api
+            "https://jd.advntr.dev/api/4.14.0"
         )
         val apiDocs = File(rootProject.projectDir, "RedisBungee-API/build/docs/javadoc")
         options.linksOffline("https://ci.limework.net/RedisBungee/RedisBungee-API/build/docs/javadoc", apiDocs.path)

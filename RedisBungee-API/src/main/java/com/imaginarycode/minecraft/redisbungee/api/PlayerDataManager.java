@@ -19,6 +19,8 @@ import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerChangedServerNe
 import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerLeftNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.api.events.IPubSubMessageEvent;
 import com.imaginarycode.minecraft.redisbungee.api.tasks.RedisPipelineTask;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import org.json.JSONObject;
 import redis.clients.jedis.ClusterPipeline;
 import redis.clients.jedis.Pipeline;
@@ -85,7 +87,7 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
             }
             UUID uuid = UUID.fromString(data.getString("uuid"));
             String message = data.getString("message");
-            plugin.handlePlatformKick(uuid, message);
+            plugin.handlePlatformKick(uuid, COMPONENT_SERIALIZER.deserialize(message));
             return;
         }
         if (event.getChannel().equals("redisbungee-serverchange")) {
@@ -95,7 +97,8 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
                 return;
             }
             UUID uuid = UUID.fromString(data.getString("uuid"));
-            String from = data.getString("from");
+            String from = null;
+            if (data.has("from")) from = data.getString("from");
             String to = data.getString("to");
             plugin.fireEvent(plugin.createPlayerChangedServerNetworkEvent(uuid, from, to));
             return;
@@ -133,12 +136,14 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
         handleServerChangeRedis(uuid, to);
     }
 
-    public void kickPlayer(UUID uuid, String message) {
+    private final JSONComponentSerializer COMPONENT_SERIALIZER =JSONComponentSerializer.json();
+
+    public void kickPlayer(UUID uuid, Component message) {
         if (!plugin.handlePlatformKick(uuid, message)) { // handle locally before SENDING a message
             JSONObject data = new JSONObject();
             data.put("proxy", plugin.configuration().getProxyId());
             data.put("uuid", uuid);
-            data.put("message", message);
+            data.put("message", COMPONENT_SERIALIZER.serialize(message));
             plugin.proxyDataManager().sendChannelMessage("redisbungee-kick", data.toString());
         }
     }

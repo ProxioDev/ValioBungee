@@ -16,6 +16,8 @@ import com.imaginarycode.minecraft.redisbungee.api.config.RedisBungeeConfigurati
 import com.imaginarycode.minecraft.redisbungee.events.PlayerChangedServerNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerLeftNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -32,6 +34,9 @@ import java.util.concurrent.TimeUnit;
 
 
 public class BungeePlayerDataManager extends PlayerDataManager<ProxiedPlayer, PostLoginEvent, PlayerDisconnectEvent, PubSubMessageEvent, PlayerChangedServerNetworkEvent, PlayerLeftNetworkEvent, ServerConnectedEvent> implements Listener {
+
+    private final BungeeComponentSerializer BUNGEECORD_SERIALIZER = BungeeComponentSerializer.get();
+
     public BungeePlayerDataManager(RedisBungeePlugin<ProxiedPlayer> plugin) {
         super(plugin);
     }
@@ -68,12 +73,12 @@ public class BungeePlayerDataManager extends PlayerDataManager<ProxiedPlayer, Po
         // check if online
         if (getLastOnline(event.getConnection().getUniqueId()) == 0) {
             if (plugin.configuration().kickWhenOnline()) {
-                kickPlayer(event.getConnection().getUniqueId(), plugin.configuration().getMessages().get(RedisBungeeConfiguration.MessageType.LOGGED_IN_OTHER_LOCATION));
+                kickPlayer(event.getConnection().getUniqueId(),MiniMessage.miniMessage().deserialize( plugin.configuration().getMessage(RedisBungeeConfiguration.MessageType.LOGGED_IN_OTHER_LOCATION)));
                 // wait 3 seconds before releasing the event
                 plugin.executeAsyncAfter(() -> event.completeIntent((Plugin) plugin), TimeUnit.SECONDS, 3);
             } else {
                 event.setCancelled(true);
-                event.setCancelReason(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(plugin.configuration().getMessages().get(RedisBungeeConfiguration.MessageType.ALREADY_LOGGED_IN)))));
+                event.setCancelReason(BungeeComponentSerializer.get().serialize(MiniMessage.miniMessage().deserialize( plugin.configuration().getMessage(RedisBungeeConfiguration.MessageType.ALREADY_LOGGED_IN))));
                 event.completeIntent((Plugin) plugin);
             }
         } else {

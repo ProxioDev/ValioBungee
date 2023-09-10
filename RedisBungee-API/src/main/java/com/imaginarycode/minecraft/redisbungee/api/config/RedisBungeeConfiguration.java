@@ -67,8 +67,8 @@ public class RedisBungeeConfiguration {
         return overrideBungeeCommands;
     }
 
-    public ImmutableMap<MessageType, String> getMessages() {
-        return messages;
+    public String getMessage(MessageType messageType) {
+        return this.messages.get(messageType);
     }
 
     public boolean kickWhenOnline() {

@@ -16,7 +16,10 @@ dependencies {
     compileOnly("net.md-5:bungeecord-api:$bungeecordApiVersion") {
         exclude("com.google.guava", "guava")
         exclude("com.google.code.gson", "gson")
+        exclude("net.kyori","adventure-api")
     }
+    implementation("net.kyori:adventure-platform-bungeecord:4.3.0")
+    implementation("net.kyori:adventure-text-serializer-gson:4.14.0")
 }
 
 description = "RedisBungee Bungeecord implementation"
@@ -35,6 +38,7 @@ tasks {
         options.isDocFilesSubDirs = true
         options.links(
             "https://ci.md-5.net/job/BungeeCord/ws/api/target/apidocs/", // bungeecord api
+            "https://jd.advntr.dev/api/4.14.0"
         )
         val apiDocs = File(rootProject.projectDir, "RedisBungee-API/build/docs/javadoc")
         options.linksOffline("https://ci.limework.net/RedisBungee/RedisBungee-API/build/docs/javadoc", apiDocs.path)
