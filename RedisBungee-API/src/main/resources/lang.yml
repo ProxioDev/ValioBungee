@@ -1,0 +1,34 @@
+# this config file is for messages / Languages
+# Note 1: use MiniMessage format https://docs.advntr.dev/minimessage/format.html for colors etc... Legacy chat color is not supported.
+# Mote 2: Language codes that are used is ISO 639-1, here is full list https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
+
+
+# example:
+# Format:
+# message_id:
+#   <2 char language code>: "MiniMessage color and your text."
+# lets assume we want to add arabic language.
+#  logged-in-other-location:
+#    en: "<color:red>You logged in from another location!"
+#    ar: "<color:red>لقد اتصلت من مكان اخر"
+
+
+# Prefix if ever used.
+redis-bungee-prefix: "<color:red>[<color:yellow>Redis<color:red>Bungee]"
+
+# en is English, Which is the default language used when a language for a message isn't defined.
+# Warning: if en or set default language wasn't defined in the config for all messages, plugin will not load.
+
+# set the default language
+default-language: en
+
+# send language based on client sent settings
+# https://minecraft.fandom.com/wiki/Language
+use-client-language: true
+
+
+logged-in-other-location:
+  en: "<color:red>You logged in from another location!"
+
+already-logged-in:
+  en: "<color:red>You are already logged in!"

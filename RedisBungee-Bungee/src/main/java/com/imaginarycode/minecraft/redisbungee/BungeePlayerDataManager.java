@@ -16,6 +16,7 @@ import com.imaginarycode.minecraft.redisbungee.api.config.RedisBungeeConfigurati
 import com.imaginarycode.minecraft.redisbungee.events.PlayerChangedServerNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerLeftNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
 import net.md_5.bungee.api.ChatColor;
@@ -73,12 +74,12 @@ public class BungeePlayerDataManager extends PlayerDataManager<ProxiedPlayer, Po
         // check if online
         if (getLastOnline(event.getConnection().getUniqueId()) == 0) {
             if (plugin.configuration().kickWhenOnline()) {
-                kickPlayer(event.getConnection().getUniqueId(),MiniMessage.miniMessage().deserialize( plugin.configuration().getMessage(RedisBungeeConfiguration.MessageType.LOGGED_IN_OTHER_LOCATION)));
+                kickPlayer(event.getConnection().getUniqueId(), Component.empty());
                 // wait 3 seconds before releasing the event
                 plugin.executeAsyncAfter(() -> event.completeIntent((Plugin) plugin), TimeUnit.SECONDS, 3);
             } else {
                 event.setCancelled(true);
-                event.setCancelReason(BungeeComponentSerializer.get().serialize(MiniMessage.miniMessage().deserialize( plugin.configuration().getMessage(RedisBungeeConfiguration.MessageType.ALREADY_LOGGED_IN))));
+                event.setCancelReason(BUNGEECORD_SERIALIZER.serialize(Component.empty()));
                 event.completeIntent((Plugin) plugin);
             }
         } else {

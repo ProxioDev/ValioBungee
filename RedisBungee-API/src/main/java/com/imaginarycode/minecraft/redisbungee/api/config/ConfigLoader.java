@@ -89,7 +89,7 @@ public interface ConfigLoader {
         boolean reconnectToLastServer = node.getNode("reconnect-to-last-server").getBoolean();
         boolean handleMotd = node.getNode("handle-motd").getBoolean(true);
 
-        RedisBungeeConfiguration configuration = new RedisBungeeConfiguration(proxyId, exemptAddresses, registerLegacyCommands, overrideBungeeCommands, getMessagesFromPath(createMessagesFile(dataFolder)), kickWhenOnline, reconnectToLastServer, handleMotd);
+        RedisBungeeConfiguration configuration = new RedisBungeeConfiguration(proxyId, exemptAddresses, registerLegacyCommands, overrideBungeeCommands, kickWhenOnline, reconnectToLastServer, handleMotd);
         Summoner<?> summoner;
         RedisBungeeMode redisBungeeMode;
         if (node.getNode("cluster-mode-enabled").getBoolean(false)) {
@@ -136,30 +136,6 @@ public interface ConfigLoader {
     }
 
     void onConfigLoad(RedisBungeeConfiguration configuration, Summoner<?> summoner, RedisBungeeMode mode);
-
-    default ImmutableMap<RedisBungeeConfiguration.MessageType, String> getMessagesFromPath(Path path) throws IOException {
-        final YAMLConfigurationLoader yamlConfigurationFileLoader = YAMLConfigurationLoader.builder().setPath(path).build();
-        ConfigurationNode node = yamlConfigurationFileLoader.load();
-        HashMap<RedisBungeeConfiguration.MessageType, String> messages = new HashMap<>();
-        messages.put(RedisBungeeConfiguration.MessageType.LOGGED_IN_OTHER_LOCATION, node.getNode("logged-in-other-location").getString("§cLogged in from another location."));
-        messages.put(RedisBungeeConfiguration.MessageType.ALREADY_LOGGED_IN, node.getNode("already-logged-in").getString("§cYou are already logged in!"));
-        return ImmutableMap.copyOf(messages);
-    }
-
-    default Path createMessagesFile(Path dataFolder) throws IOException {
-        if (Files.notExists(dataFolder)) {
-            Files.createDirectory(dataFolder);
-        }
-        Path file = dataFolder.resolve("messages.yml");
-        if (Files.notExists(file)) {
-            try (InputStream in = getClass().getClassLoader().getResourceAsStream("messages.yml")) {
-                Files.createFile(file);
-                assert in != null;
-                Files.copy(in, file, StandardCopyOption.REPLACE_EXISTING);
-            }
-        }
-        return file;
-    }
 
     default Path createConfigFile(Path dataFolder) throws IOException {
         if (Files.notExists(dataFolder)) {
