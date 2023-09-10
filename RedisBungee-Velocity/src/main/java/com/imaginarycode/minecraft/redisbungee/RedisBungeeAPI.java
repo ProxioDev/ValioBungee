@@ -23,7 +23,7 @@ import java.util.UUID;
  * or somehow you got the Plugin instance by you can call the api using {@link RedisBungeePlugin#getAbstractRedisBungeeApi()}.
  *
  * @author tuxed
- * @since 0.2.3 | updated 0.8.0
+ * @since 0.2.3
  */
 public class RedisBungeeAPI extends AbstractRedisBungeeAPI {
 
