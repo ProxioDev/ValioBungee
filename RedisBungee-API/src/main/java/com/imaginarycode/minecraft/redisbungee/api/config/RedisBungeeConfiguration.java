@@ -13,18 +13,13 @@ package com.imaginarycode.minecraft.redisbungee.api.config;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.net.InetAddresses;
+import net.kyori.adventure.text.Component;
 
 import java.net.InetAddress;
 import java.util.List;
 
 public class RedisBungeeConfiguration {
 
-    public enum MessageType {
-        LOGGED_IN_OTHER_LOCATION,
-        ALREADY_LOGGED_IN
-    }
-
-    private final ImmutableMap<MessageType, String> messages;
     public static final int CONFIG_VERSION = 2;
     private final String proxyId;
     private final List<InetAddress> exemptAddresses;
@@ -36,9 +31,8 @@ public class RedisBungeeConfiguration {
     private final boolean handleMotd;
 
 
-    public RedisBungeeConfiguration(String proxyId, List<String> exemptAddresses, boolean registerLegacyCommands, boolean overrideBungeeCommands, ImmutableMap<MessageType, String> messages, boolean kickWhenOnline, boolean handleReconnectToLastServer, boolean handleMotd) {
+    public RedisBungeeConfiguration(String proxyId, List<String> exemptAddresses, boolean registerLegacyCommands, boolean overrideBungeeCommands, boolean kickWhenOnline, boolean handleReconnectToLastServer, boolean handleMotd) {
         this.proxyId = proxyId;
-        this.messages = messages;
         ImmutableList.Builder<InetAddress> addressBuilder = ImmutableList.builder();
         for (String s : exemptAddresses) {
             addressBuilder.add(InetAddresses.forString(s));
@@ -65,10 +59,6 @@ public class RedisBungeeConfiguration {
 
     public boolean doOverrideBungeeCommands() {
         return overrideBungeeCommands;
-    }
-
-    public String getMessage(MessageType messageType) {
-        return this.messages.get(messageType);
     }
 
     public boolean kickWhenOnline() {

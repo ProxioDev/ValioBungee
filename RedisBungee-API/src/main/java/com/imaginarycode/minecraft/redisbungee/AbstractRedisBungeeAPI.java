@@ -352,7 +352,7 @@ public abstract class AbstractRedisBungeeAPI {
      * @since 0.8.0
      * @deprecated
      */
-
+    @Deprecated
     public void kickPlayer(String playerName, String message) {
         kickPlayer(getUuidFromName(playerName), message);
     }

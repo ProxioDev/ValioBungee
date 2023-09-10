@@ -1,5 +1,0 @@
-# this config file is for messages for players and command messages
-# Note this uses MiniMessage format https://docs.advntr.dev/minimessage/format.html
-
-logged-in-other-location: "<color:red>You logged in from another location!"
-already-logged-in: "<color:red>You are already logged in!"
