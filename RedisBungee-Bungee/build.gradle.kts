@@ -38,7 +38,6 @@ tasks {
         options.isDocFilesSubDirs = true
         options.links(
             "https://ci.md-5.net/job/BungeeCord/ws/api/target/apidocs/", // bungeecord api
-            "https://jd.advntr.dev/api/4.14.0"
         )
         val apiDocs = File(rootProject.projectDir, "RedisBungee-API/build/docs/javadoc")
         options.linksOffline("https://ci.limework.net/RedisBungee/RedisBungee-API/build/docs/javadoc", apiDocs.path)
