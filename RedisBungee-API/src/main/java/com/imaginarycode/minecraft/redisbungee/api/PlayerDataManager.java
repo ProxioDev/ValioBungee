@@ -38,6 +38,7 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
 
     protected final RedisBungeePlugin<P> plugin;
     private final LoadingCache<UUID, String> serverCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).build(this::getServerFromRedis);
+    private final LoadingCache<UUID, String> lastServerCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).build(this::getLastServerFromRedis);
     private final LoadingCache<UUID, String> proxyCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).build(this::getProxyFromRedis);
     private final LoadingCache<UUID, InetAddress> ipCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).build(this::getIpAddressFromRedis);
     private final LoadingCache<UUID, Long> lastOnlineCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).build(this::getLastOnlineFromRedis);
@@ -68,6 +69,7 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
 
     protected void handleNetworkPlayerServerChange(IPlayerChangedServerNetworkEvent event) {
         this.serverCache.invalidate(event.getUuid());
+        this.lastServerCache.invalidate(event.getUuid());
     }
 
     protected void handleNetworkPlayerQuit(IPlayerLeftNetworkEvent event) {
@@ -190,6 +192,10 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
         return unifiedJedis.hget("redis-bungee::player::" + uuid + "::data", "server");
     }
 
+    protected String getLastServerFromRedis(UUID uuid) {
+        return unifiedJedis.hget("redis-bungee::player::" + uuid + "::data", "last-server");
+    }
+
     protected InetAddress getIpAddressFromRedis(UUID uuid) {
         String ip = unifiedJedis.hget("redis-bungee::player::" + uuid + "::data", "ip");
         if (ip == null) return null;
@@ -202,6 +208,9 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
         return Long.parseLong(unixString);
     }
 
+    public String getLastServerFor(UUID uuid) {
+        return this.lastServerCache.get(uuid);
+    }
     public String getServerFor(UUID uuid) {
         return this.serverCache.get(uuid);
     }

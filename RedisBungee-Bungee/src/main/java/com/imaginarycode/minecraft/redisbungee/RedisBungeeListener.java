@@ -17,12 +17,15 @@ import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
+import net.kyori.adventure.text.Component;
 import net.md_5.bungee.api.AbstractReconnectHandler;
+import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.connection.Server;
 import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.event.ProxyPingEvent;
+import net.md_5.bungee.api.event.ServerConnectEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
@@ -146,5 +149,18 @@ public class RedisBungeeListener implements Listener {
         }
     }
 
-
+    @EventHandler
+    public void onServerConnectEvent(ServerConnectEvent event) {
+        if (event.getReason() == ServerConnectEvent.Reason.JOIN_PROXY && plugin.configuration().handleReconnectToLastServer()) {
+            String lastServer = plugin.playerDataManager().getLastServerFor(event.getPlayer().getUniqueId());
+            if (lastServer == null) return;
+            // sending connect message, todo: IMPLEMENT once lang system is finalized
+            ServerInfo serverInfo = ProxyServer.getInstance().getServerInfo(lastServer);
+            if (serverInfo == null) {
+                // sending failure message, todo: IMPLEMENT once lang system is finalized
+                return;
+            }
+            event.setTarget(serverInfo);
+        }
+    }
 }
