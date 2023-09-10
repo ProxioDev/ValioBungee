@@ -44,7 +44,6 @@ tasks {
         options.isDocFilesSubDirs = true
         options.links(
             "https://jd.papermc.io/velocity/3.0.0/", // velocity api
-            "https://jd.advntr.dev/api/4.14.0"
         )
         val apiDocs = File(rootProject.projectDir, "RedisBungee-API/build/docs/javadoc")
         options.linksOffline("https://ci.limework.net/RedisBungee/RedisBungee-API/build/docs/javadoc", apiDocs.path)
