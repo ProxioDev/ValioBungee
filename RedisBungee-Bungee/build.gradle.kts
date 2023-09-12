@@ -10,7 +10,7 @@ repositories {
     mavenCentral()
     maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots") } // bungeecord
 }
-val bungeecordApiVersion = "1.19-R0.1-SNAPSHOT"
+val bungeecordApiVersion = "1.20-R0.1-SNAPSHOT"
 dependencies {
     api(project(":RedisBungee-API"))
     compileOnly("net.md-5:bungeecord-api:$bungeecordApiVersion") {
