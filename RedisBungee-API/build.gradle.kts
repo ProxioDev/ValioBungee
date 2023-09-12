@@ -32,8 +32,6 @@ dependencies {
     api("net.kyori:adventure-text-serializer-plain:$adventureVersion")
     api("net.kyori:adventure-text-minimessage:$adventureVersion")
 
-    // tests
-    testImplementation("junit:junit:4.13.2")
 }
 
 description = "RedisBungee interfaces"
@@ -72,10 +70,6 @@ tasks {
 
         )
 
-    }
-
-    test {
-        useJUnitPlatform()
     }
 
     compileJava {
