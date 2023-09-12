@@ -68,22 +68,22 @@ public interface RedisBungeePlugin<P> extends EventsPlatform {
 
     boolean isOnlineMode();
 
-    public P getPlayer(UUID uuid);
+    P getPlayer(UUID uuid);
 
-    public P getPlayer(String name);
+    P getPlayer(String name);
 
-    public UUID getPlayerUUID(String player);
+    UUID getPlayerUUID(String player);
 
 
-    public String getPlayerName(UUID player);
+    String getPlayerName(UUID player);
 
     boolean handlePlatformKick(UUID uuid, Component message);
 
-    public String getPlayerServerName(P player);
+    String getPlayerServerName(P player);
 
-    public boolean isPlayerOnAServer(P player);
+    boolean isPlayerOnAServer(P player);
 
-    public InetAddress getPlayerIp(P player);
+    InetAddress getPlayerIp(P player);
 
     void executeAsync(Runnable runnable);
 
