@@ -43,7 +43,9 @@ max-redis-connections: 10
 useSSL: false
 
 # An identifier for this BungeeCord / Velocity instance. Will randomly generate if leaving it blank.
-proxy-id: "test-1"
+# Tip: you can set proxy id using Environment variable REDISBUNGEE_PROXY_ID which will override this config option
+# before launch
+proxy-id: "proxy-1"
 
 # since version 0.8.0 Internally now uses JedisPooled instead of Jedis, JedisPool.
 # which will break compatibility with old plugins that uses RedisBungee JedisPool

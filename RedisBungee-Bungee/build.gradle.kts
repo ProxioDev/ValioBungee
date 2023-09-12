@@ -44,6 +44,7 @@ tasks {
     }
     runWaterfall {
         waterfallVersion("1.20")
+        environment.put("REDISBUNGEE_PROXY_ID", "bungeecord-1")
     }
     compileJava {
         options.encoding = Charsets.UTF_8.name()

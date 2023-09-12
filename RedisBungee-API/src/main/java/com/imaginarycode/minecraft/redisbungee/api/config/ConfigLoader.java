@@ -54,7 +54,8 @@ public interface ConfigLoader {
         final boolean kickWhenOnline = node.getNode("kick-when-online").getBoolean(true);
         String redisPassword = node.getNode("redis-password").getString("");
         String redisUsername = node.getNode("redis-username").getString("");
-        String proxyId = node.getNode("proxy-id").getString("test-1");
+        String proxyId = node.getNode("proxy-id").getString("proxy-1");
+
         final int maxConnections = node.getNode("max-redis-connections").getInt(10);
         List<String> exemptAddresses;
         try {
@@ -71,9 +72,11 @@ public interface ConfigLoader {
         if ((redisUsername.isEmpty() || redisUsername.equals("none"))) {
             redisUsername = null;
         }
-
-        if (useSSL) {
-            plugin.logInfo("Using ssl");
+        // env var
+        String proxyIdFromEnv = System.getenv("REDISBUNGEE_PROXY_ID");
+        if (proxyIdFromEnv != null) {
+            plugin.logInfo("Overriding current configured proxy id {} and been set to {} by Environment variable REDISBUNGEE_PROXY_ID", proxyId, proxyIdFromEnv);
+            proxyId = proxyIdFromEnv;
         }
         // Configuration sanity checks.
         if (proxyId == null || proxyId.isEmpty()) {
@@ -88,10 +91,15 @@ public interface ConfigLoader {
         }
         boolean reconnectToLastServer = node.getNode("reconnect-to-last-server").getBoolean();
         boolean handleMotd = node.getNode("handle-motd").getBoolean(true);
+        plugin.logInfo("handle reconnect to last server: {}", reconnectToLastServer);
+        plugin.logInfo("handle motd: {}", handleMotd);
 
         RedisBungeeConfiguration configuration = new RedisBungeeConfiguration(proxyId, exemptAddresses, registerLegacyCommands, overrideBungeeCommands, kickWhenOnline, reconnectToLastServer, handleMotd);
         Summoner<?> summoner;
         RedisBungeeMode redisBungeeMode;
+        if (useSSL) {
+            plugin.logInfo("Using ssl");
+        }
         if (node.getNode("cluster-mode-enabled").getBoolean(false)) {
             plugin.logInfo("RedisBungee MODE: CLUSTER");
             Set<HostAndPort> hostAndPortSet = new HashSet<>();
