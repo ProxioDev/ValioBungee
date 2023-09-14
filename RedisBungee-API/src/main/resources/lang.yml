@@ -25,6 +25,7 @@ default-language: en
 # https://minecraft.fandom.com/wiki/Language
 use-client-language: true
 
+# messages
 messages:
   logged-in-other-location:
     en: "<color:red>You logged in from another location!"
@@ -36,4 +37,18 @@ messages:
     en: "<color:green>Connecting you to %s..."
 
 
-# commands:
+# commands common messages:
+commands-common:
+  player-not-found:
+    en: "<color:red>Player not found."
+  player-not-specified:
+    en: "<color:red>You must specify a player name."
+  command-not-specified:
+    en: "<color:red>You must specify a command to be run."
+
+# commands
+#commands:
+#
+
+
+
