@@ -185,6 +185,8 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
     @Override
     public void initialize() {
         logInfo("Initializing RedisBungee.....");
+        logInfo("Version: {}", Constants.VERSION);
+        logInfo("Build date: {}", Constants.BUILD_DATE);
         ThreadFactory factory = ((ThreadPoolExecutor) getExecutorService()).getThreadFactory();
         ScheduledExecutorService service = Executors.newScheduledThreadPool(24, factory);
         try {

@@ -49,7 +49,7 @@ proxy-id: "proxy-1"
 
 # since version 0.8.0 Internally now uses JedisPooled instead of Jedis, JedisPool.
 # which will break compatibility with old plugins that uses RedisBungee JedisPool
-# so to mitigate this issue, we will instruct RedisBungee to init an JedisPool for compatibility reasons.
+# so to mitigate this issue, RedisBungee will create an JedisPool for compatibility reasons.
 # disabled by default
 # ignored when cluster mode is enabled
 enable-jedis-pool-compatibility: false

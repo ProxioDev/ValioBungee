@@ -93,6 +93,8 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, Con
         this.server = server;
         this.logger = logger;
         this.dataFolder = dataDirectory;
+        logInfo("Version: {}", Constants.VERSION);
+        logInfo("Build date: {}", Constants.BUILD_DATE);
         try {
             loadConfig(this, dataDirectory);
         } catch (IOException e) {
@@ -252,7 +254,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, Con
 
     @Override
     public void initialize() {
-        logInfo("Initializing RedisBungee.....");
+        logInfo("Initializing RedisBungee.....");;
         // start heartbeat task
         // heartbeat and clean up
         this.heartbeatTask = server.getScheduler().buildTask(this, this.proxyDataManager::publishHeartbeat).repeat(Duration.ofSeconds(1)).schedule();
