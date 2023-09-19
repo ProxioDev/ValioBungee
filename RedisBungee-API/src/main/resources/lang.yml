@@ -23,6 +23,8 @@ default-language: en
 
 # send language based on client sent settings
 # https://minecraft.fandom.com/wiki/Language
+# if you don't have languages configured for client it will
+# default to language that has been set above
 use-client-language: true
 
 # messages
@@ -47,8 +49,9 @@ commands-common:
     en: "<color:red>You must specify a command to be run."
 
 # commands
-#commands:
-#
+commands:
+
+
 
 
 
