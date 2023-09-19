@@ -254,7 +254,8 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, Con
 
     @Override
     public void initialize() {
-        logInfo("Initializing RedisBungee.....");;
+        logInfo("Initializing RedisBungee.....");
+        ;
         // start heartbeat task
         // heartbeat and clean up
         this.heartbeatTask = server.getScheduler().buildTask(this, this.proxyDataManager::publishHeartbeat).repeat(Duration.ofSeconds(1)).schedule();
@@ -272,9 +273,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, Con
         // register legacy commands
         if (configuration.doRegisterLegacyCommands()) {
             // Override Velocity commands
-            if (configuration.doOverrideBungeeCommands()) {
-                getProxy().getCommandManager().register("glist", new RedisBungeeCommands.GlistCommand(this), "redisbungee", "rglist");
-            }
+            getProxy().getCommandManager().register("glist", new RedisBungeeCommands.GlistCommand(this), "redisbungee", "rglist");
             getProxy().getCommandManager().register("sendtoall", new RedisBungeeCommands.SendToAll(this), "rsendtoall");
             getProxy().getCommandManager().register("serverid", new RedisBungeeCommands.ServerId(this), "rserverid");
             getProxy().getCommandManager().register("serverids", new RedisBungeeCommands.ServerIds(this));
