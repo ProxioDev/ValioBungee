@@ -70,6 +70,7 @@ register-legacy-commands: false
 #
 # Please note that with build 787+, most commands overridden by RedisBungee were moved to
 # modules, and these must be disabled or overridden yourself.
+# ignored on velocity
 override-bungee-commands: false
 
 # A list of IP addresses for which RedisBungee will not modify the response for, useful for automatic
