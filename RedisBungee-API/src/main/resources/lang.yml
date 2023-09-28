@@ -38,11 +38,11 @@ messages:
     en_us: "<color:red>You are already logged in!"
     ar_sa: "<color:red>انت متصل بالفعل"
   server-not-found:
-    en_us: "<color:red>unable to connect you to the last server, because server %s was not found."
-    ar_sa: "<color:red> فشل الاتصال بالخادم السابق لان الخادم غير موجود (%s) "
+    en_us: "<color:red>unable to connect you to the last server, because server <server> was not found."
+    ar_sa: "<color:red>فشل الاتصال بالخادم السابق لان الخادم غير موجود (<server>)"
   server-found:
-    en_us: "<color:green>Connecting you to %s..."
-    ar_sa: "<color:green> جاري الاتصال بخادم %s"
+    en_us: "<color:green>Connecting you to <server>..."
+    ar_sa: "<color:green>جاري الاتصال بخادم <server>"
 
 # commands common messages:
 commands-common:
@@ -54,7 +54,7 @@ commands-common:
     ar_sa: "<color:red>أدخل اسم اللاعب مطلوب"
   command-not-specified:
     en_us: "<color:red>You must specify a command to be run."
-    ar_sa: "<color:red> ادخل الأمر المطلوب"
+    ar_sa: "<color:red>ادخل الأمر المطلوب"
 
 # commands
 commands:
