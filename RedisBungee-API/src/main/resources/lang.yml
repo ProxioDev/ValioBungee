@@ -1,6 +1,8 @@
 # this config file is for messages / Languages
 # Note 1: use MiniMessage format https://docs.advntr.dev/minimessage/format.html for colors etc... Legacy chat color is not supported.
-# Mote 2: Language codes that are used is ISO 639-1, here is full list https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
+# note 2: Language codes used in minecraft from the minecraft wiki
+# Locale Code -> In-game
+# https://minecraft.wiki/w/Language
 
 
 # example:
@@ -8,18 +10,18 @@
 # lets assume we want to add arabic language.
 # errors:
 #    logged-in-other-location:
-#      en: "<color:red>You logged in from another location!"
-#      ar: "<color:red>لقد اتصلت من مكان اخر"
+#      en_us: "<color:red>You logged in from another location!"
+#      ar_sa: "<color:red>لقد اتصلت من مكان اخر"
 
 
 # Prefix if ever used.
 redis-bungee-prefix: "<color:red>[<color:yellow>Redis<color:red>Bungee]"
 
 # en is English, Which is the default language used when a language for a message isn't defined.
-# Warning: if en or set default language wasn't defined in the config for all messages, plugin will not load.
+# Warning: IF THE set default language wasn't defined in the config for all messages, plugin will not load.
 
 # set the default language
-default-language: en
+default-language: en_us
 
 # send language based on client sent settings
 # https://minecraft.fandom.com/wiki/Language
@@ -30,23 +32,23 @@ use-client-language: true
 # messages
 messages:
   logged-in-other-location:
-    en: "<color:red>You logged in from another location!"
+    en_us: "<color:red>You logged in from another location!"
   already-logged-in:
-    en: "<color:red>You are already logged in!"
+    en_us: "<color:red>You are already logged in!"
   server-not-found:
-    en: "<color:red>unable to connect you to the last server, because server %s was not found."
+    en_us: "<color:red>unable to connect you to the last server, because server %s was not found."
   server-found:
-    en: "<color:green>Connecting you to %s..."
+    en_us: "<color:green>Connecting you to %s..."
 
 
 # commands common messages:
 commands-common:
   player-not-found:
-    en: "<color:red>Player not found."
+    en_US: "<color:red>Player not found."
   player-not-specified:
-    en: "<color:red>You must specify a player name."
+    en_us: "<color:red>You must specify a player name."
   command-not-specified:
-    en: "<color:red>You must specify a command to be run."
+    en_us: "<color:red>You must specify a command to be run."
 
 # commands
 commands:
