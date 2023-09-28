@@ -2,11 +2,11 @@
 # Note 1: use MiniMessage format https://docs.advntr.dev/minimessage/format.html for colors etc... Legacy chat color is not supported.
 # note 2: Language codes used in minecraft from the minecraft wiki
 # Locale Code -> In-game
+# example: en_us for english and ar_sa for arabic
+# all codes can be obtained from lik below
 # https://minecraft.wiki/w/Language
 
-
 # example:
-
 # lets assume we want to add arabic language.
 # errors:
 #    logged-in-other-location:
@@ -14,10 +14,10 @@
 #      ar_sa: "<color:red>لقد اتصلت من مكان اخر"
 
 
-# Prefix if ever used.
+# RedisBungee Prefix if ever used.
 redis-bungee-prefix: "<color:red>[<color:yellow>Redis<color:red>Bungee]"
 
-# en is English, Which is the default language used when a language for a message isn't defined.
+# us_en is american English, Which is the default language used when a language for a message isn't defined.
 # Warning: IF THE set default language wasn't defined in the config for all messages, plugin will not load.
 
 # set the default language
