@@ -33,22 +33,28 @@ use-client-language: true
 messages:
   logged-in-other-location:
     en_us: "<color:red>You logged in from another location!"
+    ar_sa: "<color:red>لقد اتصلت من مكان اخر"
   already-logged-in:
     en_us: "<color:red>You are already logged in!"
+    ar_sa: "<color:red>انت متصل بالفعل"
   server-not-found:
     en_us: "<color:red>unable to connect you to the last server, because server %s was not found."
+    ar_sa: "<color:red> فشل الاتصال بالخادم السابق لان الخادم غير موجود (%s) "
   server-found:
     en_us: "<color:green>Connecting you to %s..."
-
+    ar_sa: "<color:green> جاري الاتصال بخادم %s"
 
 # commands common messages:
 commands-common:
   player-not-found:
-    en_US: "<color:red>Player not found."
+    en_us: "<color:red>Player not found."
+    ar_sa: "<color:red>اللاعب غير موجود"
   player-not-specified:
     en_us: "<color:red>You must specify a player name."
+    ar_sa: "<color:red>أدخل اسم اللاعب مطلوب"
   command-not-specified:
     en_us: "<color:red>You must specify a command to be run."
+    ar_sa: "<color:red> ادخل الأمر المطلوب"
 
 # commands
 commands:
