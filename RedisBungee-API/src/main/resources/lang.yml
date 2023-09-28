@@ -34,27 +34,34 @@ messages:
   logged-in-other-location:
     en_us: "<color:red>You logged in from another location!"
     ar_sa: "<color:red>لقد اتصلت من مكان اخر"
+    pt_br: "<color:red>Você está logado em outra localização!"
   already-logged-in:
     en_us: "<color:red>You are already logged in!"
     ar_sa: "<color:red>انت متصل بالفعل"
+    pt_br: "<color:red>Você já está logado!"
   server-not-found:
     en_us: "<color:red>unable to connect you to the last server, because server %s was not found."
     ar_sa: "<color:red> فشل الاتصال بالخادم السابق لان الخادم غير موجود (%s) "
+    en_us: "<color:red>falha ao conectar você ao último servidor, porque o servidor %s não foi encontrado."
   server-found:
     en_us: "<color:green>Connecting you to %s..."
     ar_sa: "<color:green> جاري الاتصال بخادم %s"
+    pt_br: "<color:green>Conectando você a %s..."
 
 # commands common messages:
 commands-common:
   player-not-found:
     en_us: "<color:red>Player not found."
     ar_sa: "<color:red>اللاعب غير موجود"
+    pt_br: "<color:red>Jogador não encontrado."
   player-not-specified:
     en_us: "<color:red>You must specify a player name."
     ar_sa: "<color:red>أدخل اسم اللاعب مطلوب"
+    pt_br: "<color:red>Você deve especificar um nome de jogador."
   command-not-specified:
     en_us: "<color:red>You must specify a command to be run."
     ar_sa: "<color:red> ادخل الأمر المطلوب"
+    pt_br: "<color:red>Você deve especificar um comando para ser executado."
 
 # commands
 commands:
