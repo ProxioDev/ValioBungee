@@ -101,7 +101,7 @@ then in your project plugin.yml add `RedisBungee` to `depends` like this
 
 ```yaml
 name: "yourplugin"
-main: your.main.class
+main: your.loaders.class
 version: 1.0.0-SNAPSHOT
 author: idk
 depends: [ RedisBungee ]

@@ -8,13 +8,13 @@
  *  http://www.eclipse.org/legal/epl-v10.html
  */
 
-package com.imaginarycode.minecraft.redisbungee.api.config;
+package com.imaginarycode.minecraft.redisbungee.api.config.loaders;
 
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.reflect.TypeToken;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeeMode;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
+import com.imaginarycode.minecraft.redisbungee.api.config.RedisBungeeConfiguration;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisClusterSummoner;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisPooledSummoner;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.Summoner;
@@ -26,26 +26,21 @@ import redis.clients.jedis.*;
 import redis.clients.jedis.providers.ClusterConnectionProvider;
 import redis.clients.jedis.providers.PooledConnectionProvider;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.*;
 
-public interface ConfigLoader {
+public interface ConfigLoader extends GenericConfigLoader {
 
-    default void loadConfig(RedisBungeePlugin<?> plugin, File dataFolder) throws IOException {
-        loadConfig(plugin, dataFolder.toPath());
-    }
+    int CONFIG_VERSION = 2;
 
+    @Override
     default void loadConfig(RedisBungeePlugin<?> plugin, Path dataFolder) throws IOException {
-        Path configFile = createConfigFile(dataFolder);
+        Path configFile = createConfigFile(dataFolder, "config.yml", "config.yml");
         final YAMLConfigurationLoader yamlConfigurationFileLoader = YAMLConfigurationLoader.builder().setPath(configFile).build();
         ConfigurationNode node = yamlConfigurationFileLoader.load();
-        if (node.getNode("config-version").getInt(0) != RedisBungeeConfiguration.CONFIG_VERSION) {
-            handleOldConfig(dataFolder);
+        if (node.getNode("config-version").getInt(0) != CONFIG_VERSION) {
+            handleOldConfig(dataFolder, "config.yml", "config.yml");
             node = yamlConfigurationFileLoader.load();
         }
         final boolean useSSL = node.getNode("useSSL").getBoolean(false);
@@ -145,29 +140,5 @@ public interface ConfigLoader {
 
     void onConfigLoad(RedisBungeeConfiguration configuration, Summoner<?> summoner, RedisBungeeMode mode);
 
-    default Path createConfigFile(Path dataFolder) throws IOException {
-        if (Files.notExists(dataFolder)) {
-            Files.createDirectory(dataFolder);
-        }
-        Path file = dataFolder.resolve("config.yml");
-        if (Files.notExists(file)) {
-            try (InputStream in = getClass().getClassLoader().getResourceAsStream("config.yml")) {
-                Files.createFile(file);
-                assert in != null;
-                Files.copy(in, file, StandardCopyOption.REPLACE_EXISTING);
-            }
-        }
-        return file;
-    }
-
-    default void handleOldConfig(Path dataFolder) throws IOException {
-        Path oldConfigFolder = dataFolder.resolve("old_config");
-        if (Files.notExists(oldConfigFolder)) {
-            Files.createDirectory(oldConfigFolder);
-        }
-        Path oldConfigPath = dataFolder.resolve("config.yml");
-        Files.move(oldConfigPath, oldConfigFolder.resolve(UUID.randomUUID() + "_config.yml"));
-        createConfigFile(dataFolder);
-    }
 
 }

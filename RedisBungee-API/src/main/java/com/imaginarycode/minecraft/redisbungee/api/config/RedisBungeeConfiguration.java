@@ -18,7 +18,6 @@ import java.util.List;
 
 public class RedisBungeeConfiguration {
 
-    public static final int CONFIG_VERSION = 2;
     private final String proxyId;
     private final List<InetAddress> exemptAddresses;
     private final boolean registerCommands;

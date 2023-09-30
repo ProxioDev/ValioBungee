@@ -14,7 +14,7 @@ import com.imaginarycode.minecraft.redisbungee.api.PlayerDataManager;
 import com.imaginarycode.minecraft.redisbungee.api.ProxyDataManager;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeeMode;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
-import com.imaginarycode.minecraft.redisbungee.api.config.ConfigLoader;
+import com.imaginarycode.minecraft.redisbungee.api.config.loaders.ConfigLoader;
 import com.imaginarycode.minecraft.redisbungee.api.config.RedisBungeeConfiguration;
 import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerChangedServerNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerJoinedNetworkEvent;
