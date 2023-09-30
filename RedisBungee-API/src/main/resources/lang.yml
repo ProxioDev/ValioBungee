@@ -1,9 +1,14 @@
 # this config file is for messages / Languages
-# Note 1: use MiniMessage format https://docs.advntr.dev/minimessage/format.html for colors etc... Legacy chat color is not supported.
-# note 2: Language codes used in minecraft from the minecraft wiki
-# Locale Code -> In-game
-# example: en_us for english and ar_sa for arabic
-# all codes can be obtained from lik below
+# Note 1: use MiniMessage format https://docs.advntr.dev/minimessage/format.html
+# for colors etc... Legacy chat color is not supported.
+
+# Note 2:
+# Language codes used in minecraft from the minecraft wiki
+
+# example: en_us for american english and ar_sa for arabic
+
+# all codes can be obtained from link below
+# from the colum Locale Code -> In-game
 # https://minecraft.wiki/w/Language
 
 # example:
@@ -24,7 +29,6 @@ redis-bungee-prefix: "<color:red>[<color:yellow>Redis<color:red>Bungee]"
 default-language: en_us
 
 # send language based on client sent settings
-# https://minecraft.fandom.com/wiki/Language
 # if you don't have languages configured for client it will
 # default to language that has been set above
 use-client-language: true
@@ -38,9 +42,11 @@ messages:
     en_us: "<color:red>You are already logged in!"
     ar_sa: "<color:red>انت متصل بالفعل"
   server-not-found:
+    # placeholder <server> displays server name in the message.
     en_us: "<color:red>unable to connect you to the last server, because server <server> was not found."
     ar_sa: "<color:red>فشل الاتصال بالخادم السابق لان الخادم غير موجود (<server>)"
   server-found:
+    # placeholder <server> displays server name in the message.
     en_us: "<color:green>Connecting you to <server>..."
     ar_sa: "<color:green>جاري الاتصال بخادم <server>"
 
