@@ -50,7 +50,7 @@ public interface ConfigLoader {
         }
         final boolean useSSL = node.getNode("useSSL").getBoolean(false);
         final boolean overrideBungeeCommands = node.getNode("override-bungee-commands").getBoolean(false);
-        final boolean registerLegacyCommands = node.getNode("register-legacy-commands").getBoolean(false);
+        final boolean registerCommands = node.getNode("register-commands").getBoolean(false);
         final boolean kickWhenOnline = node.getNode("kick-when-online").getBoolean(true);
         String redisPassword = node.getNode("redis-password").getString("");
         String redisUsername = node.getNode("redis-username").getString("");
@@ -94,7 +94,7 @@ public interface ConfigLoader {
         plugin.logInfo("handle reconnect to last server: {}", reconnectToLastServer);
         plugin.logInfo("handle motd: {}", handleMotd);
 
-        RedisBungeeConfiguration configuration = new RedisBungeeConfiguration(proxyId, exemptAddresses, registerLegacyCommands, overrideBungeeCommands, kickWhenOnline, reconnectToLastServer, handleMotd);
+        RedisBungeeConfiguration configuration = new RedisBungeeConfiguration(proxyId, exemptAddresses, registerCommands, overrideBungeeCommands, kickWhenOnline, reconnectToLastServer, handleMotd);
         Summoner<?> summoner;
         RedisBungeeMode redisBungeeMode;
         if (useSSL) {

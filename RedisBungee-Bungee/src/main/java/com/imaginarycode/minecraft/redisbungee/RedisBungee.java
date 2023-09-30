@@ -25,7 +25,6 @@ import com.imaginarycode.minecraft.redisbungee.api.util.InitialUtils;
 import com.imaginarycode.minecraft.redisbungee.api.util.uuid.NameFetcher;
 import com.imaginarycode.minecraft.redisbungee.api.util.uuid.UUIDFetcher;
 import com.imaginarycode.minecraft.redisbungee.api.util.uuid.UUIDTranslator;
-import com.imaginarycode.minecraft.redisbungee.commands.RedisBungeeCommands;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerChangedServerNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerJoinedNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerLeftNetworkEvent;
@@ -35,7 +34,6 @@ import com.squareup.okhttp.OkHttpClient;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
 import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Event;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -241,19 +239,11 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
         // register plugin messages channel.
         getProxy().registerChannel("legacy:redisbungee");
         getProxy().registerChannel("RedisBungee");
-        if (configuration.doRegisterLegacyCommands()) {
+        if (configuration.doRegisterCommands()) {
             // register commands
             if (configuration.doOverrideBungeeCommands()) {
-                getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.GlistCommand(this));
-                getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.FindCommand(this));
-                getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.LastSeenCommand(this));
-                getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.IpCommand(this));
+
             }
-            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.SendToAll(this));
-            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.ServerId(this));
-            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.ServerIds(this));
-            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.PlayerProxyCommand(this));
-            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.PlistCommand(this));
         }
         // init the api
         this.api = new RedisBungeeAPI(this);

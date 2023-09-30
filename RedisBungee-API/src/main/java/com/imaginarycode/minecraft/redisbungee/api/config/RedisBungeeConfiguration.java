@@ -11,9 +11,7 @@
 package com.imaginarycode.minecraft.redisbungee.api.config;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.net.InetAddresses;
-import net.kyori.adventure.text.Component;
 
 import java.net.InetAddress;
 import java.util.List;
@@ -23,7 +21,7 @@ public class RedisBungeeConfiguration {
     public static final int CONFIG_VERSION = 2;
     private final String proxyId;
     private final List<InetAddress> exemptAddresses;
-    private final boolean registerLegacyCommands;
+    private final boolean registerCommands;
     private final boolean overrideBungeeCommands;
     private final boolean kickWhenOnline;
 
@@ -31,14 +29,14 @@ public class RedisBungeeConfiguration {
     private final boolean handleMotd;
 
 
-    public RedisBungeeConfiguration(String proxyId, List<String> exemptAddresses, boolean registerLegacyCommands, boolean overrideBungeeCommands, boolean kickWhenOnline, boolean handleReconnectToLastServer, boolean handleMotd) {
+    public RedisBungeeConfiguration(String proxyId, List<String> exemptAddresses, boolean registerCommands, boolean overrideBungeeCommands, boolean kickWhenOnline, boolean handleReconnectToLastServer, boolean handleMotd) {
         this.proxyId = proxyId;
         ImmutableList.Builder<InetAddress> addressBuilder = ImmutableList.builder();
         for (String s : exemptAddresses) {
             addressBuilder.add(InetAddresses.forString(s));
         }
         this.exemptAddresses = addressBuilder.build();
-        this.registerLegacyCommands = registerLegacyCommands;
+        this.registerCommands = registerCommands;
         this.overrideBungeeCommands = overrideBungeeCommands;
         this.kickWhenOnline = kickWhenOnline;
         this.handleReconnectToLastServer = handleReconnectToLastServer;
@@ -53,8 +51,8 @@ public class RedisBungeeConfiguration {
         return exemptAddresses;
     }
 
-    public boolean doRegisterLegacyCommands() {
-        return registerLegacyCommands;
+    public boolean doRegisterCommands() {
+        return registerCommands;
     }
 
     public boolean doOverrideBungeeCommands() {

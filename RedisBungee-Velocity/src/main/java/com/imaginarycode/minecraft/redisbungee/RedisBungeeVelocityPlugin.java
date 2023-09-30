@@ -26,7 +26,6 @@ import com.imaginarycode.minecraft.redisbungee.api.util.InitialUtils;
 import com.imaginarycode.minecraft.redisbungee.api.util.uuid.NameFetcher;
 import com.imaginarycode.minecraft.redisbungee.api.util.uuid.UUIDFetcher;
 import com.imaginarycode.minecraft.redisbungee.api.util.uuid.UUIDTranslator;
-import com.imaginarycode.minecraft.redisbungee.commands.RedisBungeeCommands;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerChangedServerNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerJoinedNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerLeftNetworkEvent;
@@ -46,7 +45,6 @@ import com.velocitypowered.api.proxy.messages.LegacyChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.scheduler.ScheduledTask;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.slf4j.Logger;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
@@ -270,18 +268,9 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, Con
         // register plugin messages
         IDENTIFIERS.forEach(getProxy().getChannelRegistrar()::register);
 
-        // register legacy commands
-        if (configuration.doRegisterLegacyCommands()) {
-            // Override Velocity commands
-            getProxy().getCommandManager().register("glist", new RedisBungeeCommands.GlistCommand(this), "redisbungee", "rglist");
-            getProxy().getCommandManager().register("sendtoall", new RedisBungeeCommands.SendToAll(this), "rsendtoall");
-            getProxy().getCommandManager().register("serverid", new RedisBungeeCommands.ServerId(this), "rserverid");
-            getProxy().getCommandManager().register("serverids", new RedisBungeeCommands.ServerIds(this));
-            getProxy().getCommandManager().register("pproxy", new RedisBungeeCommands.PlayerProxyCommand(this));
-            getProxy().getCommandManager().register("plist", new RedisBungeeCommands.PlistCommand(this), "rplist");
-            getProxy().getCommandManager().register("lastseen", new RedisBungeeCommands.LastSeenCommand(this), "rlastseen");
-            getProxy().getCommandManager().register("ip", new RedisBungeeCommands.IpCommand(this), "playerip", "rip", "rplayerip");
-            getProxy().getCommandManager().register("find", new RedisBungeeCommands.FindCommand(this), "rfind");
+        // register commands
+        if (configuration.doRegisterCommands()) {
+
         }
         logInfo("RedisBungee initialized successfully ");
     }

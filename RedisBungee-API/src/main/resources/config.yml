@@ -57,10 +57,12 @@ enable-jedis-pool-compatibility: false
 # max connections for the compatibility pool
 compatibility-max-connections: 3
 
-# Register redis bungee legacy commands
+# Register RedisBungee commands
 # if this disabled override-bungee-commands will be ignored
-register-legacy-commands: false
+register-commands: false
 
+
+# THIS IS BUNGEECORD ONLY OPTION!
 # Whether or not RedisBungee should install its version of regular BungeeCord commands.
 # Often, the RedisBungee commands are desired, but in some cases someone may wish to
 # override the commands using another plugin.
