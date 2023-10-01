@@ -14,8 +14,10 @@ import com.imaginarycode.minecraft.redisbungee.api.PlayerDataManager;
 import com.imaginarycode.minecraft.redisbungee.api.ProxyDataManager;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeeMode;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
+import com.imaginarycode.minecraft.redisbungee.api.config.LangConfiguration;
 import com.imaginarycode.minecraft.redisbungee.api.config.loaders.ConfigLoader;
 import com.imaginarycode.minecraft.redisbungee.api.config.RedisBungeeConfiguration;
+import com.imaginarycode.minecraft.redisbungee.api.config.loaders.LangConfigLoader;
 import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerChangedServerNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerJoinedNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerLeftNetworkEvent;
@@ -45,6 +47,8 @@ import redis.clients.jedis.JedisPool;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.InetAddress;
+import java.sql.Date;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -52,7 +56,7 @@ import java.util.concurrent.*;
 import java.util.logging.Level;
 
 
-public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlayer>, ConfigLoader {
+public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlayer>, ConfigLoader, LangConfigLoader {
 
     private static RedisBungeeAPI apiStatic;
     private AbstractRedisBungeeAPI api;
@@ -64,6 +68,7 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
     private Summoner<?> summoner;
     private UUIDTranslator uuidTranslator;
     private RedisBungeeConfiguration configuration;
+    private LangConfiguration langConfiguration;
     private OkHttpClient httpClient;
 
     private final Logger logger = LoggerFactory.getLogger("RedisBungee");
@@ -74,6 +79,10 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
         return this.configuration;
     }
 
+    @Override
+    public LangConfiguration langConfiguration() {
+        return this.langConfiguration;
+    }
 
     @Override
     public AbstractRedisBungeeAPI getAbstractRedisBungeeApi() {
@@ -184,7 +193,7 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
     public void initialize() {
         logInfo("Initializing RedisBungee.....");
         logInfo("Version: {}", Constants.VERSION);
-        logInfo("Build date: {}", Constants.BUILD_DATE);
+        logInfo("Build date: {}", Date.from(Instant.ofEpochSecond(Constants.BUILD_DATE)));
         ThreadFactory factory = ((ThreadPoolExecutor) getExecutorService()).getThreadFactory();
         ScheduledExecutorService service = Executors.newScheduledThreadPool(24, factory);
         try {
@@ -198,7 +207,8 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
             getLogger().log(Level.WARNING, "skipping replacement.....");
         }
         try {
-            loadConfig(this, getDataFolder());
+            loadConfig(this, getDataFolder().toPath());
+            loadLangConfig(this, getDataFolder().toPath());
         } catch (IOException e) {
             throw new RuntimeException("Unable to load/save config", e);
         }
@@ -350,4 +360,8 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
     }
 
 
+    @Override
+    public void onLangConfigLoad(LangConfiguration langConfiguration) {
+        this.langConfiguration = langConfiguration;
+    }
 }

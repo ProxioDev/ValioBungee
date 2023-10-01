@@ -15,8 +15,10 @@ import com.imaginarycode.minecraft.redisbungee.api.PlayerDataManager;
 import com.imaginarycode.minecraft.redisbungee.api.ProxyDataManager;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeeMode;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
+import com.imaginarycode.minecraft.redisbungee.api.config.LangConfiguration;
 import com.imaginarycode.minecraft.redisbungee.api.config.loaders.ConfigLoader;
 import com.imaginarycode.minecraft.redisbungee.api.config.RedisBungeeConfiguration;
+import com.imaginarycode.minecraft.redisbungee.api.config.loaders.LangConfigLoader;
 import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerChangedServerNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerJoinedNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerLeftNetworkEvent;
@@ -52,7 +54,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.nio.file.Path;
+import java.sql.Date;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -61,7 +65,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 @Plugin(id = "redisbungee", name = "RedisBungee", version = Constants.VERSION, url = "https://github.com/ProxioDev/RedisBungee", authors = {"astei", "ProxioDev"})
-public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, ConfigLoader {
+public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, ConfigLoader, LangConfigLoader {
     private final ProxyServer server;
     private final Logger logger;
     private final Path dataFolder;
@@ -70,6 +74,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, Con
     private RedisBungeeMode redisBungeeMode;
     private final UUIDTranslator uuidTranslator;
     private RedisBungeeConfiguration configuration;
+    private LangConfiguration langConfiguration;
     private final OkHttpClient httpClient;
 
     private final ProxyDataManager proxyDataManager;
@@ -92,9 +97,10 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, Con
         this.logger = logger;
         this.dataFolder = dataDirectory;
         logInfo("Version: {}", Constants.VERSION);
-        logInfo("Build date: {}", Constants.BUILD_DATE);
+        logInfo("Build date: {}", Date.from(Instant.ofEpochSecond(Constants.BUILD_DATE)));
         try {
             loadConfig(this, dataDirectory);
+            loadLangConfig(this, dataDirectory);
         } catch (IOException e) {
             throw new RuntimeException("Unable to load/save config", e);
         } catch (JedisConnectionException e) {
@@ -207,6 +213,11 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, Con
     }
 
     @Override
+    public LangConfiguration langConfiguration() {
+        return this.langConfiguration;
+    }
+
+    @Override
     public Player getPlayer(UUID uuid) {
         return this.getProxy().getPlayer(uuid).orElse(null);
     }
@@ -311,6 +322,10 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, Con
         this.redisBungeeMode = mode;
     }
 
+    @Override
+    public void onLangConfigLoad(LangConfiguration langConfiguration) {
+        this.langConfiguration = langConfiguration;
+    }
 
     @Override
     public RedisBungeeMode getRedisBungeeMode() {

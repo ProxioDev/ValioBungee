@@ -155,12 +155,13 @@ public class RedisBungeeListener {
     @Subscribe
     public void onPlayerChooseInitialServerEvent(PlayerChooseInitialServerEvent event) {
         if (plugin.configuration().handleReconnectToLastServer()) {
-            String lastServer = plugin.playerDataManager().getLastServerFor(event.getPlayer().getUniqueId());
+            Player player = event.getPlayer();
+            String lastServer = plugin.playerDataManager().getLastServerFor(player.getUniqueId());
             if (lastServer == null) return;
-            // sending connect message, todo: IMPLEMENT once lang system is finalized
+            player.sendMessage(plugin.langConfiguration().messages().serverConnecting(player.getPlayerSettings().getLocale(), lastServer));
             Optional<RegisteredServer> optionalRegisteredServer = ((RedisBungeeVelocityPlugin) plugin).getProxy().getServer(lastServer);
             if (optionalRegisteredServer.isEmpty()) {
-                // sending failure message, todo: IMPLEMENT once lang system is finalized
+                player.sendMessage(plugin.langConfiguration().messages().serverNotFound(player.getPlayerSettings().getLocale(), lastServer));
                 return;
             }
             RegisteredServer server = optionalRegisteredServer.get();

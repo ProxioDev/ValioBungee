@@ -25,10 +25,7 @@ import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.event.player.ServerConnectedEvent;
 import com.velocitypowered.api.proxy.Player;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class VelocityPlayerDataManager extends PlayerDataManager<Player, PostLoginEvent, DisconnectEvent, PubSubMessageEvent, PlayerChangedServerNetworkEvent, PlayerLeftNetworkEvent, ServerConnectedEvent> {
@@ -69,15 +66,14 @@ public class VelocityPlayerDataManager extends PlayerDataManager<Player, PostLog
 
     @Subscribe
     public void onLoginEvent(LoginEvent event, Continuation continuation) {
-        System.out.println(event.getPlayer().getPlayerSettings().getLocale().getDisplayLanguage());
         // check if online
         if (getLastOnline(event.getPlayer().getUniqueId()) == 0) {
             if (plugin.configuration().kickWhenOnline()) {
-                kickPlayer(event.getPlayer().getUniqueId(), Component.empty());
+                kickPlayer(event.getPlayer().getUniqueId(), plugin.langConfiguration().messages().loggedInFromOtherLocation());
                 // wait 3 seconds before releasing the event
                 plugin.executeAsyncAfter(continuation::resume, TimeUnit.SECONDS, 3);
             } else {
-                event.setResult(ResultedEvent.ComponentResult.denied(Component.empty()));
+                event.setResult(ResultedEvent.ComponentResult.denied(plugin.langConfiguration().messages().alreadyLoggedIn()));
                 continuation.resume();
             }
         } else {

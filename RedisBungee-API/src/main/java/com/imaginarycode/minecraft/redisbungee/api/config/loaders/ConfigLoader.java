@@ -34,7 +34,6 @@ public interface ConfigLoader extends GenericConfigLoader {
 
     int CONFIG_VERSION = 2;
 
-    @Override
     default void loadConfig(RedisBungeePlugin<?> plugin, Path dataFolder) throws IOException {
         Path configFile = createConfigFile(dataFolder, "config.yml", "config.yml");
         final YAMLConfigurationLoader yamlConfigurationFileLoader = YAMLConfigurationLoader.builder().setPath(configFile).build();

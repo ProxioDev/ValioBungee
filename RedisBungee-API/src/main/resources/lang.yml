@@ -1,71 +1,80 @@
 # this config file is for messages / Languages
-# Note 1: use MiniMessage format https://docs.advntr.dev/minimessage/format.html
+# use MiniMessage format https://docs.advntr.dev/minimessage/format.html
 # for colors etc... Legacy chat color is not supported.
 
-# Note 2:
 # Language codes used in minecraft from the minecraft wiki
-
-# example: en_us for american english and ar_sa for arabic
+# example: en-us for american english and ar-sa for arabic
 
 # all codes can be obtained from link below
 # from the colum Locale Code -> In-game
+# NOTE: minecraft wiki shows languages like this `en_us` in config it should be `en-us`
 # https://minecraft.wiki/w/Language
 
 # example:
 # lets assume we want to add arabic language.
-# errors:
+# messages:
 #    logged-in-other-location:
-#      en_us: "<color:red>You logged in from another location!"
-#      ar_sa: "<color:red>لقد اتصلت من مكان اخر"
+#      en-us: "<color:red>You logged in from another location!"
+#      ar-sa: "<color:red>لقد اتصلت من مكان اخر"
 
 
 # RedisBungee Prefix if ever used.
-redis-bungee-prefix: "<color:red>[<color:yellow>Redis<color:red>Bungee]"
+prefix: "<color:red>[<color:yellow>Redis<color:red>Bungee]"
 
-# us_en is american English, Which is the default language used when a language for a message isn't defined.
-# Warning: IF THE set default language wasn't defined in the config for all messages, plugin will not load.
-
-# set the default language
-default-language: en_us
+# en-us is american English, Which is the default language used when a language for a message isn't defined.
+# Warning: IF THE set default locale wasn't defined in the config for all messages, plugin will not load.
+# set the Default locale
+default-locale: en-us
 
 # send language based on client sent settings
-# if you don't have languages configured for client it will
-# default to language that has been set above
-use-client-language: true
+# if you don't have languages configured For client Language
+# it will default to language that has been set above
+# NOTE: due minecraft protocol not sending player settings during login,
+# some of the messages like logged-in-other-location will
+# skip translation and use default locale that has been set in default-locale.
+use-client-locale: true
 
-# messages
+# messages that are used during login, and connecting to Last server
 messages:
   logged-in-other-location:
-    en_us: "<color:red>You logged in from another location!"
-    ar_sa: "<color:red>لقد اتصلت من مكان اخر"
+    en-us: "<color:red>You logged in from another location!"
+    ar-sa: "<color:red>لقد اتصلت من مكان اخر"
   already-logged-in:
-    en_us: "<color:red>You are already logged in!"
-    ar_sa: "<color:red>انت متصل بالفعل"
+    en-us: "<color:red>You are already logged in!"
+    ar-sa: "<color:red>انت متصل بالفعل"
   server-not-found:
     # placeholder <server> displays server name in the message.
-    en_us: "<color:red>unable to connect you to the last server, because server <server> was not found."
-    ar_sa: "<color:red>فشل الاتصال بالخادم السابق لان الخادم غير موجود (<server>)"
-  server-found:
+    en-us: "<color:red>unable to connect you to the last server, because server <server> was not found."
+    ar-sa: "<color:red>فشل الاتصال بالخادم السابق لان الخادم غير موجود (<server>)"
+  server-connecting:
     # placeholder <server> displays server name in the message.
-    en_us: "<color:green>Connecting you to <server>..."
-    ar_sa: "<color:green>جاري الاتصال بخادم <server>"
+    en-us: "<color:green>Connecting you to <server>..."
+    ar-sa: "<color:green>جاري الاتصال بخادم <server>"
 
-# commands common messages:
+
+# commands common messages
 commands-common:
   player-not-found:
-    en_us: "<color:red>Player not found."
-    ar_sa: "<color:red>اللاعب غير موجود"
+    en-us: "<color:red>Player not found."
+    ar-sa: "<color:red>اللاعب غير موجود"
   player-not-specified:
-    en_us: "<color:red>You must specify a player name."
-    ar_sa: "<color:red>أدخل اسم اللاعب مطلوب"
+    en-us: "<color:red>You must specify a player name."
+    ar-sa: "<color:red>أدخل اسم اللاعب مطلوب"
   command-not-specified:
-    en_us: "<color:red>You must specify a command to be run."
-    ar_sa: "<color:red>ادخل الأمر المطلوب"
+    en-us: "<color:red>You must specify a command to be run."
+    ar-sa: "<color:red>ادخل الأمر المطلوب"
 
 # commands
 commands:
+  glist:
+    single-player:
+      en-us: "<color:yellow><players> player is currently online"
+    players:
+      en-us: "<color:yellow><players> players are currently online"
+    notice:
+      en-us: "<color:yellow>To see all players online, use /glist showall."
 
 
 
-
-
+# DO NOT CHANGE!!!!!
+config-version: 1

@@ -18,6 +18,7 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
 import net.md_5.bungee.api.AbstractReconnectHandler;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.config.ServerInfo;
@@ -152,12 +153,13 @@ public class RedisBungeeListener implements Listener {
     @EventHandler
     public void onServerConnectEvent(ServerConnectEvent event) {
         if (event.getReason() == ServerConnectEvent.Reason.JOIN_PROXY && plugin.configuration().handleReconnectToLastServer()) {
+            ProxiedPlayer player = event.getPlayer();
             String lastServer = plugin.playerDataManager().getLastServerFor(event.getPlayer().getUniqueId());
             if (lastServer == null) return;
-            // sending connect message, todo: IMPLEMENT once lang system is finalized
+            player.sendMessage(BungeeComponentSerializer.get().serialize(plugin.langConfiguration().messages().serverConnecting(player.getLocale(), lastServer)));
             ServerInfo serverInfo = ProxyServer.getInstance().getServerInfo(lastServer);
             if (serverInfo == null) {
-                // sending failure message, todo: IMPLEMENT once lang system is finalized
+                player.sendMessage(BungeeComponentSerializer.get().serialize(plugin.langConfiguration().messages().serverNotFound(player.getLocale(), lastServer)));
                 return;
             }
             event.setTarget(serverInfo);

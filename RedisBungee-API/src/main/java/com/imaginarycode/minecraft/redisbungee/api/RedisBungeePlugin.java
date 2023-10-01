@@ -11,6 +11,7 @@
 package com.imaginarycode.minecraft.redisbungee.api;
 
 import com.imaginarycode.minecraft.redisbungee.AbstractRedisBungeeAPI;
+import com.imaginarycode.minecraft.redisbungee.api.config.LangConfiguration;
 import com.imaginarycode.minecraft.redisbungee.api.config.RedisBungeeConfiguration;
 import com.imaginarycode.minecraft.redisbungee.api.events.EventsPlatform;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.Summoner;
@@ -53,6 +54,8 @@ public interface RedisBungeePlugin<P> extends EventsPlatform {
     void logFatal(String format, Throwable throwable);
 
     RedisBungeeConfiguration configuration();
+
+    LangConfiguration langConfiguration();
 
     Summoner<?> getSummoner();
 

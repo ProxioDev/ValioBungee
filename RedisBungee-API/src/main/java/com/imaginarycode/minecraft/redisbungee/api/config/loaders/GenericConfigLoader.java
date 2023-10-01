@@ -1,28 +1,30 @@
+/*
+ * Copyright (c) 2013-present RedisBungee contributors
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ *
+ *  http://www.eclipse.org/legal/epl-v10.html
+ */
+
 package com.imaginarycode.minecraft.redisbungee.api.config.loaders;
 
-import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
+;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.Instant;
-import java.util.UUID;
+
 
 public interface GenericConfigLoader {
 
     // CHANGES on every reboot
     String RANDOM_OLD = "backup-" + Instant.now().getEpochSecond();
-
-    default void loadConfig(RedisBungeePlugin<?> plugin, File dataFolder) throws IOException {
-        loadConfig(plugin, dataFolder.toPath());
-    }
-
-
-    void loadConfig(RedisBungeePlugin<?> plugin, Path path) throws IOException;
 
     default Path createConfigFile(Path dataFolder, String configFile, @Nullable String defaultResourceID) throws IOException {
         if (Files.notExists(dataFolder)) {

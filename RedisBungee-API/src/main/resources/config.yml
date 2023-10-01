@@ -61,9 +61,8 @@ compatibility-max-connections: 3
 # if this disabled override-bungee-commands will be ignored
 register-commands: false
 
-
 # THIS IS BUNGEECORD ONLY OPTION!
-# Whether or not RedisBungee should install its version of regular BungeeCord commands.
+# Whether RedisBungee should install its version of regular BungeeCord commands.
 # Often, the RedisBungee commands are desired, but in some cases someone may wish to
 # override the commands using another plugin.
 #
@@ -75,23 +74,24 @@ register-commands: false
 # ignored on velocity
 override-bungee-commands: false
 
-# A list of IP addresses for which RedisBungee will not modify the response for, useful for automatic
-# restart scripts.
-exempt-ip-addresses: []
-
 # restore old login behavior before 0.9.0 update
 # enabled by default
-# when true: when player login and there is old player with same uuid it will get disconnected as result and new player will login
+# when true: when player login and there is old player with same uuid it will get disconnected as result and new player will log in
 # when false: when a player login but login will fail because old player is still connected.
 kick-when-online: true
 
 # enabled by default
-# this option tells redis-bungee handle motd and set online count, when motd is requested
+# this option tells RedisBungee handle motd and set online count, when motd is requested
 # you can disable this when you want to handle motd yourself, use RedisBungee api to get total players when needed :)
 handle-motd: true
 
+# A list of IP addresses for which RedisBungee will not modify the response for, useful for automatic
+# restart scripts.
+# Ignored if handle-motd is disabled.
+exempt-ip-addresses: []
+
 # disabled by default
-# Redis-bungee will attempt to connect player to last server that was stored.
+# RedisBungee will attempt to connect player to last server that was stored.
 reconnect-to-last-server: false
 
 # Config version DO NOT CHANGE!!!!
