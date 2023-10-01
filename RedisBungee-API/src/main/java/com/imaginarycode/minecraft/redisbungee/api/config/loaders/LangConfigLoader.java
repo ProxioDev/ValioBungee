@@ -38,7 +38,6 @@ public interface LangConfigLoader extends GenericConfigLoader {
 
         Component prefix = miniMessage.deserialize(node.getNode("prefix").getString("<color:red>[<color:yellow>Redis<color:red>Bungee]"));
         Locale defaultLocale = Locale.forLanguageTag(node.getNode("default-locale").getString("en-us"));
-        System.out.println(node.getNode("default-locale").getString());
         boolean useClientLocale = node.getNode("use-client-locale").getBoolean(true);
         LangConfiguration.Messages messages = new LangConfiguration.Messages(defaultLocale);
         node.getNode("messages").getChildrenMap().forEach((key, childNode) -> childNode.getChildrenMap().forEach((childKey, childChildNode) -> {
