@@ -38,43 +38,70 @@ use-client-locale: true
 messages:
   logged-in-other-location:
     en-us: "<color:red>You logged in from another location!"
-    ar-sa: "<color:red>لقد اتصلت من مكان اخر"
   already-logged-in:
     en-us: "<color:red>You are already logged in!"
-    ar-sa: "<color:red>انت متصل بالفعل"
   server-not-found:
     # placeholder <server> displays server name in the message.
     en-us: "<color:red>unable to connect you to the last server, because server <server> was not found."
-    ar-sa: "<color:red>فشل الاتصال بالخادم السابق لان الخادم غير موجود (<server>)"
   server-connecting:
     # placeholder <server> displays server name in the message.
     en-us: "<color:green>Connecting you to <server>..."
-    ar-sa: "<color:green>جاري الاتصال بخادم <server>"
 
 
 # commands common messages
 commands-common:
   player-not-found:
     en-us: "<color:red>Player not found."
-    ar-sa: "<color:red>اللاعب غير موجود"
   player-not-specified:
     en-us: "<color:red>You must specify a player name."
-    ar-sa: "<color:red>أدخل اسم اللاعب مطلوب"
   command-not-specified:
     en-us: "<color:red>You must specify a command to be run."
-    ar-sa: "<color:red>ادخل الأمر المطلوب"
 
 # commands
 commands:
   glist:
     single-player:
-      en-us: "<color:yellow><players> player is currently online"
+      en-us: "<color:yellow>1 player is currently online."
     players:
-      en-us: "<color:yellow><players> players are currently online"
+      en-us: "<color:yellow><players> players are currently online."
     notice:
       en-us: "<color:yellow>To see all players online, use /glist showall."
-
-
+  find:
+    found:
+      en-us: "<color:blue><player> is on <server>."
+  last-seen:
+    online:
+      en-us: "<color:green><player> is currently online."
+    last-seen:
+      en-us: "<color:blue><player> last seen on <date>."
+    never-seen:
+      en-us: "<color:red><player> has never been online."
+  ip:
+    connected-from:
+      en-us: "<color:green><player> is connected from <ip>."
+  proxy:
+    connected-to:
+      en-us: "<color:green><player> is connected to <proxy>."
+  send-to-all:
+    sent:
+      en-us: "<color:green>Sent the command /<command> to all proxies."
+  # note: server here means a proxy.
+  server-id:
+    message:
+      en-us: "<color:yellow>You are on <color:blue><proxy>."
+  # Same here too
+  server-ids:
+    message:
+      en-us: "<color:yellow>All server IDs: <proxies>"
+  plist:
+    notice:
+      en-us: "<color:yellow>To see all players online, use /plist <proxy> showall."
+    not-valid-proxy:
+      en-us: "<color:red><proxy> is not valid proxy. use /serverids for valid proxies"
+    single-player:
+      en-us: "<color:yellow>1 player is currently online on <proxy>."
+    players:
+      en-us: "<color:yellow><players> players are currently online on <proxy>."
 
 # DO NOT CHANGE!!!!!
 config-version: 1
