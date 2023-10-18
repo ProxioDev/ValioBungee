@@ -36,10 +36,11 @@ SpigotMC resource page: [click](https://www.spigotmc.org/resources/redisbungee.8
 |:-------------:|:---------:|
 |     1.x.x     | &#x2716;	 |
 |     2.x.x     | &#x2716;	 |
-|     3.x.x     | &#x2714;	 |
-|     4.x.x     | &#x2714;	 |
-|     5.x.x     | &#x2714;	 |
-|     6.x.x     | &#x2714;  |
+|     3.x.x     | &#x2716;	 |
+|     4.x.x     | &#x2716;	 |
+|     5.x.x     | &#x2716;	 |
+|   below 6.2   | &#x2716;	 |
+| 6.2 or above  |  &#x2714  |
 |     7.x.x     | &#x2714;  |
 
 ## Implementing RedisBungee in your plugin: [![RedisBungee Build](https://github.com/proxiodev/RedisBungee/actions/workflows/maven.yml/badge.svg)](https://github.com/Limework/RedisBungee/actions/workflows/maven.yml) [![](https://jitpack.io/v/ProxioDev/redisbungee.svg)](https://jitpack.io/#ProxioDev/redisbungee)

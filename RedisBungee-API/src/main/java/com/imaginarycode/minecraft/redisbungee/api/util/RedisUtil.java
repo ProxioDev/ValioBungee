@@ -13,7 +13,7 @@ public class RedisUtil {
         }
         int major = Integer.parseInt(args[0]);
         int minor = Integer.parseInt(args[1]);
-        return major >= 3 && minor >= 0;
+        return major >= 6 && minor >= 2;
     }
 
     // Ham1255: i am keeping this if some plugin uses this *IF*
