@@ -25,11 +25,10 @@ redis-cluster-servers:
   - host: 127.0.0.1
     port: 6379
 
-# THIS FEATURE IS REDIS V6+
 # OPTIONAL: if your redis uses acl usernames set the username here. leave empty for no username.
 redis-username: ""
 
-# OPTIONAL but recommended: If your Redis server uses AUTH, set the password required.
+# OPTIONAL but recommended: If your Redis server uses AUTH, set the required password.
 redis-password: ""
 
 # Maximum connections that will be maintained to the Redis server.
@@ -37,7 +36,7 @@ redis-password: ""
 # inefficient plugins or a lot of players.
 max-redis-connections: 10
 
-# since redis can support ssl by version 6 you can use ssl / tls in redis bungee too!
+# since redis can support ssl by version 6 you can use SSL/TLS in redis bungee too!
 # but there is more configuration needed to work see https://github.com/ProxioDev/RedisBungee/issues/18
 # Keep note that SSL/TLS connections will decrease redis performance so use it when needed.
 useSSL: false
@@ -47,7 +46,7 @@ useSSL: false
 # before launch
 proxy-id: "proxy-1"
 
-# since version 0.8.0 Internally now uses JedisPooled instead of Jedis, JedisPool.
+# since RedisBungee Internally now uses JedisPooled instead of Jedis, JedisPool.
 # which will break compatibility with old plugins that uses RedisBungee JedisPool
 # so to mitigate this issue, RedisBungee will create an JedisPool for compatibility reasons.
 # disabled by default
@@ -58,7 +57,7 @@ enable-jedis-pool-compatibility: false
 compatibility-max-connections: 3
 
 # Register RedisBungee commands
-# if this disabled override-bungee-commands will be ignored
+# if this disabled override-bungee-commands will be also disabled automatically.
 register-commands: false
 
 # THIS IS BUNGEECORD ONLY OPTION!
@@ -71,7 +70,7 @@ register-commands: false
 #
 # Please note that with build 787+, most commands overridden by RedisBungee were moved to
 # modules, and these must be disabled or overridden yourself.
-# ignored on velocity
+# not used on velocity
 override-bungee-commands: false
 
 # restore old login behavior before 0.9.0 update
@@ -87,7 +86,7 @@ handle-motd: true
 
 # A list of IP addresses for which RedisBungee will not modify the response for, useful for automatic
 # restart scripts.
-# Ignored if handle-motd is disabled.
+# ignored if handle-motd is disabled.
 exempt-ip-addresses: []
 
 # disabled by default
