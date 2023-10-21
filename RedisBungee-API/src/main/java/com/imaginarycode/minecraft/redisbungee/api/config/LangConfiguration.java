@@ -14,14 +14,30 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * This language support implementation is temporarily
+ * until I come up with better system but for now we will use Maps instead :/
+ */
 public class LangConfiguration {
 
+    private interface RegistrableMessages {
 
-    public static class Messages {
+        void register(String id, Locale locale, String miniMessage);
+
+        void test(Locale locale);
+
+        default void throwError(Locale locale, String where) {
+            throw new IllegalStateException("Language system  in `" + where + "` found missing entries for " + locale.toString());
+        }
+
+    }
+
+    public static class Messages implements RegistrableMessages{
 
         private final Map<Locale, Component> LOGGED_IN_FROM_OTHER_LOCATION;
         private final Map<Locale, Component> ALREADY_LOGGED_IN;
@@ -99,12 +115,79 @@ public class LangConfiguration {
         // tests locale if set CORRECTLY or just throw if not
         public void test(Locale locale) {
             if (!(LOGGED_IN_FROM_OTHER_LOCATION.containsKey(locale) && ALREADY_LOGGED_IN.containsKey(locale) && SERVER_CONNECTING.containsKey(locale) && SERVER_NOT_FOUND.containsKey(locale))) {
-                throw new IllegalStateException("Language system  in `messages` found missing entries for " + locale.toString());
+                throwError(locale, "messages");
             }
         }
 
     }
 
+    public static class CommandMessages implements RegistrableMessages {
+
+        private final Locale defaultLocale;
+
+        // Common
+        private final Map<Locale, Component> COMMON_PLAYER_NOT_FOUND;
+        private final Map<Locale, Component> COMMON_PLAYER_NOT_SPECIFIED;
+        private final Map<Locale, Component> COMMON_COMMAND_NOT_SPECIFIED;
+
+        public CommandMessages(Locale defaultLocale) {
+            this.defaultLocale = defaultLocale;
+            COMMON_PLAYER_NOT_FOUND = new HashMap<>();
+            COMMON_COMMAND_NOT_SPECIFIED = new HashMap<>();
+            COMMON_PLAYER_NOT_SPECIFIED = new HashMap<>();
+        }
+
+        // probably split using :
+        @Override
+        public void register(String id, Locale locale, String miniMessage) {
+            String[] splitId = id.split(":");
+            //System.out.println(Arrays.toString(splitId) + " " + locale + miniMessage);
+            switch (splitId[0]) {
+                case "commands-common" -> {
+                    switch (splitId[1]) {
+                        case "player-not-found" -> COMMON_PLAYER_NOT_FOUND.put(locale, MiniMessage.miniMessage().deserialize(miniMessage));
+                        case "player-not-specified" -> COMMON_PLAYER_NOT_SPECIFIED.put(locale, MiniMessage.miniMessage().deserialize(miniMessage));
+                        case "command-not-specified" -> COMMON_COMMAND_NOT_SPECIFIED.put(locale, MiniMessage.miniMessage().deserialize(miniMessage));
+                    }
+                }
+                case "commands" -> {
+                    switch (splitId[1]) {
+
+                    }
+                }
+            }
+        }
+
+        public Component playerNotFound(Locale locale) {
+            if (COMMON_PLAYER_NOT_FOUND.containsKey(locale)) return  COMMON_PLAYER_NOT_FOUND.get(locale);
+            return COMMON_PLAYER_NOT_FOUND.get(defaultLocale);
+        }
+        public Component playerNotFound() {
+            return playerNotFound(this.defaultLocale);
+        }
+        public Component commandNotSpecified(Locale locale) {
+            if (COMMON_COMMAND_NOT_SPECIFIED.containsKey(locale)) return  COMMON_COMMAND_NOT_SPECIFIED.get(locale);
+            return COMMON_COMMAND_NOT_SPECIFIED.get(defaultLocale);
+        }
+        public Component commandNotSpecified() {
+            return commandNotSpecified(this.defaultLocale);
+        }
+        public Component playerNotSpecified(Locale locale) {
+            if (COMMON_PLAYER_NOT_SPECIFIED.containsKey(locale)) return  COMMON_PLAYER_NOT_SPECIFIED.get(locale);
+            return COMMON_PLAYER_NOT_SPECIFIED.get(defaultLocale);
+        }
+        public Component playerNotSpecified() {
+            return playerNotSpecified(this.defaultLocale);
+        }
+
+
+        @Override
+        public void test(Locale locale) {
+            if (!(this.COMMON_PLAYER_NOT_FOUND.containsKey(locale) && this.COMMON_PLAYER_NOT_SPECIFIED.containsKey(locale) && this.COMMON_COMMAND_NOT_SPECIFIED.containsKey(locale))) {
+                throwError(locale, "commands messages");
+            }
+        }
+    }
 
     private final Component redisBungeePrefix;
 
@@ -114,12 +197,15 @@ public class LangConfiguration {
 
     private final Messages messages;
 
+    private final CommandMessages commandMessages;
 
-    public LangConfiguration(Component redisBungeePrefix, Locale defaultLanguage, boolean useClientLanguage, Messages messages) {
+
+    public LangConfiguration(Component redisBungeePrefix, Locale defaultLanguage, boolean useClientLanguage, Messages messages, CommandMessages commandMessages) {
         this.redisBungeePrefix = redisBungeePrefix;
         this.defaultLanguage = defaultLanguage;
         this.useClientLanguage = useClientLanguage;
         this.messages = messages;
+        this.commandMessages = commandMessages;
     }
 
     public Component redisBungeePrefix() {
@@ -138,5 +224,7 @@ public class LangConfiguration {
         return messages;
     }
 
-
+    public CommandMessages commandMessages() {
+        return commandMessages;
+    }
 }
