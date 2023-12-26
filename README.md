@@ -176,9 +176,7 @@ If you are using static legacy method `RedisBungee#getPool()` it might fail in:
 
 ## Support
 
-You can join our matrix room [here](https://matrix.to/#/!zhedzmRNSZXfuOPZUB:govindas.net?via=govindas.net&via=matrix.org)
-
-![icon](https://matrix.org/images/matrix-logo-white.svg)
+open an issue with question button
 
 ## License
 
