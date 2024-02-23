@@ -1,3 +1,4 @@
+# used https://github.com/PaperMC/Paper/blob/master/.github/ISSUE_TEMPLATE/behavior-bug-or-plugin-incompatibility.yml as template
 name: Ask Question
 description: Ask any questions to the developers
 labels: [ "question"]
