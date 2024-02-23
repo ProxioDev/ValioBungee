@@ -1,0 +1,51 @@
+name: Bug or incompatibility
+description: Report issues with plugin incompatibility or other behavior related issues.
+labels: [ "waiting" ]
+body:
+  - type: textarea
+    attributes:
+      label: intended behavior
+      description: what you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: what the behavior you actually saw
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Steps to reproduce
+      description: either a video, or way you want to present it.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Velocity or Bungeecord Versions
+      description: |
+        Please provide Proxy version for either Bungeecord or Velocity
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: RedisBungee Version & Redis Version
+      description: |
+        RedisBungee version is Different from Redis Version!
+        good example:
+
+        Redis Version: 7.2
+        RedisBungee Version: 0.12.0
+        
+        in-case you used development branch you can use git commit hash Instead of the version
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Other
+      description: |
+        extra information that we might need to know?
+    validations:
+      required: false

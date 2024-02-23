@@ -1,0 +1,9 @@
+name: Ask Question
+description: Ask any questions to the developers
+labels: [ "question"]
+body:
+  - type: textarea
+    attributes:
+      label: Your question?
+    validations:
+      required: true
