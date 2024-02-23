@@ -23,7 +23,7 @@ import java.util.Locale;
 
 public interface LangConfigLoader extends GenericConfigLoader {
 
-    int CONFIG_VERSION = 2;
+    int CONFIG_VERSION = 1;
 
     default void loadLangConfig(RedisBungeePlugin<?> plugin, Path dataFolder) throws IOException {
         Path configFile = createConfigFile(dataFolder, "lang.yml", "lang.yml");
