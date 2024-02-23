@@ -77,4 +77,4 @@ exempt-ip-addresses: []
 reconnect-to-last-server: false
 
 # Config version DO NOT CHANGE!!!!
-config-version: 3
+config-version: 2
