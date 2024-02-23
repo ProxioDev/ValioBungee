@@ -56,23 +56,6 @@ enable-jedis-pool-compatibility: false
 # max connections for the compatibility pool
 compatibility-max-connections: 3
 
-# Register RedisBungee commands
-# if this disabled override-bungee-commands will be also disabled automatically.
-register-commands: false
-
-# THIS IS BUNGEECORD ONLY OPTION!
-# Whether RedisBungee should install its version of regular BungeeCord commands.
-# Often, the RedisBungee commands are desired, but in some cases someone may wish to
-# override the commands using another plugin.
-#
-# If you are just denying access to the commands, RedisBungee uses the default BungeeCord
-# permissions - just deny them and access will be denied.
-#
-# Please note that with build 787+, most commands overridden by RedisBungee were moved to
-# modules, and these must be disabled or overridden yourself.
-# not used on velocity
-override-bungee-commands: false
-
 # restore old login behavior before 0.9.0 update
 # enabled by default
 # when true: when player login and there is old player with same uuid it will get disconnected as result and new player will log in
@@ -94,4 +77,4 @@ exempt-ip-addresses: []
 reconnect-to-last-server: false
 
 # Config version DO NOT CHANGE!!!!
-config-version: 2
+config-version: 3

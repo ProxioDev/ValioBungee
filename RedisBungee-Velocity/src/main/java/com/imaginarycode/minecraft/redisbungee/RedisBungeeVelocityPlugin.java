@@ -279,10 +279,6 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, Con
         // register plugin messages
         IDENTIFIERS.forEach(getProxy().getChannelRegistrar()::register);
 
-        // register commands
-        if (configuration.doRegisterCommands()) {
-
-        }
         logInfo("RedisBungee initialized successfully ");
     }
 

@@ -44,16 +44,8 @@ public interface LangConfigLoader extends GenericConfigLoader {
             messages.register(key.toString(), Locale.forLanguageTag(childKey.toString()), childChildNode.getString());
         }));
         messages.test(defaultLocale);
-        LangConfiguration.CommandMessages commandMessages = new LangConfiguration.CommandMessages(defaultLocale);
 
-        node.getNode("commands-common").getChildrenMap().forEach((key, childNode) -> childNode.getChildrenMap().forEach((childKey, childChildNode) -> {
-            commandMessages.register("commands-common:" + key.toString(), Locale.forLanguageTag(childKey.toString()), childChildNode.getString());
-        }));
-        node.getNode("commands").getChildrenMap().forEach((key, childNode) -> childNode.getChildrenMap().forEach((childKey, childChildNode) -> childChildNode.getChildrenMap().forEach((childChildKey, childChildChildNode) -> {
-            commandMessages.register("commands:" + key.toString() + ":" + childKey.toString(), Locale.forLanguageTag(childChildKey.toString()), childChildChildNode.getString());
-        })));
-        commandMessages.test(defaultLocale);
-        onLangConfigLoad(new LangConfiguration(prefix, defaultLocale, useClientLocale, messages, commandMessages));
+        onLangConfigLoad(new LangConfiguration(prefix, defaultLocale, useClientLocale, messages));
     }
 
 

@@ -249,12 +249,7 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
         // register plugin messages channel.
         getProxy().registerChannel("legacy:redisbungee");
         getProxy().registerChannel("RedisBungee");
-        if (configuration.doRegisterCommands()) {
-            // register commands
-            if (configuration.doOverrideBungeeCommands()) {
 
-            }
-        }
         // init the api
         this.api = new RedisBungeeAPI(this);
         apiStatic = (RedisBungeeAPI) this.api;
