@@ -29,7 +29,7 @@ public class InitialUtils {
                         String version = s.split(":")[1];
                         plugin.logInfo("Redis server version: " + version);
                         if (!RedisUtil.isRedisVersionRight(version)) {
-                            plugin.logFatal("Your version of Redis (" + version + ") is not at least version 3.0 RedisBungee requires a newer version of Redis.");
+                            plugin.logFatal("Your version of Redis (" + version + ") is not at least version " + RedisUtil.MAJOR_VERSION + "." + RedisUtil.MINOR_VERSION + " RedisBungee requires a newer version of Redis.");
                             throw new RuntimeException("Unsupported Redis version detected");
                         }
                         long uuidCacheSize = unifiedJedis.hlen("uuid-cache");
