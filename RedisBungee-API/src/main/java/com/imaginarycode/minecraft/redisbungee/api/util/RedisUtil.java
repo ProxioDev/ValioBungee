@@ -7,7 +7,7 @@ public class RedisUtil {
     public final static int PROXY_TIMEOUT = 30;
 
     public static final int MAJOR_VERSION = 6;
-    public static final int MINOR_VERSION = 6;
+    public static final int MINOR_VERSION = 2;
 
     public static boolean isRedisVersionRight(String redisVersion) {
         String[] args = redisVersion.split("\\.");
