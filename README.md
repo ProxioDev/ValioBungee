@@ -2,8 +2,10 @@
 
 ~~*if you are here for transferring players to another proxy when the first proxy crashes or whatever this plugin won't do
 it, tell mojang to implement transfer packet*.~~
+
 minecraft snapshot 24W03A mojang introduced transfer packets in the protocol we have to wait and 
 see how Proxies developers implement the apis, additionally how to implement proxy transfers in redisbungee
+
 [Click here, for more information about transfer packet](https://hypixel.net/threads/why-do-we-need-transfer-packets.1390307/)
 
 The original project of RedisBungee is no longer maintained, so we have forked the plugin.
