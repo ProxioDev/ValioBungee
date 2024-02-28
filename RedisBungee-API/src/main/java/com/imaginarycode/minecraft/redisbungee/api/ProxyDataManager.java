@@ -335,7 +335,7 @@ public abstract class ProxyDataManager implements Runnable {
                             if (!payloadDataManagerUUID.equals(this.dataManagerUUID)) {
                                 plugin.logWarn("detected other proxy is using same ID! {} this can cause issues, please shutdown this proxy and change the id!", this.proxyId);
                             }
-                            break;
+                            continue;
                         }
                         if (unknownPayload instanceof HeartbeatPayload payload) {
                             handleHeartBeat(payload);
@@ -344,6 +344,8 @@ public abstract class ProxyDataManager implements Runnable {
                         } else if (unknownPayload instanceof RunCommandPayload payload) {
                             handleCommand(payload);
                         } else if (unknownPayload instanceof PubSubPayload payload) {
+                            System.out.println("HANDLED PUBSUB?");
+
                             handleChannelMessage(payload);
                         } else {
                             plugin.logWarn("got unknown data manager payload: {}", unknownPayload.getClassName());
