@@ -12,7 +12,7 @@ repositories {
 }
 
 
-val jedisVersion = "4.3.2"
+val jedisVersion = "5.1.2"
 val configurateVersion = "3.7.3"
 val guavaVersion = "31.1-jre"
 
