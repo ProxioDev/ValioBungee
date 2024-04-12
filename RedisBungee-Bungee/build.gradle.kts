@@ -23,8 +23,8 @@ dependencies {
         exclude("com.google.code.gson", "gson")
         exclude("net.kyori","adventure-api")
     }
-    implementation("net.kyori:adventure-platform-bungeecord:4.3.0")
-    implementation("net.kyori:adventure-text-serializer-gson:4.14.0")
+    implementation("net.kyori:adventure-platform-bungeecord:4.3.2")
+    implementation("net.kyori:adventure-text-serializer-gson:4.15.0")
 }
 
 description = "RedisBungee Bungeecord implementation"
