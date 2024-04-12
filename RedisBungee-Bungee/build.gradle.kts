@@ -1,15 +1,20 @@
 plugins {
     `java-library`
     `maven-publish`
+    checkstyle
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("xyz.jpenilla.run-waterfall") version "2.0.0"
 }
-
 
 repositories {
     mavenCentral()
     maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots") } // bungeecord
 }
+
+checkstyle {
+    toolVersion = "10.12.3"
+}
+
 val bungeecordApiVersion = "1.20-R0.1-SNAPSHOT"
 dependencies {
     api(project(":RedisBungee-API"))
@@ -44,7 +49,7 @@ tasks {
     }
     runWaterfall {
         waterfallVersion("1.20")
-        environment.put("REDISBUNGEE_PROXY_ID", "bungeecord-1")
+        environment["REDISBUNGEE_PROXY_ID"] = "bungeecord-1"
     }
     compileJava {
         options.encoding = Charsets.UTF_8.name()

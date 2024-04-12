@@ -4,9 +4,11 @@ import java.io.ByteArrayOutputStream
 plugins {
     `java-library`
     `maven-publish`
+    checkstyle
     id("net.kyori.blossom") version "1.2.0"
 
 }
+
 
 repositories {
     mavenCentral()
@@ -40,7 +42,7 @@ description = "RedisBungee interfaces"
 blossom {
     replaceToken("@version@", "$version")
     // GIT
-    var commit: String = ""
+    val commit: String;
     val commitStdout = ByteArrayOutputStream()
     rootProject.exec {
         standardOutput = commitStdout
@@ -51,6 +53,11 @@ blossom {
     replaceToken("@git_commit@", commit)
     replaceToken("@build_date@", "${Instant.now().epochSecond}")
 }
+
+checkstyle {
+    toolVersion = "10.12.3"
+}
+
 
 java {
     withJavadocJar()

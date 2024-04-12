@@ -1,6 +1,7 @@
 plugins {
     `java-library`
     `maven-publish`
+    checkstyle
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("xyz.jpenilla.run-velocity") version "2.0.0"
 
@@ -35,6 +36,10 @@ java {
     withJavadocJar()
     withSourcesJar()
 }
+checkstyle {
+    toolVersion = "10.12.3"
+}
+
 
 tasks {
     withType<Javadoc> {
