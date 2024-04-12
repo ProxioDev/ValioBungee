@@ -13,8 +13,8 @@ package com.imaginarycode.minecraft.redisbungee.commands;
 import com.google.common.base.Joiner;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.imaginarycode.minecraft.redisbungee.RedisBungee;
 import com.imaginarycode.minecraft.redisbungee.AbstractRedisBungeeAPI;
+import com.imaginarycode.minecraft.redisbungee.RedisBungee;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -286,9 +286,10 @@ public class RedisBungeeCommands {
 
     public static class ServerIds extends Command {
         private final RedisBungee plugin;
+
         public ServerIds(RedisBungee plugin) {
             super("serverids", "redisbungee.command.serverids");
-            this.plugin =plugin;
+            this.plugin = plugin;
         }
 
         @Override
@@ -313,8 +314,8 @@ public class RedisBungeeCommands {
             plugin.getProxy().getScheduler().runAsync(plugin, new Runnable() {
                 @Override
                 public void run() {
-                    String proxy = args.length >= 1 ? args[0] : plugin.getConfiguration().getProxyId();
-                    if (!plugin.getProxiesIds().contains(proxy)) {
+                    String proxy = args.length >= 1 ? args[0] : plugin.configuration().getProxyId();
+                    if (!plugin.proxyDataManager().proxiesIds().contains(proxy)) {
                         sender.sendMessage(new ComponentBuilder(proxy + " is not a valid proxy. See /serverids for valid proxies.").color(ChatColor.RED).create());
                         return;
                     }

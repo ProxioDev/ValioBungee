@@ -22,38 +22,38 @@ import java.util.List;
 import java.util.UUID;
 
 public class NameFetcher {
-	private static OkHttpClient httpClient;
-	private static final Gson gson = new Gson();
+    private static OkHttpClient httpClient;
+    private static final Gson gson = new Gson();
 
-	public static void setHttpClient(OkHttpClient httpClient) {
-		NameFetcher.httpClient = httpClient;
-	}
+    public static void setHttpClient(OkHttpClient httpClient) {
+        NameFetcher.httpClient = httpClient;
+    }
 
-	public static List<String> nameHistoryFromUuid(UUID uuid) throws IOException {
-		String name = getName(uuid);
-		if (name == null) return Collections.emptyList();
-		return Collections.singletonList(name);
-	}
+    public static List<String> nameHistoryFromUuid(UUID uuid) throws IOException {
+        String name = getName(uuid);
+        if (name == null) return Collections.emptyList();
+        return Collections.singletonList(name);
+    }
 
-	public static String getName(UUID uuid) throws IOException {
-		String url = "https://playerdb.co/api/player/minecraft/" + uuid.toString();
-		Request request = new Request.Builder()
-				.addHeader("User-Agent", "RedisBungee-ProxioDev")
-				.url(url)
-				.get()
-				.build();
-		ResponseBody body = httpClient.newCall(request).execute().body();
-		String response = body.string();
-		body.close();
+    public static String getName(UUID uuid) throws IOException {
+        String url = "https://playerdb.co/api/player/minecraft/" + uuid.toString();
+        Request request = new Request.Builder()
+                .addHeader("User-Agent", "RedisBungee-ProxioDev")
+                .url(url)
+                .get()
+                .build();
+        ResponseBody body = httpClient.newCall(request).execute().body();
+        String response = body.string();
+        body.close();
 
-		JsonObject json = gson.fromJson(response, JsonObject.class);
-		if (!json.has("success") || !json.get("success").getAsBoolean()) return null;
-		if (!json.has("data")) return null;
-		JsonObject data = json.getAsJsonObject("data");
-		if (!data.has("player")) return null;
-		JsonObject player = data.getAsJsonObject("player");
-		if (!player.has("username")) return null;
+        JsonObject json = gson.fromJson(response, JsonObject.class);
+        if (!json.has("success") || !json.get("success").getAsBoolean()) return null;
+        if (!json.has("data")) return null;
+        JsonObject data = json.getAsJsonObject("data");
+        if (!data.has("player")) return null;
+        JsonObject player = data.getAsJsonObject("player");
+        if (!player.has("username")) return null;
 
-		return player.get("username").getAsString();
-	}
+        return player.get("username").getAsString();
+    }
 }

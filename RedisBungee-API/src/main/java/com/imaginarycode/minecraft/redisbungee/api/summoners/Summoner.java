@@ -10,6 +10,8 @@
 
 package com.imaginarycode.minecraft.redisbungee.api.summoners;
 
+import redis.clients.jedis.UnifiedJedis;
+
 import java.io.Closeable;
 
 
@@ -18,9 +20,8 @@ import java.io.Closeable;
  *
  * @author Ham1255
  * @since 0.7.0
- *
  */
-public interface Summoner<P> extends Closeable {
+public interface Summoner<P extends UnifiedJedis> extends Closeable {
 
     P obtainResource();
 

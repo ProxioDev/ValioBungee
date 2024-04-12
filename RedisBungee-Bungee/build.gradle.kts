@@ -40,11 +40,11 @@ tasks {
         options.linksOffline("https://ci.limework.net/RedisBungee/RedisBungee-API/build/docs/javadoc", apiDocs.path)
     }
     runWaterfall {
-        waterfallVersion("1.19")
+        waterfallVersion("1.20")
     }
     compileJava {
         options.encoding = Charsets.UTF_8.name()
-        options.release.set(8)
+        options.release.set(17)
     }
     javadoc {
         options.encoding = Charsets.UTF_8.name()
@@ -73,6 +73,7 @@ tasks {
         relocate("com.google.gson", "com.imaginarycode.minecraft.redisbungee.internal.com.google.gson")
         relocate("com.google.j2objc", "com.imaginarycode.minecraft.redisbungee.internal.com.google.j2objc")
         relocate("com.google.thirdparty", "com.imaginarycode.minecraft.redisbungee.internal.com.google.thirdparty")
+        relocate("com.github.benmanes.caffeine", "com.imaginarycode.minecraft.redisbungee.internal.caffeine")
     }
 
 }
