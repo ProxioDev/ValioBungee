@@ -18,8 +18,8 @@ dependencies {
         exclude("com.google.code.gson", "gson")
         exclude("org.spongepowered", "configurate-yaml")
     }
-    compileOnly("com.velocitypowered:velocity-api:3.2.0-SNAPSHOT")
-    annotationProcessor("com.velocitypowered:velocity-api:3.2.0-SNAPSHOT")
+    compileOnly("com.velocitypowered:velocity-api:3.3.0-SNAPSHOT")
+    annotationProcessor("com.velocitypowered:velocity-api:3.3.0-SNAPSHOT")
 }
 
 description = "RedisBungee Velocity implementation"
@@ -42,11 +42,11 @@ tasks {
         options.linksOffline("https://ci.limework.net/RedisBungee/RedisBungee-API/build/docs/javadoc",  apiDocs.path)
     }
     runVelocity {
-        velocityVersion("3.2.0-SNAPSHOT")
+        velocityVersion("3.3.0-SNAPSHOT")
     }
     compileJava {
         options.encoding = Charsets.UTF_8.name()
-        options.release.set(11)
+        options.release.set(17)
     }
     javadoc {
         options.encoding = Charsets.UTF_8.name()
