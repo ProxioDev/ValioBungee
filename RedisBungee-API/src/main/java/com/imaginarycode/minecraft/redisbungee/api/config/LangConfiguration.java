@@ -14,7 +14,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -22,6 +21,7 @@ import java.util.Map;
 /**
  * This language support implementation is temporarily
  * until I come up with better system but for now we will use Maps instead :/
+ * Todo: possible usage of adventure api
  */
 public class LangConfiguration {
 
