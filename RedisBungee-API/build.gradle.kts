@@ -20,7 +20,7 @@ val configurateVersion = "3.7.3"
 val guavaVersion = "31.1-jre"
 val okHttpVersion = "2.7.5"
 val caffeineVersion = "3.1.8"
-val adventureVersion = "4.15.0"
+val adventureVersion = "4.16.0"
 
 dependencies {
     api("com.google.guava:guava:$guavaVersion")
