@@ -1,30 +1,20 @@
 plugins {
     `java-library`
     `maven-publish`
-    checkstyle
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("xyz.jpenilla.run-waterfall") version "2.0.0"
 }
 
-repositories {
-    mavenCentral()
-    maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots") } // bungeecord
-}
-
-checkstyle {
-    toolVersion = "10.12.3"
-}
-
-val bungeecordApiVersion = "1.20-R0.1-SNAPSHOT"
 dependencies {
     api(project(":RedisBungee-API"))
-    compileOnly("net.md-5:bungeecord-api:$bungeecordApiVersion") {
+    compileOnly(libs.platform.bungeecord) {
         exclude("com.google.guava", "guava")
         exclude("com.google.code.gson", "gson")
         exclude("net.kyori","adventure-api")
     }
-    implementation("net.kyori:adventure-platform-bungeecord:4.3.2")
-    implementation("net.kyori:adventure-text-serializer-gson:4.15.0")
+    implementation(libs.adventure.platforms.bungeecord)
+    implementation(libs.adventure.gson)
+    implementation(libs.acf.bungeecord)
 }
 
 description = "RedisBungee Bungeecord implementation"
@@ -83,6 +73,9 @@ tasks {
         relocate("com.google.j2objc", "com.imaginarycode.minecraft.redisbungee.internal.com.google.j2objc")
         relocate("com.google.thirdparty", "com.imaginarycode.minecraft.redisbungee.internal.com.google.thirdparty")
         relocate("com.github.benmanes.caffeine", "com.imaginarycode.minecraft.redisbungee.internal.caffeine")
+        // acf shade
+        relocate("co.aikar.commands", "com.imaginarycode.minecraft.redisbungee.internal.acf.commands")
+
     }
 
 }

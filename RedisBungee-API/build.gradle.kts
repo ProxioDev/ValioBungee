@@ -4,37 +4,22 @@ import java.io.ByteArrayOutputStream
 plugins {
     `java-library`
     `maven-publish`
-    checkstyle
     id("net.kyori.blossom") version "1.2.0"
 
 }
 
-
-repositories {
-    mavenCentral()
-}
-
-
-val jedisVersion = "5.1.2"
-val configurateVersion = "3.7.3"
-val guavaVersion = "31.1-jre"
-val okHttpVersion = "2.7.5"
-val caffeineVersion = "3.1.8"
-val adventureVersion = "4.16.0"
-
 dependencies {
-    api("com.google.guava:guava:$guavaVersion")
-    api("redis.clients:jedis:$jedisVersion")
-    api("com.squareup.okhttp:okhttp:$okHttpVersion")
-    api("org.spongepowered:configurate-yaml:$configurateVersion")
-    api("com.github.ben-manes.caffeine:caffeine:$caffeineVersion")
-
-    api("net.kyori:adventure-api:$adventureVersion")
-    api("net.kyori:adventure-text-serializer-gson:$adventureVersion")
-    api("net.kyori:adventure-text-serializer-legacy:$adventureVersion")
-    api("net.kyori:adventure-text-serializer-plain:$adventureVersion")
-    api("net.kyori:adventure-text-minimessage:$adventureVersion")
-
+    api(libs.guava)
+    api(libs.jedis)
+    api(libs.okhttp)
+    api(libs.configurate)
+    api(libs.caffeine)
+    api(libs.adventure.api)
+    api(libs.adventure.gson)
+    api(libs.adventure.legacy)
+    api(libs.adventure.plain)
+    api(libs.adventure.miniMessage)
+    implementation(libs.acf.core)
 }
 
 description = "RedisBungee interfaces"
@@ -54,10 +39,6 @@ blossom {
     replaceToken("@build_date@", "${Instant.now().epochSecond}")
 }
 
-checkstyle {
-    toolVersion = "10.12.3"
-}
-
 
 java {
     withJavadocJar()
@@ -70,6 +51,10 @@ tasks {
         val options = options as StandardJavadocDocletOptions
         options.use()
         options.isDocFilesSubDirs = true
+        val jedisVersion = libs.jedis.get().version
+        val configurateVersion = libs.configurate.get().version
+        val guavaVersion = libs.guava.get().version
+        val adventureVersion = libs.guava.get().version
         options.links(
             "https://configurate.aoeu.xyz/$configurateVersion/apidocs/", // configurate
             "https://javadoc.io/doc/redis.clients/jedis/$jedisVersion/", // jedis
