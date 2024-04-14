@@ -286,7 +286,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, Con
         // load commands
         CommandPlatformHelper.init(new VelocityCommandPlatformHelper());
         this.commandManager = new VelocityCommandManager(this.getProxy(), this);
-        CommandLoader.initCommands(this.commandManager, configuration());
+        CommandLoader.initCommands(this.commandManager, this);
 
         logInfo("RedisBungee initialized successfully ");
     }

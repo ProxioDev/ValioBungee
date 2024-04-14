@@ -11,12 +11,13 @@
 package com.imaginarycode.minecraft.redisbungee.commands;
 
 import co.aikar.commands.CommandManager;
+import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 import com.imaginarycode.minecraft.redisbungee.api.config.RedisBungeeConfiguration;
 
 public class CommandLoader {
 
-    public static void initCommands(CommandManager<?, ?, ?, ?, ?, ?> commandManager, RedisBungeeConfiguration configuration) {
-        commandManager.registerCommand(new CommandRedisBungee());
+    public static void initCommands(CommandManager<?, ?, ?, ?, ?, ?> commandManager, RedisBungeePlugin<?> plugin) {
+        commandManager.registerCommand(new CommandRedisBungee(plugin));
         // todo: config options to disable each command
     }
 

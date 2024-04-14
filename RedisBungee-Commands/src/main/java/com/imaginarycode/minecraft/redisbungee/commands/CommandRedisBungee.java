@@ -13,10 +13,13 @@ package com.imaginarycode.minecraft.redisbungee.commands;
 import co.aikar.commands.CommandIssuer;
 import co.aikar.commands.annotation.*;
 import com.imaginarycode.minecraft.redisbungee.Constants;
+import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 import com.imaginarycode.minecraft.redisbungee.commands.utils.AdventureBaseCommand;
+import com.imaginarycode.minecraft.redisbungee.commands.utils.StopperUUIDCleanupTask;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 
@@ -26,10 +29,15 @@ import java.util.Date;
 @CommandPermission("redisbungee.use")
 public class CommandRedisBungee extends AdventureBaseCommand {
 
+    private final RedisBungeePlugin<?> plugin;
+
+    public CommandRedisBungee(RedisBungeePlugin<?> plugin) {
+        this.plugin = plugin;
+    }
 
     @Default
     @Subcommand("info|version|git")
-    public static void info(CommandIssuer issuer) {
+    public void info(CommandIssuer issuer) {
         final String message = """
         <color:aqua>This proxy is running RedisBungee Limework's fork
         <color:yellow>========================================
@@ -52,17 +60,30 @@ public class CommandRedisBungee extends AdventureBaseCommand {
                         .hoverEvent(HoverEvent.showText(Component.text("Click me to open: " + Constants.getGithubCommitLink())))
                 )));
     }
-
+    // <color:aqua>......: <color:green>......
     @HelpCommand
-    public static void help(CommandIssuer issuer) {
+    public void help(CommandIssuer issuer) {
         final String message = """
         <color:yellow>========================================
-        <color:aqua>/rb info: <color:green>shows version, build date, git commit hash.
-        <color:aqua>/rb help: shows this page.
-        <color:aqua>......: <color:green>......
+        <color:aqua>/rb info: <color:green>shows info of this version.
+        <color:aqua>/rb help: <color:green>shows this page.
+        <color:aqua>/rb clean: <color:green>cleans up the uuid cache
+        <color:red><bold>WARNING...</bold> <color:white>command above could cause performance issues
         <color:yellow>========================================
         <color:yellow>run /rb help for more commands""";
         sendMessage(issuer, MiniMessage.miniMessage().deserialize(message));
+    }
+    @Subcommand("clean")
+    @Private
+    public void cleanUp(CommandIssuer issuer) {
+        if (StopperUUIDCleanupTask.isRunning) {
+            sendMessage(issuer,
+                    Component.text("cleanup is currently running!").color(NamedTextColor.RED));
+            return;
+        }
+        sendMessage(issuer,
+                Component.text("cleanup is Starting, you should see the output status in the proxy console").color(NamedTextColor.GOLD));
+        plugin.executeAsync(new StopperUUIDCleanupTask(plugin));
     }
 
 }

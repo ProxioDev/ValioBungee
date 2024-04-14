@@ -11,6 +11,7 @@
 package com.imaginarycode.minecraft.redisbungee.commands.utils;
 
 import co.aikar.commands.CommandIssuer;
+import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 import net.kyori.adventure.text.Component;
 
 

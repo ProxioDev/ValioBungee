@@ -261,7 +261,7 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
         // commands
         CommandPlatformHelper.init(new BungeeCommandPlatformHelper());
         this.commandManager = new BungeeCommandManager(this);
-        CommandLoader.initCommands(this.commandManager, configuration());
+        CommandLoader.initCommands(this.commandManager, this);
 
         logInfo("RedisBungee initialized successfully ");
     }
