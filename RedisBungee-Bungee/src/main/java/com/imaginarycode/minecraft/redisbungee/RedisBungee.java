@@ -10,6 +10,7 @@
 
 package com.imaginarycode.minecraft.redisbungee;
 
+import co.aikar.commands.BungeeCommandManager;
 import com.imaginarycode.minecraft.redisbungee.api.PlayerDataManager;
 import com.imaginarycode.minecraft.redisbungee.api.ProxyDataManager;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeeMode;
@@ -27,6 +28,8 @@ import com.imaginarycode.minecraft.redisbungee.api.util.InitialUtils;
 import com.imaginarycode.minecraft.redisbungee.api.util.uuid.NameFetcher;
 import com.imaginarycode.minecraft.redisbungee.api.util.uuid.UUIDFetcher;
 import com.imaginarycode.minecraft.redisbungee.api.util.uuid.UUIDTranslator;
+import com.imaginarycode.minecraft.redisbungee.commands.CommandLoader;
+import com.imaginarycode.minecraft.redisbungee.commands.utils.CommandPlatformHelper;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerChangedServerNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerJoinedNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerLeftNetworkEvent;
@@ -70,6 +73,7 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
     private RedisBungeeConfiguration configuration;
     private LangConfiguration langConfiguration;
     private OkHttpClient httpClient;
+    private BungeeCommandManager commandManager;
 
     private final Logger logger = LoggerFactory.getLogger("RedisBungee");
 
@@ -254,6 +258,11 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
         this.api = new RedisBungeeAPI(this);
         apiStatic = (RedisBungeeAPI) this.api;
 
+        // commands
+        CommandPlatformHelper.init(new BungeeCommandPlatformHelper());
+        this.commandManager = new BungeeCommandManager(this);
+        CommandLoader.initCommands(this.commandManager, configuration());
+
         logInfo("RedisBungee initialized successfully ");
     }
 
@@ -277,6 +286,9 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
             this.summoner.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+        if (this.commandManager != null) {
+            this.commandManager.unregisterCommands();
         }
         logInfo("RedisBungee shutdown successfully");
     }

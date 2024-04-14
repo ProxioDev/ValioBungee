@@ -22,6 +22,7 @@ dependencies {
     }
     compileOnly(libs.platform.velocity)
     annotationProcessor(libs.platform.velocity)
+    implementation(project(":RedisBungee-Commands"))
     implementation(libs.acf.velocity)
 
 }

@@ -19,7 +19,6 @@ dependencies {
     api(libs.adventure.legacy)
     api(libs.adventure.plain)
     api(libs.adventure.miniMessage)
-    implementation(libs.acf.core)
 }
 
 description = "RedisBungee interfaces"

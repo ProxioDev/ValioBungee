@@ -15,6 +15,7 @@ dependencies {
     implementation(libs.adventure.platforms.bungeecord)
     implementation(libs.adventure.gson)
     implementation(libs.acf.bungeecord)
+    implementation(project(":RedisBungee-Commands"))
 }
 
 description = "RedisBungee Bungeecord implementation"

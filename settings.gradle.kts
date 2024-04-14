@@ -7,6 +7,7 @@ pluginManagement {
 rootProject.name = "RedisBungee-Parent"
 
 include(":RedisBungee-Velocity")
+include(":RedisBungee-Commands")
 include(":RedisBungee-Bungee")
 include(":RedisBungee-API")
 

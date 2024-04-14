@@ -10,11 +10,14 @@
 
 package com.imaginarycode.minecraft.redisbungee;
 
+import co.aikar.commands.VelocityCommandManager;
 import com.google.inject.Inject;
 import com.imaginarycode.minecraft.redisbungee.api.PlayerDataManager;
 import com.imaginarycode.minecraft.redisbungee.api.ProxyDataManager;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeeMode;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
+import com.imaginarycode.minecraft.redisbungee.commands.CommandLoader;
+import com.imaginarycode.minecraft.redisbungee.commands.utils.CommandPlatformHelper;
 import com.imaginarycode.minecraft.redisbungee.api.config.LangConfiguration;
 import com.imaginarycode.minecraft.redisbungee.api.config.loaders.ConfigLoader;
 import com.imaginarycode.minecraft.redisbungee.api.config.RedisBungeeConfiguration;
@@ -90,6 +93,8 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, Con
             // This is needed for clients before 1.13
             new LegacyChannelIdentifier("legacy:redisbungee")
     );
+
+    private VelocityCommandManager commandManager;
 
     @Inject
     public RedisBungeeVelocityPlugin(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
@@ -264,7 +269,6 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, Con
     @Override
     public void initialize() {
         logInfo("Initializing RedisBungee.....");
-        ;
         // start heartbeat task
         // heartbeat and clean up
         this.heartbeatTask = server.getScheduler().buildTask(this, this.proxyDataManager::publishHeartbeat).repeat(Duration.ofSeconds(1)).schedule();
@@ -278,6 +282,11 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, Con
 
         // register plugin messages
         IDENTIFIERS.forEach(getProxy().getChannelRegistrar()::register);
+
+        // load commands
+        CommandPlatformHelper.init(new VelocityCommandPlatformHelper());
+        this.commandManager = new VelocityCommandManager(this.getProxy(), this);
+        CommandLoader.initCommands(this.commandManager, configuration());
 
         logInfo("RedisBungee initialized successfully ");
     }
@@ -308,6 +317,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, Con
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+        if (commandManager != null) commandManager.unregisterCommands();
         logInfo("RedisBungee shutdown complete");
     }
 
