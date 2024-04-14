@@ -161,7 +161,7 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
         Map<String, String> redisData = new HashMap<>();
         redisData.put("last-online", String.valueOf(0));
         redisData.put("proxy", plugin.configuration().getProxyId());
-        redisData.put("ip", inetAddress.toString());
+        redisData.put("ip", inetAddress.getHostAddress());
         unifiedJedis.hset("redis-bungee::player::" + uuid + "::data", redisData);
 
         JSONObject data = new JSONObject();
