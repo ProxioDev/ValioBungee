@@ -344,8 +344,6 @@ public abstract class ProxyDataManager implements Runnable {
                         } else if (unknownPayload instanceof RunCommandPayload payload) {
                             handleCommand(payload);
                         } else if (unknownPayload instanceof PubSubPayload payload) {
-                            System.out.println("HANDLED PUBSUB?");
-
                             handleChannelMessage(payload);
                         } else {
                             plugin.logWarn("got unknown data manager payload: {}", unknownPayload.getClassName());
