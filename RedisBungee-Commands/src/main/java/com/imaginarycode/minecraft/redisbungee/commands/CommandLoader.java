@@ -18,7 +18,8 @@ public class CommandLoader {
 
     public static void initCommands(CommandManager<?, ?, ?, ?, ?, ?> commandManager, RedisBungeePlugin<?> plugin) {
         commandManager.registerCommand(new CommandRedisBungee(plugin));
-        // todo: config options to disable each command
+    // todo: config options to disable each command
+    commandManager.registerCommand(new LegacyRedisBungeeCommands(plugin));
     }
 
 }

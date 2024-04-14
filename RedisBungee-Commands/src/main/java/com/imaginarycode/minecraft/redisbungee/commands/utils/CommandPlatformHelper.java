@@ -28,6 +28,7 @@ public abstract class CommandPlatformHelper {
         SINGLETON = platformHelper;
     }
 
+
     public static CommandPlatformHelper getPlatformHelper() {
         return SINGLETON;
     }
