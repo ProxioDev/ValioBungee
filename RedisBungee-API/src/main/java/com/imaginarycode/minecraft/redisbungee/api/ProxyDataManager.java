@@ -280,6 +280,7 @@ public abstract class ProxyDataManager implements Runnable {
             return;
         }
         for (UUID uuid : getProxyMembers(id)) plugin.fireEvent(plugin.createPlayerLeftNetworkEvent(uuid));
+        this.heartbeats.remove(id);
         plugin.logInfo("Proxy {} has disconnected", id);
     }
 
