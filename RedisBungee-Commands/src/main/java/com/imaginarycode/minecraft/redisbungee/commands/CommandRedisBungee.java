@@ -41,12 +41,12 @@ public class CommandRedisBungee extends AdventureBaseCommand {
     public void info(CommandIssuer issuer) {
         final String message = """
         <color:aqua>This proxy is running RedisBungee Limework's fork
-        <color:yellow>========================================
+        <color:gold>========================================
         <color:aqua>RedisBungee version: <color:green><version>
         <color:aqua>Build date: <color:green><build-date>
         <color:aqua>Commit: <color:green><commit>
-        <color:yellow>========================================
-        <color:yellow>run /rb help for more commands""";
+        <color:gold>========================================
+        <color:gold>run /rb help for more commands""";
     sendMessage(
         issuer,
         MiniMessage.miniMessage()
@@ -65,14 +65,14 @@ public class CommandRedisBungee extends AdventureBaseCommand {
     @HelpCommand
     public void help(CommandIssuer issuer) {
         final String message = """
-        <color:yellow>========================================
+        <color:gold>========================================
         <color:aqua>/rb info: <color:green>shows info of this version.
         <color:aqua>/rb help: <color:green>shows this page.
         <color:aqua>/rb clean: <color:green>cleans up the uuid cache
         <color:red><bold>WARNING...</bold> <color:white>command above could cause performance issues
         <color:aqua>/rb show: <color:green>shows list of proxies with player count
-        <color:yellow>========================================
-        <color:yellow>run /rb help for more commands""";
+        <color:gold>========================================
+        <color:gold>run /rb help for more commands""";
         sendMessage(issuer, MiniMessage.miniMessage().deserialize(message));
     }
     @Subcommand("clean")
@@ -92,12 +92,23 @@ public class CommandRedisBungee extends AdventureBaseCommand {
     @Subcommand("show")
     public void showProxies(CommandIssuer issuer) {
         final String message = """
-        <color:yellow>========================================
-        <data><color:yellow>========================================""";
+        <color:gold>========================================
+        <data><color:gold>========================================""";
+
+        final String proxyPlayersMessage = "<color:yellow><proxy><here> : <color:green><players> online";
+
+
         TextComponent.Builder builder = Component.text();
 
         plugin.proxyDataManager().eachProxyCount().forEach((proxy, players)
-                -> builder.append(Component.text(proxy + ": " + players)).appendNewline());
+                -> builder.append(
+                MiniMessage.miniMessage()
+                        .deserialize(proxyPlayersMessage,
+                                Placeholder.component("here", Component.text(plugin.proxyDataManager().proxyId().equals(proxy) ? " (#) " : "")),
+                                Placeholder.component("proxy", Component.text(proxy)),
+                                Placeholder.component("players", Component.text(players))
+                        )
+                        .appendNewline()));
 
         sendMessage(issuer, MiniMessage.miniMessage().deserialize(message, Placeholder.component("data", builder)));
 
