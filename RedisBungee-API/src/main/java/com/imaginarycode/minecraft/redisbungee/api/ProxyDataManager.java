@@ -10,6 +10,7 @@
 
 package com.imaginarycode.minecraft.redisbungee.api;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.imaginarycode.minecraft.redisbungee.api.payloads.AbstractPayload;
@@ -145,6 +146,12 @@ public abstract class ProxyDataManager implements Runnable {
             players += value.players();
         }
         return players;
+    }
+
+    public Map<String, Integer> eachProxyCount() {
+        ImmutableMap.Builder<String, Integer> builder = ImmutableMap.builder();
+        heartbeats.forEach((proxy, data) -> builder.put(proxy, data.players()));
+        return builder.build();
     }
 
     // Call on close

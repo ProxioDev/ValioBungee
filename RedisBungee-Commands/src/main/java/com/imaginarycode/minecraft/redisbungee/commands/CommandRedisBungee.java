@@ -17,6 +17,7 @@ import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 import com.imaginarycode.minecraft.redisbungee.commands.utils.AdventureBaseCommand;
 import com.imaginarycode.minecraft.redisbungee.commands.utils.StopperUUIDCleanupTask;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -69,6 +70,7 @@ public class CommandRedisBungee extends AdventureBaseCommand {
         <color:aqua>/rb help: <color:green>shows this page.
         <color:aqua>/rb clean: <color:green>cleans up the uuid cache
         <color:red><bold>WARNING...</bold> <color:white>command above could cause performance issues
+        <color:aqua>/rb show: <color:green>shows list of proxies with player count
         <color:yellow>========================================
         <color:yellow>run /rb help for more commands""";
         sendMessage(issuer, MiniMessage.miniMessage().deserialize(message));
@@ -86,4 +88,19 @@ public class CommandRedisBungee extends AdventureBaseCommand {
         plugin.executeAsync(new StopperUUIDCleanupTask(plugin));
     }
 
+
+    @Subcommand("show")
+    public void showProxies(CommandIssuer issuer) {
+        final String message = """
+        <color:yellow>========================================
+        <data><color:yellow>========================================""";
+        TextComponent.Builder builder = Component.text();
+
+        plugin.proxyDataManager().eachProxyCount().forEach((proxy, players)
+                -> builder.append(Component.text(proxy + ": " + players)).appendNewline());
+
+        sendMessage(issuer, MiniMessage.miniMessage().deserialize(message, Placeholder.component("data", builder)));
+
+
+    }
 }
