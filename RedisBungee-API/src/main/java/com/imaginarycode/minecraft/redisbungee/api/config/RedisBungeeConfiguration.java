@@ -13,6 +13,7 @@ package com.imaginarycode.minecraft.redisbungee.api.config;
 import com.google.common.collect.ImmutableList;
 import com.google.common.net.InetAddresses;
 
+import javax.annotation.Nullable;
 import java.net.InetAddress;
 import java.util.List;
 
@@ -25,8 +26,10 @@ public class RedisBungeeConfiguration {
     private final boolean handleReconnectToLastServer;
     private final boolean handleMotd;
 
+    private final CommandsConfiguration commandsConfiguration;
 
-    public RedisBungeeConfiguration(String proxyId, List<String> exemptAddresses, boolean kickWhenOnline, boolean handleReconnectToLastServer, boolean handleMotd) {
+
+    public RedisBungeeConfiguration(String proxyId, List<String> exemptAddresses, boolean kickWhenOnline, boolean handleReconnectToLastServer, boolean handleMotd, CommandsConfiguration commandsConfiguration) {
         this.proxyId = proxyId;
         ImmutableList.Builder<InetAddress> addressBuilder = ImmutableList.builder();
         for (String s : exemptAddresses) {
@@ -36,6 +39,7 @@ public class RedisBungeeConfiguration {
         this.kickWhenOnline = kickWhenOnline;
         this.handleReconnectToLastServer = handleReconnectToLastServer;
         this.handleMotd = handleMotd;
+        this.commandsConfiguration = commandsConfiguration;
     }
 
     public String getProxyId() {
@@ -58,5 +62,21 @@ public class RedisBungeeConfiguration {
         return this.handleReconnectToLastServer;
     }
 
+    public record CommandsConfiguration(boolean redisbungeeEnabled, boolean redisbungeeLegacyEnabled,
+                                        @Nullable LegacySubCommandsConfiguration legacySubCommandsConfiguration) {
 
+    }
+
+    public record LegacySubCommandsConfiguration(boolean findEnabled, boolean glistEnabled, boolean ipEnabled,
+                                                 boolean lastseenEnabled, boolean plistEnabled, boolean pproxyEnabled,
+                                                 boolean sendtoallEnabled, boolean serveridEnabled,
+                                                 boolean serveridsEnabled, boolean installFind, boolean installGlist, boolean installIp,
+                                                 boolean installLastseen, boolean installPlist, boolean installPproxy,
+                                                 boolean installSendtoall, boolean installServerid,
+                                                 boolean installServerids) {
+    }
+
+    public CommandsConfiguration commandsConfiguration() {
+        return commandsConfiguration;
+    }
 }

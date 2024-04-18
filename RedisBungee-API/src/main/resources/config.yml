@@ -50,7 +50,7 @@ proxy-id: "proxy-1"
 # which will break compatibility with old plugins that uses RedisBungee JedisPool
 # so to mitigate this issue, RedisBungee will create an JedisPool for compatibility reasons.
 # disabled by default
-# ignored when cluster mode is enabled
+# Automatically disabled when cluster mode is enabled
 enable-jedis-pool-compatibility: false
 
 # max connections for the compatibility pool
@@ -69,12 +69,64 @@ handle-motd: true
 
 # A list of IP addresses for which RedisBungee will not modify the response for, useful for automatic
 # restart scripts.
-# ignored if handle-motd is disabled.
+# Automatically disabled  if handle-motd is disabled.
 exempt-ip-addresses: []
 
 # disabled by default
 # RedisBungee will attempt to connect player to last server that was stored.
 reconnect-to-last-server: false
+
+# For redis bungee legacy commands
+# either can be run using '/rbl glist' for example
+# or if 'install' is set to true '/glist' can be used.
+# 'install' also overrides the proxy installed commands
+#
+# In legacy commands each command got it own permissions since they had it own permission pre new command system,
+# so it's also applied to subcommands in '/rbl'.
+commands:
+  # Permission redisbungee.legacy.use
+  redisbungee-legacy:
+    enabled: false
+    subcommands:
+        # Permission redisbungee.command.glist
+        glist:
+          enabled: false
+          install: false
+        # Permission redisbungee.command.find
+        find:
+          enabled: false
+          install: false
+        # Permission redisbungee.command.lastseen
+        lastseen:
+          enabled: false
+          install: false
+        # Permission redisbungee.command.ip
+        ip:
+          enabled: false
+          install: false
+        # Permission redisbungee.command.pproxy
+        pproxy:
+          enabled: false
+          install: false
+        # Permission redisbungee.command.sendtoall
+        sendtoall:
+          enabled: false
+          install: false
+        # Permission redisbungee.command.serverid
+        serverid:
+          enabled: false
+          install: false
+        # Permission redisbungee.command.serverids
+        serverids:
+          enabled: false
+          install: false
+       # Permission redisbungee.command.plist
+        plist:
+          enabled: false
+          install: false
+  # Permission redisbungee.command.use
+  redisbungee:
+    enabled: true
 
 # Config version DO NOT CHANGE!!!!
 config-version: 2

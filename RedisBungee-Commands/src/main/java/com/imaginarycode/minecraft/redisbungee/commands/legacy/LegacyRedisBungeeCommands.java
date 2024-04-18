@@ -8,9 +8,10 @@
  *  http://www.eclipse.org/legal/epl-v10.html
  */
 
-package com.imaginarycode.minecraft.redisbungee.commands;
+package com.imaginarycode.minecraft.redisbungee.commands.legacy;
 
 import co.aikar.commands.CommandIssuer;
+import co.aikar.commands.CommandManager;
 import co.aikar.commands.annotation.CommandAlias;
 import co.aikar.commands.annotation.CommandPermission;
 import co.aikar.commands.annotation.Subcommand;
@@ -29,15 +30,27 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 
-@CommandAlias("rbl|redisbungeeleagacy")
-@CommandPermission("redisbungee.leagacy.use")
+@CommandAlias("rbl|redisbungeelegacy")
+@CommandPermission("redisbungee.legacy.use")
 public class LegacyRedisBungeeCommands extends AdventureBaseCommand {
-
 
     private final RedisBungeePlugin<?> plugin;
 
-    public LegacyRedisBungeeCommands(RedisBungeePlugin<?> plugin) {
+    public LegacyRedisBungeeCommands(CommandManager<?, ?, ?, ?, ?, ?> commandManager, RedisBungeePlugin<?> plugin) {
         this.plugin = plugin;
+        var commands = plugin.configuration().commandsConfiguration().legacySubCommandsConfiguration();
+        if (!plugin.configuration().commandsConfiguration().redisbungeeLegacyEnabled()) throw new IllegalStateException("someone tried to init me while disabled!");
+        if (commands == null) throw new NullPointerException("commands config is null!!");
+
+        if (commands.installGlist())  commandManager.registerCommand(new CommandGList(this));
+        if (commands.installFind())  commandManager.registerCommand(new CommandFind(this));
+        if (commands.installIp())  commandManager.registerCommand(new CommandIp(this));
+        if (commands.installLastseen())  commandManager.registerCommand(new CommandLastSeen(this));
+        if (commands.installPlist())  commandManager.registerCommand(new CommandPlist(this));
+        if (commands.installPproxy())  commandManager.registerCommand(new CommandPProxy(this));
+        if (commands.installSendtoall())  commandManager.registerCommand(new CommandSendToAll(this));
+        if (commands.installServerid())  commandManager.registerCommand(new CommandServerId(this));
+        if (commands.installServerids())  commandManager.registerCommand(new CommandServerIds(this));
     }
 
     private static final Component NO_PLAYER_SPECIFIED =
@@ -52,7 +65,6 @@ public class LegacyRedisBungeeCommands extends AdventureBaseCommand {
     }
 
     @Subcommand("glist")
-    @CommandAlias("glist")
     @CommandPermission("redisbungee.command.glist")
     public void gList(CommandIssuer issuer, String[] args) {
         plugin.executeAsync(() -> {
@@ -80,8 +92,8 @@ public class LegacyRedisBungeeCommands extends AdventureBaseCommand {
 
         });
     }
+
     @Subcommand("find")
-    @CommandAlias("find")
     @CommandPermission("redisbungee.command.find")
     public void find(CommandIssuer issuer, String[] args) {
         plugin.executeAsync(() -> {
@@ -107,7 +119,6 @@ public class LegacyRedisBungeeCommands extends AdventureBaseCommand {
     }
 
     @Subcommand("lastseen")
-    @CommandAlias("lastseen")
     @CommandPermission("redisbungee.command.lastseen")
     public void lastSeen(CommandIssuer issuer, String[] args) {
         plugin.executeAsync(() -> {
@@ -139,7 +150,6 @@ public class LegacyRedisBungeeCommands extends AdventureBaseCommand {
     }
 
     @Subcommand("ip")
-    @CommandAlias("ip")
     @CommandPermission("redisbungee.command.ip")
     public void ip(CommandIssuer issuer, String[] args) {
         plugin.executeAsync(() -> {
@@ -163,7 +173,6 @@ public class LegacyRedisBungeeCommands extends AdventureBaseCommand {
     }
 
     @Subcommand("pproxy")
-    @CommandAlias("pproxy")
     @CommandPermission("redisbungee.command.pproxy")
     public void playerProxy(CommandIssuer issuer, String[] args) {
         plugin.executeAsync(() -> {
@@ -188,7 +197,6 @@ public class LegacyRedisBungeeCommands extends AdventureBaseCommand {
     }
 
     @Subcommand("sendtoall")
-    @CommandAlias("sendtoall")
     @CommandPermission("redisbungee.command.sendtoall")
     public void sendToAll(CommandIssuer issuer, String[] args) {
         if (args.length > 0) {
@@ -203,22 +211,19 @@ public class LegacyRedisBungeeCommands extends AdventureBaseCommand {
     }
 
     @Subcommand("serverid")
-    @CommandAlias("serverid")
     @CommandPermission("redisbungee.command.serverid")
     public void serverId(CommandIssuer issuer) {
         sendMessage(issuer, Component.text("You are on " + plugin.getAbstractRedisBungeeApi().getProxyId() + ".", NamedTextColor.YELLOW));
     }
 
     @Subcommand("serverids")
-    @CommandAlias("serverids")
     @CommandPermission("redisbungee.command.serverids")
     public void serverIds(CommandIssuer issuer) {
-        sendMessage(issuer, Component.text("All server IDs: " + Joiner.on(", ").join(plugin.getAbstractRedisBungeeApi().getAllProxies()), NamedTextColor.YELLOW));
+        sendMessage(issuer, Component.text("All Proxies IDs: " + Joiner.on(", ").join(plugin.getAbstractRedisBungeeApi().getAllProxies()), NamedTextColor.YELLOW));
     }
 
 
     @Subcommand("plist")
-    @CommandAlias("plist")
     @CommandPermission("redisbungee.command.plist")
     public void playerList(CommandIssuer issuer, String[] args) {
         plugin.executeAsync(() -> {

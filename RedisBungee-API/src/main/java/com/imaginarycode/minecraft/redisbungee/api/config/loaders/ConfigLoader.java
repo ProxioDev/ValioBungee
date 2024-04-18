@@ -86,7 +86,42 @@ public interface ConfigLoader extends GenericConfigLoader {
         plugin.logInfo("handle reconnect to last server: {}", reconnectToLastServer);
         plugin.logInfo("handle motd: {}", handleMotd);
 
-        RedisBungeeConfiguration configuration = new RedisBungeeConfiguration(proxyId, exemptAddresses, kickWhenOnline, reconnectToLastServer, handleMotd);
+
+        // commands
+        boolean redisBungeeEnabled = node.getNode("commands", "redisbungee", "enabled").getBoolean();
+        boolean redisBungeeLegacyEnabled =node.getNode("commands", "redisbungee-legacy", "enabled").getBoolean();
+
+        boolean glistEnabled = node.getNode("commands", "redisbungee-legacy", "subcommands", "glist", "enabled").getBoolean();
+        boolean findEnabled = node.getNode("commands", "redisbungee-legacy", "subcommands", "find", "enabled").getBoolean();
+        boolean lastseenEnabled = node.getNode("commands", "redisbungee-legacy", "subcommands", "lastseen", "enabled").getBoolean();
+        boolean ipEnabled = node.getNode("commands", "redisbungee-legacy", "subcommands", "ip", "enabled").getBoolean();
+        boolean pproxyEnabled = node.getNode("commands", "redisbungee-legacy", "subcommands", "pproxy", "enabled").getBoolean();
+        boolean sendToAllEnabled = node.getNode("commands", "redisbungee-legacy", "subcommands", "sendtoall", "enabled").getBoolean();
+        boolean serverIdEnabled = node.getNode("commands", "redisbungee-legacy", "subcommands", "serverid", "enabled").getBoolean();
+        boolean serverIdsEnabled = node.getNode("commands", "redisbungee-legacy", "subcommands", "serverids", "enabled").getBoolean();
+        boolean pListEnabled = node.getNode("commands", "redisbungee-legacy", "subcommands", "plist", "enabled").getBoolean();
+
+        boolean installGlist = node.getNode("commands", "redisbungee-legacy", "subcommands", "glist", "install").getBoolean();
+        boolean installFind = node.getNode("commands", "redisbungee-legacy", "subcommands", "find", "install").getBoolean();
+        boolean installLastseen = node.getNode("commands", "redisbungee-legacy", "subcommands", "lastseen", "install").getBoolean();
+        boolean installIp = node.getNode("commands", "redisbungee-legacy", "subcommands", "ip", "install").getBoolean();
+        boolean installPproxy = node.getNode("commands", "redisbungee-legacy", "subcommands", "pproxy", "install").getBoolean();
+        boolean installSendToAll = node.getNode("commands", "redisbungee-legacy", "subcommands", "sendtoall", "install").getBoolean();
+        boolean installServerid = node.getNode("commands", "redisbungee-legacy", "subcommands", "serverid", "install").getBoolean();
+        boolean installServerIds = node.getNode("commands", "redisbungee-legacy", "subcommands", "serverids", "install").getBoolean();
+        boolean installPlist = node.getNode("commands", "redisbungee-legacy", "subcommands", "plist", "install").getBoolean();
+
+
+        RedisBungeeConfiguration configuration = new RedisBungeeConfiguration(proxyId, exemptAddresses, kickWhenOnline, reconnectToLastServer, handleMotd, new RedisBungeeConfiguration.CommandsConfiguration(
+                redisBungeeEnabled, redisBungeeLegacyEnabled,
+                new RedisBungeeConfiguration.LegacySubCommandsConfiguration(
+                        findEnabled, glistEnabled, ipEnabled,
+                        lastseenEnabled, pListEnabled, pproxyEnabled,
+                        sendToAllEnabled, serverIdEnabled, serverIdsEnabled,
+                        installFind, installGlist, installIp,
+                        installLastseen, installPlist, installPproxy,
+                        installSendToAll, installServerid, installServerIds)
+        ));
         Summoner<?> summoner;
         RedisBungeeMode redisBungeeMode;
         if (useSSL) {

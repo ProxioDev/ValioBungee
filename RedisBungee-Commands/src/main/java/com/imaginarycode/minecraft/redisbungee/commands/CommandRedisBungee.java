@@ -27,7 +27,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import java.util.Date;
 
 @CommandAlias("rb|redisbungee")
-@CommandPermission("redisbungee.use")
+@CommandPermission("redisbungee.command.use")
 public class CommandRedisBungee extends AdventureBaseCommand {
 
     private final RedisBungeePlugin<?> plugin;
