@@ -1,5 +1,12 @@
 # RedisBungee configuration file.
-# you need Redis so get Redis from http://redis.io/ or install it from your package manager
+# Notice:
+# Redis 7.2.4 is last free and open source Redis version after license change
+# https://download.redis.io/releases/redis-7.2.4.tar.gz which you have to compile yourself,
+# unless your package manager still provide it.
+# Here is The alternatives
+# - 'ValKey' By linux foundation https://valkey.io/download/
+# - 'KeyDB' by Snapchat inc https://docs.keydb.dev/docs/download/
+
 
 # The Redis server you will use.
 # these settings are ignored when cluster mode is enabled.
@@ -41,9 +48,12 @@ max-redis-connections: 10
 # Keep note that SSL/TLS connections will decrease redis performance so use it when needed.
 useSSL: false
 
+# An identifier for this network, which helps to separate redisbungee instances on same redis instance.
+# You can use environment variable 'REDISBUNGEE_NETWORK_ID' to override
+network-id: "main"
+
 # An identifier for this BungeeCord / Velocity instance. Will randomly generate if leaving it blank.
-# Tip: you can set proxy id using Environment variable REDISBUNGEE_PROXY_ID which will override this config option
-# before launch
+# You can set Environment variable 'REDISBUNGEE_PROXY_ID' to override
 proxy-id: "proxy-1"
 
 # since RedisBungee Internally now uses JedisPooled instead of Jedis, JedisPool.
