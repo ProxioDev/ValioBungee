@@ -49,6 +49,7 @@ tasks {
     runVelocity {
         velocityVersion("3.3.0-SNAPSHOT")
         environment["REDISBUNGEE_PROXY_ID"] = "velocity-1"
+        environment["REDISBUNGEE_NETWORK_ID"] = "dev"
     }
     compileJava {
         options.encoding = Charsets.UTF_8.name()

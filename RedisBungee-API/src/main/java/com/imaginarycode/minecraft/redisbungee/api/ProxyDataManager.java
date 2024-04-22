@@ -24,6 +24,7 @@ import com.imaginarycode.minecraft.redisbungee.api.payloads.proxy.gson.Heartbeat
 import com.imaginarycode.minecraft.redisbungee.api.payloads.proxy.gson.PubSubPayloadSerializer;
 import com.imaginarycode.minecraft.redisbungee.api.payloads.proxy.gson.RunCommandPayloadSerializer;
 import com.imaginarycode.minecraft.redisbungee.api.tasks.RedisPipelineTask;
+import com.imaginarycode.minecraft.redisbungee.api.util.RedisUtil;
 import redis.clients.jedis.*;
 import redis.clients.jedis.params.XAddParams;
 import redis.clients.jedis.params.XReadParams;
@@ -38,7 +39,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 public abstract class ProxyDataManager implements Runnable {
 
-    private static final String STREAM_ID = "redisbungee-stream";
     private static final int MAX_ENTRIES = 10000;
 
     private final AtomicBoolean closed = new AtomicBoolean(false);
@@ -49,7 +49,11 @@ public abstract class ProxyDataManager implements Runnable {
     // Proxy id, heartbeat (unix epoch from instant), players as int
     private final ConcurrentHashMap<String, HeartbeatPayload.HeartbeatData> heartbeats = new ConcurrentHashMap<>();
 
+    private final String networkId;
+
     private final String proxyId;
+
+    private final String STREAM_ID;
 
     // This different from proxy id, just to detect if there is duplicate proxy using same proxy id
     private final UUID dataManagerUUID = UUID.randomUUID();
@@ -63,6 +67,8 @@ public abstract class ProxyDataManager implements Runnable {
         this.proxyId = this.plugin.configuration().getProxyId();
         this.unifiedJedis = plugin.getSummoner().obtainResource();
         this.destroyProxyMembers();
+        this.networkId = plugin.configuration().networkId();
+        this.STREAM_ID = "network-" + this.networkId + "-redisbungee-stream";
     }
 
     public abstract Set<UUID> getLocalOnlineUUIDs();
@@ -106,7 +112,7 @@ public abstract class ProxyDataManager implements Runnable {
                 public Set<UUID> doPooledPipeline(Pipeline pipeline) {
                     HashSet<Response<Set<String>>> responses = new HashSet<>();
                     for (String proxyId : proxiesIds()) {
-                        responses.add(pipeline.smembers("redisbungee::proxies::" + proxyId + "::online-players"));
+                        responses.add(pipeline.smembers("redisbungee::" + networkId + "::proxies::" + proxyId + "::online-players"));
                     }
                     pipeline.sync();
                     HashSet<UUID> uuids = new HashSet<>();
@@ -122,7 +128,7 @@ public abstract class ProxyDataManager implements Runnable {
                 public Set<UUID> clusterPipeline(ClusterPipeline pipeline) {
                     HashSet<Response<Set<String>>> responses = new HashSet<>();
                     for (String proxyId : proxiesIds()) {
-                        responses.add(pipeline.smembers("redisbungee::proxies::" + proxyId + "::online-players"));
+                        responses.add(pipeline.smembers("redisbungee::" + networkId + "::proxies::" + proxyId + "::online-players"));
                     }
                     pipeline.sync();
                     HashSet<UUID> uuids = new HashSet<>();
@@ -207,8 +213,8 @@ public abstract class ProxyDataManager implements Runnable {
                         for (UUID uuid : add) {
                             addString.add(uuid.toString());
                         }
-                        pipeline.srem("redisbungee::proxies::" + proxyId() + "::online-players", removeString.toArray(new String[]{}));
-                        pipeline.sadd("redisbungee::proxies::" + proxyId() + "::online-players", addString.toArray(new String[]{}));
+                        pipeline.srem("redisbungee::" + networkId + "::proxies::" + proxyId + "::online-players", removeString.toArray(new String[]{}));
+                        pipeline.sadd("redisbungee::" + networkId + "::proxies::" + proxyId + "::online-players", addString.toArray(new String[]{}));
                         pipeline.sync();
                         return null;
                     }
@@ -223,8 +229,8 @@ public abstract class ProxyDataManager implements Runnable {
                         for (UUID uuid : add) {
                             addString.add(uuid.toString());
                         }
-                        pipeline.srem("redisbungee::proxies::" + proxyId() + "::online-players", removeString.toArray(new String[]{}));
-                        pipeline.sadd("redisbungee::proxies::" + proxyId() + "::online-players", addString.toArray(new String[]{}));
+                        pipeline.srem("redisbungee::" + networkId + "::proxies::" + proxyId + "::online-players", removeString.toArray(new String[]{}));
+                        pipeline.sadd("redisbungee::" + networkId + "::proxies::" + proxyId + "::online-players", addString.toArray(new String[]{}));
                         pipeline.sync();
                         return null;
                     }
@@ -236,12 +242,12 @@ public abstract class ProxyDataManager implements Runnable {
         }
 
 
-        // handle dead proxies "THAT" Didn't send death payload but considered dead due TIMEOUT ~10 seconds
+        // handle dead proxies "THAT" Didn't send death payload but considered dead due TIMEOUT ~30 seconds
         final Set<String> deadProxies = new HashSet<>();
         for (Map.Entry<String, HeartbeatPayload.HeartbeatData> stringHeartbeatDataEntry : this.heartbeats.entrySet()) {
             String id = stringHeartbeatDataEntry.getKey();
             long heartbeat = stringHeartbeatDataEntry.getValue().heartbeat();
-            if (Instant.now().getEpochSecond() - heartbeat > 10) {
+            if (Instant.now().getEpochSecond() - heartbeat > RedisUtil.PROXY_TIMEOUT) {
                 deadProxies.add(id);
                 cleanProxy(id);
             }
@@ -251,7 +257,7 @@ public abstract class ProxyDataManager implements Runnable {
                 @Override
                 public Void doPooledPipeline(Pipeline pipeline) {
                     for (String deadProxy : deadProxies) {
-                        pipeline.del("redisbungee::proxies::" + deadProxy + "::online-players");
+                        pipeline.del("redisbungee::" + networkId + "::proxies::" + deadProxy + "::online-players");
                     }
                     pipeline.sync();
                     return null;
@@ -260,7 +266,7 @@ public abstract class ProxyDataManager implements Runnable {
                 @Override
                 public Void clusterPipeline(ClusterPipeline pipeline) {
                     for (String deadProxy : deadProxies) {
-                        pipeline.del("redisbungee::proxies::" + deadProxy + "::online-players");
+                        pipeline.del("redisbungee::" + networkId + "::proxies::" + deadProxy + "::online-players");
                     }
                     pipeline.sync();
                     return null;
@@ -302,19 +308,19 @@ public abstract class ProxyDataManager implements Runnable {
 
 
     public void addPlayer(UUID uuid) {
-        this.unifiedJedis.sadd("redisbungee::proxies::" + this.proxyId + "::online-players", uuid.toString());
+        this.unifiedJedis.sadd("redisbungee::" + this.networkId + "::proxies::" + this.proxyId + "::online-players", uuid.toString());
     }
 
     public void removePlayer(UUID uuid) {
-        this.unifiedJedis.srem("redisbungee::proxies::" + this.proxyId + "::online-players", uuid.toString());
+        this.unifiedJedis.srem("redisbungee::" + this.networkId + "::proxies::" + this.proxyId + "::online-players", uuid.toString());
     }
 
     private void destroyProxyMembers() {
-        unifiedJedis.del("redisbungee::proxies::" + this.proxyId + "::online-players");
+        unifiedJedis.del("redisbungee::" + this.networkId + "::proxies::" + this.proxyId + "::online-players");
     }
 
     private Set<UUID> getProxyMembers(String proxyId) {
-        Set<String> uuidsStrings = unifiedJedis.smembers("redisbungee::proxies::" + proxyId + "::online-players");
+        Set<String> uuidsStrings = unifiedJedis.smembers("redisbungee::" + this.networkId + "::proxies::" + proxyId + "::online-players");
         HashSet<UUID> uuids = new HashSet<>();
         for (String proxyMember : uuidsStrings) {
             uuids.add(UUID.fromString(proxyMember));
@@ -387,4 +393,7 @@ public abstract class ProxyDataManager implements Runnable {
         return unifiedJedis;
     }
 
+    public String networkId() {
+        return networkId;
+    }
 }

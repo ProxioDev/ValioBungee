@@ -45,10 +45,14 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
     private final Object SERVERS_TO_PLAYERS_KEY = new Object();
     private final LoadingCache<Object, Multimap<String, UUID>> serverToPlayersCache = Caffeine.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).build(this::serversToPlayersBuilder);
     private final UnifiedJedis unifiedJedis;
+    private final String proxyId;
+    private final String networkId;
 
     public PlayerDataManager(RedisBungeePlugin<P> plugin) {
         this.plugin = plugin;
         this.unifiedJedis = plugin.proxyDataManager().unifiedJedis();
+        this.proxyId = plugin.proxyDataManager().proxyId();
+        this.networkId = plugin.proxyDataManager().networkId();
     }
 
     // handle network wide
@@ -84,7 +88,7 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
         if (event.getChannel().equals("redisbungee-kick")) {
             JSONObject data = new JSONObject(event.getMessage());
             String proxy = data.getString("proxy");
-            if (proxy.equals(plugin.configuration().getProxyId())) {
+            if (proxy.equals(this.proxyId)) {
                 return;
             }
             UUID uuid = UUID.fromString(data.getString("uuid"));
@@ -95,7 +99,7 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
         if (event.getChannel().equals("redisbungee-serverchange")) {
             JSONObject data = new JSONObject(event.getMessage());
             String proxy = data.getString("proxy");
-            if (proxy.equals(plugin.configuration().getProxyId())) {
+            if (proxy.equals(this.proxyId)) {
                 return;
             }
             UUID uuid = UUID.fromString(data.getString("uuid"));
@@ -108,7 +112,7 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
         if (event.getChannel().equals("redisbungee-player-join")) {
             JSONObject data = new JSONObject(event.getMessage());
             String proxy = data.getString("proxy");
-            if (proxy.equals(plugin.configuration().getProxyId())) {
+            if (proxy.equals(this.proxyId)) {
                 return;
             }
             UUID uuid = UUID.fromString(data.getString("uuid"));
@@ -118,7 +122,7 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
         if (event.getChannel().equals("redisbungee-player-leave")) {
             JSONObject data = new JSONObject(event.getMessage());
             String proxy = data.getString("proxy");
-            if (proxy.equals(plugin.configuration().getProxyId())) {
+            if (proxy.equals(this.proxyId)) {
                 return;
             }
             UUID uuid = UUID.fromString(data.getString("uuid"));
@@ -129,7 +133,7 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
 
     protected void playerChangedServer(UUID uuid, String from, String to) {
         JSONObject data = new JSONObject();
-        data.put("proxy", plugin.configuration().getProxyId());
+        data.put("proxy", this.proxyId);
         data.put("uuid", uuid);
         data.put("from", from);
         data.put("to", to);
@@ -143,7 +147,7 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
     public void kickPlayer(UUID uuid, Component message) {
         if (!plugin.handlePlatformKick(uuid, message)) { // handle locally before SENDING a message
             JSONObject data = new JSONObject();
-            data.put("proxy", plugin.configuration().getProxyId());
+            data.put("proxy", this.proxyId);
             data.put("uuid", uuid);
             data.put("message", COMPONENT_SERIALIZER.serialize(message));
             plugin.proxyDataManager().sendChannelMessage("redisbungee-kick", data.toString());
@@ -154,18 +158,18 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
         Map<String, String> data = new HashMap<>();
         data.put("server", server);
         data.put("last-server", server);
-        unifiedJedis.hset("redis-bungee::player::" + uuid + "::data", data);
+        unifiedJedis.hset("redis-bungee::" + this.networkId + "::player::" + uuid + "::data", data);
     }
 
     protected void addPlayer(final UUID uuid, final InetAddress inetAddress) {
         Map<String, String> redisData = new HashMap<>();
         redisData.put("last-online", String.valueOf(0));
-        redisData.put("proxy", plugin.configuration().getProxyId());
+        redisData.put("proxy", this.proxyId);
         redisData.put("ip", inetAddress.getHostAddress());
-        unifiedJedis.hset("redis-bungee::player::" + uuid + "::data", redisData);
+        unifiedJedis.hset("redis-bungee::" + this.networkId + "::player::" + uuid + "::data", redisData);
 
         JSONObject data = new JSONObject();
-        data.put("proxy", plugin.configuration().getProxyId());
+        data.put("proxy", this.proxyId);
         data.put("uuid", uuid);
         plugin.proxyDataManager().sendChannelMessage("redisbungee-player-join", data.toString());
         plugin.fireEvent(plugin.createPlayerJoinedNetworkEvent(uuid));
@@ -173,10 +177,10 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
     }
 
     protected void removePlayer(UUID uuid) {
-        unifiedJedis.hset("redis-bungee::player::" + uuid + "::data", "last-online", String.valueOf(System.currentTimeMillis()));
-        unifiedJedis.hdel("redis-bungee::player::" + uuid + "::data", "server", "proxy", "ip");
+        unifiedJedis.hset("redis-bungee::" + this.networkId + "::player::" + uuid + "::data", "last-online", String.valueOf(System.currentTimeMillis()));
+        unifiedJedis.hdel("redis-bungee::" + this.networkId + "::player::" + uuid + "::data", "server", "proxy", "ip");
         JSONObject data = new JSONObject();
-        data.put("proxy", plugin.configuration().getProxyId());
+        data.put("proxy", this.proxyId);
         data.put("uuid", uuid);
         plugin.proxyDataManager().sendChannelMessage("redisbungee-player-leave", data.toString());
         plugin.fireEvent(plugin.createPlayerLeftNetworkEvent(uuid));
@@ -185,25 +189,25 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
 
 
     protected String getProxyFromRedis(UUID uuid) {
-        return unifiedJedis.hget("redis-bungee::player::" + uuid + "::data", "proxy");
+        return unifiedJedis.hget("redis-bungee::" + this.networkId + "::player::" + uuid + "::data", "proxy");
     }
 
     protected String getServerFromRedis(UUID uuid) {
-        return unifiedJedis.hget("redis-bungee::player::" + uuid + "::data", "server");
+        return unifiedJedis.hget("redis-bungee::" + this.networkId + "::player::" + uuid + "::data", "server");
     }
 
     protected String getLastServerFromRedis(UUID uuid) {
-        return unifiedJedis.hget("redis-bungee::player::" + uuid + "::data", "last-server");
+        return unifiedJedis.hget("redis-bungee::" + this.networkId + "::player::" + uuid + "::data", "last-server");
     }
 
     protected InetAddress getIpAddressFromRedis(UUID uuid) {
-        String ip = unifiedJedis.hget("redis-bungee::player::" + uuid + "::data", "ip");
+        String ip = unifiedJedis.hget("redis-bungee::" + this.networkId + "::player::" + uuid + "::data", "ip");
         if (ip == null) return null;
         return InetAddresses.forString(ip);
     }
 
     protected long getLastOnlineFromRedis(UUID uuid) {
-        String unixString = unifiedJedis.hget("redis-bungee::player::" + uuid + "::data", "last-online");
+        String unixString = unifiedJedis.hget("redis-bungee::" + this.networkId + "::player::" + uuid + "::data", "last-online");
         if (unixString == null) return -1;
         return Long.parseLong(unixString);
     }
@@ -241,7 +245,7 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
                 public Multimap<String, UUID> doPooledPipeline(Pipeline pipeline) {
                     HashMap<UUID, Response<String>> responses = new HashMap<>();
                     for (UUID uuid : uuids) {
-                        responses.put(uuid, pipeline.hget("redis-bungee::player::" + uuid + "::data", "server"));
+                        responses.put(uuid, pipeline.hget("redis-bungee::" + networkId + "::player::" + uuid + "::data", "server"));
                     }
                     pipeline.sync();
                     responses.forEach((uuid, response) -> builder.put(response.get(), uuid));
@@ -252,7 +256,7 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
                 public Multimap<String, UUID> clusterPipeline(ClusterPipeline pipeline) {
                     HashMap<UUID, Response<String>> responses = new HashMap<>();
                     for (UUID uuid : uuids) {
-                        responses.put(uuid, pipeline.hget("redis-bungee::player::" + uuid + "::data", "server"));
+                        responses.put(uuid, pipeline.hget("redis-bungee::" + networkId + "::player::" + uuid + "::data", "server"));
                     }
                     pipeline.sync();
                     responses.forEach((uuid, response) -> builder.put(response.get(), uuid));

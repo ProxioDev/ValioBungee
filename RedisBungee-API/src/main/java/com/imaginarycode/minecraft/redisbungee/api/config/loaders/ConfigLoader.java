@@ -46,6 +46,7 @@ public interface ConfigLoader extends GenericConfigLoader {
         final boolean kickWhenOnline = node.getNode("kick-when-online").getBoolean(true);
         String redisPassword = node.getNode("redis-password").getString("");
         String redisUsername = node.getNode("redis-username").getString("");
+        String networkId = node.getNode("network-id").getString("main");
         String proxyId = node.getNode("proxy-id").getString("proxy-1");
 
         final int maxConnections = node.getNode("max-redis-connections").getInt(10);
@@ -70,6 +71,13 @@ public interface ConfigLoader extends GenericConfigLoader {
             plugin.logInfo("Overriding current configured proxy id {} and been set to {} by Environment variable REDISBUNGEE_PROXY_ID", proxyId, proxyIdFromEnv);
             proxyId = proxyIdFromEnv;
         }
+
+        String networkIdFromEnv = System.getenv("REDISBUNGEE_NETWORK_ID");
+        if (networkIdFromEnv != null) {
+            plugin.logInfo("Overriding current configured network id {} and been set to {} by Environment variable REDISBUNGEE_NETWORK_ID", networkId, networkIdFromEnv);
+            networkId = networkIdFromEnv;
+        }
+
         // Configuration sanity checks.
         if (proxyId == null || proxyId.isEmpty()) {
             String genId = UUID.randomUUID().toString();
@@ -81,6 +89,16 @@ public interface ConfigLoader extends GenericConfigLoader {
         } else {
             plugin.logInfo("Loaded proxy id " + proxyId);
         }
+
+        if (networkId.isEmpty()) {
+            networkId = "main";
+            plugin.logWarn("network id was empty and replaced with 'main'");
+        }
+
+        plugin.logInfo("Loaded network id " + networkId);
+
+
+
         boolean reconnectToLastServer = node.getNode("reconnect-to-last-server").getBoolean();
         boolean handleMotd = node.getNode("handle-motd").getBoolean(true);
         plugin.logInfo("handle reconnect to last server: {}", reconnectToLastServer);
@@ -112,7 +130,7 @@ public interface ConfigLoader extends GenericConfigLoader {
         boolean installPlist = node.getNode("commands", "redisbungee-legacy", "subcommands", "plist", "install").getBoolean(false);
 
 
-        RedisBungeeConfiguration configuration = new RedisBungeeConfiguration(proxyId, exemptAddresses, kickWhenOnline, reconnectToLastServer, handleMotd, new RedisBungeeConfiguration.CommandsConfiguration(
+        RedisBungeeConfiguration configuration = new RedisBungeeConfiguration(networkId, proxyId, exemptAddresses, kickWhenOnline, reconnectToLastServer, handleMotd, new RedisBungeeConfiguration.CommandsConfiguration(
                 redisBungeeEnabled, redisBungeeLegacyEnabled,
                 new RedisBungeeConfiguration.LegacySubCommandsConfiguration(
                         findEnabled, glistEnabled, ipEnabled,
