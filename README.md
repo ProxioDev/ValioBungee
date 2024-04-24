@@ -23,11 +23,3 @@ You can find the original RedisBungee is by [astei](https://github.com/astei) an
 found [here](https://github.com/minecrafter/RedisBungee) or spigot
 page [here, but its no longer available](https://www.spigotmc.org/resources/redisbungee.13494/)
 
-## YourKit
-
-YourKit supports open source projects with innovative and intelligent tools for monitoring and profiling Java and .NET
-applications. YourKit is the creator
-of [YourKit Java Profiler](https://www.yourkit.com/java/profiler/), [YourKit .NET Profiler](https://www.yourkit.com/.net/profiler/)
-and [YourKit YouMonitor](https://www.yourkit.com/youmonitor/).
-
-![YourKit](https://www.yourkit.com/images/yklogo.png)
