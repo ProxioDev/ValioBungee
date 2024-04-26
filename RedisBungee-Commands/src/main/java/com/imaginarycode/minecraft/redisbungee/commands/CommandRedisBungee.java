@@ -12,6 +12,7 @@ package com.imaginarycode.minecraft.redisbungee.commands;
 
 import co.aikar.commands.CommandIssuer;
 import co.aikar.commands.annotation.*;
+import com.google.common.primitives.Ints;
 import com.imaginarycode.minecraft.redisbungee.Constants;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 import com.imaginarycode.minecraft.redisbungee.commands.utils.AdventureBaseCommand;
@@ -24,7 +25,10 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @CommandAlias("rb|redisbungee")
 @CommandPermission("redisbungee.command.use")
@@ -89,28 +93,89 @@ public class CommandRedisBungee extends AdventureBaseCommand {
     }
 
 
+
+    private List<Map.Entry<String, Integer>> subListProxies(List<Map.Entry<String, Integer>> data, int currentPage, int pageSize) {
+        return data.subList(((currentPage * pageSize) - pageSize), Ints.constrainToRange(currentPage * pageSize, 0, data.size()));
+
+    }
     @Subcommand("show")
-    public void showProxies(CommandIssuer issuer) {
-        final String message = """
-        <color:gold>========================================
-        <data><color:gold>========================================""";
+    public void showProxies(CommandIssuer issuer, String[] args) {
+        final String closer = "<color:gold>========================================";
+        final String pageTop = "<color:yellow>Page: <color:green><current>/<max> <color:yellow>Network ID: <color:green><network> Proxies online: <proxies>";
+        final String proxy = "<color:yellow><proxy><here> : <color:green><players> online";
+        final String proxyHere = " (#) ";
+        final String nextPage = ">>>>>";
+        final String previousPage = "<<<<< ";
+        final String pageInvalid = "<color:red>invalid page";
+        final String noProxies = "<color:red>No proxies were found :(";
 
-        final String proxyPlayersMessage = "<color:yellow><proxy><here> : <color:green><players> online";
+        final int pageSize = 16;
 
+        int currentPage;
+        if (args.length > 0) {
+            try {
+                currentPage = Integer.parseInt(args[0]);
+                if (currentPage < 1) currentPage = 1;
+            } catch (NumberFormatException e) {
+                sendMessage(issuer, MiniMessage.miniMessage().deserialize(pageInvalid));
+                return;
+            }
+        } else currentPage = 1;
 
+        var data = new ArrayList<>(plugin.proxyDataManager().eachProxyCount().entrySet());
+        for (int i = 0; i < 2; i++) {
+            data.addAll(data);
+        }
+
+        // there is no way this runs because there is always an heartbeat.
+        // if not could be some shenanigans done by devs :P
+        if (data.isEmpty()) {
+            sendMessage(issuer, MiniMessage.miniMessage().deserialize(noProxies));
+            return;
+        }
+        // compute the total pages
+        final int maxPages = (data.size() / pageSize);
+        if (currentPage > maxPages) currentPage = maxPages;
+
+        System.out.println((currentPage * pageSize) - pageSize);
+        var subList = subListProxies(data, currentPage, pageSize);
         TextComponent.Builder builder = Component.text();
+        builder.append(MiniMessage.miniMessage().deserialize(closer)).appendNewline();
+        builder.append(MiniMessage.miniMessage().deserialize(pageTop,
+                Placeholder.component("current", Component.text(currentPage)),
+                Placeholder.component("max", Component.text(maxPages)),
+                Placeholder.component("network", Component.text(plugin.proxyDataManager().networkId())),
+                Placeholder.component("proxies", Component.text(data.size()))
 
-        plugin.proxyDataManager().eachProxyCount().forEach((proxy, players)
-                -> builder.append(
-                MiniMessage.miniMessage()
-                        .deserialize(proxyPlayersMessage,
-                                Placeholder.component("here", Component.text(plugin.proxyDataManager().proxyId().equals(proxy) ? " (#) " : "")),
-                                Placeholder.component("proxy", Component.text(proxy)),
-                                Placeholder.component("players", Component.text(players))
-                        )
-                        .appendNewline()));
 
-        sendMessage(issuer, MiniMessage.miniMessage().deserialize(message, Placeholder.component("data", builder)));
+                )).appendNewline();
+        int left = pageSize;
+        for (Map.Entry<String, Integer> entrySet : subList) {
+            builder.append(MiniMessage.miniMessage().deserialize(proxy,
+
+                    Placeholder.component("proxy", Component.text(entrySet.getKey())),
+                    Placeholder.component("here", Component.text(plugin.proxyDataManager().proxyId().equals(entrySet.getKey()) ? proxyHere : "")),
+                    Placeholder.component("players", Component.text(entrySet.getValue()))
+
+            )).appendNewline();
+            left--;
+        }
+        while(left > 0) {
+            builder.appendNewline();
+            left--;
+        }
+        if (currentPage > 1) {
+            builder.append(MiniMessage.miniMessage().deserialize(previousPage)
+                    .clickEvent(ClickEvent.runCommand("/rb show " + (currentPage - 1))));
+        }
+        if (subList.size() == pageSize && !subListProxies(data, currentPage + 1, pageSize).isEmpty()) {
+            builder.append(MiniMessage.miniMessage().deserialize(nextPage)
+                    .clickEvent(ClickEvent.runCommand("/rb show " + (currentPage + 1))));
+        }
+        builder.appendNewline();
+        builder.append(MiniMessage.miniMessage().deserialize(closer));
+        sendMessage(issuer, builder.build());
+
 
 
     }
