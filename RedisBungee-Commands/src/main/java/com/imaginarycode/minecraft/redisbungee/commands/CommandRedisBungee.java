@@ -94,7 +94,7 @@ public class CommandRedisBungee extends AdventureBaseCommand {
 
 
 
-    private List<Map.Entry<String, Integer>> subListProxies(List<Map.Entry<String, Integer>> data, int currentPage, int pageSize) {
+    private List<Map.Entry<String, Integer>> subListProxies(List<Map.Entry<String, Integer>> data, final int currentPage, final int pageSize) {
         return data.subList(((currentPage * pageSize) - pageSize), Ints.constrainToRange(currentPage * pageSize, 0, data.size()));
 
     }
@@ -123,6 +123,14 @@ public class CommandRedisBungee extends AdventureBaseCommand {
         } else currentPage = 1;
 
         var data = new ArrayList<>(plugin.proxyDataManager().eachProxyCount().entrySet());
+        data.addAll(data);
+        data.addAll(data);
+        data.addAll(data);
+        data.addAll(data);
+        data.addAll(data);
+        data.addAll(data);
+        data.addAll(data);
+        data.addAll(data);
 
         // there is no way this runs because there is always an heartbeat.
         // if not could be some shenanigans done by devs :P
@@ -131,9 +139,8 @@ public class CommandRedisBungee extends AdventureBaseCommand {
             return;
         }
         // compute the total pages
-        final int maxPages = (data.size() / pageSize);
+        int maxPages = data.size() < pageSize ? 1 : data.size() / pageSize ;
         if (currentPage > maxPages) currentPage = maxPages;
-
         var subList = subListProxies(data, currentPage, pageSize);
         TextComponent.Builder builder = Component.text();
         builder.append(MiniMessage.miniMessage().deserialize(closer)).appendNewline();
