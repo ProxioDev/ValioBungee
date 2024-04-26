@@ -101,7 +101,7 @@ public class CommandRedisBungee extends AdventureBaseCommand {
     @Subcommand("show")
     public void showProxies(CommandIssuer issuer, String[] args) {
         final String closer = "<color:gold>========================================";
-        final String pageTop = "<color:yellow>Page: <color:green><current>/<max> <color:yellow>Network ID: <color:green><network> Proxies online: <proxies>";
+        final String pageTop = "<color:yellow>Page: <color:green><current>/<max> <color:yellow>Network ID: <color:green><network> <color:yellow>Proxies online: <color:green><proxies>";
         final String proxy = "<color:yellow><proxy><here> : <color:green><players> online";
         final String proxyHere = " (#) ";
         final String nextPage = ">>>>>";
