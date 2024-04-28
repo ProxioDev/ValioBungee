@@ -134,7 +134,6 @@ public class CommandRedisBungee extends AdventureBaseCommand {
         } else currentPage = 1;
 
         var data = new ArrayList<>(plugin.proxyDataManager().eachProxyCount().entrySet());
-
         // there is no way this runs because there is always an heartbeat.
         // if not could be some shenanigans done by devs :P
         if (data.isEmpty()) {
@@ -142,7 +141,7 @@ public class CommandRedisBungee extends AdventureBaseCommand {
             return;
         }
         // compute the total pages
-        int maxPages = data.size() < pageSize ? 1 : data.size() / pageSize ;
+        int maxPages = (int) Math.ceil(data.size() / (double) pageSize);
         if (currentPage > maxPages) currentPage = maxPages;
         var subList = subListProxies(data, currentPage, pageSize);
         TextComponent.Builder builder = Component.text();
