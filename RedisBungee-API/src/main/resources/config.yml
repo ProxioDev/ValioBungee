@@ -56,7 +56,7 @@ network-id: "main"
 # You can set Environment variable 'REDISBUNGEE_PROXY_ID' to override
 proxy-id: "proxy-1"
 
-# since RedisBungee Internally now uses JedisPooled instead of Jedis, JedisPool.
+# since RedisBungee Internally now uses UnifiedJedis instead of Jedis, JedisPool.
 # which will break compatibility with old plugins that uses RedisBungee JedisPool
 # so to mitigate this issue, RedisBungee will create an JedisPool for compatibility reasons.
 # disabled by default
