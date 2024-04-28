@@ -9,6 +9,10 @@ or [Velocity*](https://github.com/PaperMC/Velocity) proxies
 
 [![](https://raw.githubusercontent.com/Prospector/badges/master/modrinth-badge-72h-padded.png)](https://modrinth.com/plugin/redisbungee)
 
+## Wiki
+
+https://github.com/ProxioDev/RedisBungee/wiki
+
 ## Support
 
 open an issue with question button
