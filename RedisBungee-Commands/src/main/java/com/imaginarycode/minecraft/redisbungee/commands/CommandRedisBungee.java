@@ -11,6 +11,7 @@
 package com.imaginarycode.minecraft.redisbungee.commands;
 
 import co.aikar.commands.CommandIssuer;
+import co.aikar.commands.RegisteredCommand;
 import co.aikar.commands.annotation.*;
 import com.google.common.primitives.Ints;
 import com.imaginarycode.minecraft.redisbungee.Constants;
@@ -26,12 +27,12 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 @CommandAlias("rb|redisbungee")
 @CommandPermission("redisbungee.command.use")
+@Description("Main command")
 public class CommandRedisBungee extends AdventureBaseCommand {
 
     private final RedisBungeePlugin<?> plugin;
@@ -66,19 +67,29 @@ public class CommandRedisBungee extends AdventureBaseCommand {
     }
     // <color:aqua>......: <color:green>......
     @HelpCommand
+    @Description("shows the help page")
     public void help(CommandIssuer issuer) {
-        final String message = """
-        <color:gold>========================================
-        <color:aqua>/rb info: <color:green>shows info of this version.
-        <color:aqua>/rb help: <color:green>shows this page.
-        <color:aqua>/rb clean: <color:green>cleans up the uuid cache
-        <color:red><bold>WARNING...</bold> <color:white>command above could cause performance issues
-        <color:aqua>/rb show: <color:green>shows list of proxies with player count
-        <color:gold>========================================
-        <color:gold>run /rb help for more commands""";
-        sendMessage(issuer, MiniMessage.miniMessage().deserialize(message));
+        final String barFormat = "<color:gold>========================================";
+        final String commandFormat = "<color:aqua>/rb <sub-command>: <color:green><description>";
+
+        TextComponent.Builder message = Component.text();
+        message.append(MiniMessage.miniMessage().deserialize(barFormat));
+
+        getSubCommands().forEach((subCommand, registeredCommand) -> {
+            String[] split = registeredCommand.getCommand().split(" ");
+            if (split.length > 1 && subCommand.equalsIgnoreCase(split[1])) {
+                message.appendNewline().append(MiniMessage.miniMessage().deserialize(commandFormat, Placeholder.component("sub-command", Component.text(subCommand)),
+                        Placeholder.component("description", MiniMessage.miniMessage().deserialize(registeredCommand.getHelpText()))
+                ));
+            }
+        });
+
+        message.appendNewline().append(MiniMessage.miniMessage().deserialize(barFormat));
+
+        sendMessage(issuer, message.build());
     }
     @Subcommand("clean")
+    @Description("cleans up the uuid cache<color:red> <bold>WARNING...</bold> <color:white>command above could cause performance issues")
     @Private
     public void cleanUp(CommandIssuer issuer) {
         if (StopperUUIDCleanupTask.isRunning) {
@@ -98,6 +109,7 @@ public class CommandRedisBungee extends AdventureBaseCommand {
 
     }
     @Subcommand("show")
+    @Description("Shows proxies in this network")
     public void showProxies(CommandIssuer issuer, String[] args) {
         final String closer = "<color:gold>========================================";
         final String pageTop = "<color:yellow>Page: <color:green><current>/<max> <color:yellow>Network ID: <color:green><network> <color:yellow>Proxies online: <color:green><proxies>";
