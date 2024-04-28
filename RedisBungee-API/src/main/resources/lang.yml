@@ -1,0 +1,55 @@
+# this config file is for messages / Languages
+# use MiniMessage format https://docs.advntr.dev/minimessage/format.html
+# for colors etc... Legacy chat color is not supported.
+
+# Language codes used in minecraft from the minecraft wiki
+# example: en-us for american english and ar-sa for arabic
+
+# all codes can be obtained from link below
+# from the colum Locale Code -> In-game
+# NOTE: minecraft wiki shows languages like this `en_us` in config it should be `en-us`
+# https://minecraft.wiki/w/Language
+
+# example:
+# lets assume we want to add arabic language.
+# messages:
+#    logged-in-other-location:
+#      en-us: "<color:red>You logged in from another location!"
+#      ar-sa: "<color:red>لقد اتصلت من مكان اخر"
+
+
+# RedisBungee Prefix if ever used.
+prefix: "<color:red>[<color:yellow>Redis<color:red>Bungee]"
+
+# en-us is american English, Which is the default language used when a language for a message isn't defined.
+# Warning: IF THE set default locale wasn't defined in the config for all messages, plugin will not load.
+# set the Default locale
+default-locale: en-us
+
+# send language based on client sent settings
+# if you don't have languages configured For client Language
+# it will default to language that has been set above
+# NOTE: due minecraft protocol not sending player settings during login,
+# some of the messages like logged-in-other-location will
+# skip translation and use default locale that has been set in default-locale.
+use-client-locale: true
+
+# messages that are used during login, and connecting to Last server
+messages:
+  logged-in-other-location:
+    en-us: "<color:red>You logged in from another location!"
+    pt-br: "<color:red>Você está logado em outra localização!"
+  already-logged-in:
+    en-us: "<color:red>You are already logged in!"
+    pt-br: "<color:red>Você já está logado!"
+  server-not-found:
+    # placeholder <server> displays server name in the message.
+    en-us: "<color:red>unable to connect you to the last server, because server <server> was not found."
+    pt-br: "<color:red>falha ao conectar você ao último servidor, porque o servidor <server> não foi encontrado."
+  server-connecting:
+    # placeholder <server> displays server name in the message.
+    en-us: "<color:green>Connecting you to <server>..."
+    pt-br: "<color:green>Conectando você a <server>..."
+
+# DO NOT CHANGE!!!!!
+config-version: 1

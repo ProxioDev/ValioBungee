@@ -10,91 +10,83 @@
 
 package com.imaginarycode.minecraft.redisbungee;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multimap;
-import com.imaginarycode.minecraft.redisbungee.api.config.ConfigLoader;
+import co.aikar.commands.BungeeCommandManager;
+import com.imaginarycode.minecraft.redisbungee.api.PlayerDataManager;
+import com.imaginarycode.minecraft.redisbungee.api.ProxyDataManager;
+import com.imaginarycode.minecraft.redisbungee.api.RedisBungeeMode;
+import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
+import com.imaginarycode.minecraft.redisbungee.api.config.LangConfiguration;
+import com.imaginarycode.minecraft.redisbungee.api.config.loaders.ConfigLoader;
 import com.imaginarycode.minecraft.redisbungee.api.config.RedisBungeeConfiguration;
+import com.imaginarycode.minecraft.redisbungee.api.config.loaders.LangConfigLoader;
 import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerChangedServerNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerJoinedNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerLeftNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.api.events.IPubSubMessageEvent;
-import com.imaginarycode.minecraft.redisbungee.api.tasks.*;
-import com.imaginarycode.minecraft.redisbungee.commands.RedisBungeeCommands;
+import com.imaginarycode.minecraft.redisbungee.api.summoners.Summoner;
+import com.imaginarycode.minecraft.redisbungee.api.util.InitialUtils;
+import com.imaginarycode.minecraft.redisbungee.api.util.uuid.NameFetcher;
+import com.imaginarycode.minecraft.redisbungee.api.util.uuid.UUIDFetcher;
+import com.imaginarycode.minecraft.redisbungee.api.util.uuid.UUIDTranslator;
+import com.imaginarycode.minecraft.redisbungee.commands.CommandLoader;
+import com.imaginarycode.minecraft.redisbungee.commands.utils.CommandPlatformHelper;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerChangedServerNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerJoinedNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerLeftNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
-import com.imaginarycode.minecraft.redisbungee.api.*;
-import com.imaginarycode.minecraft.redisbungee.api.summoners.Summoner;
-import com.imaginarycode.minecraft.redisbungee.api.RedisBungeeMode;
-import com.imaginarycode.minecraft.redisbungee.api.util.uuid.NameFetcher;
-import com.imaginarycode.minecraft.redisbungee.api.util.uuid.UUIDFetcher;
-import com.imaginarycode.minecraft.redisbungee.api.util.uuid.UUIDTranslator;
 import com.squareup.okhttp.Dispatcher;
 import com.squareup.okhttp.OkHttpClient;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Event;
 import net.md_5.bungee.api.plugin.Plugin;
-import redis.clients.jedis.*;
+import net.md_5.bungee.api.scheduler.ScheduledTask;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import redis.clients.jedis.JedisPool;
 
-import java.io.*;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.InetAddress;
-import java.util.*;
+import java.sql.Date;
+import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
 
-public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlayer>, ConfigLoader {
+public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlayer>, ConfigLoader, LangConfigLoader {
 
     private static RedisBungeeAPI apiStatic;
-
     private AbstractRedisBungeeAPI api;
     private RedisBungeeMode redisBungeeMode;
-    private PubSubListener psl = null;
+    private ProxyDataManager proxyDataManager;
+    private BungeePlayerDataManager playerDataManager;
+    private ScheduledTask heartbeatTask;
+    private ScheduledTask cleanupTask;
     private Summoner<?> summoner;
     private UUIDTranslator uuidTranslator;
     private RedisBungeeConfiguration configuration;
-    private BungeeDataManager dataManager;
+    private LangConfiguration langConfiguration;
     private OkHttpClient httpClient;
-    private volatile List<String> proxiesIds;
-    private final AtomicInteger globalPlayerCount = new AtomicInteger();
-    private Future<?> integrityCheck;
-    private Future<?> heartbeatTask;
-    private static final Object SERVER_TO_PLAYERS_KEY = new Object();
-    private final Cache<Object, Multimap<String, UUID>> serverToPlayersCache = CacheBuilder.newBuilder()
-            .expireAfterWrite(5, TimeUnit.SECONDS)
-            .build();
+    private BungeeCommandManager commandManager;
+
+    private final Logger logger = LoggerFactory.getLogger("RedisBungee");
 
 
     @Override
-    public RedisBungeeConfiguration getConfiguration() {
+    public RedisBungeeConfiguration configuration() {
         return this.configuration;
     }
 
     @Override
-    public int getCount() {
-        return this.globalPlayerCount.get();
+    public LangConfiguration langConfiguration() {
+        return this.langConfiguration;
     }
-
-    @Override
-    public Set<String> getLocalPlayersAsUuidStrings() {
-        ImmutableSet.Builder<String> builder = ImmutableSet.builder();
-        for (ProxiedPlayer player : getProxy().getPlayers()) {
-            builder.add(player.getUniqueId().toString());
-        }
-        return builder.build();
-    }
-
-    @Override
-    public AbstractDataManager<ProxiedPlayer, ?, ?, ?> getDataManager() {
-        return this.dataManager;
-    }
-
 
     @Override
     public AbstractRedisBungeeAPI getAbstractRedisBungeeApi() {
@@ -102,37 +94,18 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
     }
 
     @Override
+    public ProxyDataManager proxyDataManager() {
+        return this.proxyDataManager;
+    }
+
+    @Override
+    public PlayerDataManager<ProxiedPlayer, ?, ?, ?, ?, ?, ?> playerDataManager() {
+        return this.playerDataManager;
+    }
+
+    @Override
     public UUIDTranslator getUuidTranslator() {
         return this.uuidTranslator;
-    }
-
-    @Override
-    public Multimap<String, UUID> serverToPlayersCache() {
-        try {
-            return this.serverToPlayersCache.get(SERVER_TO_PLAYERS_KEY, this::serversToPlayers);
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public List<String> getProxiesIds() {
-        return proxiesIds;
-    }
-
-    @Override
-    public PubSubListener getPubSubListener() {
-        return this.psl;
-    }
-
-    @Override
-    public void executeAsync(Runnable runnable) {
-        this.getProxy().getScheduler().runAsync(this, runnable);
-    }
-
-    @Override
-    public void executeAsyncAfter(Runnable runnable, TimeUnit timeUnit, int time) {
-        this.getProxy().getScheduler().schedule(this, runnable, time, timeUnit);
     }
 
     @Override
@@ -147,17 +120,32 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
 
     @Override
     public void logInfo(String msg) {
-        this.getLogger().info(msg);
+        this.logger.info(msg);
+    }
+
+    @Override
+    public void logInfo(String format, Object... object) {
+        this.logger.info(format, object);
     }
 
     @Override
     public void logWarn(String msg) {
-        this.getLogger().warning(msg);
+        this.logger.warn(msg);
+    }
+
+    @Override
+    public void logWarn(String format, Object... object) {
+        this.logger.warn(format, object);
     }
 
     @Override
     public void logFatal(String msg) {
-        this.getLogger().severe(msg);
+        this.logger.error(msg);
+    }
+
+    @Override
+    public void logFatal(String format, Throwable throwable) {
+        this.logger.error(format, throwable);
     }
 
     @Override
@@ -181,6 +169,15 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
     }
 
     @Override
+    public boolean handlePlatformKick(UUID uuid, Component message) {
+        ProxiedPlayer player = getPlayer(uuid);
+        if (player == null) return false;
+        if (!player.isConnected()) return false;
+        player.disconnect(BungeeComponentSerializer.get().serialize(message));
+        return true;
+    }
+
+    @Override
     public String getPlayerServerName(ProxiedPlayer player) {
         return player.getServer().getInfo().getName();
     }
@@ -199,6 +196,7 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
     @Override
     public void initialize() {
         logInfo("Initializing RedisBungee.....");
+        logInfo("Version: {}", Constants.VERSION);
         ThreadFactory factory = ((ThreadPoolExecutor) getExecutorService()).getThreadFactory();
         ScheduledExecutorService service = Executors.newScheduledThreadPool(24, factory);
         try {
@@ -209,16 +207,39 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
             builtinService.shutdownNow();
         } catch (IllegalAccessException | NoSuchFieldException e) {
             getLogger().log(Level.WARNING, "Can't replace BungeeCord thread pool with our own");
-            getLogger().log(Level.INFO, "skipping replacement.....");
+            getLogger().log(Level.WARNING, "skipping replacement.....");
         }
         try {
-            loadConfig(this, getDataFolder());
+            loadConfig(this, getDataFolder().toPath());
+            loadLangConfig(this, getDataFolder().toPath());
         } catch (IOException e) {
             throw new RuntimeException("Unable to load/save config", e);
         }
-        // init the api class
-        this.api = new RedisBungeeAPI(this);
-        apiStatic = (RedisBungeeAPI) this.api;
+        // init the proxy data manager
+        this.proxyDataManager = new ProxyDataManager(this) {
+            @Override
+            public Set<UUID> getLocalOnlineUUIDs() {
+                HashSet<UUID> uuids = new HashSet<>();
+                ProxyServer.getInstance().getPlayers().forEach((proxiedPlayer) -> uuids.add(proxiedPlayer.getUniqueId()));
+                return uuids;
+            }
+
+            @Override
+            protected void handlePlatformCommandExecution(String command) {
+                logInfo("Dispatching {}", command);
+                ProxyServer.getInstance().getPluginManager().dispatchCommand(RedisBungeeCommandSender.getSingleton(), command);
+            }
+        };
+        this.playerDataManager = new BungeePlayerDataManager(this);
+
+        getProxy().getPluginManager().registerListener(this, this.playerDataManager);
+        getProxy().getPluginManager().registerListener(this, new RedisBungeeListener(this));
+        // start listening
+        getProxy().getScheduler().runAsync(this, proxyDataManager);
+        // heartbeat
+        this.heartbeatTask = getProxy().getScheduler().schedule(this, () -> this.proxyDataManager.publishHeartbeat(), 0, 1, TimeUnit.SECONDS);
+        // cleanup
+        this.cleanupTask = getProxy().getScheduler().schedule(this, () -> this.proxyDataManager.correctionTask(), 0, 60, TimeUnit.SECONDS);
         // init the http lib
         httpClient = new OkHttpClient();
         Dispatcher dispatcher = new Dispatcher(getExecutorService());
@@ -226,71 +247,49 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
         NameFetcher.setHttpClient(httpClient);
         UUIDFetcher.setHttpClient(httpClient);
         InitialUtils.checkRedisVersion(this);
-        // check if this proxy is recovering from a crash and start heart the beat.
-        InitialUtils.checkIfRecovering(this, getDataFolder().toPath());
-        updateProxiesIds();
         uuidTranslator = new UUIDTranslator(this);
-        heartbeatTask = service.scheduleAtFixedRate(new HeartbeatTask(this, this.globalPlayerCount), 0, HeartbeatTask.INTERVAL, HeartbeatTask.REPEAT_INTERVAL_TIME_UNIT);
-        dataManager = new BungeeDataManager(this);
-        getProxy().getPluginManager().registerListener(this, new RedisBungeeBungeeListener(this, configuration.getExemptAddresses()));
-        getProxy().getPluginManager().registerListener(this, dataManager);
-        psl = new PubSubListener(this);
-        getProxy().getScheduler().runAsync(this, psl);
-
-        IntegrityCheckTask integrityCheckTask = new IntegrityCheckTask(this) {
-            @Override
-            public void handlePlatformPlayer(String player, UnifiedJedis unifiedJedis) {
-                ProxiedPlayer proxiedPlayer = ProxyServer.getInstance().getPlayer(UUID.fromString(player));
-                if (proxiedPlayer == null)
-                    return; // We'll deal with it later.
-
-                BungeePlayerUtils.createBungeePlayer(proxiedPlayer, unifiedJedis, false);
-            }
-        };
-
-        integrityCheck = service.scheduleAtFixedRate(integrityCheckTask::execute, 0, IntegrityCheckTask.INTERVAL, IntegrityCheckTask.TIMEUNIT);
 
         // register plugin messages channel.
         getProxy().registerChannel("legacy:redisbungee");
         getProxy().registerChannel("RedisBungee");
-        if (configuration.doRegisterLegacyCommands()) {
-            // register commands
-            if (configuration.doOverrideBungeeCommands()) {
-                getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.GlistCommand(this));
-                getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.FindCommand(this));
-                getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.LastSeenCommand(this));
-                getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.IpCommand(this));
-            }
-            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.SendToAll(this));
-            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.ServerId(this));
-            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.ServerIds(this));
-            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.PlayerProxyCommand(this));
-            getProxy().getPluginManager().registerCommand(this, new RedisBungeeCommands.PlistCommand(this));
-        }
+
+        // init the api
+        this.api = new RedisBungeeAPI(this);
+        apiStatic = (RedisBungeeAPI) this.api;
+
+        // commands
+        CommandPlatformHelper.init(new BungeeCommandPlatformHelper());
+        this.commandManager = new BungeeCommandManager(this);
+        CommandLoader.initCommands(this.commandManager, this);
+
         logInfo("RedisBungee initialized successfully ");
     }
 
     @Override
     public void stop() {
         logInfo("Turning off redis connections.....");
-        // Poison the PubSub listener
-        if (psl != null) {
-            psl.poison();
-        }
-        if (integrityCheck != null) {
-            integrityCheck.cancel(true);
+        getProxy().getPluginManager().unregisterListeners(this);
+
+        if (this.cleanupTask != null) {
+            this.cleanupTask.cancel();
         }
         if (heartbeatTask != null) {
-            heartbeatTask.cancel(true);
+            heartbeatTask.cancel();
         }
-        getProxy().getPluginManager().unregisterListeners(this);
-        ShutdownUtils.shutdownCleanup(this);
+        try {
+            this.proxyDataManager.close();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         try {
             this.summoner.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        logInfo("RedisBungee shutdown");
+        if (this.commandManager != null) {
+            this.commandManager.unregisterCommands();
+        }
+        logInfo("RedisBungee shutdown successfully");
     }
 
     @Override
@@ -303,10 +302,14 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
         return this.redisBungeeMode;
     }
 
+    @Override
+    public void executeAsync(Runnable runnable) {
+        this.getProxy().getScheduler().runAsync(this, runnable);
+    }
 
     @Override
-    public void updateProxiesIds() {
-        proxiesIds = getCurrentProxiesIds(false);
+    public void executeAsyncAfter(Runnable runnable, TimeUnit timeUnit, int time) {
+        this.getProxy().getScheduler().schedule(this, runnable, time, timeUnit);
     }
 
     @Override
@@ -349,9 +352,8 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
     /**
      * This returns an instance of {@link RedisBungeeAPI}
      *
-     * @deprecated Please use {@link RedisBungeeAPI#getRedisBungeeApi()} this class intended to for old plugins that no longer updated.
-     *
      * @return the {@link AbstractRedisBungeeAPI} object instance.
+     * @deprecated Please use {@link RedisBungeeAPI#getRedisBungeeApi()} this class intended to for old plugins that no longer updated.
      */
     @Deprecated
     public static RedisBungeeAPI getApi() {
@@ -361,5 +363,11 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
     @Deprecated
     public JedisPool getPool() {
         return api.getJedisPool();
+    }
+
+
+    @Override
+    public void onLangConfigLoad(LangConfiguration langConfiguration) {
+        this.langConfiguration = langConfiguration;
     }
 }

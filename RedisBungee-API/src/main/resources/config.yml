@@ -1,7 +1,14 @@
 # RedisBungee configuration file.
-# Get Redis from http://redis.io/
+# Notice:
+# Redis 7.2.4 is last free and open source Redis version after license change
+# https://download.redis.io/releases/redis-7.2.4.tar.gz which you have to compile yourself,
+# unless your package manager still provide it.
+# Here is The alternatives
+# - 'ValKey' By linux foundation https://valkey.io/download/
+# - 'KeyDB' by Snapchat inc https://docs.keydb.dev/docs/download/
 
-# The Redis server you use.
+
+# The 'Redis', 'ValKey', 'KeyDB' server you will use.
 # these settings are ignored when cluster mode is enabled.
 redis-server: 127.0.0.1
 redis-port: 6379
@@ -12,7 +19,7 @@ cluster-mode-enabled: false
 
 # FORMAT:
 # redis-cluster-servers:
-# - host: 127.0.0.1
+# - host: 127.0.0.1`
 #   port: 2020
 # - host: 127.0.0.1
 #   port: 2021
@@ -25,11 +32,10 @@ redis-cluster-servers:
   - host: 127.0.0.1
     port: 6379
 
-# THIS FEATURE IS REDIS V6+
 # OPTIONAL: if your redis uses acl usernames set the username here. leave empty for no username.
 redis-username: ""
 
-# OPTIONAL but recommended: If your Redis server uses AUTH, set the password required.
+# OPTIONAL but recommended: If your Redis server uses AUTH, set the required password.
 redis-password: ""
 
 # Maximum connections that will be maintained to the Redis server.
@@ -37,44 +43,100 @@ redis-password: ""
 # inefficient plugins or a lot of players.
 max-redis-connections: 10
 
-# since redis can support ssl by version 6 you can use ssl / tls in redis bungee too!
+# since redis can support ssl by version 6 you can use SSL/TLS in redis bungee too!
 # but there is more configuration needed to work see https://github.com/ProxioDev/RedisBungee/issues/18
 # Keep note that SSL/TLS connections will decrease redis performance so use it when needed.
 useSSL: false
 
-# An identifier for this BungeeCord / Velocity instance. Will randomly generate if leaving it blank.
-proxy-id: "test-1"
+# An identifier for this network, which helps to separate redisbungee instances on same redis instance.
+# You can use environment variable 'REDISBUNGEE_NETWORK_ID' to override
+network-id: "main"
 
-# since version 0.8.0 Internally now uses JedisPooled instead of Jedis, JedisPool.
+# An identifier for this BungeeCord / Velocity instance. Will randomly generate if leaving it blank.
+# You can set Environment variable 'REDISBUNGEE_PROXY_ID' to override
+proxy-id: "proxy-1"
+
+# since RedisBungee Internally now uses UnifiedJedis instead of Jedis, JedisPool.
 # which will break compatibility with old plugins that uses RedisBungee JedisPool
-# so to mitigate this issue, we will instruct RedisBungee to init an JedisPool for compatibility reasons.
-# enabled by default
-# ignored when cluster mode is enabled
-enable-jedis-pool-compatibility: true
+# so to mitigate this issue, RedisBungee will create an JedisPool for compatibility reasons.
+# disabled by default
+# Automatically disabled when cluster mode is enabled
+enable-jedis-pool-compatibility: false
+
 # max connections for the compatibility pool
 compatibility-max-connections: 3
 
-# Register redis bungee legacy commands
-# if this disabled override-bungee-commands will be ignored
-register-legacy-commands: false
+# restore old login behavior before 0.9.0 update
+# enabled by default
+# when true: when player login and there is old player with same uuid it will get disconnected as result and new player will log in
+# when false: when a player login but login will fail because old player is still connected.
+kick-when-online: true
 
-# Whether or not RedisBungee should install its version of regular BungeeCord commands.
-# Often, the RedisBungee commands are desired, but in some cases someone may wish to
-# override the commands using another plugin.
-#
-# If you are just denying access to the commands, RedisBungee uses the default BungeeCord
-# permissions - just deny them and access will be denied.
-#
-# Please note that with build 787+, most commands overridden by RedisBungee were moved to
-# modules, and these must be disabled or overridden yourself.
-override-bungee-commands: false
+# enabled by default
+# this option tells RedisBungee handle motd and set online count, when motd is requested
+# you can disable this when you want to handle motd yourself, use RedisBungee api to get total players when needed :)
+handle-motd: true
 
 # A list of IP addresses for which RedisBungee will not modify the response for, useful for automatic
 # restart scripts.
+# Automatically disabled  if handle-motd is disabled.
 exempt-ip-addresses: []
 
-# restore old login when online behavior before 0.9.0 update
-disable-kick-when-online: false
+# disabled by default
+# RedisBungee will attempt to connect player to last server that was stored.
+reconnect-to-last-server: false
+
+# For redis bungee legacy commands
+# either can be run using '/rbl glist' for example
+# or if 'install' is set to true '/glist' can be used.
+# 'install' also overrides the proxy installed commands
+#
+# In legacy commands each command got it own permissions since they had it own permission pre new command system,
+# so it's also applied to subcommands in '/rbl'.
+commands:
+  # Permission redisbungee.legacy.use
+  redisbungee-legacy:
+    enabled: false
+    subcommands:
+        # Permission redisbungee.command.glist
+        glist:
+          enabled: false
+          install: false
+        # Permission redisbungee.command.find
+        find:
+          enabled: false
+          install: false
+        # Permission redisbungee.command.lastseen
+        lastseen:
+          enabled: false
+          install: false
+        # Permission redisbungee.command.ip
+        ip:
+          enabled: false
+          install: false
+        # Permission redisbungee.command.pproxy
+        pproxy:
+          enabled: false
+          install: false
+        # Permission redisbungee.command.sendtoall
+        sendtoall:
+          enabled: false
+          install: false
+        # Permission redisbungee.command.serverid
+        serverid:
+          enabled: false
+          install: false
+        # Permission redisbungee.command.serverids
+        serverids:
+          enabled: false
+          install: false
+       # Permission redisbungee.command.plist
+        plist:
+          enabled: false
+          install: false
+  # Permission redisbungee.command.use
+  redisbungee:
+    enabled: true
 
 # Config version DO NOT CHANGE!!!!
-config-version: 1
+config-version: 2

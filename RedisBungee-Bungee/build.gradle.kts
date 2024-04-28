@@ -5,18 +5,17 @@ plugins {
     id("xyz.jpenilla.run-waterfall") version "2.0.0"
 }
 
-
-repositories {
-    mavenCentral()
-    maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots") } // bungeecord
-}
-val bungeecordApiVersion = "1.19-R0.1-SNAPSHOT"
 dependencies {
     api(project(":RedisBungee-API"))
-    compileOnly("net.md-5:bungeecord-api:$bungeecordApiVersion") {
+    compileOnly(libs.platform.bungeecord) {
         exclude("com.google.guava", "guava")
         exclude("com.google.code.gson", "gson")
+        exclude("net.kyori","adventure-api")
     }
+    implementation(libs.adventure.platforms.bungeecord)
+    implementation(libs.adventure.gson)
+    implementation(libs.acf.bungeecord)
+    implementation(project(":RedisBungee-Commands"))
 }
 
 description = "RedisBungee Bungeecord implementation"
@@ -40,11 +39,13 @@ tasks {
         options.linksOffline("https://ci.limework.net/RedisBungee/RedisBungee-API/build/docs/javadoc", apiDocs.path)
     }
     runWaterfall {
-        waterfallVersion("1.19")
+        waterfallVersion("1.20")
+        environment["REDISBUNGEE_PROXY_ID"] = "bungeecord-1"
+        environment["REDISBUNGEE_NETWORK_ID"] = "dev"
     }
     compileJava {
         options.encoding = Charsets.UTF_8.name()
-        options.release.set(8)
+        options.release.set(17)
     }
     javadoc {
         options.encoding = Charsets.UTF_8.name()
@@ -73,6 +74,10 @@ tasks {
         relocate("com.google.gson", "com.imaginarycode.minecraft.redisbungee.internal.com.google.gson")
         relocate("com.google.j2objc", "com.imaginarycode.minecraft.redisbungee.internal.com.google.j2objc")
         relocate("com.google.thirdparty", "com.imaginarycode.minecraft.redisbungee.internal.com.google.thirdparty")
+        relocate("com.github.benmanes.caffeine", "com.imaginarycode.minecraft.redisbungee.internal.caffeine")
+        // acf shade
+        relocate("co.aikar.commands", "com.imaginarycode.minecraft.redisbungee.internal.acf.commands")
+
     }
 
 }
