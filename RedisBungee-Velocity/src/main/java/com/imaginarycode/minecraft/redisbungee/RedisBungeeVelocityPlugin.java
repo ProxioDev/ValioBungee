@@ -102,7 +102,6 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, Con
         this.logger = logger;
         this.dataFolder = dataDirectory;
         logInfo("Version: {}", Constants.VERSION);
-        logInfo("Build date: {}", Date.from(Instant.ofEpochSecond(Constants.BUILD_DATE)));
         try {
             loadConfig(this, dataDirectory);
             loadLangConfig(this, dataDirectory);
