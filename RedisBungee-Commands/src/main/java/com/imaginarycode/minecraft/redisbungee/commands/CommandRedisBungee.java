@@ -42,12 +42,12 @@ public class CommandRedisBungee extends AdventureBaseCommand {
 
     @Default
     @Subcommand("info|version|git")
+    @Description("information about current redisbungee build")
     public void info(CommandIssuer issuer) {
         final String message = """
         <color:aqua>This proxy is running RedisBungee Limework's fork
         <color:gold>========================================
         <color:aqua>RedisBungee version: <color:green><version>
-        <color:aqua>Build date: <color:green><build-date>
         <color:aqua>Commit: <color:green><commit>
         <color:gold>========================================
         <color:gold>run /rb help for more commands""";
@@ -57,7 +57,6 @@ public class CommandRedisBungee extends AdventureBaseCommand {
             .deserialize(
                 message,
                 Placeholder.component("version", Component.text(Constants.VERSION)),
-                Placeholder.component("build-date", Component.text( new Date(Constants.BUILD_DATE * 1000).toString() )),
                 Placeholder.component(
                     "commit",
                     Component.text(Constants.GIT_COMMIT.substring(0, 8))
@@ -123,14 +122,6 @@ public class CommandRedisBungee extends AdventureBaseCommand {
         } else currentPage = 1;
 
         var data = new ArrayList<>(plugin.proxyDataManager().eachProxyCount().entrySet());
-        data.addAll(data);
-        data.addAll(data);
-        data.addAll(data);
-        data.addAll(data);
-        data.addAll(data);
-        data.addAll(data);
-        data.addAll(data);
-        data.addAll(data);
 
         // there is no way this runs because there is always an heartbeat.
         // if not could be some shenanigans done by devs :P
@@ -169,17 +160,19 @@ public class CommandRedisBungee extends AdventureBaseCommand {
         }
         if (currentPage > 1) {
             builder.append(MiniMessage.miniMessage().deserialize(previousPage)
-                    .clickEvent(ClickEvent.runCommand("/rb show " + (currentPage - 1))));
+                    .color(NamedTextColor.WHITE).clickEvent(ClickEvent.runCommand("/rb show " + (currentPage - 1))));
+        } else {
+            builder.append(MiniMessage.miniMessage().deserialize(previousPage).color(NamedTextColor.GRAY));
         }
         if (subList.size() == pageSize && !subListProxies(data, currentPage + 1, pageSize).isEmpty()) {
             builder.append(MiniMessage.miniMessage().deserialize(nextPage)
-                    .clickEvent(ClickEvent.runCommand("/rb show " + (currentPage + 1))));
+                    .color(NamedTextColor.WHITE).clickEvent(ClickEvent.runCommand("/rb show " + (currentPage + 1))));
+        } else {
+            builder.append(MiniMessage.miniMessage().deserialize(nextPage).color(NamedTextColor.GRAY));
         }
         builder.appendNewline();
         builder.append(MiniMessage.miniMessage().deserialize(closer));
         sendMessage(issuer, builder.build());
-
-
 
     }
 }

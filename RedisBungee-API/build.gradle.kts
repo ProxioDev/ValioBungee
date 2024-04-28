@@ -35,7 +35,6 @@ blossom {
     commit = "$commitStdout".replace("\n", "") // for some reason it adds new line so remove it.
     commitStdout.close()
     replaceToken("@git_commit@", commit)
-    replaceToken("@build_date@", "${Instant.now().epochSecond}")
 }
 
 
