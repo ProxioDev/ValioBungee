@@ -84,7 +84,7 @@ public class VelocityPlayerDataManager extends PlayerDataManager<Player, PostLog
     @Override
     @Subscribe
     public void onLoginEvent(PostLoginEvent event) {
-        addPlayer(event.getPlayer().getUniqueId(), event.getPlayer().getRemoteAddress().getAddress());
+        addPlayer(event.getPlayer().getUniqueId(), event.getPlayer().getUsername(), event.getPlayer().getRemoteAddress().getAddress());
     }
 
     @Override

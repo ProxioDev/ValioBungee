@@ -161,13 +161,13 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
         unifiedJedis.hset("redis-bungee::" + this.networkId + "::player::" + uuid + "::data", data);
     }
 
-    protected void addPlayer(final UUID uuid, final InetAddress inetAddress) {
+    protected void addPlayer(final UUID uuid, final String name, final InetAddress inetAddress) {
         Map<String, String> redisData = new HashMap<>();
         redisData.put("last-online", String.valueOf(0));
         redisData.put("proxy", this.proxyId);
         redisData.put("ip", inetAddress.getHostAddress());
         unifiedJedis.hset("redis-bungee::" + this.networkId + "::player::" + uuid + "::data", redisData);
-
+        plugin.getUuidTranslator().persistInfo(name, uuid, this.unifiedJedis);
         JSONObject data = new JSONObject();
         data.put("proxy", this.proxyId);
         data.put("uuid", uuid);
