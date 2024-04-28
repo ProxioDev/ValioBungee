@@ -34,7 +34,7 @@ public class InitialUtils {
                         }
                         long uuidCacheSize = unifiedJedis.hlen("uuid-cache");
                         if (uuidCacheSize > 750000) {
-                            plugin.logInfo("Looks like you have a really big UUID cache! Run https://github.com/ProxioDev/Brains");
+                            plugin.logInfo("Looks like you have a really big UUID cache! Run '/rb clean' to remove expired cache entries");
                         }
                         break;
                     }
