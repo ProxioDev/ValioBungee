@@ -423,7 +423,7 @@ public abstract class AbstractRedisBungeeAPI {
         if (getMode() == RedisBungeeMode.SINGLE) {
             JedisPool jedisPool = ((JedisPooledSummoner) this.plugin.getSummoner()).getCompatibilityJedisPool();
             if (jedisPool == null) {
-                throw new IllegalStateException("JedisPool compatibility mode is disabled");
+                throw new IllegalStateException("JedisPool compatibility mode is disabled, Please enable it in the RedisBungee config.yml");
             }
             return jedisPool;
         } else {
