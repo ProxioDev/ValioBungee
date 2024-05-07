@@ -41,7 +41,6 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
     private final LoadingCache<UUID, String> lastServerCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).build(this::getLastServerFromRedis);
     private final LoadingCache<UUID, String> proxyCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).build(this::getProxyFromRedis);
     private final LoadingCache<UUID, InetAddress> ipCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).build(this::getIpAddressFromRedis);
-    private final LoadingCache<UUID, Long> lastOnlineCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).build(this::getLastOnlineFromRedis);
     private final Object SERVERS_TO_PLAYERS_KEY = new Object();
     private final LoadingCache<Object, Multimap<String, UUID>> serverToPlayersCache = Caffeine.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).build(this::serversToPlayersBuilder);
     private final UnifiedJedis unifiedJedis;
@@ -80,7 +79,6 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
         this.proxyCache.invalidate(event.getUuid());
         this.serverCache.invalidate(event.getUuid());
         this.ipCache.invalidate(event.getUuid());
-        this.lastOnlineCache.invalidate(event.getUuid());
     }
 
     protected void handlePubSubMessageEvent(IPubSubMessageEvent event) {
@@ -228,7 +226,7 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
     }
 
     public long getLastOnline(UUID uuid) {
-        return this.lastOnlineCache.get(uuid);
+        return getLastOnlineFromRedis(uuid);
     }
 
     public Multimap<String, UUID> serversToPlayers() {
