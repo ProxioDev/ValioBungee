@@ -37,10 +37,10 @@ import java.util.concurrent.TimeUnit;
 public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEvent, SC extends IPlayerChangedServerNetworkEvent, NJE extends IPlayerLeftNetworkEvent, CE> {
 
     protected final RedisBungeePlugin<P> plugin;
-    private final LoadingCache<UUID, String> serverCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).build(this::getServerFromRedis);
-    private final LoadingCache<UUID, String> lastServerCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).build(this::getLastServerFromRedis);
-    private final LoadingCache<UUID, String> proxyCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).build(this::getProxyFromRedis);
-    private final LoadingCache<UUID, InetAddress> ipCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).build(this::getIpAddressFromRedis);
+    private final LoadingCache<UUID, String> serverCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build(this::getServerFromRedis);
+    private final LoadingCache<UUID, String> lastServerCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build(this::getLastServerFromRedis);
+    private final LoadingCache<UUID, String> proxyCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build(this::getProxyFromRedis);
+    private final LoadingCache<UUID, InetAddress> ipCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build(this::getIpAddressFromRedis);
     private final Object SERVERS_TO_PLAYERS_KEY = new Object();
     private final LoadingCache<Object, Multimap<String, UUID>> serverToPlayersCache = Caffeine.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).build(this::serversToPlayersBuilder);
     private final UnifiedJedis unifiedJedis;
