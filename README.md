@@ -1,9 +1,14 @@
-# RedisBungee Limework's Fork
+# ValioBungee 
 
-The original project of RedisBungee is no longer maintained, so we have forked the plugin.
-RedisBungee uses [Redis](https://redis.io) with Java client [Jedis](https://github.com/redis/jedis/)
-to Synchronize players data between [BungeeCord](https://github.com/SpigotMC/BungeeCord)
-or [Velocity*](https://github.com/PaperMC/Velocity) proxies
+ValioBungee is RedisBungee Limework's Fork, name change is trying for us to be compliant with Redis Trademarks usage.
+
+The original project of RedisBungee is no longer maintained, so we forked it.
+
+ValioBungee is used to Synchronize players data between [BungeeCord](https://github.com/SpigotMC/BungeeCord)
+or [Velocity](https://github.com/PaperMC/Velocity) proxies, 
+such as if player is online on the network, server and proxy player on, last online, uuid to name translation,
+last server join on connect, etc.
+
 
 ## Downloads
 
@@ -11,7 +16,7 @@ or [Velocity*](https://github.com/PaperMC/Velocity) proxies
 
 ## Wiki
 
-https://github.com/ProxioDev/RedisBungee/wiki
+https://github.com/ProxioDev/ValioBungee/wiki
 
 ## Support
 
