@@ -29,14 +29,14 @@ jobs:
      # Artifact name
        name: RedisBungee-Bungee
      # Destination path
-       path: RedisBungee-Bungee/build/libs/*
+       path: Bungee/build/libs/*
     - name: Upload Velocity
       uses: actions/upload-artifact@v2.2.3
       with:
         name: RedisBungee-Velocity
-        path: RedisBungee-Velocity/build/libs/*
+        path: Velocity/build/libs/*
     - name: Upload API
       uses: actions/upload-artifact@v2.2.3
       with:
         name: RedisBungee-API
-        path: RedisBungee-API/build/libs/*
+        path: API/build/libs/*

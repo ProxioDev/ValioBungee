@@ -4,12 +4,31 @@ pluginManagement {
     }
 }
 
-rootProject.name = "RedisBungee-Parent"
+rootProject.name = "ValioBungee"
+
+include(":RedisBungee-API")
+project(":RedisBungee-API").projectDir = file("api")
+
+include(":RedisBungee-Commands")
+project(":RedisBungee-Commands").projectDir = file("commands")
 
 include(":RedisBungee-Velocity")
-include(":RedisBungee-Commands")
+project(":RedisBungee-Velocity").projectDir = file("proxies/velocity")
+
 include(":RedisBungee-Bungee")
-include(":RedisBungee-API")
+project(":RedisBungee-Bungee").projectDir = file("proxies/bungeecord/bungeecord-api")
+
+include(":RedisBungee-Proxy-Bungee")
+project(":RedisBungee-Proxy-Bungee").projectDir = file("proxies/bungeecord")
+
+include(":RedisBungee-Velocity")
+project(":RedisBungee-Velocity").projectDir = file("proxies/velocity/velocity-api")
+
+include(":RedisBungee-Proxy-Velocity")
+project(":RedisBungee-Proxy-Velocity").projectDir = file("proxies/velocity")
+
+
+
 
 dependencyResolutionManagement {
     repositories {

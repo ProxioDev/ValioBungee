@@ -1,12 +1,11 @@
 plugins {
-    `java-library`
-    `maven-publish`
+    java
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("xyz.jpenilla.run-waterfall") version "2.0.0"
 }
 
 dependencies {
-    api(project(":RedisBungee-API"))
+    implementation(project(":RedisBungee-Bungee"))
     compileOnly(libs.platform.bungeecord) {
         exclude("com.google.guava", "guava")
         exclude("com.google.code.gson", "gson")
@@ -80,12 +79,4 @@ tasks {
 
     }
 
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            from(components["java"])
-        }
-    }
 }

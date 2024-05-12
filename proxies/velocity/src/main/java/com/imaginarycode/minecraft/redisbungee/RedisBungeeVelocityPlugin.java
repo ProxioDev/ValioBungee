@@ -68,7 +68,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 @Plugin(id = "redisbungee", name = "RedisBungee", version = Constants.VERSION, url = "https://github.com/ProxioDev/RedisBungee", authors = {"astei", "ProxioDev"})
-public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, ConfigLoader, LangConfigLoader {
+public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, ConfigLoader, LangConfigLoader, ServerObjectFetcher {
     private final ProxyServer server;
     private final Logger logger;
     private final Path dataFolder;

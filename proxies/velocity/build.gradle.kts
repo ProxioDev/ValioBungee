@@ -1,25 +1,11 @@
 plugins {
-    `java-library`
-    `maven-publish`
+    java
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("xyz.jpenilla.run-velocity") version "2.0.0"
-
 }
 
-
 dependencies {
-    api(project(":RedisBungee-API")) {
-        // Since velocity already includes guava / configurate exlude them
-        exclude("com.google.guava", "guava")
-        exclude("com.google.code.gson", "gson")
-        exclude("org.spongepowered", "configurate-yaml")
-        // exclude also adventure api
-        exclude("net.kyori", "adventure-api")
-        exclude("net.kyori", "adventure-text-serializer-gson")
-        exclude("net.kyori", "adventure-text-serializer-legacy")
-        exclude("net.kyori", "adventure-text-serializer-plain")
-        exclude("net.kyori", "adventure-text-minimessage")
-    }
+    implementation(project(":RedisBungee-Velocity"))
     compileOnly(libs.platform.velocity)
     annotationProcessor(libs.platform.velocity)
     implementation(project(":RedisBungee-Commands"))
@@ -29,23 +15,8 @@ dependencies {
 
 description = "RedisBungee Velocity implementation"
 
-java {
-    withJavadocJar()
-    withSourcesJar()
-}
 
 tasks {
-    withType<Javadoc> {
-        dependsOn(project(":RedisBungee-API").getTasksByName("javadoc", false))
-        val options = options as StandardJavadocDocletOptions
-        options.use()
-        options.isDocFilesSubDirs = true
-        options.links(
-            "https://jd.papermc.io/velocity/3.0.0/", // velocity api
-        )
-        val apiDocs = File(rootProject.projectDir, "RedisBungee-API/build/docs/javadoc")
-        options.linksOffline("https://ci.limework.net/RedisBungee/RedisBungee-API/build/docs/javadoc", apiDocs.path)
-    }
     runVelocity {
         velocityVersion("3.3.0-SNAPSHOT")
         environment["REDISBUNGEE_PROXY_ID"] = "velocity-1"
@@ -54,9 +25,6 @@ tasks {
     compileJava {
         options.encoding = Charsets.UTF_8.name()
         options.release.set(17)
-    }
-    javadoc {
-        options.encoding = Charsets.UTF_8.name()
     }
     processResources {
         filteringCharset = Charsets.UTF_8.name()
@@ -75,10 +43,3 @@ tasks {
 
 }
 
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            from(components["java"])
-        }
-    }
-}

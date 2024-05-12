@@ -1,6 +1,5 @@
 plugins {
     `java-library`
-    `maven-publish`
 }
 
 dependencies {
@@ -21,13 +20,5 @@ tasks {
     }
     processResources {
         filteringCharset = Charsets.UTF_8.name()
-    }
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            from(components["java"])
-        }
     }
 }

@@ -49,7 +49,7 @@ public class RedisBungeeAPI extends AbstractRedisBungeeAPI {
     public final ServerInfo getServerFor(@NonNull UUID player) {
         String serverName = this.getServerNameFor(player);
         if (serverName == null) return null;
-        return ((RedisBungeeVelocityPlugin) this.plugin).getProxy().getServer(serverName).map((RegisteredServer::getServerInfo)).orElse(null);
+        return ((ServerObjectFetcher) this.plugin).getProxy().getServer(serverName).map((RegisteredServer::getServerInfo)).orElse(null);
     }
 
     /**
