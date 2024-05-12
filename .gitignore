@@ -46,4 +46,4 @@ manifest.mf
 javadoc
 
 # run-server folders
-*/run
+proxies/*/run
