@@ -30,7 +30,7 @@ java {
 tasks {
     withType<Javadoc> {
         dependsOn(project(":RedisBungee-API").getTasksByName("javadoc", false))
-        val path = project(":RedisBungee-API").path;
+        val path = project(":RedisBungee-API").projectDir
         val options = options as StandardJavadocDocletOptions
         options.use()
         options.isDocFilesSubDirs = true
