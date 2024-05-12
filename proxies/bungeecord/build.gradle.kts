@@ -20,23 +20,10 @@ dependencies {
 description = "RedisBungee Bungeecord implementation"
 
 java {
-    withJavadocJar()
     withSourcesJar()
 }
 
-
 tasks {
-    withType<Javadoc> {
-        dependsOn(project(":RedisBungee-API").getTasksByName("javadoc", false))
-        val options = options as StandardJavadocDocletOptions
-        options.use()
-        options.isDocFilesSubDirs = true
-        options.links(
-            "https://ci.md-5.net/job/BungeeCord/ws/api/target/apidocs/", // bungeecord api
-        )
-        val apiDocs = File(rootProject.projectDir, "RedisBungee-API/build/docs/javadoc")
-        options.linksOffline("https://ci.limework.net/RedisBungee/RedisBungee-API/build/docs/javadoc", apiDocs.path)
-    }
     runWaterfall {
         waterfallVersion("1.20")
         environment["REDISBUNGEE_PROXY_ID"] = "bungeecord-1"
@@ -45,9 +32,6 @@ tasks {
     compileJava {
         options.encoding = Charsets.UTF_8.name()
         options.release.set(17)
-    }
-    javadoc {
-        options.encoding = Charsets.UTF_8.name()
     }
     processResources {
         filteringCharset = Charsets.UTF_8.name()

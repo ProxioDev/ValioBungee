@@ -15,6 +15,9 @@ dependencies {
 
 description = "RedisBungee Velocity implementation"
 
+java {
+    withSourcesJar()
+}
 
 tasks {
     runVelocity {
