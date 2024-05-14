@@ -13,7 +13,8 @@ package com.imaginarycode.minecraft.redisbungee;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeeMode;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisPooledSummoner;
-import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -55,6 +56,30 @@ public class RedisBungeeAPI extends AbstractRedisBungeeAPI {
         if (serverName == null) return null;
         return ((Plugin) this.plugin).getProxy().getServerInfo(serverName);
     }
+
+    /**
+     * Kicks a player from the network but with bungeecord chat Component system
+     * calls {@link #getUuidFromName(String)} to get uuid
+     *
+     * @param playerName player name
+     * @param message    kick message that player will see on kick
+     * @since 0.13.0
+     */
+    public void kickPlayer(String playerName, BaseComponent[] message) {
+        kickPlayer(getUuidFromName(playerName), message);
+    }
+
+    /**
+     * Kicks a player from the network but with bungeecord chat Component system
+     *
+     * @param playerUUID player name
+     * @param message    kick message that player will see on kick
+     * @since 0.13.0
+     */
+    public void kickPlayer(UUID playerUUID, BaseComponent[] message) {
+        kickPlayer(playerUUID, BungeeComponentSerializer.get().deserialize(message));
+    }
+
 
     // LEGACY API FOR BACKWARD COMPATIBILITY
 

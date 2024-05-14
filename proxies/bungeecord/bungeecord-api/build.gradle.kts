@@ -10,6 +10,7 @@ dependencies {
         exclude("com.google.code.gson", "gson")
         exclude("net.kyori","adventure-api")
     }
+    compileOnly(libs.adventure.platforms.bungeecord)
 }
 
 description = "RedisBungee Bungeecord API"
