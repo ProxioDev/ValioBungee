@@ -224,7 +224,7 @@ public abstract class AbstractRedisBungeeAPI {
      * @since 0.2.5
      * @deprecated to avoid confusion between A server and A proxy see #getProxyId()
      */
-    @Deprecated
+    @Deprecated(forRemoval = true)
     public final String getServerId() {
         return getProxyId();
     }
@@ -248,7 +248,7 @@ public abstract class AbstractRedisBungeeAPI {
      * @since 0.2.5
      * @deprecated to avoid confusion between A server and A proxy see see {@link #getAllProxies()}
      */
-    @Deprecated
+    @Deprecated(forRemoval = true)
     public final List<String> getAllServers() {
         return getAllProxies();
     }
@@ -260,7 +260,7 @@ public abstract class AbstractRedisBungeeAPI {
      * @since 0.3
      * @deprecated No longer required
      */
-    @Deprecated
+    @Deprecated(forRemoval = true)
     public final void registerPubSubChannels(String... channels) {
     }
 
@@ -271,7 +271,7 @@ public abstract class AbstractRedisBungeeAPI {
      * @since 0.3
      * @deprecated No longer required
      */
-    @Deprecated
+    @Deprecated(forRemoval = true)
     public final void unregisterPubSubChannels(String... channels) {
     }
 
@@ -352,7 +352,7 @@ public abstract class AbstractRedisBungeeAPI {
      * @since 0.8.0
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(forRemoval = true)
     public void kickPlayer(String playerName, String message) {
         kickPlayer(getUuidFromName(playerName), message);
     }
@@ -365,7 +365,7 @@ public abstract class AbstractRedisBungeeAPI {
      * @since 0.8.0
      * @deprecated
      */
-    @Deprecated
+    @Deprecated(forRemoval = true)
     public void kickPlayer(UUID playerUUID, String message) {
         kickPlayer(playerUUID, Component.text(message));
     }
@@ -402,7 +402,9 @@ public abstract class AbstractRedisBungeeAPI {
      * @throws IllegalStateException if the {@link #getMode()} is not equal to {@link RedisBungeeMode#SINGLE}
      * @see #getJedisPool()
      * @since 0.7.0
+     * @deprecated use {@link #getSummoner() }
      */
+    @Deprecated(forRemoval = true)
     public Jedis requestJedis() {
         if (getMode() == RedisBungeeMode.SINGLE) {
             return getJedisPool().getResource();
@@ -438,7 +440,9 @@ public abstract class AbstractRedisBungeeAPI {
      * @return {@link redis.clients.jedis.JedisCluster}
      * @throws IllegalStateException if the {@link #getMode()} is not equal to {@link RedisBungeeMode#CLUSTER}
      * @since 0.8.0
+     * @deprecated use {@link #getSummoner()}
      */
+    @Deprecated(forRemoval = true)
     public JedisCluster requestClusterJedis() {
         if (getMode() == RedisBungeeMode.CLUSTER) {
             return ((JedisClusterSummoner) this.plugin.getSummoner()).obtainResource();
@@ -454,7 +458,9 @@ public abstract class AbstractRedisBungeeAPI {
      * @return {@link redis.clients.jedis.JedisPooled}
      * @throws IllegalStateException if the {@link #getMode()} is not equal to {@link RedisBungeeMode#SINGLE}
      * @since 0.8.0
+     * @deprecated use {@link #getSummoner()}
      */
+    @Deprecated(forRemoval = true)
     public JedisPooled requestJedisPooled() {
         if (getMode() == RedisBungeeMode.SINGLE) {
             return ((JedisPooledSummoner) this.plugin.getSummoner()).obtainResource();
