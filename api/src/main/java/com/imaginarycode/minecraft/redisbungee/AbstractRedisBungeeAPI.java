@@ -14,16 +14,11 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeeMode;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
-import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisClusterSummoner;
-import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisPooledSummoner;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.Summoner;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPooled;
 
 import java.net.InetAddress;
 import java.util.*;
@@ -217,19 +212,6 @@ public abstract class AbstractRedisBungeeAPI {
     }
 
     /**
-     * Get the current BungeeCord / Velocity proxy ID for this server.
-     *
-     * @return the current server ID
-     * @see #getAllServers()
-     * @since 0.2.5
-     * @deprecated to avoid confusion between A server and A proxy see #getProxyId()
-     */
-    @Deprecated(forRemoval = true)
-    public final String getServerId() {
-        return getProxyId();
-    }
-
-    /**
      * Get all the linked proxies in this network.
      *
      * @return the list of all proxies
@@ -238,41 +220,6 @@ public abstract class AbstractRedisBungeeAPI {
      */
     public final List<String> getAllProxies() {
         return plugin.proxyDataManager().proxiesIds();
-    }
-
-    /**
-     * Get all the linked proxies in this network.
-     *
-     * @return the list of all proxies
-     * @see #getServerId()
-     * @since 0.2.5
-     * @deprecated to avoid confusion between A server and A proxy see see {@link #getAllProxies()}
-     */
-    @Deprecated(forRemoval = true)
-    public final List<String> getAllServers() {
-        return getAllProxies();
-    }
-
-    /**
-     * Register (a) PubSub channel(s), so that you may handle PubSubMessageEvent for it.
-     *
-     * @param channels the channels to register
-     * @since 0.3
-     * @deprecated No longer required
-     */
-    @Deprecated(forRemoval = true)
-    public final void registerPubSubChannels(String... channels) {
-    }
-
-    /**
-     * Unregister (a) PubSub channel(s).
-     *
-     * @param channels the channels to unregister
-     * @since 0.3
-     * @deprecated No longer required
-     */
-    @Deprecated(forRemoval = true)
-    public final void unregisterPubSubChannels(String... channels) {
     }
 
     /**
@@ -342,34 +289,6 @@ public abstract class AbstractRedisBungeeAPI {
         return plugin.getUuidTranslator().getTranslatedUuid(name, expensiveLookups);
     }
 
-
-    /**
-     * Kicks a player from the network
-     * calls {@link #getUuidFromName(String)} to get uuid
-     *
-     * @param playerName player name
-     * @param message   kick message that player will see on kick
-     * @since 0.8.0
-     * @deprecated
-     */
-    @Deprecated(forRemoval = true)
-    public void kickPlayer(String playerName, String message) {
-        kickPlayer(getUuidFromName(playerName), message);
-    }
-
-    /**
-     * Kicks a player from the network
-     *
-     * @param playerUUID player name
-     * @param message    kick message that player will see on kick
-     * @since 0.8.0
-     * @deprecated
-     */
-    @Deprecated(forRemoval = true)
-    public void kickPlayer(UUID playerUUID, String message) {
-        kickPlayer(playerUUID, Component.text(message));
-    }
-
     /**
      * Kicks a player from the network
      * calls {@link #getUuidFromName(String)} to get uuid
@@ -394,81 +313,6 @@ public abstract class AbstractRedisBungeeAPI {
         this.plugin.playerDataManager().kickPlayer(playerUUID, message);
     }
 
-
-    /**
-     * This gives you instance of Jedis
-     *
-     * @return {@link Jedis}
-     * @throws IllegalStateException if the {@link #getMode()} is not equal to {@link RedisBungeeMode#SINGLE}
-     * @see #getJedisPool()
-     * @since 0.7.0
-     * @deprecated use {@link #getSummoner() }
-     */
-    @Deprecated(forRemoval = true)
-    public Jedis requestJedis() {
-        if (getMode() == RedisBungeeMode.SINGLE) {
-            return getJedisPool().getResource();
-        } else {
-            throw new IllegalStateException("Mode is not " + RedisBungeeMode.SINGLE);
-        }
-    }
-
-    /**
-     * This gets Redis Bungee {@link JedisPool}
-     *
-     * @return {@link JedisPool}
-     * @throws IllegalStateException if the {@link #getMode()} is not equal to {@link RedisBungeeMode#SINGLE}
-     * @throws IllegalStateException if JedisPool compatibility mode is disabled in the config
-     * @since 0.6.5
-     */
-    public JedisPool getJedisPool() {
-        if (getMode() == RedisBungeeMode.SINGLE) {
-            JedisPool jedisPool = ((JedisPooledSummoner) this.plugin.getSummoner()).getCompatibilityJedisPool();
-            if (jedisPool == null) {
-                throw new IllegalStateException("JedisPool compatibility mode is disabled, Please enable it in the RedisBungee config.yml");
-            }
-            return jedisPool;
-        } else {
-            throw new IllegalStateException("Mode is not " + RedisBungeeMode.SINGLE);
-        }
-    }
-
-    /**
-     * This gives you an instance of JedisCluster that can't be closed
-     * see {@link com.imaginarycode.minecraft.redisbungee.api.summoners.NotClosableJedisCluster}
-     *
-     * @return {@link redis.clients.jedis.JedisCluster}
-     * @throws IllegalStateException if the {@link #getMode()} is not equal to {@link RedisBungeeMode#CLUSTER}
-     * @since 0.8.0
-     * @deprecated use {@link #getSummoner()}
-     */
-    @Deprecated(forRemoval = true)
-    public JedisCluster requestClusterJedis() {
-        if (getMode() == RedisBungeeMode.CLUSTER) {
-            return ((JedisClusterSummoner) this.plugin.getSummoner()).obtainResource();
-        } else {
-            throw new IllegalStateException("Mode is not " + RedisBungeeMode.CLUSTER);
-        }
-    }
-
-    /**
-     * This gives you an instance of JedisPooled that can't be closed
-     * see {@link com.imaginarycode.minecraft.redisbungee.api.summoners.NotClosableJedisPooled}
-     *
-     * @return {@link redis.clients.jedis.JedisPooled}
-     * @throws IllegalStateException if the {@link #getMode()} is not equal to {@link RedisBungeeMode#SINGLE}
-     * @since 0.8.0
-     * @deprecated use {@link #getSummoner()}
-     */
-    @Deprecated(forRemoval = true)
-    public JedisPooled requestJedisPooled() {
-        if (getMode() == RedisBungeeMode.SINGLE) {
-            return ((JedisPooledSummoner) this.plugin.getSummoner()).obtainResource();
-        } else {
-            throw new IllegalStateException("Mode is not " + RedisBungeeMode.SINGLE);
-        }
-    }
-
     /**
      * returns Summoner class responsible for Single Jedis {@link redis.clients.jedis.JedisPooled} with {@link JedisPool}, Cluster Jedis {@link redis.clients.jedis.JedisCluster} handling
      *
@@ -478,7 +322,6 @@ public abstract class AbstractRedisBungeeAPI {
     public Summoner<?> getSummoner() {
         return this.plugin.getSummoner();
     }
-
 
     /**
      * shows what mode is RedisBungee is on

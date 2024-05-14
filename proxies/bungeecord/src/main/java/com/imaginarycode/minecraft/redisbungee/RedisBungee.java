@@ -62,7 +62,7 @@ import java.util.logging.Level;
 public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlayer>, ConfigLoader, LangConfigLoader {
 
     private static RedisBungeeAPI apiStatic;
-    private AbstractRedisBungeeAPI api;
+    private RedisBungeeAPI api;
     private RedisBungeeMode redisBungeeMode;
     private ProxyDataManager proxyDataManager;
     private BungeePlayerDataManager playerDataManager;
