@@ -26,7 +26,6 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerPing;
-import net.kyori.adventure.text.Component;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -146,8 +145,11 @@ public class RedisBungeeListener {
                     return;
                 }
             }
-
-            ((ServerConnection) event.getSource()).sendPluginMessage(event.getIdentifier(), out.toByteArray());
+            try {
+                // ServerConnection throws IllegalStateException when connection dies somehow so just ignore :/
+                ((ServerConnection) event.getSource()).sendPluginMessage(event.getIdentifier(), out.toByteArray());
+            } catch (IllegalStateException ignored) {
+            }
         });
 
     }
