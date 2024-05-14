@@ -3,6 +3,12 @@
 ValioBungee is RedisBungee Limework's Fork, name change is trying for us to be compliant with Redis Trademarks usage. Which will only effect 
 Repository name only, jar name *NOT PLUGIN Name*, but not internals etc...
 
+
+This fork is backward compatible for bungeecord plugins that compiled with RedisBungee pre fork `0.5`,
+so if you want to recompile using the new api you have to adapt the changes in the code if you still have 
+access to the code.
+
+
 The original project of RedisBungee is no longer maintained, so we forked it.
 ValioBungee is used to Synchronize players data between [BungeeCord](https://github.com/SpigotMC/BungeeCord)
 or [Velocity](https://github.com/PaperMC/Velocity) proxies, 
