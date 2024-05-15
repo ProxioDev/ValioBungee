@@ -27,6 +27,10 @@ project(":RedisBungee-Velocity").projectDir = file("proxies/velocity/velocity-ap
 include(":RedisBungee-Proxy-Velocity")
 project(":RedisBungee-Proxy-Velocity").projectDir = file("proxies/velocity")
 
+include(":Limework-Plugin-Message-API-Protocol")
+project(":Limework-Plugin-Message-API-Protocol").projectDir = file("plugin-message-api/protocol")
+include(":RedisBungee-Plugin-Message-API")
+project(":RedisBungee-Plugin-Message-API").projectDir = file("plugin-message-api/redisbungee")
 
 
 
