@@ -88,6 +88,9 @@ public abstract class ProxyDataManager implements Runnable {
 
     public synchronized void sendCommandTo(String proxyToRun, String command) {
         if (isClosed()) return;
+        if (proxyToRun.equals("allservers") || proxyToRun.equals(this.proxyId())) {
+            handlePlatformCommandExecution(command);
+        }
         publishPayload(new RunCommandPayload(this.proxyId, proxyToRun, command));
     }
 
