@@ -7,10 +7,6 @@
 # - 'ValKey' By linux foundation https://valkey.io/download/
 # - 'KeyDB' by Snapchat inc https://docs.keydb.dev/docs/download/
 
-# Driver to be used
-# for Redis, KeyDB use "jedis"
-# for Valkey use "jackey"
-driver: jackey
 
 # The 'Redis', 'ValKey', 'KeyDB' server you will use.
 # these settings are ignored when cluster mode is enabled.
