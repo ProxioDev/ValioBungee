@@ -6,33 +6,24 @@ pluginManagement {
 
 rootProject.name = "ValioBungee"
 
-include(":RedisBungee-API")
-project(":RedisBungee-API").projectDir = file("api")
-
-include(":RedisBungee-Commands")
-project(":RedisBungee-Commands").projectDir = file("commands")
-
-include(":RedisBungee-Velocity")
-project(":RedisBungee-Velocity").projectDir = file("proxies/velocity")
-
-include(":RedisBungee-Bungee")
-project(":RedisBungee-Bungee").projectDir = file("proxies/bungeecord/bungeecord-api")
-
-include(":RedisBungee-Proxy-Bungee")
-project(":RedisBungee-Proxy-Bungee").projectDir = file("proxies/bungeecord")
-
-include(":RedisBungee-Velocity")
-project(":RedisBungee-Velocity").projectDir = file("proxies/velocity/velocity-api")
-
-include(":RedisBungee-Proxy-Velocity")
-project(":RedisBungee-Proxy-Velocity").projectDir = file("proxies/velocity")
-
-include(":Limework-Plugin-Message-API-Protocol")
-project(":Limework-Plugin-Message-API-Protocol").projectDir = file("plugin-message-api/protocol")
-include(":RedisBungee-Plugin-Message-API")
-project(":RedisBungee-Plugin-Message-API").projectDir = file("plugin-message-api/redisbungee")
+val projects = arrayOf(
+    ":RedisBungee-API" to "api",
+    ":RedisBungee-Commands" to "commands",
+    ":RedisBungee-Velocity" to "proxies/velocity",
+    ":RedisBungee-Bungee" to "proxies/bungeecord/bungeecord-api",
+    ":RedisBungee-Proxy-Bungee" to "proxies/bungeecord",
+    ":RedisBungee-Velocity" to "proxies/velocity/velocity-api",
+    ":RedisBungee-Proxy-Velocity" to "proxies/velocity",
+    ":Limework-Plugin-Message-API-Protocol" to "plugin-message-api/protocol",
+    ":RedisBungee-Plugin-Message-API" to "plugin-message-api/api",
+    ":RedisBungee-Plugin-Message-API-Paper" to "plugin-message-api/api/paper"
+)
 
 
+projects.forEach { (projectName, filePath) ->
+    include(projectName)
+    project(projectName).projectDir = file(filePath)
+}
 
 dependencyResolutionManagement {
     repositories {

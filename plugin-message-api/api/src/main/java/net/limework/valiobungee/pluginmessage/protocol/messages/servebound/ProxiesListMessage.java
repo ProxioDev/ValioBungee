@@ -11,8 +11,8 @@ public class ProxiesListMessage extends PluginMessage {
 
     private Proxy[] proxies;
 
-    public ProxiesListMessage(Proxy[] proxies) {
-        this.proxies = proxies;
+    public ProxiesListMessage() {
+
     }
 
     public Proxy[] proxies() {

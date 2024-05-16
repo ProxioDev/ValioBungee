@@ -11,7 +11,7 @@ dependencies {
 tasks {
     compileJava {
         options.encoding = Charsets.UTF_8.name()
-        options.release.set(8) // use java 8 for shit servers that still stuck on 1.8
+        options.release.set(17)
     }
     javadoc {
         options.encoding = Charsets.UTF_8.name()
