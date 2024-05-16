@@ -14,9 +14,6 @@ val projects = arrayOf(
     ":RedisBungee-Proxy-Bungee" to "proxies/bungeecord",
     ":RedisBungee-Velocity" to "proxies/velocity/velocity-api",
     ":RedisBungee-Proxy-Velocity" to "proxies/velocity",
-    ":Limework-Plugin-Message-API-Protocol" to "plugin-message-api/protocol",
-    ":RedisBungee-Plugin-Message-API" to "plugin-message-api/api",
-    ":RedisBungee-Plugin-Message-API-Paper" to "plugin-message-api/api/paper"
 )
 
 
