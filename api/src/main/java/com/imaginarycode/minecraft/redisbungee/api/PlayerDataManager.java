@@ -41,10 +41,10 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
     private final UnifiedJedis unifiedJedis;
     private final String proxyId;
     private final String networkId;
-    private final LoadingCache<UUID, String> serverCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build(this::getServerFromRedis);
-    private final LoadingCache<UUID, String> lastServerCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build(this::getLastServerFromRedis);
-    private final LoadingCache<UUID, String> proxyCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build(this::getProxyFromRedis);
-    private final LoadingCache<UUID, InetAddress> ipCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build(this::getIpAddressFromRedis);
+    private final LoadingCache<UUID, String> serverCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).build(this::getServerFromRedis);
+    private final LoadingCache<UUID, String> lastServerCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).build(this::getLastServerFromRedis);
+    private final LoadingCache<UUID, String> proxyCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).build(this::getProxyFromRedis);
+    private final LoadingCache<UUID, InetAddress> ipCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).build(this::getIpAddressFromRedis);
     private final LoadingCache<Object, Multimap<String, UUID>> serverToPlayersCache = Caffeine.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).build(this::serversToPlayersBuilder);
     private final JSONComponentSerializer COMPONENT_SERIALIZER = JSONComponentSerializer.json();
 
