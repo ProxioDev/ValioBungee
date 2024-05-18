@@ -37,15 +37,16 @@ import java.util.concurrent.TimeUnit;
 public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEvent, SC extends IPlayerChangedServerNetworkEvent, NJE extends IPlayerLeftNetworkEvent, CE> {
 
     protected final RedisBungeePlugin<P> plugin;
+    private final Object SERVERS_TO_PLAYERS_KEY = new Object();
+    private final UnifiedJedis unifiedJedis;
+    private final String proxyId;
+    private final String networkId;
     private final LoadingCache<UUID, String> serverCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build(this::getServerFromRedis);
     private final LoadingCache<UUID, String> lastServerCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build(this::getLastServerFromRedis);
     private final LoadingCache<UUID, String> proxyCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build(this::getProxyFromRedis);
     private final LoadingCache<UUID, InetAddress> ipCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build(this::getIpAddressFromRedis);
-    private final Object SERVERS_TO_PLAYERS_KEY = new Object();
     private final LoadingCache<Object, Multimap<String, UUID>> serverToPlayersCache = Caffeine.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).build(this::serversToPlayersBuilder);
-    private final UnifiedJedis unifiedJedis;
-    private final String proxyId;
-    private final String networkId;
+    private final JSONComponentSerializer COMPONENT_SERIALIZER = JSONComponentSerializer.json();
 
     public PlayerDataManager(RedisBungeePlugin<P> plugin) {
         this.plugin = plugin;
@@ -69,16 +70,21 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
 
     public abstract void onDisconnectEvent(DE event);
 
-
     protected void handleNetworkPlayerServerChange(IPlayerChangedServerNetworkEvent event) {
         this.serverCache.invalidate(event.getUuid());
         this.lastServerCache.invalidate(event.getUuid());
+
+        //TODO: We could also rely on redisbungee-serverchange pubsub messages to update the cache in-place without querying redis. That would be a lot more efficient.
+        this.serverToPlayersCache.invalidate(SERVERS_TO_PLAYERS_KEY);
     }
 
     protected void handleNetworkPlayerQuit(IPlayerLeftNetworkEvent event) {
         this.proxyCache.invalidate(event.getUuid());
         this.serverCache.invalidate(event.getUuid());
         this.ipCache.invalidate(event.getUuid());
+
+        //TODO: We could also rely on redisbungee-serverchange pubsub messages to update the cache in-place without querying redis. That would be a lot more efficient.
+        this.serverToPlayersCache.invalidate(SERVERS_TO_PLAYERS_KEY);
     }
 
     protected void handlePubSubMessageEvent(IPubSubMessageEvent event) {
@@ -139,8 +145,6 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
         plugin.fireEvent(plugin.createPlayerChangedServerNetworkEvent(uuid, from, to));
         handleServerChangeRedis(uuid, to);
     }
-
-    private final JSONComponentSerializer COMPONENT_SERIALIZER =JSONComponentSerializer.json();
 
     public void kickPlayer(UUID uuid, Component message) {
         if (!plugin.handlePlatformKick(uuid, message)) { // handle locally before SENDING a message
@@ -213,6 +217,7 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
     public String getLastServerFor(UUID uuid) {
         return this.lastServerCache.get(uuid);
     }
+
     public String getServerFor(UUID uuid) {
         return this.serverCache.get(uuid);
     }
