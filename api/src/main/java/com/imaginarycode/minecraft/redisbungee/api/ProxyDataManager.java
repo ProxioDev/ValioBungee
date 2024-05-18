@@ -392,10 +392,6 @@ public abstract class ProxyDataManager implements Runnable {
         return proxyId;
     }
 
-    public UnifiedJedis unifiedJedis() {
-        return unifiedJedis;
-    }
-
     public String networkId() {
         return networkId;
     }

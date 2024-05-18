@@ -52,7 +52,7 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
 
     public PlayerDataManager(RedisBungeePlugin<P> plugin) {
         this.plugin = plugin;
-        this.unifiedJedis = plugin.proxyDataManager().unifiedJedis();
+        this.unifiedJedis = plugin.getSummoner().obtainResource();
         this.proxyId = plugin.proxyDataManager().proxyId();
         this.networkId = plugin.proxyDataManager().networkId();
     }
@@ -83,6 +83,8 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
     }
 
     protected void handleNetworkPlayerQuit(IPlayerLeftNetworkEvent event) {
+        // reason we don't set the data here because in-case of failure in redis etc,
+        // events won't reach the proxy so data would be incorrect.
         this.proxyCache.invalidate(event.getUuid());
         this.serverCache.invalidate(event.getUuid());
         this.ipCache.invalidate(event.getUuid());
@@ -93,6 +95,8 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
     }
 
     protected void handleNetworkPlayerJoin(IPlayerJoinedNetworkEvent event) {
+        // reason we don't set the data here because in-case of failure in redis etc,
+        // events won't reach the proxy so data would be incorrect.
         this.proxyCache.invalidate(event.getUuid());
         this.serverCache.invalidate(event.getUuid());
         this.ipCache.invalidate(event.getUuid());
