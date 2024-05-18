@@ -12,7 +12,9 @@ package com.imaginarycode.minecraft.redisbungee;
 
 import com.imaginarycode.minecraft.redisbungee.api.PlayerDataManager;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
+import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerJoinedNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerChangedServerNetworkEvent;
+import com.imaginarycode.minecraft.redisbungee.events.PlayerJoinedNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerLeftNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import net.kyori.adventure.text.Component;
@@ -29,7 +31,7 @@ import net.md_5.bungee.event.EventHandler;
 import java.util.concurrent.TimeUnit;
 
 
-public class BungeePlayerDataManager extends PlayerDataManager<ProxiedPlayer, PostLoginEvent, PlayerDisconnectEvent, PubSubMessageEvent, PlayerChangedServerNetworkEvent, PlayerLeftNetworkEvent, ServerConnectedEvent> implements Listener {
+public class BungeePlayerDataManager extends PlayerDataManager<ProxiedPlayer, PostLoginEvent, PlayerDisconnectEvent, PubSubMessageEvent, PlayerChangedServerNetworkEvent, PlayerLeftNetworkEvent, ServerConnectedEvent, PlayerJoinedNetworkEvent> implements Listener {
 
     public BungeePlayerDataManager(RedisBungeePlugin<ProxiedPlayer> plugin) {
         super(plugin);
@@ -45,6 +47,12 @@ public class BungeePlayerDataManager extends PlayerDataManager<ProxiedPlayer, Po
     @EventHandler
     public void onNetworkPlayerQuit(PlayerLeftNetworkEvent event) {
         super.handleNetworkPlayerQuit(event);
+    }
+
+    @Override
+    @EventHandler
+    public void onNetworkPlayerJoin(PlayerJoinedNetworkEvent event) {
+        super.handleNetworkPlayerJoin(event);
     }
 
     @Override

@@ -151,7 +151,7 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, Con
     }
 
     @Override
-    public PlayerDataManager<Player, ?, ?, ?, ?, ?, ?> playerDataManager() {
+    public PlayerDataManager<Player, ?, ?, ?, ?, ?, ?, ?> playerDataManager() {
         return this.playerDataManager;
     }
 

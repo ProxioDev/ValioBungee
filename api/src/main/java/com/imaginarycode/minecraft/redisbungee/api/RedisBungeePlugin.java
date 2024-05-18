@@ -65,7 +65,7 @@ public interface RedisBungeePlugin<P> extends EventsPlatform {
 
     ProxyDataManager proxyDataManager();
 
-    PlayerDataManager<P, ?, ?, ?, ?, ?, ?> playerDataManager();
+    PlayerDataManager<P, ?, ?, ?, ?, ?, ?, ?> playerDataManager();
 
     UUIDTranslator getUuidTranslator();
 
