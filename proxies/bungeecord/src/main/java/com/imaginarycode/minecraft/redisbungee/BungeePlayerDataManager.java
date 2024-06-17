@@ -12,12 +12,10 @@ package com.imaginarycode.minecraft.redisbungee;
 
 import com.imaginarycode.minecraft.redisbungee.api.PlayerDataManager;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
-import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerJoinedNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerChangedServerNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerJoinedNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerLeftNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.LoginEvent;
@@ -74,14 +72,21 @@ public class BungeePlayerDataManager extends PlayerDataManager<ProxiedPlayer, Po
         event.registerIntent((Plugin) plugin);
         // check if online
         if (getLastOnline(event.getConnection().getUniqueId()) == 0) {
-            if (plugin.configuration().kickWhenOnline()) {
-                kickPlayer(event.getConnection().getUniqueId(), plugin.langConfiguration().messages().loggedInFromOtherLocation());
-                // wait 3 seconds before releasing the event
-                plugin.executeAsyncAfter(() -> event.completeIntent((Plugin) plugin), TimeUnit.SECONDS, 3);
-            } else {
-                event.setCancelled(true);
-                event.setCancelReason(BungeeComponentSerializer.get().serialize(plugin.langConfiguration().messages().alreadyLoggedIn()));
+            // because something can go wrong and proxy somehow does not update player data correctly on shutdown
+            // we have to check proxy if it has the player
+            String proxyId = getProxyFor(event.getConnection().getUniqueId());
+            if (proxyId == null || !plugin.proxyDataManager().isPlayerTrulyOnProxy(proxyId, event.getConnection().getUniqueId())) {
                 event.completeIntent((Plugin) plugin);
+            } else {
+                if (plugin.configuration().kickWhenOnline()) {
+                    kickPlayer(event.getConnection().getUniqueId(), plugin.langConfiguration().messages().loggedInFromOtherLocation());
+                    // wait 3 seconds before releasing the event
+                    plugin.executeAsyncAfter(() -> event.completeIntent((Plugin) plugin), TimeUnit.SECONDS, 3);
+                } else {
+                    event.setCancelled(true);
+                    event.setCancelReason(BungeeComponentSerializer.get().serialize(plugin.langConfiguration().messages().alreadyLoggedIn()));
+                    event.completeIntent((Plugin) plugin);
+                }
             }
         } else {
             event.completeIntent((Plugin) plugin);

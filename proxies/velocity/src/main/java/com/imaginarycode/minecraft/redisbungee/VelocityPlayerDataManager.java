@@ -75,13 +75,20 @@ public class VelocityPlayerDataManager extends PlayerDataManager<Player, PostLog
     public void onLoginEvent(LoginEvent event, Continuation continuation) {
         // check if online
         if (getLastOnline(event.getPlayer().getUniqueId()) == 0) {
-            if (plugin.configuration().kickWhenOnline()) {
-                kickPlayer(event.getPlayer().getUniqueId(), plugin.langConfiguration().messages().loggedInFromOtherLocation());
-                // wait 3 seconds before releasing the event
-                plugin.executeAsyncAfter(continuation::resume, TimeUnit.SECONDS, 3);
-            } else {
-                event.setResult(ResultedEvent.ComponentResult.denied(plugin.langConfiguration().messages().alreadyLoggedIn()));
+            // because something can go wrong and proxy somehow does not update player data correctly on shutdown
+            // we have to check proxy if it has the player
+            String proxyId = getProxyFor(event.getPlayer().getUniqueId());
+            if (proxyId == null || !plugin.proxyDataManager().isPlayerTrulyOnProxy(proxyId, event.getPlayer().getUniqueId())) {
                 continuation.resume();
+            } else {
+                if (plugin.configuration().kickWhenOnline()) {
+                    kickPlayer(event.getPlayer().getUniqueId(), plugin.langConfiguration().messages().loggedInFromOtherLocation());
+                    // wait 3 seconds before releasing the event
+                    plugin.executeAsyncAfter(continuation::resume, TimeUnit.SECONDS, 3);
+                } else {
+                    event.setResult(ResultedEvent.ComponentResult.denied(plugin.langConfiguration().messages().alreadyLoggedIn()));
+                    continuation.resume();
+                }
             }
         } else {
             continuation.resume();

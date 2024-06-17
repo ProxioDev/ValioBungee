@@ -82,6 +82,13 @@ public abstract class ProxyDataManager implements Runnable {
         return getProxyMembers(proxyId);
     }
 
+    // this skip checking if proxy is and its package private
+    // due proxy shutdown shenanigans
+    public boolean isPlayerTrulyOnProxy(String proxyId, UUID uuid) {
+        return unifiedJedis.sismember("redisbungee::" + this.networkId + "::proxies::" + proxyId + "::online-players", uuid.toString());
+    }
+
+
     public List<String> proxiesIds() {
         return Collections.list(this.heartbeats.keys());
     }
