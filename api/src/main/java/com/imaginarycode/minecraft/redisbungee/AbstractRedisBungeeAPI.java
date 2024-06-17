@@ -337,4 +337,22 @@ public abstract class AbstractRedisBungeeAPI {
     public static AbstractRedisBungeeAPI getAbstractRedisBungeeAPI() {
         return abstractRedisBungeeAPI;
     }
+
+    @Deprecated(forRemoval = true)
+    public void registerPubSubChannels(String... channels) {
+    }
+
+    /**
+     * Warning: this is Legacy API to maintain backward compatibility with RedisBungee Pre fork 0.5
+     * <p>
+     *  Unregister (a) PubSub channel(s).
+     *
+     * @param channels the channels to unregister
+     * @since 0.3
+     * @deprecated No longer required
+     */
+    @Deprecated(forRemoval = true)
+    public void unregisterPubSubChannels(String... channels) {
+    }
+
 }

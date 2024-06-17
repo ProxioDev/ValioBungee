@@ -135,6 +135,7 @@ public class RedisBungeeAPI extends AbstractRedisBungeeAPI {
      * @since 0.3
      * @deprecated No longer required
      */
+
     @Deprecated
     public final void unregisterPubSubChannels(String... channels) {
     }
