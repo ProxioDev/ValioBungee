@@ -270,7 +270,12 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
                         responses.put(uuid, pipeline.hget("redis-bungee::" + networkId + "::player::" + uuid + "::data", "server"));
                     }
                     pipeline.sync();
-                    responses.forEach((uuid, response) -> builder.put(response.get(), uuid));
+                    responses.forEach((uuid, response) -> {
+                        String key = response.get();
+                        if (key == null) return;
+
+                        builder.put(key, uuid);
+                    });
                     return builder.build();
                 }
 
@@ -281,7 +286,12 @@ public abstract class PlayerDataManager<P, LE, DE, PS extends IPubSubMessageEven
                         responses.put(uuid, pipeline.hget("redis-bungee::" + networkId + "::player::" + uuid + "::data", "server"));
                     }
                     pipeline.sync();
-                    responses.forEach((uuid, response) -> builder.put(response.get(), uuid));
+                    responses.forEach((uuid, response) -> {
+                        String key = response.get();
+                        if (key == null) return;
+
+                        builder.put(key, uuid);
+                    });
                     return builder.build();
                 }
             }.call();
