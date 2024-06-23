@@ -62,7 +62,7 @@ public class RedisBungeeConfiguration {
         return this.handleMotd;
     }
 
-    public HandleMotdOrder handleMotdPriority() {
+    public HandleMotdOrder handleMotdOrder() {
         return handleMotdOrder;
     }
 

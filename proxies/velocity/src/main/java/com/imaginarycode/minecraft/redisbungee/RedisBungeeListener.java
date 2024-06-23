@@ -44,7 +44,7 @@ public class RedisBungeeListener {
 
     @Subscribe(order = PostOrder.FIRST)
     public void onPingFirst(ProxyPingEvent event) {
-        if (plugin.configuration().handleMotdPriority() != HandleMotdOrder.FIRST) {
+        if (plugin.configuration().handleMotdOrder() != HandleMotdOrder.FIRST) {
             return;
         }
         onPing0(event);
@@ -52,7 +52,7 @@ public class RedisBungeeListener {
 
     @Subscribe(order = PostOrder.NORMAL)
     public void onPingNormal(ProxyPingEvent event) {
-        if (plugin.configuration().handleMotdPriority() != HandleMotdOrder.NORMAL) {
+        if (plugin.configuration().handleMotdOrder() != HandleMotdOrder.NORMAL) {
             return;
         }
         onPing0(event);
@@ -60,7 +60,7 @@ public class RedisBungeeListener {
 
     @Subscribe(order = PostOrder.LAST)
     public void onPingLast(ProxyPingEvent event) {
-        if (plugin.configuration().handleMotdPriority() != HandleMotdOrder.LAST) {
+        if (plugin.configuration().handleMotdOrder() != HandleMotdOrder.LAST) {
             return;
         }
         onPing0(event);
