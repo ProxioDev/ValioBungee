@@ -77,6 +77,13 @@ kick-when-online: true
 # you can disable this when you want to handle motd yourself, use RedisBungee api to get total players when needed :)
 handle-motd: true
 
+# MOTD plugins compatibility setting
+# Allowed values: FIRST, NORMAL, LAST
+# This option enables RedisBungee to manage various interactions between other plugins and the online player count,
+# which is dynamically updated to a global player count in ping responses if the handle-motd option is enabled.
+# If you encounter issues with other plugins accessing or modifying the player count, try using a value of FIRST or LAST.
+handle-motd-order: NORMAL
+
 # A list of IP addresses for which RedisBungee will not modify the response for, useful for automatic
 # restart scripts.
 # Automatically disabled  if handle-motd is disabled.

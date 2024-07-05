@@ -17,7 +17,7 @@ import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
-import net.kyori.adventure.text.Component;
+import com.imaginarycode.minecraft.redisbungee.api.config.HandleMotdOrder;
 import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
 import net.md_5.bungee.api.AbstractReconnectHandler;
 import net.md_5.bungee.api.ProxyServer;
@@ -29,6 +29,7 @@ import net.md_5.bungee.api.event.ProxyPingEvent;
 import net.md_5.bungee.api.event.ServerConnectEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
+import net.md_5.bungee.event.EventPriority;
 
 import java.util.*;
 
@@ -42,8 +43,31 @@ public class RedisBungeeListener implements Listener {
         this.plugin = plugin;
     }
 
-    @EventHandler
-    public void onPing(ProxyPingEvent event) {
+    @EventHandler(priority = EventPriority.LOWEST)
+    private void onPingFirst(ProxyPingEvent event) {
+        if (plugin.configuration().handleMotdOrder() != HandleMotdOrder.FIRST) {
+            return;
+        }
+        onPing0(event);
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL)
+    private void onPingNormal(ProxyPingEvent event) {
+        if (plugin.configuration().handleMotdOrder() != HandleMotdOrder.NORMAL) {
+            return;
+        }
+        onPing0(event);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    private void onPingLast(ProxyPingEvent event) {
+        if (plugin.configuration().handleMotdOrder() != HandleMotdOrder.LAST) {
+            return;
+        }
+        onPing0(event);
+    }
+
+    private void onPing0(ProxyPingEvent event) {
         if (!plugin.configuration().handleMotd()) return;
         if (plugin.configuration().getExemptAddresses().contains(event.getConnection().getAddress().getAddress())) return;
         ServerInfo forced = AbstractReconnectHandler.getForcedHost(event.getConnection());

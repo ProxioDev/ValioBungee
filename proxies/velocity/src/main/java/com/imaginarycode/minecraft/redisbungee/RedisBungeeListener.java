@@ -17,6 +17,7 @@ import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
+import com.imaginarycode.minecraft.redisbungee.api.config.HandleMotdOrder;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
@@ -41,8 +42,31 @@ public class RedisBungeeListener {
         this.plugin = plugin;
     }
 
-    @Subscribe(order = PostOrder.LAST) // some plugins changes it online players so we need to be executed as last
-    public void onPing(ProxyPingEvent event) {
+    @Subscribe(order = PostOrder.FIRST)
+    public void onPingFirst(ProxyPingEvent event) {
+        if (plugin.configuration().handleMotdOrder() != HandleMotdOrder.FIRST) {
+            return;
+        }
+        onPing0(event);
+    }
+
+    @Subscribe(order = PostOrder.NORMAL)
+    public void onPingNormal(ProxyPingEvent event) {
+        if (plugin.configuration().handleMotdOrder() != HandleMotdOrder.NORMAL) {
+            return;
+        }
+        onPing0(event);
+    }
+
+    @Subscribe(order = PostOrder.LAST)
+    public void onPingLast(ProxyPingEvent event) {
+        if (plugin.configuration().handleMotdOrder() != HandleMotdOrder.LAST) {
+            return;
+        }
+        onPing0(event);
+    }
+
+    private void onPing0(ProxyPingEvent event) {
         if (!plugin.configuration().handleMotd()) return;
         if (plugin.configuration().getExemptAddresses().contains(event.getConnection().getRemoteAddress().getAddress())) return;
 

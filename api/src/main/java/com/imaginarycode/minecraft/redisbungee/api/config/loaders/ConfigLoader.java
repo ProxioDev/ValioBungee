@@ -14,6 +14,7 @@ package com.imaginarycode.minecraft.redisbungee.api.config.loaders;
 import com.google.common.reflect.TypeToken;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeeMode;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
+import com.imaginarycode.minecraft.redisbungee.api.config.HandleMotdOrder;
 import com.imaginarycode.minecraft.redisbungee.api.config.RedisBungeeConfiguration;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisClusterSummoner;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisPooledSummoner;
@@ -104,6 +105,16 @@ public interface ConfigLoader extends GenericConfigLoader {
         plugin.logInfo("handle reconnect to last server: {}", reconnectToLastServer);
         plugin.logInfo("handle motd: {}", handleMotd);
 
+        HandleMotdOrder handleMotdOrder = HandleMotdOrder.NORMAL;
+        String handleMotdOrderName = node.getNode("handle-motd-priority").getString();
+        if (handleMotdOrderName != null) {
+            try {
+                handleMotdOrder = HandleMotdOrder.valueOf(handleMotdOrderName.toUpperCase(Locale.ROOT));
+            } catch (IllegalArgumentException e) {
+                plugin.logWarn("handle motd order value '{}' is unsupported (allowed: {})", handleMotdOrderName, HandleMotdOrder.values());
+            }
+        }
+        plugin.logInfo("handle motd order: {}", handleMotdOrder);
 
         // commands
         boolean redisBungeeEnabled = node.getNode("commands", "redisbungee", "enabled").getBoolean(true);
@@ -130,7 +141,8 @@ public interface ConfigLoader extends GenericConfigLoader {
         boolean installPlist = node.getNode("commands", "redisbungee-legacy", "subcommands", "plist", "install").getBoolean(false);
 
 
-        RedisBungeeConfiguration configuration = new RedisBungeeConfiguration(networkId, proxyId, exemptAddresses, kickWhenOnline, reconnectToLastServer, handleMotd, new RedisBungeeConfiguration.CommandsConfiguration(
+        RedisBungeeConfiguration configuration = new RedisBungeeConfiguration(networkId, proxyId, exemptAddresses, kickWhenOnline, reconnectToLastServer, handleMotd, handleMotdOrder,
+            new RedisBungeeConfiguration.CommandsConfiguration(
                 redisBungeeEnabled, redisBungeeLegacyEnabled,
                 new RedisBungeeConfiguration.LegacySubCommandsConfiguration(
                         findEnabled, glistEnabled, ipEnabled,

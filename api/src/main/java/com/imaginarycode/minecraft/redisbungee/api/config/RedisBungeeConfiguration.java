@@ -25,12 +25,13 @@ public class RedisBungeeConfiguration {
 
     private final boolean handleReconnectToLastServer;
     private final boolean handleMotd;
+    private final HandleMotdOrder handleMotdOrder;
 
     private final CommandsConfiguration commandsConfiguration;
     private final String networkId;
 
 
-    public RedisBungeeConfiguration(String networkId, String proxyId, List<String> exemptAddresses, boolean kickWhenOnline, boolean handleReconnectToLastServer, boolean handleMotd, CommandsConfiguration commandsConfiguration) {
+    public RedisBungeeConfiguration(String networkId, String proxyId, List<String> exemptAddresses, boolean kickWhenOnline, boolean handleReconnectToLastServer, boolean handleMotd, HandleMotdOrder handleMotdOrder, CommandsConfiguration commandsConfiguration) {
         this.proxyId = proxyId;
         ImmutableList.Builder<InetAddress> addressBuilder = ImmutableList.builder();
         for (String s : exemptAddresses) {
@@ -40,6 +41,7 @@ public class RedisBungeeConfiguration {
         this.kickWhenOnline = kickWhenOnline;
         this.handleReconnectToLastServer = handleReconnectToLastServer;
         this.handleMotd = handleMotd;
+        this.handleMotdOrder = handleMotdOrder;
         this.commandsConfiguration = commandsConfiguration;
         this.networkId = networkId;
     }
@@ -58,6 +60,10 @@ public class RedisBungeeConfiguration {
 
     public boolean handleMotd() {
         return this.handleMotd;
+    }
+
+    public HandleMotdOrder handleMotdOrder() {
+        return handleMotdOrder;
     }
 
     public boolean handleReconnectToLastServer() {
