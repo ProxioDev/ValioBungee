@@ -374,6 +374,7 @@ public abstract class ProxyDataManager implements Runnable {
                         }
                     }
                 }
+                unifiedJedis.xdel(STREAM_ID,this.lastStreamEntryID); //CLEAN-UP of the stream, otherwise the STREAM would fill-up over time and take space - petulikan1
             } catch (Exception e) {
                 this.plugin.logFatal("an error has occurred in the stream", e);
                 try {
