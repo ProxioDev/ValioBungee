@@ -50,6 +50,8 @@ useSSL: false
 
 # An identifier for this network, which helps to separate redisbungee instances on same redis instance.
 # You can use environment variable 'REDISBUNGEE_NETWORK_ID' to override
+# Depending on the platform bungeecord or velocity system will append platform id to the network id
+# to prevent proxies from different platforms from seeing each other. since 0.13.0
 network-id: "main"
 
 # An identifier for this BungeeCord / Velocity instance. Will randomly generate if leaving it blank.

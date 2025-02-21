@@ -92,5 +92,5 @@ public interface RedisBungeePlugin<P> extends EventsPlatform {
 
     void executeAsyncAfter(Runnable runnable, TimeUnit timeUnit, int time);
 
-
+    String platformId();
 }

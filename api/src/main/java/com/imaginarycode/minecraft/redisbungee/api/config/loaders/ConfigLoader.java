@@ -97,8 +97,9 @@ public interface ConfigLoader extends GenericConfigLoader {
         }
 
         plugin.logInfo("Loaded network id " + networkId);
-
-
+        // TO avoid proxies from different platforms from seeing each other.
+        networkId = plugin.platformId() + "-" + networkId;
+        plugin.logInfo("Platform is {} so network id is now is {}", plugin.platformId(), networkId);
 
         boolean reconnectToLastServer = node.getNode("reconnect-to-last-server").getBoolean();
         boolean handleMotd = node.getNode("handle-motd").getBoolean(true);

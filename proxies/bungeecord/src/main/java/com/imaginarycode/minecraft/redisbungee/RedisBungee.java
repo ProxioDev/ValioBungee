@@ -355,9 +355,13 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
         return api.getJedisPool();
     }
 
-
     @Override
     public void onLangConfigLoad(LangConfiguration langConfiguration) {
         this.langConfiguration = langConfiguration;
+    }
+
+    @Override
+    public String platformId() {
+        return "bungeecord";
     }
 }

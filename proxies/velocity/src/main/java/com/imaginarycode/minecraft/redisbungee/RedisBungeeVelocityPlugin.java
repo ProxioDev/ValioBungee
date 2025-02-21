@@ -367,4 +367,9 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, Con
     public InputStream getResourceAsStream(String name) {
         return this.getClass().getClassLoader().getResourceAsStream(name);
     }
+
+    @Override
+    public String platformId() {
+        return "velocity";
+    }
 }
