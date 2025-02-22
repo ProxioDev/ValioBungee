@@ -14,14 +14,16 @@ fun configureProject(name: String, path: String) {
 
 configureProject(":RedisBungee-API", "api")
 configureProject(":RedisBungee-Commands", "commands")
-configureProject(":RedisBungee-Velocity", "proxies/velocity")
+
 configureProject(":RedisBungee-Bungee", "proxies/bungeecord/bungeecord-api")
 configureProject(":RedisBungee-Proxy-Bungee", "proxies/bungeecord")
+
 configureProject(":RedisBungee-Velocity", "proxies/velocity/velocity-api")
 configureProject(":RedisBungee-Proxy-Velocity", "proxies/velocity")
 
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+
     repositories {
         mavenCentral()
         maven("https://repo.papermc.io/repository/maven-public/")
