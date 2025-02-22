@@ -172,7 +172,7 @@ public abstract class PlayerDataManager<P> {
         Map<String, String> data = new HashMap<>();
         data.put("server", server);
         data.put("last-server", server);
-        unifiedJedis.hset("redis-bungee::" + this.networkId + "::player::" + uuid + "::data", data);
+        unifiedJedis.hset("redisbungee::" + this.networkId + "::player::" + uuid + "::data", data);
     }
 
     protected void addPlayer(final UUID uuid, final String name, final InetAddress inetAddress) {
@@ -180,7 +180,7 @@ public abstract class PlayerDataManager<P> {
         redisData.put("last-online", String.valueOf(0));
         redisData.put("proxy", this.proxyId);
         redisData.put("ip", inetAddress.getHostAddress());
-        unifiedJedis.hset("redis-bungee::" + this.networkId + "::player::" + uuid + "::data", redisData);
+        unifiedJedis.hset("redisbungee::" + this.networkId + "::player::" + uuid + "::data", redisData);
         plugin.getUuidTranslator().persistInfo(name, uuid, this.unifiedJedis);
         JSONObject data = new JSONObject();
         data.put("proxy", this.proxyId);
@@ -191,8 +191,8 @@ public abstract class PlayerDataManager<P> {
     }
 
     protected void removePlayer(UUID uuid) {
-        unifiedJedis.hset("redis-bungee::" + this.networkId + "::player::" + uuid + "::data", "last-online", String.valueOf(System.currentTimeMillis()));
-        unifiedJedis.hdel("redis-bungee::" + this.networkId + "::player::" + uuid + "::data", "server", "proxy", "ip");
+        unifiedJedis.hset("redisbungee::" + this.networkId + "::player::" + uuid + "::data", "last-online", String.valueOf(System.currentTimeMillis()));
+        unifiedJedis.hdel("redisbungee::" + this.networkId + "::player::" + uuid + "::data", "server", "proxy", "ip");
         JSONObject data = new JSONObject();
         data.put("proxy", this.proxyId);
         data.put("uuid", uuid);
@@ -203,25 +203,25 @@ public abstract class PlayerDataManager<P> {
 
 
     protected String getProxyFromRedis(UUID uuid) {
-        return unifiedJedis.hget("redis-bungee::" + this.networkId + "::player::" + uuid + "::data", "proxy");
+        return unifiedJedis.hget("redisbungee::" + this.networkId + "::player::" + uuid + "::data", "proxy");
     }
 
     protected String getServerFromRedis(UUID uuid) {
-        return unifiedJedis.hget("redis-bungee::" + this.networkId + "::player::" + uuid + "::data", "server");
+        return unifiedJedis.hget("redisbungee::" + this.networkId + "::player::" + uuid + "::data", "server");
     }
 
     protected String getLastServerFromRedis(UUID uuid) {
-        return unifiedJedis.hget("redis-bungee::" + this.networkId + "::player::" + uuid + "::data", "last-server");
+        return unifiedJedis.hget("redisbungee::" + this.networkId + "::player::" + uuid + "::data", "last-server");
     }
 
     protected InetAddress getIpAddressFromRedis(UUID uuid) {
-        String ip = unifiedJedis.hget("redis-bungee::" + this.networkId + "::player::" + uuid + "::data", "ip");
+        String ip = unifiedJedis.hget("redisbungee::" + this.networkId + "::player::" + uuid + "::data", "ip");
         if (ip == null) return null;
         return InetAddresses.forString(ip);
     }
 
     protected long getLastOnlineFromRedis(UUID uuid) {
-        String unixString = unifiedJedis.hget("redis-bungee::" + this.networkId + "::player::" + uuid + "::data", "last-online");
+        String unixString = unifiedJedis.hget("redisbungee::" + this.networkId + "::player::" + uuid + "::data", "last-online");
         if (unixString == null) return -1;
         return Long.parseLong(unixString);
     }
@@ -260,7 +260,7 @@ public abstract class PlayerDataManager<P> {
                 public Multimap<String, UUID> doPooledPipeline(Pipeline pipeline) {
                     HashMap<UUID, Response<String>> responses = new HashMap<>();
                     for (UUID uuid : uuids) {
-                        Optional.ofNullable(pipeline.hget("redis-bungee::" + networkId + "::player::" + uuid + "::data", "server")).ifPresent(stringResponse -> {
+                        Optional.ofNullable(pipeline.hget("redisbungee::" + networkId + "::player::" + uuid + "::data", "server")).ifPresent(stringResponse -> {
                             responses.put(uuid, stringResponse);
                         });
                     }
@@ -278,7 +278,7 @@ public abstract class PlayerDataManager<P> {
                 public Multimap<String, UUID> clusterPipeline(ClusterPipeline pipeline) {
                     HashMap<UUID, Response<String>> responses = new HashMap<>();
                     for (UUID uuid : uuids) {
-                        Optional.ofNullable(pipeline.hget("redis-bungee::" + networkId + "::player::" + uuid + "::data", "server")).ifPresent(stringResponse -> {
+                        Optional.ofNullable(pipeline.hget("redisbungee::" + networkId + "::player::" + uuid + "::data", "server")).ifPresent(stringResponse -> {
                             responses.put(uuid, stringResponse);
                         });
                     }
