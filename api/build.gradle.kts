@@ -13,11 +13,6 @@ dependencies {
     api(libs.okhttp)
     api(libs.configurateV3)
     api(libs.caffeine)
-    api(libs.adventure.api)
-    api(libs.adventure.gson)
-    api(libs.adventure.legacy)
-    api(libs.adventure.plain)
-    api(libs.adventure.miniMessage)
 }
 
 description = "RedisBungee interfaces"

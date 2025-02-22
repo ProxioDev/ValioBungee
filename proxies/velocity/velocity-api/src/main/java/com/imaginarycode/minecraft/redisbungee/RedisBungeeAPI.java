@@ -13,6 +13,7 @@ package com.imaginarycode.minecraft.redisbungee;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -51,6 +52,30 @@ public class RedisBungeeAPI extends AbstractRedisBungeeAPI {
         if (serverName == null) return null;
         return ((ServerObjectFetcher) this.plugin).getProxy().getServer(serverName).map((RegisteredServer::getServerInfo)).orElse(null);
     }
+
+    /**
+     * Kicks a player from the network
+     * calls {@link #getUuidFromName(String)} to get uuid
+     *
+     * @param playerName player name
+     * @param message   kick message that player will see on kick
+     * @since 0.12.0
+     */
+    public void kickPlayer(String playerName, Component message) {
+        kickPlayer(getUuidFromName(playerName), message);
+    }
+
+    /**
+     * Kicks a player from the network
+     *
+     * @param playerUUID player name
+     * @param message    kick message that player will see on kick
+     * @since 0.12.0
+     */
+    public void kickPlayer(UUID playerUUID, Component message) {
+        this.plugin.playerDataManager().kickPlayer(playerUUID, message);
+    }
+
 
     /**
      * Api instance
