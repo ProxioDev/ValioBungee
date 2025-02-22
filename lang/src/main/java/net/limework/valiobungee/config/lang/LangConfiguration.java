@@ -8,7 +8,7 @@
  *  http://www.eclipse.org/legal/epl-v10.html
  */
 
-package com.imaginarycode.minecraft.redisbungee.api.config;
+package net.limework.valiobungee.config.lang;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;

@@ -33,16 +33,16 @@ public class CommandRedisBungeeDebug extends AdventureBaseCommand {
     @Description("kicks a player from the network by name")
     @Private
     public void kick(CommandIssuer issuer, String playerName) {
-
-        plugin.getAbstractRedisBungeeApi().kickPlayer(playerName, Component.text("debug kick"));
+        String message = serializeMessage(Component.text("kicked using redisbungee api using name"));
+        plugin.playerDataManager().serializedPlayerKick(plugin.getUuidTranslator().getTranslatedUuid(playerName, false), message);
     }
 
     @Subcommand("kickByUUID")
     @Description("kicks a player from the network by UUID")
     @Private
     public void kick(CommandIssuer issuer, UUID uuid) {
-
-        plugin.getAbstractRedisBungeeApi().kickPlayer(uuid, Component.text("debug kick"));
+        String message = serializeMessage(Component.text("kicked using redisbungee api using uuid"));
+        plugin.playerDataManager().serializedPlayerKick(uuid, message);
     }
 
 

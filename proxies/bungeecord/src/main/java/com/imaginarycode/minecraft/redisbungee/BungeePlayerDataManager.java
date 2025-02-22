@@ -12,7 +12,6 @@ package com.imaginarycode.minecraft.redisbungee;
 
 import com.imaginarycode.minecraft.redisbungee.api.PlayerDataManager;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
-import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerJoinedNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerChangedServerNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerJoinedNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerLeftNetworkEvent;
@@ -75,7 +74,7 @@ public class BungeePlayerDataManager extends PlayerDataManager<ProxiedPlayer> im
                 event.completeIntent((Plugin) plugin);
             } else {
                 if (plugin.configuration().kickWhenOnline()) {
-                    kickPlayer(event.getConnection().getUniqueId(), plugin.langConfiguration().messages().loggedInFromOtherLocation());
+                    serializedPlayerKick(event.getConnection().getUniqueId(), plugin.langConfiguration().messages().loggedInFromOtherLocation());
                     // wait 3 seconds before releasing the event
                     plugin.executeAsyncAfter(() -> event.completeIntent((Plugin) plugin), TimeUnit.SECONDS, 3);
                 } else {

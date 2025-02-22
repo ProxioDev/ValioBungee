@@ -20,8 +20,6 @@ import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerJoinedNetworkEv
 import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerLeftNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.api.events.IPubSubMessageEvent;
 import com.imaginarycode.minecraft.redisbungee.api.tasks.RedisPipelineTask;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import org.json.JSONObject;
 import redis.clients.jedis.ClusterPipeline;
 import redis.clients.jedis.Pipeline;
@@ -45,7 +43,6 @@ public abstract class PlayerDataManager<P> {
     private final LoadingCache<UUID, InetAddress> ipCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).build(this::getIpAddressFromRedis);
     private final LoadingCache<UUID, Long> lastOnlineCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).build(this::getLastOnlineFromRedis);
     private final LoadingCache<Object, Multimap<String, UUID>> serverToPlayersCache = Caffeine.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).build(this::serversToPlayersBuilder);
-    private final JSONComponentSerializer COMPONENT_SERIALIZER = JSONComponentSerializer.json();
 
     public PlayerDataManager(RedisBungeePlugin<P> plugin) {
         this.plugin = plugin;
@@ -99,50 +96,33 @@ public abstract class PlayerDataManager<P> {
         this.serverToPlayersCache.invalidate(SERVERS_TO_PLAYERS_KEY);
     }
 
+
     protected void handlePubSubMessageEvent(IPubSubMessageEvent event) {
-        // kick api
-        if (event.getChannel().equals("redisbungee-kick")) {
-            JSONObject data = new JSONObject(event.getMessage());
-            String proxy = data.getString("proxy");
-            if (proxy.equals(this.proxyId)) {
-                return;
+        switch (event.getChannel()) {
+            case "redisbungee-serverchange" -> {
+                JSONObject data = new JSONObject(event.getMessage());
+                UUID uuid = UUID.fromString(data.getString("uuid"));
+                String from = null;
+                if (data.has("from")) from = data.getString("from");
+                String to = data.getString("to");
+                plugin.fireEvent(plugin.createPlayerChangedServerNetworkEvent(uuid, from, to));
             }
-            UUID uuid = UUID.fromString(data.getString("uuid"));
-            String message = data.getString("message");
-            plugin.handlePlatformKick(uuid, COMPONENT_SERIALIZER.deserialize(message));
-            return;
-        }
-        if (event.getChannel().equals("redisbungee-serverchange")) {
-            JSONObject data = new JSONObject(event.getMessage());
-            String proxy = data.getString("proxy");
-            if (proxy.equals(this.proxyId)) {
-                return;
+            case "redisbungee-player-join" -> {
+                JSONObject data = new JSONObject(event.getMessage());
+                UUID uuid = UUID.fromString(data.getString("uuid"));
+                plugin.fireEvent(plugin.createPlayerJoinedNetworkEvent(uuid));
             }
-            UUID uuid = UUID.fromString(data.getString("uuid"));
-            String from = null;
-            if (data.has("from")) from = data.getString("from");
-            String to = data.getString("to");
-            plugin.fireEvent(plugin.createPlayerChangedServerNetworkEvent(uuid, from, to));
-            return;
-        }
-        if (event.getChannel().equals("redisbungee-player-join")) {
-            JSONObject data = new JSONObject(event.getMessage());
-            String proxy = data.getString("proxy");
-            if (proxy.equals(this.proxyId)) {
-                return;
+            case "redisbungee-player-leave" -> {
+                JSONObject data = new JSONObject(event.getMessage());
+                UUID uuid = UUID.fromString(data.getString("uuid"));
+                plugin.fireEvent(plugin.createPlayerLeftNetworkEvent(uuid));
             }
-            UUID uuid = UUID.fromString(data.getString("uuid"));
-            plugin.fireEvent(plugin.createPlayerJoinedNetworkEvent(uuid));
-            return;
-        }
-        if (event.getChannel().equals("redisbungee-player-leave")) {
-            JSONObject data = new JSONObject(event.getMessage());
-            String proxy = data.getString("proxy");
-            if (proxy.equals(this.proxyId)) {
-                return;
+            case "redisbungee-player-kick" -> {
+                JSONObject data = new JSONObject(event.getMessage());
+                UUID uuid = UUID.fromString(data.getString("uuid"));
+                String message = data.getString("serialized-message");
+                handleSerializedKick(uuid, message);
             }
-            UUID uuid = UUID.fromString(data.getString("uuid"));
-            plugin.fireEvent(plugin.createPlayerLeftNetworkEvent(uuid));
         }
 
     }
@@ -158,14 +138,16 @@ public abstract class PlayerDataManager<P> {
         handleServerChangeRedis(uuid, to);
     }
 
-    public void kickPlayer(UUID uuid, Component message) {
-        if (!plugin.handlePlatformKick(uuid, message)) { // handle locally before SENDING a message
-            JSONObject data = new JSONObject();
-            data.put("proxy", this.proxyId);
-            data.put("uuid", uuid);
-            data.put("message", COMPONENT_SERIALIZER.serialize(message));
-            plugin.proxyDataManager().sendChannelMessage("redisbungee-kick", data.toString());
-        }
+    // must check if player is on the local proxy
+    protected abstract boolean handleSerializedKick(UUID player, String serializedMessage);
+
+    public void serializedPlayerKick(UUID player, String serializedMessage) {
+        JSONObject data = new JSONObject();
+        data.put("proxy", this.proxyId);
+        data.put("uuid", player);
+        data.put("serialized-message", serializedMessage);
+        if (!handleSerializedKick(player, serializedMessage))
+            plugin.proxyDataManager().sendChannelMessage("redisbungee-player-kick", data.toString());
     }
 
     private void handleServerChangeRedis(UUID uuid, String server) {

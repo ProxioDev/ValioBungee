@@ -11,12 +11,10 @@
 package com.imaginarycode.minecraft.redisbungee.api;
 
 import com.imaginarycode.minecraft.redisbungee.AbstractRedisBungeeAPI;
-import com.imaginarycode.minecraft.redisbungee.api.config.LangConfiguration;
 import com.imaginarycode.minecraft.redisbungee.api.config.RedisBungeeConfiguration;
 import com.imaginarycode.minecraft.redisbungee.api.events.EventsPlatform;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.Summoner;
 import com.imaginarycode.minecraft.redisbungee.api.util.uuid.UUIDTranslator;
-import net.kyori.adventure.text.Component;
 
 import java.net.InetAddress;
 import java.util.UUID;
@@ -55,8 +53,6 @@ public interface RedisBungeePlugin<P> extends EventsPlatform {
 
     RedisBungeeConfiguration configuration();
 
-    LangConfiguration langConfiguration();
-
     Summoner<?> getSummoner();
 
     RedisBungeeMode getRedisBungeeMode();
@@ -77,10 +73,7 @@ public interface RedisBungeePlugin<P> extends EventsPlatform {
 
     UUID getPlayerUUID(String player);
 
-
     String getPlayerName(UUID player);
-
-    boolean handlePlatformKick(UUID uuid, Component message);
 
     String getPlayerServerName(P player);
 

@@ -103,7 +103,6 @@ public abstract class ProxyDataManager implements Runnable {
 
     public synchronized void sendChannelMessage(String channel, String message) {
         if (isClosed()) return;
-        this.plugin.fireEvent(this.plugin.createPubSubEvent(channel, message));
         publishPayload(new PubSubPayload(this.proxyId, channel, message));
     }
 

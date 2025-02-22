@@ -13,6 +13,7 @@ fun configureProject(name: String, path: String) {
 }
 
 configureProject(":RedisBungee-API", "api")
+configureProject(":RedisBungee-Lang", "lang")
 configureProject(":RedisBungee-Commands", "commands")
 
 configureProject(":RedisBungee-Bungee", "proxies/bungeecord/bungeecord-api")

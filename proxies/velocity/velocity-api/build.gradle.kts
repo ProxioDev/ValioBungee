@@ -10,15 +10,9 @@ dependencies {
         exclude("com.google.code.gson", "gson")
         exclude("org.spongepowered", "configurate-yaml")
         exclude("com.github.ben-manes.caffeine", "caffeine")
-        // exclude also adventure api
-        exclude("net.kyori", "adventure-api")
-        exclude("net.kyori", "adventure-text-serializer-gson")
-        exclude("net.kyori", "adventure-text-serializer-legacy")
-        exclude("net.kyori", "adventure-text-serializer-plain")
-        exclude("net.kyori", "adventure-text-minimessage")
     }
+    implementation(project(":RedisBungee-Lang"))
     compileOnly(libs.platform.velocity)
-
 }
 
 description = "RedisBungee Velocity API"

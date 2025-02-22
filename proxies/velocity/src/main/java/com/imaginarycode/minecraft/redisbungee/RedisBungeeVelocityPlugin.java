@@ -18,18 +18,14 @@ import com.imaginarycode.minecraft.redisbungee.api.RedisBungeeMode;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 import com.imaginarycode.minecraft.redisbungee.commands.CommandLoader;
 import com.imaginarycode.minecraft.redisbungee.commands.utils.CommandPlatformHelper;
-import com.imaginarycode.minecraft.redisbungee.api.config.LangConfiguration;
 import com.imaginarycode.minecraft.redisbungee.api.config.loaders.ConfigLoader;
 import com.imaginarycode.minecraft.redisbungee.api.config.RedisBungeeConfiguration;
-import com.imaginarycode.minecraft.redisbungee.api.config.loaders.LangConfigLoader;
 import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerChangedServerNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerJoinedNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerLeftNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.api.events.IPubSubMessageEvent;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.Summoner;
 import com.imaginarycode.minecraft.redisbungee.api.util.InitialUtils;
-import com.imaginarycode.minecraft.redisbungee.api.util.uuid.NameFetcher;
-import com.imaginarycode.minecraft.redisbungee.api.util.uuid.UUIDFetcher;
 import com.imaginarycode.minecraft.redisbungee.api.util.uuid.UUIDTranslator;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerChangedServerNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerJoinedNetworkEvent;
@@ -48,6 +44,8 @@ import com.velocitypowered.api.proxy.messages.LegacyChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.scheduler.ScheduledTask;
 import net.kyori.adventure.text.Component;
+import net.limework.valiobungee.config.lang.LangConfiguration;
+import net.limework.valiobungee.config.lang.LangConfigLoader;
 import org.slf4j.Logger;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 
@@ -55,18 +53,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.nio.file.Path;
-import java.sql.Date;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 @Plugin(id = "redisbungee", name = "RedisBungee", version = Constants.VERSION, url = "https://github.com/ProxioDev/RedisBungee", authors = {"astei", "ProxioDev"})
-public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, ConfigLoader, LangConfigLoader, ServerObjectFetcher {
+public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, ConfigLoader, LangConfigLoader, ApiPlatformSupport {
     private final ProxyServer server;
     private final Logger logger;
     private final Path dataFolder;
@@ -208,7 +203,6 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, Con
         return this.configuration;
     }
 
-    @Override
     public LangConfiguration langConfiguration() {
         return this.langConfiguration;
     }
@@ -231,15 +225,6 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, Con
     @Override
     public String getPlayerName(UUID player) {
         return this.getProxy().getPlayer(player).map(Player::getUsername).orElse(null);
-    }
-
-
-    @Override
-    public boolean handlePlatformKick(UUID uuid, Component message) {
-        Player player = getPlayer(uuid);
-        if (player == null) return false;
-        player.disconnect(message);
-        return true;
     }
 
     @Override
@@ -354,6 +339,11 @@ public class RedisBungeeVelocityPlugin implements RedisBungeePlugin<Player>, Con
 
     public ProxyServer getProxy() {
         return server;
+    }
+
+    @Override
+    public void kickPlayer(UUID player, Component message) {
+        this.playerDataManager.kickPlayer(player, message);
     }
 
     public Logger getLogger() {

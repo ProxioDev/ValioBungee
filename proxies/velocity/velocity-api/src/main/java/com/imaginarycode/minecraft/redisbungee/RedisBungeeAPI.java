@@ -50,7 +50,7 @@ public class RedisBungeeAPI extends AbstractRedisBungeeAPI {
     public final ServerInfo getServerFor(@NonNull UUID player) {
         String serverName = this.getServerNameFor(player);
         if (serverName == null) return null;
-        return ((ServerObjectFetcher) this.plugin).getProxy().getServer(serverName).map((RegisteredServer::getServerInfo)).orElse(null);
+        return ((ApiPlatformSupport) this.plugin).getProxy().getServer(serverName).map((RegisteredServer::getServerInfo)).orElse(null);
     }
 
     /**
@@ -73,7 +73,7 @@ public class RedisBungeeAPI extends AbstractRedisBungeeAPI {
      * @since 0.12.0
      */
     public void kickPlayer(UUID playerUUID, Component message) {
-        this.plugin.playerDataManager().kickPlayer(playerUUID, message);
+        ((ApiPlatformSupport) this.plugin).kickPlayer(playerUUID, message);
     }
 
 
