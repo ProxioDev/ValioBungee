@@ -299,6 +299,28 @@ public abstract class AbstractRedisBungeeAPI {
         return this.plugin.getSummoner();
     }
 
+    /**
+     * Kicks a player from the network using miniMessage
+     * calls {@link #getUuidFromName(String)} to get uuid
+     * <a href="https://docs.advntr.dev/minimessage/format.html">...</a>
+     * @param playerName player name
+     * @param miniMessage   kick message that player will see on kick using minimessage as format
+     * @since 0.13.0
+     */
+    public void kickPlayer(String playerName, String miniMessage) {
+        kickPlayer(getUuidFromName(playerName), miniMessage);
+    }
+
+    /**
+     * Kicks a player from the network
+     * <a href="https://docs.advntr.dev/minimessage/format.html">...</a>
+     * @param player player uuid
+     * @param miniMessage    kick message that player will see on kick using minimessage as format
+     * @since 0.13.0
+     */
+    public void kickPlayer(UUID player, String miniMessage) {
+        plugin.playerDataManager().serializedPlayerKick(player, miniMessage);
+    }
 
     /**
      * shows what mode is RedisBungee is on

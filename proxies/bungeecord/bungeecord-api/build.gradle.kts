@@ -5,11 +5,8 @@ plugins {
 
 dependencies {
     api(project(":RedisBungee-API"))
-    compileOnly(libs.platform.bungeecord) {
-        exclude("com.google.guava", "guava")
-        exclude("com.google.code.gson", "gson")
-        exclude("net.kyori","adventure-api")
-    }
+    compileOnly(libs.adventure.platforms.bungeecord)
+    compileOnly(libs.platform.bungeecord)
 }
 
 description = "RedisBungee Bungeecord API"

@@ -22,7 +22,7 @@ tasks {
         val options = options as StandardJavadocDocletOptions
         options.use()
         options.isDocFilesSubDirs = true
-        val adventureVersion = libs.adventure.plain.get().version
+        val adventureVersion = libs.adventure.api.get().version
         options.links(
             "https://jd.advntr.dev/api/$adventureVersion"
         )

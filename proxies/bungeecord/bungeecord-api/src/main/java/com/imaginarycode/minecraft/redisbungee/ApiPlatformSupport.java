@@ -10,15 +10,12 @@
 
 package com.imaginarycode.minecraft.redisbungee;
 
-import com.velocitypowered.api.proxy.ProxyServer;
 import net.kyori.adventure.text.Component;
 
 import java.util.UUID;
 
 // this class used to redirect calls to keep the implementation and api separate
 public interface ApiPlatformSupport {
-
-    ProxyServer getProxy();
 
     void kickPlayer(UUID player, Component message);
 

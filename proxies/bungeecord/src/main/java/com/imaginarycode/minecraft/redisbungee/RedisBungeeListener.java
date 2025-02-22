@@ -37,9 +37,9 @@ import static com.imaginarycode.minecraft.redisbungee.api.util.serialize.MultiMa
 
 public class RedisBungeeListener implements Listener {
 
-    private final RedisBungeePlugin<ProxiedPlayer> plugin;
+    private final RedisBungee plugin;
 
-    public RedisBungeeListener(RedisBungeePlugin<ProxiedPlayer> plugin) {
+    public RedisBungeeListener(RedisBungee plugin) {
         this.plugin = plugin;
     }
 

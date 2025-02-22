@@ -46,7 +46,7 @@ tasks {
         val jedisVersion = libs.jedis.get().version
         val configurateVersion = libs.configurateV3.get().version
         val guavaVersion = libs.guava.get().version
-        val adventureVersion = libs.adventure.plain.get().version
+        val adventureVersion = libs.adventure.api.get().version
         options.links(
             "https://configurate.aoeu.xyz/$configurateVersion/apidocs/", // configurate
             "https://javadoc.io/doc/redis.clients/jedis/$jedisVersion/", // jedis

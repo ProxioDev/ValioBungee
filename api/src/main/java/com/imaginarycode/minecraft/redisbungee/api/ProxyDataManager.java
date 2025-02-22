@@ -199,7 +199,7 @@ public abstract class ProxyDataManager implements Runnable {
         Set<UUID> storedRedisUuids = getProxyMembers(this.proxyId);
 
         if (!localOnlineUUIDs.equals(storedRedisUuids)) {
-            plugin.logWarn("De-synced playerS set detected correcting....");
+            plugin.logWarn("De-synced players set detected correcting....");
             Set<UUID> add = new HashSet<>(localOnlineUUIDs);
             Set<UUID> remove = new HashSet<>(storedRedisUuids);
             add.removeAll(storedRedisUuids);

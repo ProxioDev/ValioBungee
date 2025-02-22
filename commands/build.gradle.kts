@@ -7,7 +7,6 @@ dependencies {
     implementation(libs.acf.core)
     compileOnly(libs.adventure.api)
     compileOnly(libs.adventure.miniMessage)
-    compileOnly(libs.adventure.gson)
 }
 
 description = "RedisBungee common commands"

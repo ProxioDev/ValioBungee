@@ -14,7 +14,6 @@ import co.aikar.commands.CommandIssuer;
 import co.aikar.commands.annotation.*;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
 import com.imaginarycode.minecraft.redisbungee.commands.utils.AdventureBaseCommand;
-import net.kyori.adventure.text.Component;
 
 import java.util.UUID;
 
@@ -33,16 +32,14 @@ public class CommandRedisBungeeDebug extends AdventureBaseCommand {
     @Description("kicks a player from the network by name")
     @Private
     public void kick(CommandIssuer issuer, String playerName) {
-        String message = serializeMessage(Component.text("kicked using redisbungee api using name"));
-        plugin.playerDataManager().serializedPlayerKick(plugin.getUuidTranslator().getTranslatedUuid(playerName, false), message);
+        plugin.playerDataManager().serializedPlayerKick(plugin.getUuidTranslator().getTranslatedUuid(playerName, false), "kicked using redisbungee api using name");
     }
 
     @Subcommand("kickByUUID")
     @Description("kicks a player from the network by UUID")
     @Private
     public void kick(CommandIssuer issuer, UUID uuid) {
-        String message = serializeMessage(Component.text("kicked using redisbungee api using uuid"));
-        plugin.playerDataManager().serializedPlayerKick(uuid, message);
+        plugin.playerDataManager().serializedPlayerKick(uuid, "kicked using redisbungee api using uuid");
     }
 
 

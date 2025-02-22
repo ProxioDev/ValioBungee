@@ -5,15 +5,12 @@ plugins {
 
 dependencies {
     implementation(project(":RedisBungee-Bungee"))
-    compileOnly(libs.platform.bungeecord) {
-        exclude("com.google.guava", "guava")
-        exclude("com.google.code.gson", "gson")
-        exclude("net.kyori","adventure-api")
-    }
+    compileOnly(libs.platform.bungeecord)
     implementation(libs.adventure.platforms.bungeecord)
-    implementation(libs.adventure.gson)
+    implementation(libs.adventure.miniMessage)
     implementation(libs.acf.bungeecord)
     implementation(project(":RedisBungee-Commands"))
+    implementation(project(":RedisBungee-Lang"))
 }
 
 description = "RedisBungee Bungeecord implementation"
@@ -24,11 +21,6 @@ java {
 
 tasks {
 
-    //runWaterfall {
-        //waterfallVersion("1.20")
-        //environment["REDISBUNGEE_PROXY_ID"] = "bungeecord-1"
-        //["REDISBUNGEE_NETWORK_ID"] = "dev"
-    //}
     compileJava {
         options.encoding = Charsets.UTF_8.name()
         options.release.set(17)

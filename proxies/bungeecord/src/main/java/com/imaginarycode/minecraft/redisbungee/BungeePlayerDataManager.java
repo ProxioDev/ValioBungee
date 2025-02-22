@@ -16,7 +16,10 @@ import com.imaginarycode.minecraft.redisbungee.events.PlayerChangedServerNetwork
 import com.imaginarycode.minecraft.redisbungee.events.PlayerJoinedNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerLeftNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
@@ -26,13 +29,16 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.event.EventHandler;
 
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 
 public class BungeePlayerDataManager extends PlayerDataManager<ProxiedPlayer> implements Listener {
 
-    public BungeePlayerDataManager(RedisBungeePlugin<ProxiedPlayer> plugin) {
+    private final RedisBungee bPlugin;
+    public BungeePlayerDataManager(RedisBungee plugin) {
         super(plugin);
+        bPlugin = plugin;
     }
 
     @EventHandler
@@ -62,6 +68,29 @@ public class BungeePlayerDataManager extends PlayerDataManager<ProxiedPlayer> im
         super.playerChangedServer(event.getPlayer().getUniqueId(), oldServer, currentServer);
     }
 
+    private final BungeeComponentSerializer BUNGEE_COMPONENT_SERIALIZER = BungeeComponentSerializer.get();
+
+    private final static MiniMessage MINI_MESSAGE_SERIALIZER = MiniMessage.miniMessage();
+    @Override
+    public boolean handleSerializedKick(UUID uuid, String serializedMiniMessage) {
+        ProxiedPlayer player = plugin.getPlayer(uuid);
+        if (player == null) return false;
+        // decode the adventure component
+        if (serializedMiniMessage == null) {
+            // kick the player too even if the message is invalid
+            player.disconnect(BUNGEE_COMPONENT_SERIALIZER.serialize(Component.empty()));
+            plugin.logWarn("unable to decode serialized adventure component because its empty or null");
+        }  else {
+            Component message = MINI_MESSAGE_SERIALIZER.deserialize(serializedMiniMessage);
+            player.disconnect(BUNGEE_COMPONENT_SERIALIZER.serialize(message));
+        }
+        return true;
+    }
+
+    public void kickPlayer(UUID player, Component message) {
+        serializedPlayerKick(player, MINI_MESSAGE_SERIALIZER.serialize(message));
+    }
+
     @EventHandler
     public void onLoginEvent(LoginEvent event) {
         event.registerIntent((Plugin) plugin);
@@ -74,12 +103,12 @@ public class BungeePlayerDataManager extends PlayerDataManager<ProxiedPlayer> im
                 event.completeIntent((Plugin) plugin);
             } else {
                 if (plugin.configuration().kickWhenOnline()) {
-                    serializedPlayerKick(event.getConnection().getUniqueId(), plugin.langConfiguration().messages().loggedInFromOtherLocation());
+                    kickPlayer(event.getConnection().getUniqueId(), bPlugin.langConfiguration().messages().loggedInFromOtherLocation());
                     // wait 3 seconds before releasing the event
                     plugin.executeAsyncAfter(() -> event.completeIntent((Plugin) plugin), TimeUnit.SECONDS, 3);
                 } else {
                     event.setCancelled(true);
-                    event.setCancelReason(BungeeComponentSerializer.get().serialize(plugin.langConfiguration().messages().alreadyLoggedIn()));
+                    event.setCancelReason(BungeeComponentSerializer.get().serialize(bPlugin.langConfiguration().messages().alreadyLoggedIn()));
                     event.completeIntent((Plugin) plugin);
                 }
             }
@@ -89,10 +118,12 @@ public class BungeePlayerDataManager extends PlayerDataManager<ProxiedPlayer> im
 
     }
 
+
     @EventHandler
     public void onLoginEvent(PostLoginEvent event) {
         super.addPlayer(event.getPlayer().getUniqueId(), event.getPlayer().getName(), event.getPlayer().getAddress().getAddress());
     }
+
 
     @EventHandler
     public void onDisconnectEvent(PlayerDisconnectEvent event) {

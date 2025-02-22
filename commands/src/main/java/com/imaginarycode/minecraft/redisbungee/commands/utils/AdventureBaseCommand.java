@@ -13,7 +13,6 @@ package com.imaginarycode.minecraft.redisbungee.commands.utils;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.CommandIssuer;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 
 /**
  *  this just dumb class that wraps the adventure stuff into base command
@@ -22,12 +21,6 @@ public abstract class AdventureBaseCommand extends BaseCommand {
 
     protected void sendMessage(CommandIssuer issuer, Component component) {
         CommandPlatformHelper.getPlatformHelper().sendMessage(issuer, component);
-    }
-
-    private static final GsonComponentSerializer COMPONENT_SERIALIZER = GsonComponentSerializer.gson();
-
-    protected String serializeMessage(Component message) {
-        return COMPONENT_SERIALIZER.serialize(message);
     }
 
 }

@@ -11,6 +11,9 @@
 package com.imaginarycode.minecraft.redisbungee;
 
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -28,6 +31,8 @@ import java.util.UUID;
 public class RedisBungeeAPI extends AbstractRedisBungeeAPI {
 
     private static RedisBungeeAPI redisBungeeApi;
+
+    private static final BungeeComponentSerializer BUNGEE_COMPONENT_SERIALIZER = BungeeComponentSerializer.get();
 
     public RedisBungeeAPI(RedisBungeePlugin<?> plugin) {
         super(plugin);
@@ -49,6 +54,52 @@ public class RedisBungeeAPI extends AbstractRedisBungeeAPI {
         String serverName = this.getServerNameFor(player);
         if (serverName == null) return null;
         return ((Plugin) this.plugin).getProxy().getServerInfo(serverName);
+    }
+
+    /**
+     * Kicks a player from the network
+     * calls {@link #getUuidFromName(String)} to get uuid
+     *
+     * @param playerName player name
+     * @param message   kick message that player will see on kick
+     * @since 0.13.0
+     */
+    public void kickPlayer(String playerName, BaseComponent[] message) {
+        kickPlayer(getUuidFromName(playerName), message);
+    }
+
+    /**
+     * Kicks a player from the network
+     *
+     * @param player player uuid
+     * @param message    kick message that player will see on kick
+     * @since 0.13.0
+     */
+    public void kickPlayer(UUID player, BaseComponent[] message) {
+        kickPlayer(player, BUNGEE_COMPONENT_SERIALIZER.deserialize(message));
+    }
+
+    /**
+     * Kicks a player from the network
+     * calls {@link #getUuidFromName(String)} to get uuid
+     *
+     * @param playerName player name
+     * @param message   kick message that player will see on kick
+     * @since 0.12.0
+     */
+    public void kickPlayer(String playerName, Component message) {
+        kickPlayer(getUuidFromName(playerName), message);
+    }
+
+    /**
+     * Kicks a player from the network
+     *
+     * @param player player uuid
+     * @param message    kick message that player will see on kick
+     * @since 0.12.0
+     */
+    public void kickPlayer(UUID player, Component message) {
+        ((ApiPlatformSupport) this.plugin).kickPlayer(player, message);
     }
 
     /**

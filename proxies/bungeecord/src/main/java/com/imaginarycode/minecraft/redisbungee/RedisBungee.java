@@ -15,10 +15,8 @@ import com.imaginarycode.minecraft.redisbungee.api.PlayerDataManager;
 import com.imaginarycode.minecraft.redisbungee.api.ProxyDataManager;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeeMode;
 import com.imaginarycode.minecraft.redisbungee.api.RedisBungeePlugin;
-import com.imaginarycode.minecraft.redisbungee.api.config.LangConfiguration;
 import com.imaginarycode.minecraft.redisbungee.api.config.loaders.ConfigLoader;
 import com.imaginarycode.minecraft.redisbungee.api.config.RedisBungeeConfiguration;
-import com.imaginarycode.minecraft.redisbungee.api.config.loaders.LangConfigLoader;
 import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerChangedServerNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerJoinedNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerLeftNetworkEvent;
@@ -33,7 +31,8 @@ import com.imaginarycode.minecraft.redisbungee.events.PlayerJoinedNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PlayerLeftNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
+import net.limework.valiobungee.config.lang.LangConfigLoader;
+import net.limework.valiobungee.config.lang.LangConfiguration;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Event;
@@ -41,7 +40,6 @@ import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import redis.clients.jedis.JedisPool;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -53,9 +51,8 @@ import java.util.concurrent.*;
 import java.util.logging.Level;
 
 
-public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlayer>, ConfigLoader, LangConfigLoader {
+public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlayer>, ConfigLoader, LangConfigLoader, ApiPlatformSupport {
 
-    private static RedisBungeeAPI apiStatic;
     private AbstractRedisBungeeAPI api;
     private RedisBungeeMode redisBungeeMode;
     private ProxyDataManager proxyDataManager;
@@ -76,7 +73,6 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
         return this.configuration;
     }
 
-    @Override
     public LangConfiguration langConfiguration() {
         return this.langConfiguration;
     }
@@ -162,15 +158,6 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
     }
 
     @Override
-    public boolean handlePlatformKick(UUID uuid, Component message) {
-        ProxiedPlayer player = getPlayer(uuid);
-        if (player == null) return false;
-        if (!player.isConnected()) return false;
-        player.disconnect(BungeeComponentSerializer.get().serialize(message));
-        return true;
-    }
-
-    @Override
     public String getPlayerServerName(ProxiedPlayer player) {
         return player.getServer().getInfo().getName();
     }
@@ -243,7 +230,6 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
 
         // init the api
         this.api = new RedisBungeeAPI(this);
-        apiStatic = (RedisBungeeAPI) this.api;
 
         // commands
         CommandPlatformHelper.init(new BungeeCommandPlatformHelper());
@@ -337,22 +323,6 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
         this.summoner = summoner;
     }
 
-    /**
-     * This returns an instance of {@link RedisBungeeAPI}
-     *
-     * @return the {@link AbstractRedisBungeeAPI} object instance.
-     * @deprecated Please use {@link RedisBungeeAPI#getRedisBungeeApi()} this class intended to for old plugins that no longer updated.
-     */
-    @Deprecated
-    public static RedisBungeeAPI getApi() {
-        return apiStatic;
-    }
-
-    @Deprecated
-    public JedisPool getPool() {
-        return api.getJedisPool();
-    }
-
     @Override
     public void onLangConfigLoad(LangConfiguration langConfiguration) {
         this.langConfiguration = langConfiguration;
@@ -361,5 +331,10 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
     @Override
     public String platformId() {
         return "bungeecord";
+    }
+
+    @Override
+    public void kickPlayer(UUID player, Component message) {
+        this.playerDataManager.kickPlayer(player, message);
     }
 }

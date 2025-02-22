@@ -139,14 +139,19 @@ public abstract class PlayerDataManager<P> {
     }
 
     // must check if player is on the local proxy
-    protected abstract boolean handleSerializedKick(UUID player, String serializedMessage);
+    // https://docs.advntr.dev/minimessage/index.html
+    // implemented downstream in Velocity and Bungeecord
+    protected abstract boolean handleSerializedKick(UUID player, String serializedMiniMessage);
 
-    public void serializedPlayerKick(UUID player, String serializedMessage) {
+    // https://docs.advntr.dev/minimessage/index.html
+    // implemented downstream in Velocity and Bungeecord
+    // called by kickPlayer in each impl of this class `NOT OVERRIDE`
+    public void serializedPlayerKick(UUID player, String serializedMiniMessage) {
         JSONObject data = new JSONObject();
         data.put("proxy", this.proxyId);
         data.put("uuid", player);
-        data.put("serialized-message", serializedMessage);
-        if (!handleSerializedKick(player, serializedMessage))
+        data.put("serialized-message", serializedMiniMessage);
+        if (!handleSerializedKick(player, serializedMiniMessage))
             plugin.proxyDataManager().sendChannelMessage("redisbungee-player-kick", data.toString());
     }
 

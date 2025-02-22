@@ -24,6 +24,7 @@ import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.event.player.ServerConnectedEvent;
 import com.velocitypowered.api.proxy.Player;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 
 import java.util.UUID;
@@ -70,34 +71,25 @@ public class VelocityPlayerDataManager extends PlayerDataManager<Player> {
         super.playerChangedServer(event.getPlayer().getUniqueId(), oldServer, currentServer);
     }
 
-    private final GsonComponentSerializer COMPONENT_SERIALIZER = GsonComponentSerializer.gson();
-
+    private final static MiniMessage MINI_MESSAGE_SERIALIZER = MiniMessage.miniMessage();
     @Override
-    public boolean handleSerializedKick(UUID uuid, String serializedMessage) {
+    public boolean handleSerializedKick(UUID uuid, String serializedMiniMessage) {
         Player player = plugin.getPlayer(uuid);
         if (player == null) return false;
         // decode the adventure component
-        if (serializedMessage == null || serializedMessage.isEmpty()) {
+        if (serializedMiniMessage == null) {
             // kick the player too even if the message is invalid
             player.disconnect(Component.empty());
             plugin.logWarn("unable to decode serialized adventure component because its empty or null");
         }  else {
-            try {
-                Component message = COMPONENT_SERIALIZER.deserialize(serializedMessage);
+                Component message = MINI_MESSAGE_SERIALIZER.deserialize(serializedMiniMessage);
                 player.disconnect(message);
-            } catch (Exception e) {
-               plugin.logFatal("Kick message is invalid", e);
-               plugin.logFatal("The serialized kick message:");
-               plugin.logFatal(serializedMessage);
-               // kick the player too even if the message is invalid
-               player.disconnect(Component.empty());
-            }
         }
         return true;
     }
 
     public void kickPlayer(UUID player, Component message) {
-        serializedPlayerKick(player, COMPONENT_SERIALIZER.serialize(message));
+        serializedPlayerKick(player, MINI_MESSAGE_SERIALIZER.serialize(message));
     }
 
     @Subscribe
