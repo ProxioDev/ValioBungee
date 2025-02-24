@@ -21,6 +21,7 @@ import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerChangedServerNe
 import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerJoinedNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.api.events.IPlayerLeftNetworkEvent;
 import com.imaginarycode.minecraft.redisbungee.api.events.IPubSubMessageEvent;
+import com.imaginarycode.minecraft.redisbungee.api.summoners.JedisPooledSummoner;
 import com.imaginarycode.minecraft.redisbungee.api.summoners.Summoner;
 import com.imaginarycode.minecraft.redisbungee.api.util.InitialUtils;
 import com.imaginarycode.minecraft.redisbungee.api.util.uuid.UUIDTranslator;
@@ -40,6 +41,7 @@ import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import redis.clients.jedis.JedisPool;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -53,6 +55,7 @@ import java.util.logging.Level;
 
 public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlayer>, ConfigLoader, LangConfigLoader, ApiPlatformSupport {
 
+    private static RedisBungeeAPI apiStatic;
     private AbstractRedisBungeeAPI api;
     private RedisBungeeMode redisBungeeMode;
     private ProxyDataManager proxyDataManager;
@@ -230,6 +233,7 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
 
         // init the api
         this.api = new RedisBungeeAPI(this);
+        apiStatic = (RedisBungeeAPI) this.api;
 
         // commands
         CommandPlatformHelper.init(new BungeeCommandPlatformHelper());
@@ -337,4 +341,29 @@ public class RedisBungee extends Plugin implements RedisBungeePlugin<ProxiedPlay
     public void kickPlayer(UUID player, Component message) {
         this.playerDataManager.kickPlayer(player, message);
     }
+
+    /**
+     * This returns an instance of {@link RedisBungeeAPI}
+     *
+     * @return the {@link AbstractRedisBungeeAPI} object instance.
+     * @deprecated Please use {@link RedisBungeeAPI#getRedisBungeeApi()} this class intended to for old plugins that no longer updated.
+     */
+    @Deprecated
+    public static RedisBungeeAPI getApi() {
+        return apiStatic;
+    }
+
+    @Deprecated
+    public JedisPool getPool() {
+        if (api.getMode() == RedisBungeeMode.SINGLE) {
+            JedisPool jedisPool = ((JedisPooledSummoner) getSummoner()).getCompatibilityJedisPool();
+            if (jedisPool == null) {
+                throw new IllegalStateException("JedisPool compatibility mode is disabled, Please enable it in the RedisBungee config.yml");
+            }
+            return jedisPool;
+        } else {
+            throw new IllegalStateException("Mode is not " + RedisBungeeMode.SINGLE);
+        }
+    }
+
 }

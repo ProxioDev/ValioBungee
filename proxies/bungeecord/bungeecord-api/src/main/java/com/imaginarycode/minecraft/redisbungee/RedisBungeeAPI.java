@@ -19,6 +19,7 @@ import net.md_5.bungee.api.plugin.Plugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -100,6 +101,54 @@ public class RedisBungeeAPI extends AbstractRedisBungeeAPI {
      */
     public void kickPlayer(UUID player, Component message) {
         ((ApiPlatformSupport) this.plugin).kickPlayer(player, message);
+    }
+
+    /**
+     * Get the current BungeeCord / Velocity proxy ID for this server.
+     *
+     * @return the current server ID
+     * @see #getAllServers()
+     * @since 0.2.5
+     * @deprecated to avoid confusion between A server and A proxy see #getProxyId()
+     */
+    @Deprecated(forRemoval = true)
+    public final String getServerId() {
+        return getProxyId();
+    }
+
+    /**
+     * Get all the linked proxies in this network.
+     *
+     * @return the list of all proxies
+     * @see #getServerId()
+     * @since 0.2.5
+     * @deprecated to avoid confusion between A server and A proxy see see {@link #getAllProxies()}
+     */
+    @Deprecated(forRemoval = true)
+    public final List<String> getAllServers() {
+        return getAllProxies();
+    }
+
+    /**
+     * Register (a) PubSub channel(s), so that you may handle PubSubMessageEvent for it.
+     *
+     * @param channels the channels to register
+     * @since 0.3
+     * @deprecated No longer required
+     */
+    @Deprecated(forRemoval = true)
+    public final void registerPubSubChannels(String... channels) {
+    }
+
+    /**
+     * Unregister (a) PubSub channel(s).
+     *
+     * @param channels the channels to unregister
+     * @since 0.3
+     * @deprecated No longer required
+     */
+    @Deprecated(forRemoval = true)
+    public final void unregisterPubSubChannels(String... channels) {
     }
 
     /**
