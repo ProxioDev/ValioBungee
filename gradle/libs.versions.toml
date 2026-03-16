@@ -1,18 +1,19 @@
 [versions]
-guava = "31.1-jre"
+guava = "33.5.0-jre"
 jedis = "5.2.0"
 okhttp = "4.12.0"
 configurateV3 = "3.7.3"
-caffeine = "3.1.8"
-adventure = "4.19.0"
-adventure-bungeecord-platform = "4.3.4"
+caffeine = "3.2.3"
+adventure = "4.26.1"
+adventure-bungeecord-platform = "4.4.1"
 acf = "e2005dd62d"
-bungeecordApi = "1.21-R0.1-SNAPSHOT"
-velocity = "3.4.0-SNAPSHOT"
+bungeecordApi = "1.21-R0.4-SNAPSHOT"
+velocity = "3.5.0-SNAPSHOT"
 
 [plugins]
-blossom = { id = "net.kyori.blossom", version = "1.2.0" }
-shadow = { id = "com.gradleup.shadow", version = "8.3.5" }
+blossom = { id = "net.kyori.blossom", version = "2.2.0" }
+indragit = {id = "net.kyori.indra.git", version="4.0.0"}
+shadow = { id = "com.gradleup.shadow", version = "9.3.1" }
 run-velocity = { id = "xyz.jpenilla.run-velocity", version = "2.3.1" }
 
 [libraries]
