@@ -13,7 +13,6 @@ package com.imaginarycode.minecraft.redisbungee.api.config;
 import com.google.common.collect.ImmutableList;
 import com.google.common.net.InetAddresses;
 
-import javax.annotation.Nullable;
 import java.net.InetAddress;
 import java.util.List;
 
@@ -71,7 +70,7 @@ public class RedisBungeeConfiguration {
     }
 
     public record CommandsConfiguration(boolean redisbungeeEnabled, boolean redisbungeeLegacyEnabled,
-                                        @Nullable LegacySubCommandsConfiguration legacySubCommandsConfiguration) {
+                                         LegacySubCommandsConfiguration legacySubCommandsConfiguration) {
 
     }
 
