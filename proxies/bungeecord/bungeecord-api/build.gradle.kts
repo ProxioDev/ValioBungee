@@ -24,7 +24,7 @@ tasks {
         options.use()
         options.isDocFilesSubDirs = true
         options.links(
-            "https://ci.md-5.net/job/BungeeCord/ws/api/target/apidocs/", // bungeecord api
+            "https://hub.spigotmc.org/jenkins/job/BungeeCord/ws/api/target/reports/apidocs", // bungeecord api
         )
         val apiDocs = File(rootProject.projectDir, "api/build/docs/javadoc")
         options.linksOffline("https://ci.limework.net/ValioBungee/api/build/docs/javadoc", apiDocs.path)
