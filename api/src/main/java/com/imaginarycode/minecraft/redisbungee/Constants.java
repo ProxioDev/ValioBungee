@@ -13,8 +13,8 @@ package com.imaginarycode.minecraft.redisbungee;
 
 public class Constants {
 
-    public final static String VERSION = "@version@";
-    public final static String GIT_COMMIT = "@git_commit@";
+    public final static String VERSION = "{{ version }}";
+    public final static String GIT_COMMIT = "{{ git-commit }}";
 
     public static String getGithubCommitLink() {
         return "https://github.com/ProxioDev/ValioBungee/commit/" + GIT_COMMIT;

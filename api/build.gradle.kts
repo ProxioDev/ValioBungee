@@ -4,6 +4,7 @@ plugins {
     `java-library`
     `maven-publish`
     alias(libs.plugins.blossom)
+    alias(libs.plugins.indragit)
 
 }
 
@@ -17,20 +18,16 @@ dependencies {
 
 description = "RedisBungee interfaces"
 
-blossom {
-    replaceToken("@version@", "$version")
-    // GIT
-    val commit: String;
-    val commitStdout = ByteArrayOutputStream()
-    rootProject.exec {
-        standardOutput = commitStdout
-        commandLine("git", "rev-parse", "HEAD")
+sourceSets {
+    main {
+        blossom {
+            javaSources {
+                property("version", "$version")
+                property("git-commit", indraGit.commit().toString())
+            }
+        }
     }
-    commit = "$commitStdout".replace("\n", "") // for some reason it adds new line so remove it.
-    commitStdout.close()
-    replaceToken("@git_commit@", commit)
 }
-
 
 java {
     withJavadocJar()
