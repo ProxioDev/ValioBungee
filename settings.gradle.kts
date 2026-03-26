@@ -7,24 +7,15 @@ pluginManagement {
 
 rootProject.name = "ValioBungee"
 
-fun configureProject(name: String, path: String) {
-    include(name)
-    project(name).projectDir = file(path)
+fun configureProject(name: String) {
+    val projectName = ":valiobungee-$name"
+    include(projectName)
+    project(projectName).projectDir = file(name)
 }
 
-configureProject(":RedisBungee-API", "api")
-configureProject(":RedisBungee-Lang", "lang")
-configureProject(":RedisBungee-Commands", "commands")
-
-configureProject(":RedisBungee-Bungee", "proxies/bungeecord/bungeecord-api")
-configureProject(":RedisBungee-Proxy-Bungee", "proxies/bungeecord")
-
-configureProject(":RedisBungee-Velocity", "proxies/velocity/velocity-api")
-configureProject(":RedisBungee-Proxy-Velocity", "proxies/velocity")
 
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-
     repositories {
         mavenCentral()
         maven("https://repo.papermc.io/repository/maven-public/")
@@ -32,3 +23,5 @@ dependencyResolutionManagement {
         maven("https://jitpack.io")
     }
 }
+
+sequenceOf("core", "api").forEach{configureProject(it)}

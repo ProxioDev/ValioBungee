@@ -1,36 +1,10 @@
 [versions]
-guava = "33.5.0-jre"
-jedis = "5.2.0"
-okhttp = "4.12.0"
-configurateV3 = "3.7.3"
-caffeine = "3.2.3"
-adventure = "4.26.1"
-adventure-bungeecord-platform = "4.4.1"
-acf = "e2005dd62d"
-bungeecordApi = "1.21-R0.5-SNAPSHOT"
-velocity = "3.5.0-SNAPSHOT"
+
 
 [plugins]
-blossom = { id = "net.kyori.blossom", version = "2.2.0" }
-indragit = {id = "net.kyori.indra.git", version="4.0.0"}
-shadow = { id = "com.gradleup.shadow", version = "9.3.1" }
-run-velocity = { id = "xyz.jpenilla.run-velocity", version = "2.3.1" }
+blossom = "net.kyori.blossom:2.2.0"
+indragit = "net.kyori.indra.git:4.0.0"
+shadow = "com.gradleup.shadow:9.3.1"
+spotless = "com.diffplug.spotless:8.2.0"
 
 [libraries]
-guava = { module = "com.google.guava:guava", version.ref = "guava" }
-jedis = { module = "redis.clients:jedis", version.ref = "jedis" }
-okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
-configurateV3 = { module = "org.spongepowered:configurate-yaml", version.ref = "configurateV3" }
-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
-
-adventure-api = { module = "net.kyori:adventure-api", version.ref = "adventure" }
-adventure-miniMessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "adventure" }
-
-acf-core = { module = "com.github.ProxioDev.commands:acf-core", version.ref = "acf" }
-acf-bungeecord = { module = "com.github.ProxioDev.commands:acf-bungee", version.ref = "acf" }
-acf-velocity = { module = "com.github.ProxioDev.commands:acf-velocity", version.ref = "acf" }
-
-platform-bungeecord = { module = "net.md-5:bungeecord-api", version.ref = "bungeecordApi" }
-adventure-platforms-bungeecord = { module = "net.kyori:adventure-platform-bungeecord", version.ref = "adventure-bungeecord-platform" }
-
-platform-velocity = { module = "com.velocitypowered:velocity-api", version.ref = "velocity" }

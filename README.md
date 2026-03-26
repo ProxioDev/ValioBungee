@@ -1,9 +1,5 @@
-# ValioBungee: The RedisBungee Limework's Fork
+# ValioBungee: The RedisBungee Limework's rewrite
 
-The original project of RedisBungee is no longer maintained, so we have forked the plugin.
-RedisBungee uses [Redis](https://redis.io) with Java client [Jedis](https://github.com/redis/jedis/)
-to Synchronize players data between [BungeeCord](https://github.com/SpigotMC/BungeeCord)
-or [Velocity*](https://github.com/PaperMC/Velocity) proxies
 ## Why different name?
 Because from our current understanding we cant use Redis name due trademark restrictions.
 so we settled with valiobungee. But it doesnt not effect any internals naming schemes like plugin id and so on.
@@ -22,9 +18,11 @@ open an issue with question button
 
 ## License
 
-This project is distributed under Eclipse Public License 1.0
+This project is distributed under GPLv3
 
-You can find it [here](https://github.com/proxiodev/RedisBungee/blob/master/LICENSE)
+With API exception as Apache License  v2
+
+With Original RedisBungee compatiblity layer as EPLv1 
 
 You can find the original RedisBungee is by [astei](https://github.com/astei) and project can be
 found [here](https://github.com/minecrafter/RedisBungee) or spigot
