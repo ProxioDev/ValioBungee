@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package net.limework.valiobungee.core.proto.messages;
+option java_multiple_files = true;
+
+message ProxyInfo {
+  string proxy_id = 1; // UNIQUE ID
+  string proxy_manager_id = 2; // ProxyManager id. changes every reboot, used to detect duplicate proxy names
+}
+
+// heartbeat ._.?
+
+message Heartbeat {
+  ProxyInfo sender = 1;
+  int32 online_players_count = 2;
+}
+
+// death
+enum DeathReason {
+  UNSPECIFIED = 0; // TESTING ONLY
+  RELOAD = 1; // plugin reload
+  SHUTDOWN = 2; // proxy shutdown
+}
+message Death {
+  ProxyInfo sender = 1; // proxy that died
+  DeathReason reason = 2;
+}
+

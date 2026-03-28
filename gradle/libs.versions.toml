@@ -1,10 +1,24 @@
 [versions]
-
+protobuf-plugin = "0.9.5"
+protobuf = "3.25.8" # needed for reference to be used for protoc
+slf4j = "2.0.17"
 
 [plugins]
 blossom = "net.kyori.blossom:2.2.0"
 indragit = "net.kyori.indra.git:4.0.0"
 shadow = "com.gradleup.shadow:9.3.1"
 spotless = "com.diffplug.spotless:8.2.0"
+protobuf = { id = "com.google.protobuf", version.ref = "protobuf-plugin" }
 
 [libraries]
+redisson = "org.redisson:redisson:4.3.0"
+protobuf = { group = "com.google.protobuf", name = "protobuf-java", version.ref = "protobuf" }
+protoc = { group = "com.google.protobuf", name = "protoc", version.ref = "protobuf" }
+caffeine = "com.github.ben-manes.caffeine:caffeine:3.2.3"
+
+# logging
+slf4j = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
+# testing
+testing-juipter = "org.junit.jupiter:junit-jupiter:6.0.3"
+testing-slf4j-simple = { group = "org.slf4j", name = "slf4j-simple", version.ref = "slf4j" }
+

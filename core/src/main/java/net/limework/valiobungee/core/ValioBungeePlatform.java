@@ -1,0 +1,21 @@
+/*
+* Copyright (c) 2026-present ValioBungee contributors
+* All rights reserved. This program and the accompanying materials
+* are made available under the terms of the GNU GENERAL PUBLIC LICENSE Version 3
+* which accompanies this distribution, and is available at
+* https://www.gnu.org/licenses/gpl-3.0.txt
+*/
+package net.limework.valiobungee.core;
+
+public interface ValioBungeePlatform {
+
+  int localOnlinePlayers();
+
+  String platformProxyVendor();
+
+  String networkId();
+
+  String proxyId();
+
+  ProxyManager proxyManager();
+}

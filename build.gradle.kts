@@ -6,7 +6,7 @@ plugins {
 
 subprojects {
     apply { plugin("com.diffplug.spotless") }
-    apply { plugin("java-library")}
+    apply { plugin("java-library") }
 
     java {
         toolchain {
@@ -32,6 +32,9 @@ subprojects {
                 licenseHeaderFile(file("copyright_header.txt"))
             } else {
                 licenseHeaderFile(rootProject.file("copyright_header.txt"))
+            }
+            if (project.name == "valiobungee-core") {
+                targetExclude("**/net/limework/valiobungee/core/proto/**")
             }
         }
     }
