@@ -9,10 +9,12 @@ rootProject.name = "ValioBungee"
 
 fun configureProject(name: String) {
     val projectName = ":valiobungee-$name"
-    include(projectName)
-    project(projectName).projectDir = file(name)
+    configureProject(projectName,name)
 }
-
+fun configureProject(name: String, path: String) {
+    include(name)
+    project(name).projectDir = file(path)
+}
 
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
@@ -24,4 +26,15 @@ dependencyResolutionManagement {
     }
 }
 
+// main project stuff
 sequenceOf("core", "api").forEach{configureProject(it)}
+// RedisBunggee Project
+// configureProject(":RedisBungee-API", "redisbungee/api")
+// configureProject(":RedisBungee-Lang", "redisbungee/lang")
+// configureProject(":RedisBungee-Commands", "redisbungee/commands")
+
+// configureProject(":RedisBungee-Bungee", "redisbungee/proxies/bungeecord/bungeecord-api")
+// configureProject(":RedisBungee-Proxy-Bungee", "redisbungee/proxies/bungeecord")
+
+// configureProject(":RedisBungee-Velocity", "redisbungee/proxies/velocity/velocity-api")
+// configureProject(":RedisBungee-Proxy-Velocity", "redisbungee/proxies/velocity")
