@@ -33,12 +33,12 @@ import org.slf4j.Logger;
  * locally Why abstract? Because it allows us to develop alternative implementation to use other
  * software than valkey or redis
  */
-public abstract class ProxyManager {
+public abstract class ProxyNetworkManager {
 
   protected final UUID proxyManagerId = UUID.randomUUID();
   protected final ValioBungeePlatform platform;
 
-  public ProxyManager(ValioBungeePlatform platform) {
+  public ProxyNetworkManager(ValioBungeePlatform platform) {
     this.platform = platform;
   }
 

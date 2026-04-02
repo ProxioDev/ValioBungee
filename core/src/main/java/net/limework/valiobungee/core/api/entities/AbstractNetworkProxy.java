@@ -39,8 +39,8 @@ public abstract class AbstractNetworkProxy implements NetworkProxy {
   }
 
   @Override
-  public int onlinePlayersCount() {
-    return this.platform.proxyManager().onlinePlayersCount(this.proxyId);
+  public int onlinePlayerCount() {
+    return this.platform.proxyNetworkManager().onlinePlayersCount(this.proxyId);
   }
 
   @Override

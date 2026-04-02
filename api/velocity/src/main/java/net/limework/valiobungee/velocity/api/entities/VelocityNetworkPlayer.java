@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.limework.valiobungee.velocity.api;
+package net.limework.valiobungee.velocity.api.entities;
 
-import net.limework.valiobungee.api.ValioBungeeAPI;
+import net.limework.valiobungee.api.entity.NetworkPlayer;
 
 /**
- * Valiobungee velocity specific API
+ * Velocity Network player.
  *
  * @author Ham1255
  * @since 1.0.0
  */
-public interface VelocityValioBungeeAPI extends ValioBungeeAPI {}
+public interface VelocityNetworkPlayer extends NetworkPlayer {}

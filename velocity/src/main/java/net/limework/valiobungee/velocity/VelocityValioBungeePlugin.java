@@ -21,30 +21,100 @@ package net.limework.valiobungee.velocity;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
+import java.nio.file.Path;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import net.limework.valiobungee.api.entity.NetworkPlayer;
+import net.limework.valiobungee.api.entity.NetworkProxy;
 import net.limework.valiobungee.core.ConstantVariables;
+import net.limework.valiobungee.core.ProxyNetworkManager;
 import net.limework.valiobungee.core.ValioBungeePlatform;
+import net.limework.valiobungee.core.util.logging.LogProviderFactory;
+import net.limework.valiobungee.velocity.api.entities.ImplVelocityNetworkProxy;
 import org.slf4j.Logger;
 
-import java.nio.file.Path;
-
 @Plugin(
-        id = "valiobungee",
-        name = "valiobungee",
-        version = ConstantVariables.VERSION,
-        url = "https://github.com/ProxioDev/ValioBungee",
-        authors = {"limework", "ProxioDev"})
+    id = "valiobungee",
+    name = "valiobungee",
+    version = ConstantVariables.VERSION,
+    url = "https://github.com/ProxioDev/ValioBungee",
+    authors = {"limework", "ProxioDev"})
 public class VelocityValioBungeePlugin implements ValioBungeePlatform {
 
-    private final ProxyServer server;
-    private final Logger logger;
-    private final Path dataFolder;
+  private final ProxyServer server;
+  private final Logger logger;
+  private final Path dataFolder;
+  private final ProxyNetworkManager proxyNetworkManager;
 
-    public VelocityValioBungeePlugin( ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
-        this.server = server;
-        this.logger = logger;
-        this.dataFolder = dataDirectory;
-    }
+  public VelocityValioBungeePlugin(
+      ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
+    this.server = server;
+    this.logger = logger;
+    this.dataFolder = dataDirectory;
+    // init logging
+    LogProviderFactory.register(logger);
+    this.proxyNetworkManager = null;
+  }
 
+  @Override
+  public int localOnlinePlayers() {
+    return this.server.getPlayerCount();
+  }
 
+  @Override
+  public String platformProxyVendor() {
+    return "velocity";
+  }
 
+  @Override
+  public ProxyNetworkManager proxyNetworkManager() {
+    return this.proxyNetworkManager;
+  }
+
+  @Override
+  public String proxyId() {
+    return "test-ido";
+  }
+
+  @Override
+  public String networkId() {
+    return "development";
+  }
+
+  @Override
+  public Optional<NetworkPlayer> getNetworkPlayer(UUID uuid) {
+    logger.warn("not implemented api call returned as Optional empty");
+    return Optional.empty();
+  }
+
+  @Override
+  public Optional<NetworkProxy> getNetworkProxy(String id) {
+    if (this.proxyId().equals(id)) return Optional.of(getLocalProxy());
+    logger.warn("not implemented api call returned as Optional empty");
+    return Optional.empty();
+  }
+
+  @Override
+  public NetworkProxy getLocalProxy() {
+    return new ImplVelocityNetworkProxy(this, proxyId());
+  }
+
+  @Override
+  public Set<NetworkProxy> getNetworkProxies() {
+    logger.warn("not implemented api call returned as Optional empty");
+    return Set.of();
+  }
+
+  @Override
+  public Set<NetworkPlayer> getLocalProxyPlayers() {
+    logger.warn("not implemented api call returned as Optional empty");
+    return Set.of();
+  }
+
+  @Override
+  public Set<NetworkPlayer> getNetworkPlayers() {
+    logger.warn("not implemented api call returned as Optional empty");
+    return Set.of();
+  }
 }

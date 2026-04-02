@@ -13,26 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.limework.valiobungee.api;
+package net.limework.valiobungee.velocity.api.entities;
+
+import net.limework.valiobungee.api.entity.NetworkProxy;
 
 /**
- * this class provides the API object and access to the version and git commit
+ * Proxy is an object for online proxy in a velocity network
  *
+ * @author Ham1255
  * @since 1.0.0
  */
-public interface ValioBungeeAPIProvider {
-  /**
-   * @return The api object {@link ValioBungeeAPI}
-   */
-  ValioBungeeAPI getAPI();
-
-  /**
-   * @return version of the build
-   */
-  String getVersion();
-
-  /**
-   * @return GIT COMMIT based on the build
-   */
-  String getGitCommit();
-}
+public interface VelocityNetworkProxy extends NetworkProxy {}

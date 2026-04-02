@@ -16,8 +16,15 @@
  * You should have received a copy of the GNU General Public License
  * along with ValioBungee. If not, see <https://www.gnu.org/licenses/gpl-3.0.txt>.
  */
-package net.limework.valiobungee.core.api;
+package net.limework.valiobungee.velocity.api.entities;
 
-import net.limework.valiobungee.api.ValioBungeeAPI;
+import java.util.UUID;
+import net.limework.valiobungee.api.entity.NetworkProxy;
+import net.limework.valiobungee.core.ValioBungeePlatform;
+import net.limework.valiobungee.core.api.entities.AbstractNetworkPlayer;
 
-public class AbstractValioBungeeAPI implements ValioBungeeAPI {}
+public class ImplVelocityNetworkPlayer extends AbstractNetworkPlayer {
+  public ImplVelocityNetworkPlayer(ValioBungeePlatform platform, UUID uuid, NetworkProxy proxy) {
+    super(platform, uuid, proxy);
+  }
+}

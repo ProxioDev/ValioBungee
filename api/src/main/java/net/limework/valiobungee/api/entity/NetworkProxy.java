@@ -32,12 +32,12 @@ public interface NetworkProxy {
   /**
    * @return online players number in this proxy
    */
-  int onlinePlayersCount();
+  int onlinePlayerCount();
 
   /**
    * @return Returns set of players in this proxy
    */
-  Set<NetworkPlayer> networkPlayers();
+  Set<NetworkPlayer> getProxyPlayers();
 
   /**
    * @return returns true if this object is proxy on it
