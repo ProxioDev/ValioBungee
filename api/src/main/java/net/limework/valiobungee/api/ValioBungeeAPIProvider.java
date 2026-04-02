@@ -15,4 +15,24 @@
  */
 package net.limework.valiobungee.api;
 
-public interface NetworkPlayer {}
+/**
+ * this class provides the API object and access to the version and git commit
+ *
+ * @since 1.0.0
+ */
+public interface ValioBungeeAPIProvider {
+  /**
+   * @return The api object {@link ValioBungeeAPI}
+   */
+  ValioBungeeAPI getAPI();
+
+  /**
+   * @return version of the build
+   */
+  String getVersion();
+
+  /**
+   * @return GIT COMMIT based on the build
+   */
+  String getGitCommit();
+}

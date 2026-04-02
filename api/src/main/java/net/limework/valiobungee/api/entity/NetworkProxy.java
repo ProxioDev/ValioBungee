@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.limework.valiobungee.api;
+package net.limework.valiobungee.api.entity;
+
+import java.util.Set;
 
 /**
  * Proxy is an object for online proxy in a network
@@ -30,7 +32,12 @@ public interface NetworkProxy {
   /**
    * @return online players number in this proxy
    */
-  int onlinePlayers();
+  int onlinePlayersCount();
+
+  /**
+   * @return Returns set of players in this proxy
+   */
+  Set<NetworkPlayer> networkPlayers();
 
   /**
    * @return returns true if this object is proxy on it

@@ -16,30 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with ValioBungee. If not, see <https://www.gnu.org/licenses/gpl-3.0.txt>.
  */
-package net.limework.valiobungee.core;
+package net.limework.valiobungee.core.api;
 
-import net.limework.valiobungee.api.ValioBungeeAPIProvider;
-import net.limework.valiobungee.core.api.entities.NetworkEntitiesProvider;
+import net.limework.valiobungee.api.ValioBungeeAPI;
 
-public interface ValioBungeePlatform extends NetworkEntitiesProvider, ValioBungeeAPIProvider {
-
-  int localOnlinePlayers();
-
-  String platformProxyVendor();
-
-  String networkId();
-
-  String proxyId();
-
-  ProxyManager proxyManager();
-
-  @Override
-  default String getGitCommit() {
-    return ConstantVariables.GIT_COMMIT;
-  }
-
-  @Override
-  default String getVersion() {
-    return ConstantVariables.VERSION;
-  }
-}
+public class AbstractValioBungeeAPI implements ValioBungeeAPI {}

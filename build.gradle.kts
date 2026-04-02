@@ -26,11 +26,13 @@ subprojects {
     }
     extensions.configure<com.diffplug.gradle.spotless.SpotlessExtension> {
         var redisBungeeProjects = sequenceOf("RedisBungee-API", "RedisBungee-Lang", "RedisBungee-Commands", "RedisBungee-Bungee", "RedisBungee-Proxy-Bungee", "RedisBungee-Velocity", "RedisBungee-Proxy-Velocity")
+        var apiProjects = sequenceOf("valiobungee-api", "valiobungee-velocity-api")
+
         java {
             removeUnusedImports()
             googleJavaFormat()
-            if (project.name == "valiobungee-api") {
-                licenseHeaderFile(file("copyright_header.txt"))
+            if (apiProjects.contains(project.name)) {
+                licenseHeaderFile(rootProject.file("api/copyright_header.txt"))
             } else if (redisBungeeProjects.contains(project.name)) {
                 licenseHeaderFile(rootProject.file("redisbungee/copyright_header.txt"))
             } else {

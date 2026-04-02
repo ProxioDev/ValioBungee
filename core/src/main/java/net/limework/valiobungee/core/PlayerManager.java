@@ -18,28 +18,4 @@
  */
 package net.limework.valiobungee.core;
 
-import net.limework.valiobungee.api.ValioBungeeAPIProvider;
-import net.limework.valiobungee.core.api.entities.NetworkEntitiesProvider;
-
-public interface ValioBungeePlatform extends NetworkEntitiesProvider, ValioBungeeAPIProvider {
-
-  int localOnlinePlayers();
-
-  String platformProxyVendor();
-
-  String networkId();
-
-  String proxyId();
-
-  ProxyManager proxyManager();
-
-  @Override
-  default String getGitCommit() {
-    return ConstantVariables.GIT_COMMIT;
-  }
-
-  @Override
-  default String getVersion() {
-    return ConstantVariables.VERSION;
-  }
-}
+public abstract class PlayerManager {}

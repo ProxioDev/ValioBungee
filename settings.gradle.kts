@@ -1,4 +1,5 @@
 @file:Suppress("UnstableApiUsage")
+
 pluginManagement {
     repositories {
         gradlePluginPortal()
@@ -9,8 +10,14 @@ rootProject.name = "ValioBungee"
 
 fun configureProject(name: String) {
     val projectName = ":valiobungee-$name"
-    configureProject(projectName,name)
+    configureProject(projectName, name)
 }
+
+fun configureAPIProject(name: String) {
+    val projectName = ":valiobungee-$name-api"
+    configureProject(projectName, "api/$name")
+}
+
 fun configureProject(name: String, path: String) {
     include(name)
     project(name).projectDir = file(path)
@@ -27,7 +34,10 @@ dependencyResolutionManagement {
 }
 
 // main project stuff
-sequenceOf("core", "api").forEach{configureProject(it)}
+sequenceOf("api", "core", "velocity").forEach { configureProject(it) }
+// api
+sequenceOf("velocity").forEach { configureAPIProject(it) }
+
 // RedisBunggee Project
 // configureProject(":RedisBungee-API", "redisbungee/api")
 // configureProject(":RedisBungee-Lang", "redisbungee/lang")

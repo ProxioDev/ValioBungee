@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.limework.valiobungee.api;
+package net.limework.valiobungee.velocity.api;
 
-public class APIConstantVariables {
+import net.limework.valiobungee.api.ValioBungeeAPI;
 
-  public static final String API_VERSION = "{{ apiversion }}";
-}
+public interface VelocityValioBungeeAPI extends ValioBungeeAPI {}

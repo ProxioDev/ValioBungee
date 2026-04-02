@@ -16,34 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with ValioBungee. If not, see <https://www.gnu.org/licenses/gpl-3.0.txt>.
  */
-package net.limework.valiobungee.core.api.impl;
+package net.limework.valiobungee.core.api.entities;
 
-import net.limework.valiobungee.api.NetworkProxy;
-import net.limework.valiobungee.core.ValioBungeePlatform;
+import java.util.UUID;
+import net.limework.valiobungee.api.entity.NetworkPlayer;
+import net.limework.valiobungee.api.entity.NetworkProxy;
 
-public class ImplNetworkProxy implements NetworkProxy {
+public interface NetworkEntitiesProvider {
 
-  private final ValioBungeePlatform platform;
+  NetworkPlayer getNetworkPlayer(UUID uuid);
 
-  private final String proxyId;
+  NetworkProxy getNetworkProxy(String id);
 
-  public ImplNetworkProxy(ValioBungeePlatform platform, String proxyId) {
-    this.platform = platform;
-    this.proxyId = proxyId;
-  }
-
-  @Override
-  public String proxyId() {
-    return this.proxyId;
-  }
-
-  @Override
-  public int onlinePlayers() {
-    return this.platform.proxyManager().onlinePlayersCount(this.proxyId);
-  }
-
-  @Override
-  public boolean isMe() {
-    return this.platform.proxyId().equals(proxyId);
-  }
+  NetworkProxy getSelfProxy();
 }
