@@ -18,6 +18,10 @@
  */
 package net.limework.valiobungee.velocity;
 
+import com.google.inject.Inject;
+import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
+import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -25,12 +29,16 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 import net.limework.valiobungee.api.entity.NetworkPlayer;
 import net.limework.valiobungee.api.entity.NetworkProxy;
 import net.limework.valiobungee.core.ConstantVariables;
 import net.limework.valiobungee.core.ProxyNetworkManager;
 import net.limework.valiobungee.core.ValioBungeePlatform;
 import net.limework.valiobungee.core.util.logging.LogProviderFactory;
+import net.limework.valiobungee.velocity.api.TestProxyNetworkManager;
+import net.limework.valiobungee.velocity.api.entities.ImplVelocityNetworkPlayer;
 import net.limework.valiobungee.velocity.api.entities.ImplVelocityNetworkProxy;
 import org.slf4j.Logger;
 
@@ -47,6 +55,7 @@ public class VelocityValioBungeePlugin implements ValioBungeePlatform {
   private final Path dataFolder;
   private final ProxyNetworkManager proxyNetworkManager;
 
+  @Inject
   public VelocityValioBungeePlugin(
       ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
     this.server = server;
@@ -54,8 +63,19 @@ public class VelocityValioBungeePlugin implements ValioBungeePlatform {
     this.dataFolder = dataDirectory;
     // init logging
     LogProviderFactory.register(logger);
-    this.proxyNetworkManager = null;
+    this.proxyNetworkManager = new TestProxyNetworkManager(this);
   }
+
+  @Subscribe(priority = Short.MAX_VALUE) // this really important so MAKE IT MAX
+  public void onProxyInitializeEvent(ProxyInitializeEvent event) {
+    logger.info(
+        "initializing ValioBungee for {} platform, version {}",
+        platformProxyVendor(),
+        ConstantVariables.VERSION);
+  }
+
+  @Subscribe(priority = Short.MIN_VALUE) // this really import so Make it AT LOWEST
+  public void onProxyShutdownEvent(ProxyShutdownEvent event) {}
 
   @Override
   public int localOnlinePlayers() {
@@ -73,8 +93,15 @@ public class VelocityValioBungeePlugin implements ValioBungeePlatform {
   }
 
   @Override
+  public NetworkProxy proxyPlatformCreator(String id) {
+    return new ImplVelocityNetworkProxy(this, id);
+  }
+
+  private final String id = "test-ido-" + ThreadLocalRandom.current().nextInt(10);
+
+  @Override
   public String proxyId() {
-    return "test-ido";
+    return id;
   }
 
   @Override
@@ -90,9 +117,7 @@ public class VelocityValioBungeePlugin implements ValioBungeePlatform {
 
   @Override
   public Optional<NetworkProxy> getNetworkProxy(String id) {
-    if (this.proxyId().equals(id)) return Optional.of(getLocalProxy());
-    logger.warn("not implemented api call returned as Optional empty");
-    return Optional.empty();
+    return this.proxyNetworkManager.getNetworkProxy(id);
   }
 
   @Override
@@ -102,14 +127,15 @@ public class VelocityValioBungeePlugin implements ValioBungeePlatform {
 
   @Override
   public Set<NetworkProxy> getNetworkProxies() {
-    logger.warn("not implemented api call returned as Optional empty");
-    return Set.of();
+    return proxyNetworkManager.getNetworkProxies();
   }
 
   @Override
   public Set<NetworkPlayer> getLocalProxyPlayers() {
-    logger.warn("not implemented api call returned as Optional empty");
-    return Set.of();
+    NetworkProxy proxy = getLocalProxy();
+    return this.server.getAllPlayers().stream()
+        .map(p -> new ImplVelocityNetworkPlayer(this, p.getUniqueId(), getLocalProxy(), p))
+        .collect(Collectors.toSet());
   }
 
   @Override

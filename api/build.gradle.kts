@@ -1,10 +1,8 @@
-description = "Api functions for valiobungee"
-
-
-java {
-    withJavadocJar()
-    withSourcesJar()
+plugins {
+    `maven-publish`
 }
+
+description = "Api functions for valiobungee"
 
 dependencies {
     testImplementation(libs.testing.juipter)
@@ -12,5 +10,14 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+        }
+    }
 }
 

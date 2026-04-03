@@ -8,14 +8,19 @@ pluginManagement {
 
 rootProject.name = "ValioBungee"
 
-fun configureProject(name: String) {
+fun configureRootProjects(name: String) {
     val projectName = ":valiobungee-$name"
     configureProject(projectName, name)
 }
 
-fun configureAPIProject(name: String) {
+fun configureAPISubProject(name: String) {
     val projectName = ":valiobungee-$name-api"
     configureProject(projectName, "api/$name")
+}
+
+fun configureCoreSubProject(name: String) {
+    val projectName = ":valiobungee-core-$name"
+    configureProject(projectName, "core/$name")
 }
 
 fun configureProject(name: String, path: String) {
@@ -34,9 +39,11 @@ dependencyResolutionManagement {
 }
 
 // main project stuff
-sequenceOf("api", "core", "velocity").forEach { configureProject(it) }
+sequenceOf("api", "core", "velocity").forEach { configureRootProjects(it) }
+// core data implementations
+sequenceOf("redisson").forEach { configureCoreSubProject(it) }
 // api
-sequenceOf("velocity").forEach { configureAPIProject(it) }
+sequenceOf("velocity").forEach { configureAPISubProject(it) }
 
 // RedisBunggee Project
 // configureProject(":RedisBungee-API", "redisbungee/api")

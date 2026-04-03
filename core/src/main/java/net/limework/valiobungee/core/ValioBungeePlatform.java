@@ -19,6 +19,7 @@
 package net.limework.valiobungee.core;
 
 import net.limework.valiobungee.api.ValioBungeeAPI;
+import net.limework.valiobungee.api.entity.NetworkProxy;
 
 public interface ValioBungeePlatform extends ValioBungeeAPI {
 
@@ -31,6 +32,8 @@ public interface ValioBungeePlatform extends ValioBungeeAPI {
   String proxyId();
 
   ProxyNetworkManager proxyNetworkManager();
+
+  NetworkProxy proxyPlatformCreator(String id);
 
   @Override
   default String getGitCommit() {

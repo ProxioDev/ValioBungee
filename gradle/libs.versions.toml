@@ -19,7 +19,7 @@ indragit = "net.kyori.indra.git:4.0.0"
 shadow = "com.gradleup.shadow:9.3.1"
 spotless = "com.diffplug.spotless:8.2.0"
 protobuf = { id = "com.google.protobuf", version.ref = "protobuf-plugin" }
-run-velocity = { id = "xyz.jpenilla.run-velocity", version = "2.3.1" }
+run-velocity = { id = "xyz.jpenilla.run-velocity", version = "3.0.2" }
 
 [libraries]
 # protobuf

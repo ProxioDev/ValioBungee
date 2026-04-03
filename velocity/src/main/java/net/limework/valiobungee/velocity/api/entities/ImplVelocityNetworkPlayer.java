@@ -18,13 +18,40 @@
  */
 package net.limework.valiobungee.velocity.api.entities;
 
+import com.velocitypowered.api.proxy.Player;
+import java.util.Optional;
 import java.util.UUID;
 import net.limework.valiobungee.api.entity.NetworkProxy;
 import net.limework.valiobungee.core.ValioBungeePlatform;
-import net.limework.valiobungee.core.api.entities.AbstractNetworkPlayer;
+import net.limework.valiobungee.core.api.entities.AbstractUUIDNetworkPlayer;
+import net.limework.valiobungee.core.util.logging.LogProviderFactory;
 
-public class ImplVelocityNetworkPlayer extends AbstractNetworkPlayer {
-  public ImplVelocityNetworkPlayer(ValioBungeePlatform platform, UUID uuid, NetworkProxy proxy) {
+public class ImplVelocityNetworkPlayer extends AbstractUUIDNetworkPlayer
+    implements VelocityNetworkPlayer {
+  private final Player handle;
+
+  public ImplVelocityNetworkPlayer(
+      ValioBungeePlatform platform, UUID uuid, NetworkProxy proxy, Player handle) {
     super(platform, uuid, proxy);
+    this.handle = handle;
+  }
+
+  @Override
+  public Optional<Player> getHandle() {
+    return Optional.ofNullable(handle);
+  }
+
+  @Override
+  public boolean isLocal() {
+    return handle != null;
+  }
+
+  @Override
+  public boolean isOnline() {
+    if (isLocal()) {
+      return handle.isActive();
+    }
+    LogProviderFactory.get().warn("NOT IMPLEMENTED IS ONLINE for Velocity network player");
+    return false;
   }
 }

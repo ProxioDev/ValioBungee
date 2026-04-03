@@ -13,23 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.limework.valiobungee.velocity.api.entities;
+package net.limework.valiobungee.api.entity;
 
-import com.velocitypowered.api.proxy.Player;
-import java.util.Optional;
-import net.limework.valiobungee.api.entity.NetworkPlayer;
-import net.limework.valiobungee.api.entity.UUIDPlayer;
+import java.util.UUID;
 
 /**
- * Velocity Network player. hold specific stuff for velocity platform
+ * Network player. that uses UUID as an ID
  *
  * @author Ham1255
  * @since 1.0.0
  */
-public interface VelocityNetworkPlayer extends NetworkPlayer, UUIDPlayer {
-
+public interface UUIDPlayer {
   /**
-   * @return an optional that contains a player if he is on the same proxy
+   * @return player unique id
    */
-  Optional<Player> getHandle();
+  UUID getUniqueId();
 }

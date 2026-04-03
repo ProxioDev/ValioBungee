@@ -14,22 +14,9 @@ dependencies {
 
 description = "ValioBungee Velocity implementation"
 
-java {
-    withSourcesJar()
-}
-
 tasks {
     runVelocity {
         velocityVersion(libs.versions.velocity.get())
     }
-    compileJava {
-        options.encoding = Charsets.UTF_8.name()
-        options.release.set(21) // required by velocity
-    }
-    processResources {
-        filteringCharset = Charsets.UTF_8.name()
-    }
-
-
 }
 

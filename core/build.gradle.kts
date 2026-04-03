@@ -17,17 +17,13 @@ sourceSets {
     }
 }
 
-java {
-    withJavadocJar()
-    withSourcesJar()
-}
+
 
 dependencies {
     api(project(":valiobungee-api"))
     api(libs.protobuf)
     api(libs.caffeine)
     api(libs.slf4j)
-    api(libs.redisson)
     testImplementation(libs.testing.juipter)
     testImplementation(libs.testing.slf4j.simple)
 }

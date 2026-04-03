@@ -23,7 +23,12 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.RemovalCause;
 import com.github.benmanes.caffeine.cache.RemovalListener;
 import java.time.Duration;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import net.limework.valiobungee.api.entity.NetworkProxy;
 import net.limework.valiobungee.core.proto.messages.*;
 import net.limework.valiobungee.core.util.logging.LogProviderFactory;
 import org.slf4j.Logger;
@@ -102,6 +107,22 @@ public abstract class ProxyNetworkManager {
         .setSender(createProxyInfo())
         .setOnlinePlayersCount(platform.localOnlinePlayers())
         .build();
+  }
+
+  // return self only if no other proxies
+  public Set<NetworkProxy> getNetworkProxies() {
+    return Stream.concat(
+            this.heartbeats.asMap().values().stream()
+                .map(h -> platform.proxyPlatformCreator(h.getSender().getProxyId())),
+            Stream.of(platform.getLocalProxy()))
+        .collect(Collectors.toSet());
+  }
+
+  public Optional<NetworkProxy> getNetworkProxy(String id) {
+    if (platform.networkId().equals(id)) return Optional.of(platform.proxyPlatformCreator(id));
+    if (!this.heartbeats.asMap().containsKey(id)) return Optional.empty();
+    return Optional.of(
+        platform.proxyPlatformCreator(this.heartbeats.asMap().get(id).getSender().getProxyId()));
   }
 
   protected abstract void publishDeathPayload();

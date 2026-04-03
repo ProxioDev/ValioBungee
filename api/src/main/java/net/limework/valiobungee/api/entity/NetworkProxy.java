@@ -40,7 +40,7 @@ public interface NetworkProxy {
   Set<NetworkPlayer> getProxyPlayers();
 
   /**
-   * @return returns true if this object is proxy on it
+   * @return returns true if this NetworkProxy is the same proxy
    */
   boolean isMe();
 }

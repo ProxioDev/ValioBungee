@@ -15,8 +15,6 @@
  */
 package net.limework.valiobungee.api.entity;
 
-import java.util.UUID;
-
 /**
  * Network player.
  *
@@ -25,12 +23,17 @@ import java.util.UUID;
  */
 public interface NetworkPlayer {
   /**
-   * @return player unique id
-   */
-  UUID getUUID();
-
-  /**
    * @return proxy player on
    */
   NetworkProxy getProxy();
+
+  /**
+   * @return true when player is on the same proxy
+   */
+  boolean isLocal();
+
+  /**
+   * @return true when a player is online on the network
+   */
+  boolean isOnline();
 }
