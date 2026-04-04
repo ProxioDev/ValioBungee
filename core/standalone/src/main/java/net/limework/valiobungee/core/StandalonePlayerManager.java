@@ -16,25 +16,42 @@
  * You should have received a copy of the GNU General Public License
  * along with ValioBungee. If not, see <https://www.gnu.org/licenses/gpl-3.0.txt>.
  */
-package net.limework.valiobungee.velocity.api;
+package net.limework.valiobungee.core;
 
-import net.limework.valiobungee.core.ProxyNetworkManager;
-import net.limework.valiobungee.core.ValioBungeePlatform;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import net.limework.valiobungee.api.entity.NetworkPlayer;
 
-public class TestProxyNetworkManager extends ProxyNetworkManager {
-  public TestProxyNetworkManager(ValioBungeePlatform platform) {
+public class StandalonePlayerManager extends PlayerManager {
+
+  public StandalonePlayerManager(ValioBungeePlatform platform) {
     super(platform);
   }
 
   @Override
-  protected void publishDeathPayload() {}
+  public Optional<NetworkPlayer> getNetworkPlayer(UUID uuid) {
+    return platform.getLocalProxyPlayers().stream()
+        .filter(p -> p.getUniqueId().equals(uuid))
+        .findFirst();
+  }
 
   @Override
-  protected void publishHeartbeatPayload() {}
+  public Set<NetworkPlayer> getNetworkPlayers() {
+    return platform.getLocalProxyPlayers();
+  }
 
   @Override
-  public void init() {}
+  public boolean isOnline(UUID uuid) {
+    return false;
+  }
 
   @Override
-  public void close() {}
+  public void handleJoin(UUID uuid) {}
+
+  @Override
+  public void handleQuit(UUID uuid) {}
+
+  @Override
+  public void correctionTask() {}
 }

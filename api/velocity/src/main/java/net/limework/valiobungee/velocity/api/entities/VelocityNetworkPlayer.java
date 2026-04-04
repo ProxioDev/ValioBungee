@@ -18,7 +18,6 @@ package net.limework.valiobungee.velocity.api.entities;
 import com.velocitypowered.api.proxy.Player;
 import java.util.Optional;
 import net.limework.valiobungee.api.entity.NetworkPlayer;
-import net.limework.valiobungee.api.entity.UUIDPlayer;
 
 /**
  * Velocity Network player. hold specific stuff for velocity platform
@@ -26,7 +25,7 @@ import net.limework.valiobungee.api.entity.UUIDPlayer;
  * @author Ham1255
  * @since 1.0.0
  */
-public interface VelocityNetworkPlayer extends NetworkPlayer, UUIDPlayer {
+public interface VelocityNetworkPlayer extends NetworkPlayer {
 
   /**
    * @return an optional that contains a player if he is on the same proxy

@@ -26,6 +26,7 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -33,11 +34,9 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import net.limework.valiobungee.api.entity.NetworkPlayer;
 import net.limework.valiobungee.api.entity.NetworkProxy;
-import net.limework.valiobungee.core.ConstantVariables;
-import net.limework.valiobungee.core.ProxyNetworkManager;
-import net.limework.valiobungee.core.ValioBungeePlatform;
+import net.limework.valiobungee.core.*;
 import net.limework.valiobungee.core.util.logging.LogProviderFactory;
-import net.limework.valiobungee.velocity.api.TestProxyNetworkManager;
+import net.limework.valiobungee.velocity.api.VelocityValioBungeeAPI;
 import net.limework.valiobungee.velocity.api.entities.ImplVelocityNetworkPlayer;
 import net.limework.valiobungee.velocity.api.entities.ImplVelocityNetworkProxy;
 import org.slf4j.Logger;
@@ -48,12 +47,13 @@ import org.slf4j.Logger;
     version = ConstantVariables.VERSION,
     url = "https://github.com/ProxioDev/ValioBungee",
     authors = {"limework", "ProxioDev"})
-public class VelocityValioBungeePlugin implements ValioBungeePlatform {
+public class VelocityValioBungeePlugin implements ValioBungeePlatform, VelocityValioBungeeAPI {
 
   private final ProxyServer server;
   private final Logger logger;
   private final Path dataFolder;
   private final ProxyNetworkManager proxyNetworkManager;
+  private final PlayerManager playerManager;
 
   @Inject
   public VelocityValioBungeePlugin(
@@ -63,7 +63,8 @@ public class VelocityValioBungeePlugin implements ValioBungeePlatform {
     this.dataFolder = dataDirectory;
     // init logging
     LogProviderFactory.register(logger);
-    this.proxyNetworkManager = new TestProxyNetworkManager(this);
+    this.proxyNetworkManager = new StandaloneProxyNetworkManager(this);
+    this.playerManager = new StandalonePlayerManager(this);
   }
 
   @Subscribe(priority = Short.MAX_VALUE) // this really important so MAKE IT MAX
@@ -72,10 +73,19 @@ public class VelocityValioBungeePlugin implements ValioBungeePlatform {
         "initializing ValioBungee for {} platform, version {}",
         platformProxyVendor(),
         ConstantVariables.VERSION);
+    this.proxyNetworkManager.init(); // init the heart beat system
+    this.server.getEventManager().register(this, new PlayerManagerListener(this));
+    this.server
+        .getScheduler()
+        .buildTask(this, this.playerManager::correctionTask)
+        .repeat(Duration.ofMinutes(30))
+        .schedule(); // the correction task
   }
 
   @Subscribe(priority = Short.MIN_VALUE) // this really import so Make it AT LOWEST
-  public void onProxyShutdownEvent(ProxyShutdownEvent event) {}
+  public void onProxyShutdownEvent(ProxyShutdownEvent event) {
+    this.proxyNetworkManager.close(); // shutdown the heartbeat system
+  }
 
   @Override
   public int localOnlinePlayers() {
@@ -90,6 +100,11 @@ public class VelocityValioBungeePlugin implements ValioBungeePlatform {
   @Override
   public ProxyNetworkManager proxyNetworkManager() {
     return this.proxyNetworkManager;
+  }
+
+  @Override
+  public PlayerManager playerManager() {
+    return this.playerManager;
   }
 
   @Override
@@ -112,6 +127,7 @@ public class VelocityValioBungeePlugin implements ValioBungeePlatform {
   @Override
   public Optional<NetworkPlayer> getNetworkPlayer(UUID uuid) {
     logger.warn("not implemented api call returned as Optional empty");
+    server.getAllPlayers();
     return Optional.empty();
   }
 
@@ -132,7 +148,6 @@ public class VelocityValioBungeePlugin implements ValioBungeePlatform {
 
   @Override
   public Set<NetworkPlayer> getLocalProxyPlayers() {
-    NetworkProxy proxy = getLocalProxy();
     return this.server.getAllPlayers().stream()
         .map(p -> new ImplVelocityNetworkPlayer(this, p.getUniqueId(), getLocalProxy(), p))
         .collect(Collectors.toSet());

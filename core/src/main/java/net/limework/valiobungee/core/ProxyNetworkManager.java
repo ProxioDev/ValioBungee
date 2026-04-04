@@ -60,7 +60,7 @@ public abstract class ProxyNetworkManager {
                   (key, value, cause) -> {
                     if (cause == RemovalCause.EXPIRED) {
                       assert value != null;
-                      log.warn("proxy {} has disconnected but did not send death message", value);
+                      log.warn("proxy {} has disconnected but did not send death message", key);
                     }
                   })
           .build();

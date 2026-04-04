@@ -23,10 +23,9 @@ import java.util.Optional;
 import java.util.UUID;
 import net.limework.valiobungee.api.entity.NetworkProxy;
 import net.limework.valiobungee.core.ValioBungeePlatform;
-import net.limework.valiobungee.core.api.entities.AbstractUUIDNetworkPlayer;
-import net.limework.valiobungee.core.util.logging.LogProviderFactory;
+import net.limework.valiobungee.core.api.entities.AbstractNetworkPlayer;
 
-public class ImplVelocityNetworkPlayer extends AbstractUUIDNetworkPlayer
+public class ImplVelocityNetworkPlayer extends AbstractNetworkPlayer
     implements VelocityNetworkPlayer {
   private final Player handle;
 
@@ -43,7 +42,7 @@ public class ImplVelocityNetworkPlayer extends AbstractUUIDNetworkPlayer
 
   @Override
   public boolean isLocal() {
-    return handle != null;
+    return handle != null && handle.isActive();
   }
 
   @Override
@@ -51,7 +50,6 @@ public class ImplVelocityNetworkPlayer extends AbstractUUIDNetworkPlayer
     if (isLocal()) {
       return handle.isActive();
     }
-    LogProviderFactory.get().warn("NOT IMPLEMENTED IS ONLINE for Velocity network player");
-    return false;
+    return platform.playerManager().isOnline(uuid);
   }
 }

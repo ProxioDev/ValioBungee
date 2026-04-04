@@ -33,6 +33,8 @@ public interface ValioBungeePlatform extends ValioBungeeAPI {
 
   ProxyNetworkManager proxyNetworkManager();
 
+  PlayerManager playerManager();
+
   NetworkProxy proxyPlatformCreator(String id);
 
   @Override

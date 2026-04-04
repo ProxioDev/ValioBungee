@@ -15,6 +15,8 @@
  */
 package net.limework.valiobungee.api.entity;
 
+import java.util.UUID;
+
 /**
  * Network player.
  *
@@ -33,7 +35,16 @@ public interface NetworkPlayer {
   boolean isLocal();
 
   /**
+   * This used when we already had the object but player went offline since getting a player as
+   * {@link java.util.Optional} we check if its present if not means offline see {@link
+   * net.limework.valiobungee.api.ValioBungeeAPI#getNetworkPlayer(UUID)}
+   *
    * @return true when a player is online on the network
    */
   boolean isOnline();
+
+  /**
+   * @return player unique id
+   */
+  UUID getUniqueId();
 }

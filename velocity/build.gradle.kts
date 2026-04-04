@@ -8,6 +8,8 @@ plugins {
 dependencies {
     implementation(project(":valiobungee-velocity-api"))
     implementation(project(":valiobungee-core"))
+    implementation(project(":valiobungee-core-standalone"))
+    implementation(project(":valiobungee-core-redisson"))
     compileOnly(libs.platform.velocity)
     annotationProcessor(libs.platform.velocity)
 }

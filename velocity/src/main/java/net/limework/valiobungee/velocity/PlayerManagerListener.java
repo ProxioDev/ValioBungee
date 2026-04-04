@@ -16,30 +16,15 @@
  * You should have received a copy of the GNU General Public License
  * along with ValioBungee. If not, see <https://www.gnu.org/licenses/gpl-3.0.txt>.
  */
-package net.limework.valiobungee.core;
+package net.limework.valiobungee.velocity;
 
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import net.limework.valiobungee.api.entity.NetworkPlayer;
+import net.limework.valiobungee.core.ValioBungeePlatform;
 
-public abstract class PlayerManager {
+public class PlayerManagerListener {
 
-  protected final ValioBungeePlatform platform;
+  private final ValioBungeePlatform platform;
 
-  public PlayerManager(ValioBungeePlatform platform) {
+  public PlayerManagerListener(ValioBungeePlatform platform) {
     this.platform = platform;
   }
-
-  public abstract Optional<NetworkPlayer> getNetworkPlayer(UUID uuid);
-
-  public abstract Set<NetworkPlayer> getNetworkPlayers();
-
-  public abstract boolean isOnline(UUID uuid);
-
-  public abstract void handleJoin(UUID uuid);
-
-  public abstract void handleQuit(UUID uuid);
-
-  public abstract void correctionTask();
 }

@@ -41,7 +41,7 @@ dependencyResolutionManagement {
 // main project stuff
 sequenceOf("api", "core", "velocity").forEach { configureRootProjects(it) }
 // core data implementations
-sequenceOf("redisson").forEach { configureCoreSubProject(it) }
+sequenceOf("redisson", "standalone").forEach { configureCoreSubProject(it) }
 // api
 sequenceOf("velocity").forEach { configureAPISubProject(it) }
 

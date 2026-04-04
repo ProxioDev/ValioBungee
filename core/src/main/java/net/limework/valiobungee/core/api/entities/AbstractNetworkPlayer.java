@@ -22,16 +22,15 @@ import java.util.Objects;
 import java.util.UUID;
 import net.limework.valiobungee.api.entity.NetworkPlayer;
 import net.limework.valiobungee.api.entity.NetworkProxy;
-import net.limework.valiobungee.api.entity.UUIDPlayer;
 import net.limework.valiobungee.core.ValioBungeePlatform;
 
-public abstract class AbstractUUIDNetworkPlayer implements NetworkPlayer, UUIDPlayer {
+public abstract class AbstractNetworkPlayer implements NetworkPlayer {
 
-  private final ValioBungeePlatform platform;
-  private final UUID uuid;
-  private final NetworkProxy proxy;
+  protected final ValioBungeePlatform platform;
+  protected final UUID uuid;
+  protected final NetworkProxy proxy;
 
-  public AbstractUUIDNetworkPlayer(ValioBungeePlatform platform, UUID uuid, NetworkProxy proxy) {
+  public AbstractNetworkPlayer(ValioBungeePlatform platform, UUID uuid, NetworkProxy proxy) {
     this.platform = platform;
     this.uuid = uuid;
     this.proxy = proxy;
@@ -49,7 +48,7 @@ public abstract class AbstractUUIDNetworkPlayer implements NetworkPlayer, UUIDPl
 
   @Override
   public boolean equals(Object o) {
-    if (!(o instanceof AbstractUUIDNetworkPlayer that)) return false;
+    if (!(o instanceof AbstractNetworkPlayer that)) return false;
     return Objects.equals(uuid, that.uuid) && Objects.equals(proxy, that.proxy);
   }
 
